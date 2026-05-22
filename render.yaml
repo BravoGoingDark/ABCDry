@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: abcdry
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py migrate
+    startCommand: gunicorn agri_dashboard.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.14.3"
