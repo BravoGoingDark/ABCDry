@@ -1,0 +1,92 @@
+/* ==========================================================================
+   ABCDryBASIN Premium Dashboard Stylesheet
+   ========================================================================== */
+
+/* Font Definitions */
+body {
+    font-family: 'Inter', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* Custom Premium Scrollbar for Main Content and Sidebars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(113, 121, 115, 0.25);
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 103, 125, 0.45);
+}
+
+/* Semicircle Gauge Needle Animation Transition */
+svg.overflow-visible line {
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                x2 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                y2 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Leaflet Map Styling and Custom Marker Overrides */
+#country-map {
+    z-index: 1;
+    background: #f0f3ff;
+}
+
+.map-overlay-tools,
+.map-overlay-panel {
+    z-index: 1200 !important;
+}
+
+/* Location Ping Tool Marker Styles */
+.modern-ping-marker {
+    background: transparent;
+    border: 0;
+    width: 20px;
+    height: 20px;
+    position: relative;
+    overflow: visible;
+}
+
+.modern-ping-marker .ping-core {
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background: #0ea5e9;
+    border: 2px solid #e0f2fe;
+    box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.35);
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    z-index: 2;
+}
+
+.modern-ping-marker .ping-pulse {
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    border: 2px solid rgba(14, 165, 233, 0.55);
+    animation: pingPulse 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+@keyframes pingPulse {
+    0% {
+        transform: scale(0.65);
+        opacity: 0.95;
+    }
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}

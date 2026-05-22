@@ -1,0 +1,249 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ABCDryBASIN\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "High risk"
+msgstr "Risque élevé"
+
+msgid "Moderate risk"
+msgstr "Risque modéré"
+
+msgid "Low risk"
+msgstr "Risque faible"
+
+msgid ""
+"Current soil salinity levels in sector 4 are incompatible with durum wheat "
+"under drip irrigation. Consider switching to highly salt-tolerant crops or "
+"scheduling intensive leaching protocols before sowing."
+msgstr ""
+"Les niveaux actuels de salinité du sol dans le secteur 4 sont incompatibles "
+"avec le blé dur sous irrigation goutte-à-goutte. Envisagez des cultures très"
+" tolérantes au sel ou des protocoles de lessivage intensifs avant le semis."
+
+msgid ""
+"The crop is generally suitable. Monitor soil moisture and optimize water "
+"application."
+msgstr ""
+"La culture est globalement adaptée. Surveillez l'humidité du sol et "
+"optimisez l'apport en eau."
+
+msgid "Current indicators are favorable. Continue weekly monitoring."
+msgstr ""
+"Les indicateurs actuels sont favorables. Poursuivez un suivi hebdomadaire."
+
+msgid "Ichkeul National Park, Tunisia"
+msgstr "Parc national d'Ichkeul, Tunisie"
+
+msgid "Rabat area, Morocco"
+msgstr "Région de Rabat, Maroc"
+
+msgid "Algiers area, Algeria"
+msgstr "Région d'Alger, Algérie"
+
+msgid "Lake Ichkeul"
+msgstr "Lac Ichkeul"
+
+msgid "Lake Ghezala"
+msgstr "Lac de Ghezala"
+
+msgid "Lake of Bizerte"
+msgstr "Lac de Bizerte"
+
+msgid "Dayet Aoua"
+msgstr "Dayet Aoua"
+
+msgid "Lake Afennourir"
+msgstr "Lac Afennourir"
+
+msgid "Bin el Ouidane"
+msgstr "Bin el Ouidane"
+
+msgid "Lake Oubeira"
+msgstr "Lac Oubeira"
+
+msgid "Lake Fetzara"
+msgstr "Lac Fetzara"
+
+msgid "Lake Mellah"
+msgstr "Lac Mellah"
+
+msgid "Map centered on __PLACE__."
+msgstr "Carte centrée sur __PLACE__."
+
+msgid "All drawings have been removed."
+msgstr "Tous les dessins ont été supprimés."
+
+msgid "Selection mode: click a drawn area to see its details."
+msgstr ""
+"Mode sélection : cliquez sur une surface dessinée pour voir ses "
+"informations."
+
+msgid "Draw mode: trace a polygon to measure the area."
+msgstr "Mode dessin : tracez un polygone pour mesurer la surface."
+
+msgid "Ruler mode: click two points on the map to measure distance."
+msgstr ""
+"Mode règle : cliquez deux points sur la carte pour mesurer la distance."
+
+msgid "Ping mode: click a point for exact live metrics."
+msgstr ""
+"Mode ping : cliquez un point pour obtenir les métriques en direct exactes."
+
+msgid "Ruler measurement cleared."
+msgstr "Mesure de la règle supprimée."
+
+msgid "Ping saved, but live metrics are unavailable for now."
+msgstr ""
+"Ping enregistré, mais les métriques en direct sont momentanément "
+"indisponibles."
+
+msgid "First point recorded. Click the second point."
+msgstr "Premier point enregistré. Cliquez le deuxième point."
+
+msgid "Distance: __M__ m (__KM__ km)."
+msgstr "Distance : __M__ m (__KM__ km)."
+
+msgid ""
+"Area: __M2__ m² (__HA__ ha, __KM2__ km²) | Perimeter: __PM__ m | Center: "
+"__LAT__, __LNG__"
+msgstr ""
+"Surface : __M2__ m² (__HA__ ha, __KM2__ km²) | Périmètre : __PM__ m | Centre"
+" : __LAT__, __LNG__"
+
+msgid ""
+"Ping: __LAT__, __LNG__ | Wind: __WS__ km/h | Temp: __T__°C | Humidity: "
+"__H__% | Rain: __R__ mm"
+msgstr ""
+"Ping : __LAT__, __LNG__ | Vent : __WS__ km/h | Temp : __T__°C | Humidité : "
+"__H__% | Pluie : __R__ mm"
+
+msgid "ABCDryBASIN — drought risk assessment tool"
+msgstr "ABCDryBASIN — outil d'évaluation du risque de sécheresse"
+
+msgid "Drought risk assessment tool"
+msgstr "Outil d'évaluation du risque de sécheresse"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Maps"
+msgstr "Cartes"
+
+msgid "Reports"
+msgstr "Rapports"
+
+msgid "Download"
+msgstr "Télécharger"
+
+msgid "Help"
+msgstr "Aide"
+
+msgid "Search…"
+msgstr "Rechercher…"
+
+msgid "Run simulation"
+msgstr "Lancer la simulation"
+
+msgid "Account"
+msgstr "Compte"
+
+msgid "Water heat map"
+msgstr "Carte de chaleur de l'eau"
+
+msgid "Optimal"
+msgstr "Optimal"
+
+msgid "Marginal"
+msgstr "Marginal"
+
+msgid "Critical risk"
+msgstr "Risque critique"
+
+msgid "Measure"
+msgstr "Mesure"
+
+msgid "Choose a tool to begin."
+msgstr "Choisissez un outil pour commencer."
+
+msgid "Clear drawings"
+msgstr "Effacer les dessins"
+
+msgid "Clear ruler"
+msgstr "Effacer la règle"
+
+msgid "Agricultural inputs simulator"
+msgstr "Simulateur d'intrants agricoles"
+
+msgid "Crop type"
+msgstr "Type de culture"
+
+msgid "Irrigation method"
+msgstr "Méthode d'irrigation"
+
+msgid "Analyze risk"
+msgstr "Analyser le risque"
+
+msgid "Wind dynamics"
+msgstr "Dynamique du vent"
+
+msgid "Gusts up to"
+msgstr "Rafales jusqu'à"
+
+msgid "Precipitation"
+msgstr "Précipitations"
+
+msgid "% vs avg"
+msgstr "% vs moy."
+
+msgid "Soil health"
+msgstr "Santé du sol"
+
+msgid "pH level"
+msgstr "Niveau pH"
+
+msgid "NPK fertility"
+msgstr "Fertilité NPK"
+
+msgid "Microclimate"
+msgstr "Micro-climat"
+
+msgid "Temperature"
+msgstr "Température"
+
+msgid "Humidity"
+msgstr "Humidité"
+
+msgid "Sponsors and partners"
+msgstr "Sponsors et partenaires"
+
+msgid "Ministry of Agriculture"
+msgstr "Ministère de l'Agriculture"
+
+msgid "LIVE"
+msgstr "EN DIRECT"
+
+msgid "MONTHLY"
+msgstr "MENSUEL"
+
+msgid "ZONE A"
+msgstr "ZONE A"
+
+msgid "OPTIMAL"
+msgstr "OPTIMAL"
+
+msgid "Drawing tool"
+msgstr "Outil de dessin"
+
+msgid "Measure area"
+msgstr "Mesurer la surface"
+
+msgid "Select region"
+msgstr "Sélectionner une région"
+
+msgid "Ping point"
+msgstr "Point ping"
