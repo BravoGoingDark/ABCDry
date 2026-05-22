@@ -31,7 +31,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
-    "30f3-196-176-128-61.ngrok-free.app", 
+    "30f3-196-176-128-61.ngrok-free.app",
+    "abcdry-1.onrender.com",
 ]
 
 
