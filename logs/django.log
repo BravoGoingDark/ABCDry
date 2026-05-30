@@ -1486,3 +1486,5 @@ INFO 2026-05-30 12:05:42,285 autoreload 30680 7884 C:\Users\Taha\Desktop\CURSORA
 INFO 2026-05-30 12:05:46,833 autoreload 22920 14956 Watching for file changes with StatReloader
 ERROR 2026-05-30 12:15:26,172 log 22920 28880 Bad Gateway: /api/live-metrics/
 INFO 2026-05-30 12:26:50,497 autoreload 22388 10328 Watching for file changes with StatReloader
+ERROR 2026-05-30 14:20:26,288 log 22388 28300 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-30 14:26:26,287 log 22388 29224 Bad Gateway: /api/live-metrics/
