@@ -1,0 +1,652 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Parameter Review & Manual Entry" %}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-background text-on-surface font-body antialiased">
+    <!-- Top Navigation Header -->
+    <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
+        <div class="flex items-center gap-8 min-w-0 flex-1">
+            <a class="flex items-center gap-3 shrink group" href="/">
+                <span class="relative shrink-0">
+                    <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+                    <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                </span>
+                <div class="flex flex-col min-w-0 leading-tight">
+                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
+                    <span class="text-[10px] font-normal text-on-surface-variant">{% trans "Drought risk assessment tool" %}</span>
+                </div>
+            </a>
+            
+            <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="/">{% trans "Home" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">{% trans "Data" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">{% trans "Analysis" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">{% trans "Historical" %}</a>
+            </nav>
+        </div>
+        
+        <div class="flex items-center gap-3 shrink-0 min-w-0">
+            <!-- Region Selector Dropdown -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
+                <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-32" id="region-selector" name="region">
+                    <option value="tunisia">Tunisia</option>
+                    <option value="morocco">Morocco</option>
+                    <option value="algeria">Algeria</option>
+                </select>
+            </div>
+            
+            <!-- Year Selector Dropdown -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">calendar_today</span>
+                <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-40" name="year" id="year-selector">
+                    <option value="2024">2024 (Current)</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2020-2024">2020 - 2024</option>
+                    <option value="2015-2019">2015 - 2019</option>
+                    <option value="historical">{% trans "Historical Archive" %}</option>
+                </select>
+            </div>
+            
+            <!-- Run Simulation Button -->
+            <button id="run-simulation-header-btn" type="button" class="bg-primary text-on-primary px-4 py-1.5 rounded-DEFAULT text-sm font-semibold hover:bg-primary-container transition-colors shadow-sm cursor-pointer active:opacity-70 shrink-0">
+                {% trans "Run Simulation" %}
+            </button>
+            
+            <!-- Language Switcher Dynamic POST Form -->
+            <form action="{% url 'set_language' %}" class="flex items-center" method="post" id="lang-form">
+                {% csrf_token %}
+                <input name="next" type="hidden" value="{{ request.get_full_path }}"/>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">language</span>
+                    <select name="language" onchange="document.getElementById('lang-form').submit();" class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
+                        <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                        <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>FR</option>
+                    </select>
+                </div>
+            </form>
+            
+            <!-- Profile Actions -->
+            <div class="flex items-center gap-2 text-on-surface-variant shrink-0">
+                <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+                    <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                </button>
+                <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+                    <span class="material-symbols-outlined text-2xl">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Content Section -->
+    <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 mt-16 pt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="space-y-6">
+            
+            <!-- Soil Metrics -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-green-500 transition">
+                <button class="parameter-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700 transition" data-category="soil">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-green-400">eco</span>
+                        <div class="text-left">
+                            <h3 class="text-lg font-semibold text-white">{% trans "Soil Metrics" %}</h3>
+                            <p class="text-slate-400 text-sm">7 Parameters</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-2xl text-slate-400 transition-transform expand-icon">expand_more</span>
+                </button>
+                
+                <div class="parameter-content hidden border-t border-slate-700" id="soil-content">
+                    <div class="p-6 bg-slate-750">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Moisture Content (%)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Soil water content by weight</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">pH Level</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Soil acidity/alkalinity (0-14)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Nitrogen Content (mg/kg)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Available nitrogen in soil</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Phosphorus (mg/kg)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Available phosphorus content</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Potassium (mg/kg)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Available potassium content</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Organic Matter (%)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Percentage of organic content</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-green-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Texture Type</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Soil classification (Clay, Loam, Sand)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Climate Metrics -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-blue-500 transition">
+                <button class="parameter-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700 transition" data-category="climate">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-blue-400">cloud</span>
+                        <div class="text-left">
+                            <h3 class="text-lg font-semibold text-white">{% trans "Climate Metrics" %}</h3>
+                            <p class="text-slate-400 text-sm">11 Parameters</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-2xl text-slate-400 transition-transform expand-icon">expand_more</span>
+                </button>
+                
+                <div class="parameter-content hidden border-t border-slate-700" id="climate-content">
+                    <div class="p-6 bg-slate-750">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Temperature Mean (°C)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Average daily temperature</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Max Temperature (°C)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Daily maximum temperature</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Min Temperature (°C)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Daily minimum temperature</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Humidity (%)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Relative humidity percentage</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Rainfall (mm)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Daily precipitation amount</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Wind Speed (m/s)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Average wind speed</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Wind Direction (°)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Direction of wind (0-360°)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Atmospheric Pressure (hPa)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Air pressure level</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Solar Radiation (W/m²)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Incoming solar radiation</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-blue-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Evapotranspiration (mm)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Water evaporation rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Agricultural Metrics -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-yellow-500 transition">
+                <button class="parameter-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700 transition" data-category="agricultural">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-yellow-400">potted_plant</span>
+                        <div class="text-left">
+                            <h3 class="text-lg font-semibold text-white">{% trans "Agricultural Metrics" %}</h3>
+                            <p class="text-slate-400 text-sm">13 Parameters</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-2xl text-slate-400 transition-transform expand-icon">expand_more</span>
+                </button>
+                
+                <div class="parameter-content hidden border-t border-slate-700" id="agricultural-content">
+                    <div class="p-6 bg-slate-750">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Crop Type</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Type of crop (Wheat, Rice, etc.)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Crop Height (cm)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Average plant height</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Leaf Area Index (LAI)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Total leaf area per unit ground</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Biomass (kg/ha)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Total plant dry matter</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Yield (kg/ha)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Estimated crop production</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Days to Maturity</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Expected days until harvest</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Disease Incidence (%)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Percentage of affected plants</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Pest Infestation (%)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Percentage of pest damage</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Irrigation Amount (mm)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Total water applied</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Fertilizer Applied (kg/ha)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Nutrient application rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Planting Date</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Date crop was planted</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-yellow-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Harvest Date</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Date crop was harvested</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Remote Sensing -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-purple-500 transition">
+                <button class="parameter-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700 transition" data-category="remote">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-purple-400">satellite_alt</span>
+                        <div class="text-left">
+                            <h3 class="text-lg font-semibold text-white">{% trans "Remote Sensing" %}</h3>
+                            <p class="text-slate-400 text-sm">8 Parameters</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-2xl text-slate-400 transition-transform expand-icon">expand_more</span>
+                </button>
+                
+                <div class="parameter-content hidden border-t border-slate-700" id="remote-content">
+                    <div class="p-6 bg-slate-750">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">NDVI Index</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Normalized Difference Vegetation Index</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">EVI Index</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Enhanced Vegetation Index</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">NDMI Index</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Normalized Difference Moisture Index</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">NDBI Index</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Normalized Difference Built-up Index</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Cloud Coverage (%)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Percentage of cloud coverage</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Surface Temperature (°C)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Land surface temperature</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Albedo</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Surface reflectivity (0-1)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-purple-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Data Source</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Satellite or sensor (Sentinel, Landsat)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hydrology Metrics -->
+            <div class="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden hover:border-cyan-500 transition">
+                <button class="parameter-toggle w-full px-6 py-4 flex items-center justify-between hover:bg-slate-700 transition" data-category="hydrology">
+                    <div class="flex items-center gap-4">
+                        <span class="material-symbols-outlined text-3xl text-cyan-400">water_drop</span>
+                        <div class="text-left">
+                            <h3 class="text-lg font-semibold text-white">{% trans "Hydrology Metrics" %}</h3>
+                            <p class="text-slate-400 text-sm">11 Parameters</p>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-2xl text-slate-400 transition-transform expand-icon">expand_more</span>
+                </button>
+                
+                <div class="parameter-content hidden border-t border-slate-700" id="hydrology-content">
+                    <div class="p-6 bg-slate-750">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Water Level (m)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Water surface elevation</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Discharge Rate (m³/s)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Water flow rate</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Water Temperature (°C)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Temperature of water body</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">pH Value</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Water acidity level (0-14)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Dissolved Oxygen (mg/L)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Oxygen concentration in water</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Turbidity (NTU)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Water clarity measurement</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Salinity (ppt)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Salt concentration in water</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Conductivity (µS/cm)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Electrical conductivity</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Nitrogen Content (mg/L)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Dissolved nitrogen</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-800 p-4 rounded border border-slate-600">
+                                <div class="flex items-start gap-3">
+                                    <span class="material-symbols-outlined text-cyan-400 mt-1">check_circle</span>
+                                    <div>
+                                        <h4 class="font-medium text-white">Phosphorus Content (mg/L)</h4>
+                                        <p class="text-xs text-slate-400 mt-1">Dissolved phosphorus</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.parameter-toggle');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            const contentId = category + '-content';
+            const content = document.getElementById(contentId);
+            const icon = this.querySelector('.expand-icon');
+            
+            // Toggle content visibility
+            content.classList.toggle('hidden');
+            
+            // Rotate icon
+            if (content.classList.contains('hidden')) {
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                icon.style.transform = 'rotate(180deg)';
+            }
+        });
+    });
+});
+</script>
+
+<style>
+.expand-icon {
+    transition: transform 0.3s ease;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,2 @@
+irrigation_id,irrigation_name,irrigation_efficiency_percent_dim,water_application_uniformity,irrigation_description
+1,Drip Irrigation,90.0,95.0,High-efficiency drip irrigation

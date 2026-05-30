@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+{% load i18n %}
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Data Ingestion | Ag-Intel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#4a382d",
+                      "on-tertiary-fixed": "#27180f",
+                      "secondary": "#00677d",
+                      "on-secondary-fixed-variant": "#004e5f",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#322319",
+                      "surface": "#f9f9ff",
+                      "on-surface": "#151c27",
+                      "on-secondary-container": "#006075",
+                      "on-primary-fixed": "#002114",
+                      "outline-variant": "#c1c8c2",
+                      "background": "#f9f9ff",
+                      "secondary-fixed-dim": "#69d4f4",
+                      "inverse-surface": "#2a313d",
+                      "surface-bright": "#f9f9ff",
+                      "primary-fixed": "#c1ecd4",
+                      "on-background": "#151c27",
+                      "secondary-container": "#72ddfd",
+                      "on-tertiary-container": "#baa193",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#dcc1b2",
+                      "on-error-container": "#93000a",
+                      "surface-container-lowest": "#ffffff",
+                      "on-surface-variant": "#414844",
+                      "tertiary-fixed": "#f9ddce",
+                      "primary-fixed-dim": "#a5d0b9",
+                      "error": "#ba1a1a",
+                      "surface-container": "#e7eefe",
+                      "on-primary-container": "#86af99",
+                      "secondary-fixed": "#b2ebff",
+                      "on-tertiary-fixed-variant": "#554338",
+                      "on-primary-fixed-variant": "#274e3d",
+                      "surface-container-low": "#f0f3ff",
+                      "outline": "#717973",
+                      "on-error": "#ffffff",
+                      "inverse-on-surface": "#ebf1ff",
+                      "on-primary": "#ffffff",
+                      "surface-container-highest": "#dce2f3",
+                      "primary": "#012d1d",
+                      "surface-variant": "#dce2f3",
+                      "inverse-primary": "#a5d0b9",
+                      "surface-tint": "#3f6653",
+                      "surface-dim": "#d3daea",
+                      "primary-container": "#1b4332",
+                      "surface-container-high": "#e2e8f8",
+                      "on-secondary-fixed": "#001f27"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "fontFamily": {
+                      "headline": ["Hanken Grotesk"],
+                      "display": ["Hanken Grotesk"],
+                      "body": ["Inter"],
+                      "label": ["Jetbrains Mono"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-active {
+            background-color: #1b4332 !important;
+            color: #86af99 !important;
+            border-radius: 0.5rem;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .sparkline { height: 24px; width: 64px; }
+        
+        /* Expand icon animation */
+        .expand-icon {
+            transition: transform 0.3s ease-in-out;
+            transform: rotate(0deg);
+        }
+        
+        /* Input field styling */
+        input[type="number"],
+        input[type="text"],
+        input[type="date"],
+        select {
+            transition: all 0.2s ease;
+        }
+        
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus {
+            box-shadow: 0 0 0 3px rgba(27, 67, 50, 0.1);
+            transform: translateY(-1px);
+        }
+
+        /* Minimalist Dropdown */
+        .dropdown-datetime {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 320px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid #c1c8c2;
+            padding: 16px;
+            border-radius: 8px;
+            z-index: 1000;
+            top: calc(100% + 4px);
+            right: 0;
+        }
+
+        .dropdown-content.show {
+            display: block;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 9999;
+            min-width: 360px;
+            max-width: 480px;
+            border-radius: 16px;
+            border: 1px solid rgba(193, 200, 194, 0.95);
+            box-shadow: 0 24px 70px rgba(21, 28, 39, 0.18);
+            transform: translateX(120%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+        }
+        .toast::before {
+            content: '';
+            display: block;
+            height: 0.325rem;
+            background: var(--toast-accent, linear-gradient(90deg, #012d1d 0%, #00677d 100%));
+        }
+        .toast-body {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem 1.1rem 1rem 1rem;
+            color: #151c27;
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .toast-success {
+            --toast-accent: linear-gradient(90deg, #012d1d 0%, #2d6a4f 100%);
+        }
+        .toast-error {
+            --toast-accent: linear-gradient(90deg, #93000a 0%, #ba1a1a 100%);
+        }
+        .toast-info {
+            --toast-accent: linear-gradient(90deg, #004e5f 0%, #00677d 100%);
+        }
+
+        /* Themed confirmation modal */
+        .themed-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(21, 28, 39, 0.58);
+            backdrop-filter: blur(10px);
+        }
+
+        .themed-modal-panel {
+            width: min(100%, 28rem);
+            border: 1px solid rgba(193, 200, 194, 0.95);
+            border-radius: 1rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+            box-shadow: 0 24px 70px rgba(21, 28, 39, 0.24);
+            overflow: hidden;
+        }
+
+        .themed-modal-accent {
+            height: 0.375rem;
+            background: linear-gradient(90deg, #012d1d 0%, #00677d 52%, #1b4332 100%);
+        }
+
+        .themed-modal-button {
+            transition: all 0.2s ease;
+        }
+
+        .themed-modal-button:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Upload progress bar */
+        .upload-progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .upload-progress-bar-fill {
+            height: 100%;
+            background: #c1ecd4;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        /* Drop zone active state */
+        .drop-zone-active {
+            border-color: #1b4332 !important;
+            background-color: rgba(193, 236, 212, 0.1) !important;
+        }
+
+        /* Spinner */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Themed Confirm Modal -->
+<div id="themed-confirm-modal" class="themed-modal-backdrop hidden" aria-hidden="true">
+    <div class="themed-modal-panel" role="dialog" aria-modal="true" aria-labelledby="themed-confirm-title">
+        <div class="themed-modal-accent"></div>
+        <div class="p-6">
+            <div class="flex items-start gap-3 mb-4">
+                <div id="themed-confirm-icon" class="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    <span class="material-symbols-outlined text-[22px]">info</span>
+                </div>
+                <div class="min-w-0">
+                    <h2 id="themed-confirm-title" class="font-headline text-lg font-extrabold text-primary">Confirm action</h2>
+                    <p id="themed-confirm-message" class="mt-1 text-sm leading-6 text-on-surface-variant"></p>
+                </div>
+            </div>
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button type="button" id="themed-confirm-cancel" class="themed-modal-button rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container">Cancel</button>
+                <button type="button" id="themed-confirm-accept" class="themed-modal-button rounded-lg bg-primary px-4 py-2 text-sm font-bold text-on-primary hover:bg-primary-container">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col bg-surface h-screen">
+<header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
+    <div class="flex items-center gap-8 min-w-0 flex-1">
+        <a class="flex items-center gap-3 shrink group" href="/">
+            <span class="relative shrink-0">
+                <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+                <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+            </span>
+            <div class="flex flex-col min-w-0 leading-tight">
+                <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
+                <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+            </div>
+        </a>
+        
+        <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
+            <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="/">Home</a>
+            <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:data_ingestion' %}">Data</a>
+            <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">Analysis</a>
+            <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
+        </nav>
+    </div>
+    
+    <div class="flex items-center gap-3 shrink-0 min-w-0">
+        <!-- Language Switcher Dynamic POST Form -->
+        <form action="{% url 'set_language' %}" class="flex items-center" method="post" id="lang-form">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}"/>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">language</span>
+                <select name="language" onchange="document.getElementById('lang-form').submit();" class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                    <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>FR</option>
+                </select>
+            </div>
+        </form>
+        
+        <!-- Profile Actions -->
+        <div class="flex items-center gap-2 text-on-surface-variant shrink-0">
+            <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+                <span class="material-symbols-outlined text-2xl">account_circle</span>
+            </button>
+        </div>
+    </div>
+</header>
+<!-- Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto mt-16 p-6">
+<!-- Scrollable Content Canvas -->
+<div class="space-y-8">
+        <!-- Section 1: Drag & Drop Area -->
+        <section>
+            <div id="drop-zone" class="w-full bg-white border-2 border-dashed border-outline-variant rounded-xl p-10 flex flex-col items-center justify-center text-center group hover:border-primary transition-colors cursor-pointer" onclick="document.getElementById('file-upload').click()">
+                <input class="hidden" id="file-upload" type="file" name="file" accept=".csv,.xlsx,.xls" />
+                <div id="drop-zone-icon" class="w-16 h-16 bg-primary-container/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-primary text-4xl">upload_file</span>
+                </div>
+                <h3 id="drop-zone-title" class="text-lg font-headline font-bold text-primary mb-1">Upload Time-Series Data (Excel/CSV)</h3>
+                <p id="drop-zone-subtitle" class="text-on-surface-variant text-sm max-w-md">Drag and drop your station-ready files here, or browse local storage. Supports .csv, .xlsx, and .xls drought-monitoring formats.</p>
+                
+                <!-- Metric Type Selector for File Upload -->
+                <div class="mt-4 flex items-center gap-3" onclick="event.stopPropagation()">
+                    <label class="text-[10px] font-bold text-outline uppercase">Metric Type:</label>
+                    <select id="upload-metric-type" class="text-sm border border-outline-variant rounded-lg focus:ring-primary focus:border-primary px-3 py-1.5 text-on-surface-variant bg-white">
+                        <option value="">Select type...</option>
+                        <option value="soil">Soil Metrics</option>
+                        <option value="climate">Climate Metrics</option>
+                        <option value="drought">Drought Indices</option>
+                        <option value="agricultural">Agricultural Metrics</option>
+                        <option value="remote_sensing">Remote Sensing</option>
+                        <option value="hydrology">Hydrology Metrics</option>
+                    </select>
+                </div>
+
+                <!-- Upload Status Display (hidden by default) -->
+                <div id="upload-status" class="hidden mt-4 w-full max-w-md">
+                    <div class="flex items-center gap-3 text-sm text-primary font-medium">
+                        <div class="spinner" style="border-color: rgba(1,45,29,0.2); border-top-color: #1b4332;"></div>
+                        <span id="upload-status-text">Uploading...</span>
+                    </div>
+                    <div class="upload-progress-bar mt-2">
+                        <div id="upload-progress-fill" class="upload-progress-bar-fill" style="width: 0%; background: #1b4332;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-12 gap-6">
+            <!-- Section 2: Manual Entry -->
+            <div class="col-span-8 space-y-4">
+                <div class="bg-white border border-outline-variant rounded-xl p-5 mb-6 shadow-sm">
+                    <h4 class="text-xs font-label font-bold text-primary uppercase tracking-widest mb-4">Global Metadata</h4>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="dropdown-datetime">
+                            <label class="block text-[10px] font-bold text-outline uppercase mb-1">Measurement Timestamp</label>
+                            <button type="button" onclick="toggleDateTimePicker()" class="w-full px-4 py-2.5 border border-outline-variant rounded-lg bg-white hover:border-secondary transition-colors flex items-center justify-between text-sm">
+                                <span class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-secondary text-lg">calendar_today</span>
+                                    <span id="timestamp-display" class="text-on-surface font-medium">Select Date & Time</span>
+                                </span>
+                                <span id="dropdown-arrow" class="material-symbols-outlined text-on-surface-variant transition-transform">expand_more</span>
+                            </button>
+                            <input id="timestamp-input" type="hidden"/>
+
+                            <!-- Minimalist Dropdown -->
+                            <div id="dateTimeDropdown" class="dropdown-content">
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-outline uppercase mb-1 block">Date</label>
+                                        <input id="picker-date" type="date" class="w-full px-3 py-2 border border-outline-variant rounded-lg text-sm focus:ring-1 focus:ring-secondary"/>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="text-[10px] font-bold text-outline uppercase mb-1 block">Hour</label>
+                                            <input id="picker-hour" type="number" min="0" max="23" value="00" class="w-full px-3 py-2 border border-outline-variant rounded-lg text-sm focus:ring-1 focus:ring-secondary text-center"/>
+                                        </div>
+                                        <div>
+                                            <label class="text-[10px] font-bold text-outline uppercase mb-1 block">Minute</label>
+                                            <input id="picker-minute" type="number" min="0" max="59" value="00" class="w-full px-3 py-2 border border-outline-variant rounded-lg text-sm focus:ring-1 focus:ring-secondary text-center"/>
+                                        </div>
+                                    </div>
+                                    <button type="button" onclick="confirmDateTimePicker()" class="w-full px-4 py-2 bg-secondary text-on-secondary rounded-lg font-semibold hover:opacity-90 transition text-sm">
+                                        Set Time
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-outline uppercase mb-1">Station / Region</label>
+                            <select id="global-region" name="region_id" class="w-full text-sm border border-outline-variant rounded-lg focus:ring-primary focus:border-primary px-3 py-2 text-on-surface-variant">
+                                <option value="">Select Region...</option>
+                                {% for region in regions %}
+                                <option value="{{ region.id }}">{{ region.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-outline uppercase mb-1">Observation Year</label>
+                            <select id="global-year" name="year_id" class="w-full text-sm border border-outline-variant rounded-lg focus:ring-primary focus:border-primary px-3 py-2 text-on-surface-variant">
+                                <option value="">Select Year...</option>
+                                {% for year in years %}
+                                <option value="{{ year.id }}">{{ year.label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-outline uppercase mb-1">Latitude</label>
+                            <input id="latitude-input" class="w-full text-sm border border-outline-variant rounded-lg focus:ring-primary focus:border-primary px-3 py-2" type="number" step="0.0001" placeholder="36.8619"/>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-outline uppercase mb-1">Longitude</label>
+                            <input id="longitude-input" class="w-full text-sm border border-outline-variant rounded-lg focus:ring-primary focus:border-primary px-3 py-2" type="number" step="0.0001" placeholder="8.7065"/>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-outline uppercase mb-1">Altitude (meters)</label>
+                            <input id="altitude-input" class="w-full text-sm border border-outline-variant rounded-lg focus:ring-primary focus:border-primary px-3 py-2" type="number" step="1" placeholder="0"/>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="text-sm font-label font-bold text-primary uppercase tracking-widest mb-2">Parameter Review &amp; Manual Entry</h3>
+
+                <!-- Soil Metrics -->
+                <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="soil">
+                    <button class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">eco</span>
+                            <span class="font-headline font-bold text-primary">Soil Metrics</span>
+                            <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] rounded uppercase font-bold">9 Parameters</span>
+                        </div>
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors expand-icon">expand_more</span>
+                    </button>
+                    <div class="p-5 pt-0 border-t border-outline-variant/50 hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Moisture (%)</label>
+                                <input name="moisture_content_percent" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="25.5" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Sand %</label>
+                                <input name="sand_ratio" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="40" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Clay %</label>
+                                <input name="clay_ratio" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="25" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Silt %</label>
+                                <input name="silt_ratio" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="35" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Root Zone Depth (mm)</label>
+                                <input name="root_zone_depth_mm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="1" type="number" placeholder="600"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Organic Matter %</label>
+                                <input name="organic_matter_percent" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="2.5" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Infiltration Rate (mm/hr)</label>
+                                <input name="infiltration_rate_mmhr" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="25.0"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Salinity (dS/m)</label>
+                                <input name="salinity_ece_dsm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.001" type="number" placeholder="0.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">pH</label>
+                                <input name="ph_level" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="7.2" min="0" max="14"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Climate Metrics -->
+                <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="climate">
+                    <button class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">cloud</span>
+                            <span class="font-headline font-bold text-primary">Climate Metrics</span>
+                            <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] rounded uppercase font-bold">7 Parameters</span>
+                        </div>
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors expand-icon">expand_more</span>
+                    </button>
+                    <div class="p-5 pt-0 border-t border-outline-variant/50 hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Max Temp (°C)</label>
+                                <input name="temperature_max_c" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="32.0"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Min Temp (°C)</label>
+                                <input name="temperature_min_c" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="18.0"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Humidity (%)</label>
+                                <input name="relative_humidity_percent" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="1" type="number" placeholder="65" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Rainfall (mm)</label>
+                                <input name="rainfall_mm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="5.2"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Seasonal Variability</label>
+                                <input name="seasonal_rainfall_variability" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" type="text" placeholder="High / Medium / Low"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Wind Speed (m/s)</label>
+                                <input name="wind_speed_ms" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="3.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Solar Radiation (MJ/m²/day)</label>
+                                <input name="solar_radiation_mjm2day" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="18.5"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Agricultural Metrics -->
+                <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="agricultural">
+                    <button class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">potted_plant</span>
+                            <span class="font-headline font-bold text-primary">Agricultural Metrics</span>
+                            <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] rounded uppercase font-bold">7 Parameters</span>
+                        </div>
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors expand-icon">expand_more</span>
+                    </button>
+                    <div class="p-5 pt-0 border-t border-outline-variant/50 hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Crop Type</label>
+                                <select name="crop_id" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2">
+                                    <option value="">Select Crop...</option>
+                                    {% for crop in crops %}
+                                    <option value="{{ crop.id }}">{{ crop.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Growth Stage</label>
+                                <select name="growth_stage" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2">
+                                    <option value="">Select Stage...</option>
+                                    <option value="Germination">Germination</option>
+                                    <option value="Vegetative">Vegetative</option>
+                                    <option value="Flowering">Flowering</option>
+                                    <option value="Grain Filling">Grain Filling</option>
+                                    <option value="Maturity">Maturity</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Irrigation Method</label>
+                                <select name="irrigation_id" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2">
+                                    <option value="">Select Method...</option>
+                                    {% for method in irrigation_methods %}
+                                    <option value="{{ method.id }}">{{ method.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Irrigation Efficiency (%)</label>
+                                <input name="irrigation_efficiency_percent" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="1" type="number" placeholder="80" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Water Applied (mm)</label>
+                                <input name="water_applied_mm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="250"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Leaf Temp (°C) <span class="text-outline font-normal">(opt)</span></label>
+                                <input name="leaf_temperature_c" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="28.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Stomatal Cond. <span class="text-outline font-normal">(opt)</span></label>
+                                <input name="stomatal_conductance" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.001" type="number" placeholder="0.35"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remote Sensing -->
+                <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="remote_sensing">
+                    <button class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">satellite_alt</span>
+                            <span class="font-headline font-bold text-primary">Remote Sensing</span>
+                            <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] rounded uppercase font-bold">5 Parameters</span>
+                        </div>
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors expand-icon">expand_more</span>
+                    </button>
+                    <div class="p-5 pt-0 border-t border-outline-variant/50 hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">NDVI</label>
+                                <input name="ndvi" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.001" type="number" placeholder="0.65" min="-1" max="1"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">NDWI</label>
+                                <input name="ndwi" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.001" type="number" placeholder="0.35" min="-1" max="1"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">LST (°C)</label>
+                                <input name="land_surface_temperature_c" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="28.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Soil Moisture (%)</label>
+                                <input name="satellite_soil_moisture_percent" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="30.0" min="0" max="100"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Satellite Source</label>
+                                <select name="satellite_source" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2">
+                                    <option value="">Select Source...</option>
+                                    <option value="SMAP">SMAP</option>
+                                    <option value="Sentinel-1">Sentinel-1</option>
+                                    <option value="MODIS">MODIS</option>
+                                    <option value="Landsat">Landsat</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hydrology -->
+                <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="hydrology">
+                    <button class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">water_drop</span>
+                            <span class="font-headline font-bold text-primary">Hydrology Metrics</span>
+                            <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] rounded uppercase font-bold">7 Parameters</span>
+                        </div>
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors expand-icon">expand_more</span>
+                    </button>
+                    <div class="p-5 pt-0 border-t border-outline-variant/50 hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Precipitation (mm)</label>
+                                <input name="precipitation_mm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="12.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Evapotranspiration (mm)</label>
+                                <input name="evapotranspiration_mm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="5.2"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Groundwater Depth (m)</label>
+                                <input name="groundwater_depth_m" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="5.25"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Runoff (mm)</label>
+                                <input name="runoff_mm" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.1" type="number" placeholder="2.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">River Flow (m³/s)</label>
+                                <input name="river_flow_m3s" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="125.5"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Reservoir (m³) <span class="text-outline font-normal">(opt)</span></label>
+                                <input name="reservoir_storage_m3" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="1" type="number" placeholder="50000"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Irrigation Supply (m³) <span class="text-outline font-normal">(opt)</span></label>
+                                <input name="irrigation_supply_available_m3" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="1" type="number" placeholder="30000"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="bg-primary-fixed/10 border border-primary-fixed/30 rounded-xl p-6 shadow-sm">
+                    <h4 class="text-sm font-label font-bold text-primary uppercase tracking-widest mb-4">Ready to Save?</h4>
+                    <p class="text-sm text-on-surface-variant mb-4">All entered metrics will be saved to the PostgreSQL database. Make sure Region & Year are selected above.</p>
+                    <div class="flex gap-3">
+                        <button type="button" id="save-all-btn" onclick="saveAllMetrics()" class="flex-1 bg-primary hover:bg-primary-container text-on-primary font-bold text-sm py-3 rounded-lg transition-colors flex items-center justify-center gap-2 uppercase">
+                            <span class="material-symbols-outlined text-lg">check_circle</span>
+                            Save All Metrics
+                        </button>
+                        <button type="button" onclick="clearAllFields()" class="flex-1 bg-outline-variant hover:bg-outline text-on-surface font-bold text-sm py-3 rounded-lg transition-colors flex items-center justify-center gap-2 uppercase">
+                            <span class="material-symbols-outlined text-lg">refresh</span>
+                            Clear Fields
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Sidebar -->
+            <div class="col-span-4 space-y-6">
+                <!-- Recent Uploads -->
+                <div class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-headline font-bold text-primary">Recent Uploads</h4>
+                        <span class="material-symbols-outlined text-outline text-lg">history</span>
+                    </div>
+                    <div id="recent-uploads-list" class="space-y-4">
+                        {% for log in recent_imports %}
+                        <div class="flex items-start gap-3 p-3 bg-surface-container-low rounded-lg border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-secondary mt-1">description</span>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-primary truncate">{{ log.filename|default:"Manual entry" }}</p>
+                                <div class="flex justify-between items-center mt-1">
+                                    <span class="text-[10px] text-outline">{{ log.import_date|timesince }} ago — {{ log.metric_type }}</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 {% if log.status == 'Success' %}bg-primary-fixed text-on-primary-fixed-variant{% elif log.status == 'Failed' %}bg-error-container text-on-error-container{% else %}bg-secondary-container text-on-secondary-container{% endif %} rounded font-bold">{{ log.status|upper }}</span>
+                                </div>
+                                <span class="text-[10px] text-outline">{{ log.records_imported }} records</span>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="flex items-start gap-3 p-3 bg-surface-container-low rounded-lg border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-outline mt-1">info</span>
+                            <div class="flex-1">
+                                <p class="text-sm text-on-surface-variant">No imports yet. Upload a file or enter data manually.</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'dashboard:import_logs' %}" class="w-full mt-4 py-2 text-xs font-bold text-secondary border border-secondary rounded hover:bg-secondary-container transition-colors uppercase tracking-widest block text-center">View Activity Log</a>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="font-headline font-bold text-primary">Quick Actions</h4>
+                        <span class="material-symbols-outlined text-primary text-lg">bolt</span>
+                    </div>
+                    <div class="space-y-3">
+                        <a href="{% url 'dashboard:import_excel' %}" class="flex gap-3 p-3 bg-primary-container/10 hover:bg-primary-container/20 rounded-lg transition-colors group">
+                            <span class="material-symbols-outlined text-primary mt-1">upload_file</span>
+                            <div>
+                                <p class="text-xs font-bold text-primary uppercase">Bulk Import</p>
+                                <p class="text-[11px] text-on-surface-variant leading-tight">Upload Excel/CSV files in bulk</p>
+                            </div>
+                        </a>
+                        <a href="{% url 'dashboard:metrics_browser' %}" class="flex gap-3 p-3 bg-secondary-container/10 hover:bg-secondary-container/20 rounded-lg transition-colors group">
+                            <span class="material-symbols-outlined text-secondary mt-1">assessment</span>
+                            <div>
+                                <p class="text-xs font-bold text-secondary uppercase">View All Metrics</p>
+                                <p class="text-[11px] text-on-surface-variant leading-tight">Browse all entered data</p>
+                            </div>
+                        </a>
+                        <!-- Download Templates -->
+                        <div class="flex gap-3 p-3 bg-tertiary-fixed/10 hover:bg-tertiary-fixed/20 rounded-lg transition-colors cursor-pointer" onclick="downloadTemplates()">
+                            <span class="material-symbols-outlined text-tertiary mt-1">download</span>
+                            <div>
+                                <p class="text-xs font-bold text-tertiary uppercase">Download Templates</p>
+                                <p class="text-[11px] text-on-surface-variant leading-tight">Get Excel templates for each metric type</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Status -->
+                <div class="bg-primary-fixed/10 border border-primary-fixed/30 rounded-xl p-4 shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-primary text-lg">database</span>
+                        <div>
+                            <p class="text-xs font-bold text-primary uppercase mb-1">PostgreSQL Connected</p>
+                            <p class="text-[11px] text-on-surface-variant leading-tight">Database: <strong>ABCDry_db</strong></p>
+                            <p class="text-[11px] text-on-surface-variant leading-tight">All data is saved to PostgreSQL automatically.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Full-width Bottom Panel: Strategic Partners -->
+        <div class="col-span-12 bg-surface-container-low border border-outline-variant rounded-lg p-6 shadow-sm mt-2">
+            <h3 class="font-headline font-semibold text-on-surface-variant mb-8 text-center text-sm uppercase tracking-widest">{% trans "Strategic Partners" %}</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80">
+                <img alt="Partner 1" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzh4yO1rs1uP6ew4C7--_i0tF0XNiSKPOWmiFpd0B0m8AEOp8JU3cUi4E8aoGGcqZ2iDQZpMLR7jgr70Gn0B2G-nXkx3lqRVNNLJORnioINdK3hCZRizCABaSkCFsFRkz605WcHCnntUbvSwH2CqgUHcIJK-PTQ5fIKm5qaBlT_1beWS6hweDIMwBYxICxMwWqVGixgE__RFEwxT6GIWXWvSbhNCr8rZCXOy2ZOro6zfPYg4kjeHOHRPZ9VitusfIEQ0tEaQ3i2wu-"/>
+                <img alt="Partner 2" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBchB7Z6yDDAgwMEBWxp5R6AdfgNrsHFye1GmDMJJuVlTjJOdm2qf_lsvfC8m-UICqMSTFQb52udha38yQ1gX96zstn3B5Y6bWji5ekD8xBuEjG4waFZ-Yu2re6jSCFfwC_NXR_MmDRUapiLrr20D_qGF8yHZkR68iBVUnxy8E8T1xncatwP3kvWUNHdviCgHJ2LeDMOqXwn2PRfH2TKCHwoJNsIA69rCy7STFNJZVNLrXh-mIn8RkXYk5GIn9_OwcV6CSrzmYt0pAs"/>
+                <img alt="Partner 3" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPGT5yO7Ftcc62gTgrD802pweKfnHUVDt0iKKa26Q9zACeViPAyDT-2jiJ54iw1xdDAwPYTfFq4sSPIMwJekrPTLHMbxSv7wTWwk1VyfgQKhQPtmReEDRPV1vChvVT_uOHPu5O1QYECEGx5zaGC0kEqDsyiWidWbbCOwgviJhcpK8e_2Gj5sFGcoIYo7QEfJQzBmyl8VchUxKnYh6J3Y9tb75cOIgr8jKDTDA2h1gnDEz8uRYeDv0BpeDwHPcWlZgJF-1lp5Akr5G1"/>
+                <img alt="Partner 4" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsSBkwewznff9xbCUL-_IVa5u9oekPBtZqOU7BbqpyM_vTWbSs0Jek9xDm9Fd36KqJt8Jj37UsBlZfcBgv53bVFs52_hAyQeCSOgKW_T3i-RD7ntGu-mCndTIrK_0fgRFtf_u33moTzh7CyM882rbsKvUfAEo_savvjlPO0LTb_urqwjE5uf1fTyMvqVpvS_sN5cwUYaiwFtObiaEI3PIYxBJiKaV-yuQIforAqpmOCgbqIuCi_vQlHMcxB8m1-cFRsDWcEO8m51FX"/>
+                <img alt="Partner 5" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUjjgybQhGLoYEuC5R-qTcTA-M66lzYwqcj82lp1kCVERasgYCbaIMyZigzXcvPPywEjLKRFjpXzWnrdWdd889g0etSDIch6QKFSyoRJM-Po35u-utQmRdxGu7n__PkefPt-wPmKeLc4AAb1v3Weev619cNRKC-Fj1wDbCS3GbFZzolyAkOFp04JpdqQ74xNX6qPnP8tZpherPA19hGERjBGSxZTXP94A5uZOyc9N6x9bDdrv3LXdIpkM83GMS3wIdh3Mcewlge8RA"/>
+                <img alt="Partner 6" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCheGmgZ3dVY5beDDg8SqGO-caxlpvxXGVm62z4CVZrMVFMYM-Kwda4g4hSV853B17h-tx9l0fghlc-wny4vHwyDLRzdqaD1tS6WoXbH6tv7d8w8RxNxFzC3srevjnQHuzgUe7dVo9DI8fAlQ5ShFDkLBD_xRoKzX4BrRVw8mVHrHVkB_5H2Nw414EZMOjt8BANHqrrd83yu2Oj2Da_NkHf9bjKYnYXKVWig9BESrNwk2j4OXj0DmluvxnCsBELhDNmHCvUSKzCjPTz"/>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80 mt-8 border-t border-outline-variant/30 pt-6">
+                <img alt="Partner 7" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARQDrUUyqKNYOLZ21jI6vVfYpomqbzd8Gn7jtjxkJ8sPFQPSoFNU1qqXBxcNJvs81oelnEIo4TbNDFa0c8_QSftQcWT-rJGe7opwToxT_muf9aC5VZUwVGmXhZJdB30rnMdntd33B1el_L2YxYx9RhVDpsG0MsG2atHtNjByJzEH0-iI1Qgbgnev3DPsUmr7jKxeY2kbmoculGLEKEgPNZWmIYjyKpFFleNxFfP_A43RPvP_xOG5tURmgO0-EO-d7IPg2Sz9hOzkLk"/>
+                <img alt="Partner 8" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASqbTvFZ9gXy8NSpRwH03A0AAQiJFWgeaux3hBUOzxo0bbmn1JfTbkTz1TUyCtHr9ifvotfc23UCLTopmPRzKf8KEK8CqM4k0CVsufcVh3AizAb5YSW2I_cg9onzTMqFUaeD91X2hLVDUBaLFCWKDZHZmlDjkI16UqnCFaqnHtb8wREIEBeJFqgrnLzrCzQb3IFJNrUNdDAiqhI-CTYOv8sCXm6wlrXFUNO-4pcTikBYlWlsGBNQ6KMOPaj3VyoMjpXqtCys3VbN-S"/>
+                <img alt="Partner 9" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARbtDpPaV_DRnJs2OGrf_rahE4f4V1vMIagnQ-1b_kCX3p8Dc9u6WYZYxBCYl1uMgLEm_Gp8IwEQ5nRIryC11bjADz7d8eDOBlUu-yzqWfrzzJ4HLNSlMQ-m1m2J283_n-60RyPpy5u_pntI0_csmdkIGpNVxIp1e20Cxgbobbr9T1ig_wjlVYsfLhVQxfWqCAjzRZPJsnIpbGZX3NSvODLB5pX5w98BEJhcjOFLelZxX9NZ0gYbMyF5lncx359BOJ4iyQ9ur88gqy"/>
+                <img alt="Partner 10" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqZ6uc-4vka48KfBPj-Q61QPkvruAqhKpK_DEiRGv88kaxv1m6S2PNiM57vfYbAU8Yv72Z5wXD2bUJ54trpyc0DMG3PJmH4oGhTTSCw4IzhViVs1NDpQCiu3VGn3dlQKFNuNKPUVUFsPNNo5t5Y749gAjHwqK4pjQ4U2eT1y6VN2CPjK_hehjI6kb1dMzK5i-GihEtyy8GURWoD-7tGvZSA2h13SGR6SQV3OnFd7lvAinASPt_A8y8xai_vVfGv0thhB6QYMXPS4Af"/>
+                <img alt="Partner 11" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjzRjryBIpG_dmjlsC2zAU3geFrSZJXwKhQ19NDAVt7uZgV4gMa5tsVOZp38RVZ5Dd-HfGvtLScEa-ewlFVs_842GZ2v7XNZgPW6XYmRPIFPsQny0itjZbnDBxJSGQKXHfF6yOXFSiqgU0yvtZqC9lgaIHM-Epwuqd0VXk8Jk3JCMbwLZRs454f0WwMsWyEufFSIL6O_3CH18j7arwuAjQ6Mr3qSTUUTuon9s_aACZQ1XtfUbYi2Newfm-feWb3OlKFRknXIWj0JNO"/>
+                <img alt="Partner 12" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3o4Cje4TSzEkVJTTxTOjXDdAm4NlN2f6mfJWP4eKnZjygbDzJcysT6JupTO7_ht00gvep25xoO-IaQPJmsUpkjZVm7Tud_pBeKdBWQLsYcdsDm4ik3gzzjT1kYJ_DAVkZFLOxJdZBOf2t7ZmarMT60mHOVDXNAoH4KhL0JgjLPzKGB53rbnvt4aKGugAvx7BTFBUnQxC-ZOdWl72v34BiCOog5dUCY1lc7g4rLUp9MmNSU7wr970gTz-WvMVrRI_CJi5D2GAB82SS"/>
+            </div>
+        </div>
+</div>
+</main>
+</div>
+
+<script>
+    // ============= CSRF Token Helper =============
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const CSRF_TOKEN = getCookie('csrftoken') || '{{ csrf_token }}';
+
+    // ============= Toast Notification System =============
+    function showToast(message, type = 'success', duration = 5000) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${type}`;
+        toast.innerHTML = `
+            <div class="toast-body">
+                <span class="material-symbols-outlined text-lg mt-0.5 text-primary">${type === 'success' ? 'check_circle' : type === 'error' ? 'error' : 'info'}</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold leading-6">${message}</p>
+                </div>
+                <button onclick="this.closest('.toast').remove()" class="opacity-60 hover:opacity-100 transition-opacity text-on-surface-variant">
+                    <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+            </div>
+        `;
+        container.appendChild(toast);
+        // Trigger show animation
+        requestAnimationFrame(() => toast.classList.add('show'));
+        // Auto-remove
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, duration);
+    }
+
+    // ============= Metric Section Data Collection =============
+    const METRIC_SECTIONS = {
+        soil: {
+            fields: ['moisture_content_percent', 'sand_ratio', 'clay_ratio', 'silt_ratio',
+                     'root_zone_depth_mm', 'organic_matter_percent', 'infiltration_rate_mmhr',
+                     'field_capacity_percent', 'wilting_point_percent', 'salinity_ece_dsm', 'ph_level'],
+            required: ['moisture_content_percent', 'root_zone_depth_mm', 'organic_matter_percent',
+                       'infiltration_rate_mmhr', 'field_capacity_percent', 'wilting_point_percent',
+                       'salinity_ece_dsm', 'ph_level']
+        },
+        climate: {
+            fields: ['temperature_max_c', 'temperature_min_c', 'temperature_mean_c',
+                     'relative_humidity_percent', 'rainfall_mm', 'seasonal_rainfall_variability',
+                     'wind_speed_ms', 'solar_radiation_mjm2day', 'evapotranspiration_et0_mmday',
+                     'evapotranspiration_etc_mmday'],
+            required: ['temperature_max_c', 'temperature_min_c', 'temperature_mean_c',
+                       'relative_humidity_percent', 'wind_speed_ms', 'solar_radiation_mjm2day',
+                       'evapotranspiration_et0_mmday']
+        },
+        drought: {
+            fields: ['spi_1month', 'spi_3month', 'spi_12month', 'spei_1month', 'spei_3month',
+                     'spei_12month', 'pdsi_value', 'drought_severity_class'],
+            required: []
+        },
+        agricultural: {
+            fields: ['crop_id', 'growth_stage', 'crop_coefficient_kc', 'crop_water_requirement_mmday',
+                     'yield_reduction_factor', 'irrigation_id', 'irrigation_efficiency_percent',
+                     'water_applied_mm', 'leaf_temperature_c', 'stomatal_conductance'],
+            required: ['crop_id', 'growth_stage', 'crop_coefficient_kc', 'crop_water_requirement_mmday',
+                       'yield_reduction_factor', 'irrigation_efficiency_percent', 'water_applied_mm']
+        },
+        remote_sensing: {
+            fields: ['ndvi', 'ndwi', 'land_surface_temperature_c', 'satellite_soil_moisture_percent',
+                     'satellite_source', 'vegetation_condition_index', 'evapotranspiration_sebal_mmday'],
+            required: ['ndvi']
+        },
+        hydrology: {
+            fields: ['precipitation_mm', 'evapotranspiration_mm', 'groundwater_depth_m', 'runoff_mm',
+                     'river_flow_m3s', 'reservoir_storage_m3', 'irrigation_supply_available_m3',
+                     'soil_water_deficit_index_mm', 'water_balance_percent'],
+            required: ['precipitation_mm', 'evapotranspiration_mm', 'groundwater_depth_m', 'runoff_mm']
+        }
+    };
+
+    function collectSectionData(sectionType) {
+        const section = document.querySelector(`[data-metric-section="${sectionType}"]`);
+        if (!section) return null;
+
+        const config = METRIC_SECTIONS[sectionType];
+        const data = {};
+        let hasAnyValue = false;
+        let missingRequired = [];
+
+        config.fields.forEach(field => {
+            const input = section.querySelector(`[name="${field}"]`);
+            if (input && input.value !== '') {
+                data[field] = input.value;
+                hasAnyValue = true;
+                console.log(`[DEBUG] Section '${sectionType}' has value for field '${field}':`, input.value);
+            } else if (config.required.includes(field)) {
+                // To get a friendly name, we look at the previous sibling label if it exists, otherwise just the field name
+                let labelName = field;
+                if (input && input.previousElementSibling && input.previousElementSibling.tagName === 'LABEL') {
+                    labelName = input.previousElementSibling.textContent.replace(' (opt)', '').trim();
+                }
+                missingRequired.push(labelName);
+            }
+        });
+
+        if (hasAnyValue && missingRequired.length > 0) {
+            return { missingRequired: missingRequired, data: data };
+        }
+
+        return hasAnyValue ? { data: data } : null;
+    }
+
+    // ============= Save All Metrics to PostgreSQL =============
+    const themedConfirmModal = document.getElementById('themed-confirm-modal');
+    const themedConfirmTitle = document.getElementById('themed-confirm-title');
+    const themedConfirmMessage = document.getElementById('themed-confirm-message');
+    const themedConfirmIcon = document.getElementById('themed-confirm-icon');
+    const themedConfirmAccept = document.getElementById('themed-confirm-accept');
+    const themedConfirmCancel = document.getElementById('themed-confirm-cancel');
+
+    function showThemedConfirm({ title, message, confirmLabel = 'Confirm', cancelLabel = 'Cancel', icon = 'info', confirmClass = 'bg-primary hover:bg-primary-container text-on-primary' }) {
+        return new Promise(resolve => {
+            themedConfirmTitle.textContent = title;
+            themedConfirmMessage.textContent = message;
+            themedConfirmIcon.innerHTML = `<span class="material-symbols-outlined text-[22px]">${icon}</span>`;
+            themedConfirmAccept.textContent = confirmLabel;
+            themedConfirmCancel.textContent = cancelLabel;
+            themedConfirmAccept.className = `themed-modal-button rounded-lg px-4 py-2 text-sm font-bold ${confirmClass}`;
+
+            const closeModal = (result) => {
+                themedConfirmModal.classList.add('hidden');
+                themedConfirmModal.setAttribute('aria-hidden', 'true');
+                themedConfirmAccept.onclick = null;
+                themedConfirmCancel.onclick = null;
+                themedConfirmModal.onclick = null;
+                document.removeEventListener('keydown', onKeyDown);
+                resolve(result);
+            };
+
+            function onKeyDown(event) {
+                if (event.key === 'Escape') {
+                    closeModal(false);
+                }
+            }
+
+            themedConfirmAccept.onclick = () => closeModal(true);
+            themedConfirmCancel.onclick = () => closeModal(false);
+            themedConfirmModal.onclick = (event) => {
+                if (event.target === themedConfirmModal) closeModal(false);
+            };
+
+            document.addEventListener('keydown', onKeyDown);
+            themedConfirmModal.classList.remove('hidden');
+            themedConfirmModal.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    async function saveAllMetrics() {
+        const regionId = document.getElementById('global-region').value;
+        const yearId = document.getElementById('global-year').value;
+        const timestamp = document.getElementById('timestamp-input').value;
+
+        if (!regionId) {
+            showToast('Please select a Region in Global Metadata', 'error');
+            document.getElementById('global-region').focus();
+            return;
+        }
+        if (!yearId) {
+            showToast('Please select an Observation Year in Global Metadata', 'error');
+            document.getElementById('global-year').focus();
+            return;
+        }
+
+        // Derive measurement_date from timestamp or use today
+        let measurementDate;
+        if (timestamp) {
+            measurementDate = timestamp.split('T')[0];
+        } else {
+            const now = new Date();
+            measurementDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        }
+
+        const btn = document.getElementById('save-all-btn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;"></div> Saving...';
+        btn.disabled = true;
+
+        let totalSaved = 0;
+        let totalErrors = 0;
+        const results = [];
+
+        for (const [sectionType, config] of Object.entries(METRIC_SECTIONS)) {
+            const sectionData = collectSectionData(sectionType);
+            if (!sectionData) continue;
+
+            // If missing required fields but some values entered, ask user to confirm partial save
+            if (sectionData && sectionData.missingRequired) {
+                const missing = sectionData.missingRequired.join(', ');
+                const sectionName = sectionType.charAt(0).toUpperCase() + sectionType.slice(1).replace('_', ' ');
+                const confirmMsg = `You entered values for ${sectionName} but the following required fields are missing: ${missing}.\n\nChoose OK to save anyway (missing values will be left empty), or Cancel to skip this section.`;
+                const allow = await showThemedConfirm({
+                    title: `${sectionName} needs more fields`,
+                    message: confirmMsg,
+                    confirmLabel: 'Save anyway',
+                    cancelLabel: 'Skip section',
+                    icon: 'dataset',
+                    confirmClass: 'bg-secondary text-on-secondary hover:opacity-90',
+                });
+                if (!allow) {
+                    // User chose not to save this section
+                    continue;
+                }
+                // Mark allow_partial so server will accept missing values
+                sectionData.data.allow_partial = true;
+            }
+
+            if (sectionData && sectionData.validationError) {
+                totalErrors++;
+                results.push({ type: sectionType, success: false, error: sectionData.validationError });
+                continue;
+            }
+
+            const payload = sectionData && sectionData.data ? sectionData.data : sectionData;
+
+            // Attach global metadata to payload
+            payload.region_id = regionId;
+            payload.year_id = yearId;
+            payload.measurement_date = measurementDate;
+            payload.metric_type = sectionType;
+            if (timestamp) payload.timestamp = timestamp;
+
+            try {
+                const response = await fetch('/api/submit-metrics/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                    },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    totalSaved += (result.records_imported || 1);
+                    const action = result.action || null;
+                    const sectionName = sectionType.charAt(0).toUpperCase() + sectionType.slice(1).replace('_', ' ');
+                    if (action === 'created') {
+                        showToast(`${sectionName}: Created`, 'success', 3000);
+                    } else if (action === 'updated') {
+                        showToast(`${sectionName}: Updated`, 'success', 3000);
+                    }
+                    results.push({ type: sectionType, success: true, action: action });
+                } else {
+                    totalErrors++;
+                    results.push({ type: sectionType, success: false, error: result.error });
+                }
+            } catch (err) {
+                totalErrors++;
+                results.push({ type: sectionType, success: false, error: err.message });
+            }
+        }
+
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+
+        if (totalSaved === 0 && totalErrors === 0) {
+            showToast('No data entered in any section. Fill at least one metric category.', 'info');
+        } else if (totalSaved > 0 && totalErrors === 0) {
+            showToast(`✓ ${totalSaved} record(s) saved to ABCDry_db successfully!`, 'success');
+        } else {
+            if (totalSaved > 0) {
+                showToast(`✓ ${totalSaved} record(s) saved successfully.`, 'success', 4000);
+            }
+            
+            // Show a separate error toast for EACH failed section so the user knows exactly what they missed
+            const failedResults = results.filter(r => !r.success);
+            failedResults.forEach((result, index) => {
+                setTimeout(() => {
+                    const sectionName = result.type.charAt(0).toUpperCase() + result.type.slice(1).replace('_', ' ');
+                    showToast(`Failed to save ${sectionName}: ${result.error}`, 'error', 7000);
+                }, index * 500); // Stagger the toasts slightly
+            });
+            console.error('All save errors:', failedResults);
+        }
+    }
+
+    // ============= Clear All Fields =============
+    async function clearAllFields() {
+        const allow = await showThemedConfirm({
+            title: 'Clear all fields?',
+            message: 'This will reset every metric input on the page and remove all entered values.',
+            confirmLabel: 'Clear fields',
+            cancelLabel: 'Keep data',
+            icon: 'delete_forever',
+            confirmClass: 'bg-error text-on-error hover:opacity-90',
+        });
+        if (allow) {
+            document.querySelectorAll('[data-metric-section] input, [data-metric-section] select').forEach(el => {
+                if (el.tagName === 'SELECT') {
+                    el.selectedIndex = 0;
+                } else {
+                    el.value = '';
+                }
+            });
+            showToast('All fields cleared', 'info', 2000);
+        }
+    }
+
+    // ============= Download Templates =============
+    function downloadTemplates() {
+        showToast('Use Export links on each metrics view page to download templates', 'info', 4000);
+    }
+
+    // ============= Drag and Drop File Upload =============
+    const fileInput = document.getElementById('file-upload');
+    const dropZone = document.getElementById('drop-zone');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.add('drop-zone-active');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => {
+            dropZone.classList.remove('drop-zone-active');
+        }, false);
+    });
+
+    dropZone.addEventListener('drop', handleDrop, false);
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            uploadFile(this.files[0]);
+        }
+    });
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            uploadFile(files[0]);
+        }
+    }
+
+    async function uploadFile(file) {
+        const metricType = document.getElementById('upload-metric-type').value;
+        if (!metricType) {
+            showToast('Please select a Metric Type before uploading', 'error');
+            return;
+        }
+
+        // Validate file type
+        const validExts = ['.csv', '.xlsx', '.xls'];
+        const ext = '.' + file.name.split('.').pop().toLowerCase();
+        if (!validExts.includes(ext)) {
+            showToast('Invalid file type. Use .csv, .xlsx, or .xls', 'error');
+            return;
+        }
+
+        // Show upload status
+        const statusDiv = document.getElementById('upload-status');
+        const statusText = document.getElementById('upload-status-text');
+        const progressFill = document.getElementById('upload-progress-fill');
+        const title = document.getElementById('drop-zone-title');
+        const subtitle = document.getElementById('drop-zone-subtitle');
+
+        statusDiv.classList.remove('hidden');
+        statusText.textContent = `Uploading ${file.name}...`;
+        progressFill.style.width = '30%';
+        title.textContent = file.name;
+        subtitle.textContent = `${(file.size / 1024).toFixed(1)} KB — ${metricType} metrics`;
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('metric_type', metricType);
+
+        try {
+            progressFill.style.width = '60%';
+
+            const response = await fetch('/api/upload-file/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                },
+                body: formData,
+            });
+
+            progressFill.style.width = '90%';
+            const result = await response.json();
+            progressFill.style.width = '100%';
+
+            if (result.success) {
+                showToast(`✓ ${result.records_imported} records imported from ${file.name}`, 'success', 6000);
+                statusText.textContent = `✓ ${result.records_imported}/${result.total_rows} records saved`;
+
+                // Show created/updated summary if provided
+                if (result.created || result.updated) {
+                    if (result.created > 0) showToast(`${result.created} row(s) created`, 'success', 4000);
+                    if (result.updated > 0) showToast(`${result.updated} row(s) updated`, 'success', 4000);
+                }
+
+                if (result.error_count > 0) {
+                    showToast(`${result.error_count} row(s) had errors. Check import logs for details.`, 'info', 6000);
+                }
+
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    resetDropZone();
+                }, 3000);
+            } else {
+                showToast(`Upload failed: ${result.error}`, 'error', 8000);
+                statusText.textContent = `✗ ${result.error}`;
+                setTimeout(() => resetDropZone(), 4000);
+            }
+        } catch (err) {
+            showToast(`Network error: ${err.message}`, 'error');
+            statusText.textContent = `✗ Network error`;
+            setTimeout(() => resetDropZone(), 4000);
+        }
+    }
+
+    function resetDropZone() {
+        const statusDiv = document.getElementById('upload-status');
+        const progressFill = document.getElementById('upload-progress-fill');
+        const title = document.getElementById('drop-zone-title');
+        const subtitle = document.getElementById('drop-zone-subtitle');
+
+        statusDiv.classList.add('hidden');
+        progressFill.style.width = '0%';
+        title.textContent = 'Upload Time-Series Data (Excel/CSV)';
+        subtitle.textContent = 'Drag and drop your station-ready files here, or browse local storage. Supports .csv, .xlsx, and .xls drought-monitoring formats.';
+        fileInput.value = '';
+    }
+
+    // ============= Icon Rotation for Expand/Collapse =============
+    document.querySelectorAll('.expand-icon').forEach(icon => {
+        icon.closest('button').addEventListener('click', function() {
+            const isExpanded = this.nextElementSibling.classList.contains('hidden');
+            if (isExpanded) {
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                icon.style.transform = 'rotate(0deg)';
+            }
+        });
+    });
+
+    // ============= Micro-interactions =============
+    document.querySelectorAll('tr').forEach(row => {
+        row.addEventListener('mouseenter', () => {
+            row.style.backgroundColor = '#f0f3ff';
+        });
+        row.addEventListener('mouseleave', () => {
+            row.style.backgroundColor = '';
+        });
+    });
+
+    // ============= Auto-fill from URL Parameters =============
+    function loadCoordinatesFromURL() {
+        const params = new URLSearchParams(window.location.search);
+        const lat = params.get('lat');
+        const lon = params.get('lon');
+        const alt = params.get('alt');
+
+        const latInput = document.getElementById('latitude-input');
+        const lonInput = document.getElementById('longitude-input');
+        const altInput = document.getElementById('altitude-input');
+
+        if (lat && latInput) latInput.value = parseFloat(lat).toFixed(4);
+        if (lon && lonInput) lonInput.value = parseFloat(lon).toFixed(4);
+        if (alt && altInput) altInput.value = alt;
+
+        // Set current date as default in the picker
+        const pickerDate = document.getElementById('picker-date');
+        if (pickerDate && !pickerDate.value) {
+            const now = new Date();
+            pickerDate.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCoordinatesFromURL);
+
+    // ============= Date/Time Picker =============
+    function toggleDateTimePicker() {
+        const dropdown = document.getElementById('dateTimeDropdown');
+        const arrow = document.getElementById('dropdown-arrow');
+        
+        dropdown.classList.toggle('show');
+        arrow.style.transform = dropdown.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0deg)';
+
+        if (!document.getElementById('picker-date').value) {
+            const now = new Date();
+            document.getElementById('picker-date').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+            document.getElementById('picker-hour').value = String(now.getHours()).padStart(2, '0');
+            document.getElementById('picker-minute').value = String(now.getMinutes()).padStart(2, '0');
+        }
+    }
+
+    function confirmDateTimePicker() {
+        const date = document.getElementById('picker-date').value;
+        const hour = String(document.getElementById('picker-hour').value).padStart(2, '0');
+        const minute = String(document.getElementById('picker-minute').value).padStart(2, '0');
+
+        if (!date) {
+            showToast('Please select a date', 'error', 2000);
+            return;
+        }
+
+        const h = parseInt(hour);
+        const m = parseInt(minute);
+        if (h < 0 || h > 23 || m < 0 || m > 59) {
+            showToast('Invalid time format', 'error', 2000);
+            return;
+        }
+
+        const dateTime = `${date}T${hour}:${minute}`;
+        document.getElementById('timestamp-input').value = dateTime;
+
+        const dateObj = new Date(dateTime);
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const displayText = `${dateObj.getDate()} ${months[dateObj.getMonth()]} ${dateObj.getFullYear()} ${hour}:${minute}`;
+        document.getElementById('timestamp-display').textContent = displayText;
+
+        const dropdown = document.getElementById('dateTimeDropdown');
+        const arrow = document.getElementById('dropdown-arrow');
+        dropdown.classList.remove('show');
+        arrow.style.transform = 'rotate(0deg)';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.querySelector('.dropdown-datetime');
+        if (dropdown && !dropdown.contains(event.target)) {
+            const dropdownContent = document.getElementById('dateTimeDropdown');
+            const arrow = document.getElementById('dropdown-arrow');
+            dropdownContent.classList.remove('show');
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    });
+</script>
+</div>
+</body>
+</html>

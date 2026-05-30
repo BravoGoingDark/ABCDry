@@ -1,0 +1,541 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{% trans "Historical Comparison" %} | ABCDryBASIN</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#b2ebff",
+                        "on-tertiary-fixed-variant": "#554338",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-surface-variant": "#414844",
+                        "primary-fixed-dim": "#a5d0b9",
+                        "surface-variant": "#dce2f3",
+                        "tertiary-fixed": "#f9ddce",
+                        "secondary": "#00677d",
+                        "on-primary-fixed-variant": "#274e3d",
+                        "surface-dim": "#d3daea",
+                        "secondary-container": "#72ddfd",
+                        "primary": "#012d1d",
+                        "on-tertiary-fixed": "#27180f",
+                        "primary-fixed": "#c1ecd4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#1b4332",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#dcc1b2",
+                        "surface-tint": "#3f6653",
+                        "surface-container": "#e7eefe",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#a5d0b9",
+                        "tertiary-container": "#4a382d",
+                        "surface-container-highest": "#dce2f3",
+                        "on-surface": "#151c27",
+                        "outline": "#717973",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#baa193",
+                        "surface-bright": "#f9f9ff",
+                        "surface": "#f9f9ff",
+                        "on-primary-container": "#86af99",
+                        "surface-container-high": "#e2e8f8",
+                        "on-secondary-container": "#006075",
+                        "inverse-surface": "#2a313d",
+                        "outline-variant": "#c1c8c2",
+                        "on-primary-fixed": "#002114",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "background": "#f9f9ff",
+                        "on-background": "#151c27",
+                        "tertiary": "#322319",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-fixed-dim": "#69d4f4",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001f27",
+                        "on-secondary-fixed-variant": "#004e5f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Hanken Grotesk"],
+                        "display": ["Hanken Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Hanken Grotesk', sans-serif; }
+        .font-label { font-family: 'JetBrains Mono', monospace; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        .gauge-gradient {
+            background: conic-gradient(from 270deg at 50% 100%, #1b4332 0deg, #a5d0b9 45deg, #69d4f4 90deg, #f9ddce 135deg, #ba1a1a 180deg);
+            mask: radial-gradient(farthest-side, transparent 82%, white 83%);
+        }
+
+        .chart-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 3s ease-in forwards;
+        }
+
+        @keyframes dash {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c8c2;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Top Navigation Header -->
+<header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
+<div class="flex items-center gap-8 min-w-0 flex-1">
+<a class="flex items-center gap-3 shrink group" href="{% url 'dashboard:home' %}">
+<span class="relative shrink-0">
+<span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+<img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="{% static 'dashboard/img/abcdrybasin-logo.png' %}" width="40" height="40"/>
+</span>
+<div class="flex flex-col min-w-0 leading-tight">
+<span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
+<span class="text-[10px] font-normal text-on-surface-variant">{% trans "Drought risk assessment tool" %}</span>
+</div>
+</a>
+
+<nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:home' %}">{% trans "Home" %}</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">{% trans "Data" %}</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">{% trans "Analysis" %}</a>
+<a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:historical' %}">{% trans "Historical" %}</a>
+</nav>
+</div>
+
+<div class="flex items-center gap-3 shrink-0 min-w-0">
+<!-- Language Switcher Dynamic POST Form -->
+<form action="{% url 'set_language' %}" class="flex items-center" method="post" id="lang-form">
+{% csrf_token %}
+<input name="next" type="hidden" value="{{ request.get_full_path }}"/>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">language</span>
+<select name="language" onchange="document.getElementById('lang-form').submit();" class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
+<option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+<option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>FR</option>
+</select>
+</div>
+</form>
+
+<!-- Profile Actions -->
+<div class="flex items-center gap-2 text-on-surface-variant shrink-0">
+<button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+<span class="material-symbols-outlined text-2xl">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="pt-16 min-h-screen bg-background pb-12">
+<div class="max-w-7xl mx-auto p-10">
+<!-- HEADER SECTION -->
+<div class="mb-12">
+<h2 class="text-5xl font-headline font-black text-primary tracking-tight leading-tight">
+{% trans "HISTORICAL" %}<br/>{% trans "COMPARISON" %}
+</h2>
+<div class="h-1 w-24 bg-secondary mt-4 mb-4"></div>
+<p class="text-on-surface-variant font-label text-xs uppercase tracking-widest flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+{% trans "Comparison Window: Last 10 Years (2016-2026)" %}
+</p>
+</div>
+
+<div class="grid grid-cols-12 gap-8">
+<!-- CORE VISUAL: GAUGE -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-10 flex flex-col md:flex-row items-center gap-12 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+<div class="relative flex flex-col items-center justify-center">
+<!-- Modern Circular Gauge with Gradient -->
+<div class="relative w-64 h-64 rounded-full flex items-center justify-center shadow-xl" style="background: conic-gradient(from 180deg, #1b4332 0deg, #a5d0b9 60deg, #69d4f4 120deg, #f9ddce 180deg, #ba1a1a 240deg, #1b4332 360deg);">
+<!-- Inner circle for clean look -->
+<div class="absolute w-56 h-56 rounded-full bg-surface flex items-center justify-center">
+<div class="text-center">
+<span class="text-7xl font-headline font-black text-secondary leading-none">34</span>
+<span class="text-sm font-label font-bold text-on-surface-variant uppercase tracking-tight block mt-3">{% trans "Risk Score" %}</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 space-y-6">
+<div class="space-y-1">
+<h3 class="text-3xl font-headline font-black text-on-surface leading-tight">{% trans "Elevated Status" %}</h3>
+<p class="text-on-surface-variant text-sm font-medium">{% trans "Risk (34) is currently" %} <span class="text-secondary font-bold">{% trans "higher than 65%" %}</span> {% trans "of recorded historical cycles." %}</p>
+</div>
+<div class="bg-surface-container-low border-l-4 border-secondary p-5 rounded-r-lg">
+<div class="flex gap-3 items-start">
+<span class="material-symbols-outlined text-secondary" data-icon="psychology">psychology</span>
+<p class="text-on-surface font-medium text-sm leading-relaxed">
+<span class="font-bold text-primary block mb-1">{% trans "STRATEGIC INSIGHT:" %}</span>
+{% trans "Moderate drought year detected. Strategic irrigation planning and soil moisture preservation measures are recommended for the current quadrant." %}
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- HISTORICAL RANGE STATS - VERTICAL REFINEMENT -->
+<div class="col-span-12 lg:col-span-4 grid grid-rows-3 gap-4">
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl flex items-center justify-between group hover:border-error transition-colors">
+<div>
+<p class="text-[10px] font-label font-bold text-on-surface-variant/60 uppercase mb-1">{% trans "Historical Max (2017)" %}</p>
+<p class="text-4xl font-headline font-black text-error group-hover:scale-110 origin-left transition-transform">92</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="w-16 h-1.5 bg-error/10 rounded-full overflow-hidden">
+<div class="w-full h-full bg-error"></div>
+</div>
+<span class="text-[9px] font-label font-bold text-error">{% trans "CRITICAL" %}</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl flex items-center justify-between group hover:border-outline transition-colors">
+<div>
+<p class="text-[10px] font-label font-bold text-on-surface-variant/60 uppercase mb-1">{% trans "10-Year Average" %}</p>
+<p class="text-4xl font-headline font-black text-on-surface-variant group-hover:scale-110 origin-left transition-transform">41</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="w-16 h-1.5 bg-outline-variant rounded-full overflow-hidden">
+<div class="w-1/2 h-full bg-outline"></div>
+</div>
+<span class="text-[9px] font-label font-bold text-outline">{% trans "MODERATE" %}</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl flex items-center justify-between group hover:border-primary-fixed-dim transition-colors">
+<div>
+<p class="text-[10px] font-label font-bold text-on-surface-variant/60 uppercase mb-1">{% trans "Historical Min (2013)" %}</p>
+<p class="text-4xl font-headline font-black text-primary-fixed-dim group-hover:scale-110 origin-left transition-transform">12</p>
+</div>
+<div class="flex flex-col items-end gap-2">
+<div class="w-16 h-1.5 bg-primary-fixed-dim/10 rounded-full overflow-hidden">
+<div class="w-1/4 h-full bg-primary-fixed-dim"></div>
+</div>
+<span class="text-[9px] font-label font-bold text-primary-fixed-dim">{% trans "OPTIMAL" %}</span>
+</div>
+</div>
+</div>
+
+<!-- PERCENTILE BREAKDOWN: SEGMENTED STYLE -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col">
+<h4 class="font-headline font-black text-primary mb-8 flex items-center gap-3 text-lg">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+{% trans "PERCENTILE TIERS" %}
+</h4>
+<div class="space-y-6 flex-1">
+<div class="relative py-4">
+<!-- Indicator -->
+<div class="absolute -top-1 left-[34%] -translate-x-1/2 flex flex-col items-center">
+<div class="bg-secondary text-on-secondary px-3 py-1 rounded text-[10px] font-black font-label shadow-lg shadow-secondary/20">{% trans "NOW:" %} 34</div>
+<div class="w-1 h-12 bg-secondary/30 mt-1 rounded-full"></div>
+<div class="w-2.5 h-2.5 bg-secondary rounded-full border-2 border-surface -mt-2"></div>
+</div>
+<!-- Segmented Bar -->
+<div class="flex gap-1 h-3 mt-8">
+<div class="flex-1 bg-primary-fixed-dim/40 rounded-l-full" title="{% trans 'Low Risk' %}"></div>
+<div class="flex-1 bg-secondary-fixed-dim/40" title="{% trans 'Moderate' %}"></div>
+<div class="flex-1 bg-orange-200/40" title="{% trans 'High' %}"></div>
+<div class="flex-1 bg-error/20 rounded-r-full" title="{% trans 'Critical' %}"></div>
+</div>
+</div>
+<div class="space-y-4 pt-4">
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-surface transition-colors cursor-default border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-error ring-4 ring-error/10"></span>
+<span class="text-xs font-bold font-headline uppercase tracking-tight">{% trans "Critical (Top 10%)" %}</span>
+</div>
+<span class="font-label text-xs font-bold text-on-surface-variant">{% trans "Score > 85" %}</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-surface transition-colors cursor-default border-b border-outline-variant/30">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-orange-400"></span>
+<span class="text-xs font-bold font-headline uppercase tracking-tight">{% trans "High Risk" %}</span>
+</div>
+<span class="font-label text-xs font-bold text-on-surface-variant">60 — 85</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-xl bg-secondary-container/10 border border-secondary/20 shadow-sm">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary ring-4 ring-secondary/20"></span>
+<span class="text-xs font-black font-headline uppercase tracking-tight text-secondary">{% trans "Moderate (Current)" %}</span>
+</div>
+<span class="font-label text-xs font-black text-secondary">30 — 60</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg hover:bg-surface transition-colors cursor-default">
+<div class="flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-fixed-dim"></span>
+<span class="text-xs font-bold font-headline uppercase tracking-tight">{% trans "Optimal" %}</span>
+</div>
+<span class="font-label text-xs font-bold text-on-surface-variant">&lt; 30</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- HISTORICAL TIMELINE: MODERN LINE CHART -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col">
+<div class="flex justify-between items-center mb-10">
+<h4 class="font-headline font-black text-primary flex items-center gap-3 text-lg">
+<span class="material-symbols-outlined" data-icon="show_chart">show_chart</span>
+{% trans "ANNUAL RISK TREND (WK 22)" %}
+</h4>
+<div class="flex gap-6">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full border-2 border-primary"></span>
+<span class="text-[10px] font-black font-label text-on-surface-variant uppercase">{% trans "Historical" %}</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="text-[10px] font-black font-label text-secondary uppercase">{% trans "2026 Target" %}</span>
+</div>
+</div>
+</div>
+<div class="relative flex-1 min-h-[300px] flex gap-4">
+<!-- Y-Axis Labels -->
+<div class="flex flex-col justify-between items-end pr-2 text-xs font-label font-bold text-on-surface-variant w-10">
+<span>100</span>
+<span>75</span>
+<span>50</span>
+<span>25</span>
+<span>0</span>
+</div>
+<!-- SVG Chart Background -->
+<svg class="flex-1 overflow-visible" preserveaspectratio="none" viewbox="0 0 1000 200">
+<!-- Grid Lines -->
+<line class="text-outline-variant opacity-30" stroke="currentColor" stroke-dasharray="5" x1="0" x2="1000" y1="0" y2="0" stroke-width="1"></line>
+<line class="text-outline-variant opacity-30" stroke="currentColor" stroke-dasharray="5" x1="0" x2="1000" y1="50" y2="50" stroke-width="1"></line>
+<line class="text-outline-variant opacity-30" stroke="currentColor" stroke-dasharray="5" x1="0" x2="1000" y1="100" y2="100" stroke-width="1"></line>
+<line class="text-outline-variant opacity-30" stroke="currentColor" stroke-dasharray="5" x1="0" x2="1000" y1="150" y2="150" stroke-width="1"></line>
+<!-- Y-Axis -->
+<line class="text-outline-variant" stroke="currentColor" x1="0" x2="0" y1="0" y2="200" stroke-width="2"></line>
+</svg>
+<!-- Points & Labels Layer -->
+<div class="absolute inset-0 flex justify-between items-end pb-6 pt-12" style="left: 50px;">
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 24px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2016</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 82px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2017</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 40px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2018</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 45px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2019</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 20px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2020</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 55px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2021</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 31px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2022</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 12px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2023</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 28px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2024</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-3 h-3 rounded-full bg-surface border-2 border-primary group-hover:scale-150 transition-transform cursor-pointer shadow-sm" style="margin-bottom: 40px;"></div>
+<span class="text-[10px] font-bold font-label text-on-surface-variant/50">2025</span>
+</div>
+<div class="group relative flex flex-col items-center">
+<div class="w-5 h-5 rounded-full bg-secondary border-4 border-surface shadow-lg group-hover:scale-125 transition-transform z-10" style="margin-bottom: 34px;"></div>
+<span class="text-[10px] font-black font-label text-secondary">2026</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- FREQUENCY ANALYSIS -->
+<div class="col-span-12 lg:col-span-6 bg-primary-container text-on-primary rounded-xl overflow-hidden flex flex-col shadow-xl">
+<div class="p-8 border-b border-on-primary-container/10 bg-white/5">
+<p class="text-secondary-fixed font-label text-[10px] font-black uppercase tracking-widest mb-2">{% trans "Estimated Return Frequency" %}</p>
+<h4 class="text-3xl font-headline font-black mb-4 leading-tight">{% trans "Cycle Severity:" %}<br/>{% trans "Every 3 Years" %}</h4>
+<p class="text-on-primary-container/80 text-sm leading-relaxed max-w-md">
+{% trans "The current level (34) is consistent with a" %} <span class="text-secondary-fixed font-bold border-b border-secondary-fixed/30">{% trans "Common Drought Cycle" %}</span>. {% trans "It indicates standard multi-year fluctuation rather than an anomalous extreme event." %}
+</p>
+</div>
+<div class="p-8 grid grid-cols-3 gap-8 bg-primary/20">
+<div class="space-y-1">
+<p class="text-[9px] font-label text-on-primary-container/50 uppercase font-black">{% trans "Severe (50+)" %}</p>
+<p class="text-xl font-headline font-black text-on-primary">{% trans "1 in 7 Yrs" %}</p>
+<div class="w-8 h-1 bg-on-primary-container/20 rounded-full"></div>
+</div>
+<div class="space-y-1">
+<p class="text-[9px] font-label text-on-primary-container/50 uppercase font-black">{% trans "Extreme (75+)" %}</p>
+<p class="text-xl font-headline font-black text-on-primary">{% trans "1 in 15 Yrs" %}</p>
+<div class="w-8 h-1 bg-on-primary-container/20 rounded-full"></div>
+</div>
+<div class="space-y-1">
+<p class="text-[9px] font-label text-on-primary-container/50 uppercase font-black">{% trans "Historic (90+)" %}</p>
+<p class="text-xl font-headline font-black text-on-primary">{% trans "1 in 50 Yrs" %}</p>
+<div class="w-8 h-1 bg-on-primary-container/20 rounded-full"></div>
+</div>
+</div>
+</div>
+
+<!-- DIRECT COMPARISON: REFINED INTERACTIVE UI -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container-lowest border border-outline-variant rounded-xl p-8 flex flex-col hover:border-secondary transition-colors group">
+<div class="flex justify-between items-start mb-10">
+<h4 class="font-headline font-black text-primary flex items-center gap-3 text-lg">
+<span class="material-symbols-outlined" data-icon="compare">compare</span>
+{% trans "DIRECT COMPARISON" %}
+</h4>
+<div class="relative">
+<select class="appearance-none bg-surface border border-outline-variant rounded-lg px-4 py-2 pr-10 text-xs font-black font-label focus:ring-2 focus:ring-primary/20 focus:outline-none cursor-pointer">
+<option>{% trans "Comparison Basis: 2024" %}</option>
+<option>{% trans "Comparison Basis: 2023" %}</option>
+<option>{% trans "Comparison Basis: 10Y Avg" %}</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-sm pointer-events-none text-on-surface-variant" data-icon="keyboard_arrow_down">keyboard_arrow_down</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col justify-center space-y-10">
+<div class="space-y-3">
+<div class="flex justify-between items-end">
+<div>
+<p class="text-[9px] font-black font-label text-secondary uppercase tracking-widest mb-1">{% trans "Target Period" %}</p>
+<p class="text-sm font-black font-headline text-on-surface">{% trans "2026 (Current Week 22)" %}</p>
+</div>
+<span class="text-2xl font-headline font-black text-secondary">34</span>
+</div>
+<div class="h-4 w-full bg-secondary-container/20 rounded-full overflow-hidden p-0.5 border border-secondary/10">
+<div class="h-full bg-secondary rounded-full w-[34%] shadow-sm"></div>
+</div>
+</div>
+<div class="relative flex items-center justify-center">
+<div class="absolute w-full h-px bg-outline-variant/30"></div>
+<div class="relative px-6 py-2 bg-error-container/40 border border-error/30 rounded-full flex items-center gap-2 group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-error text-sm font-black" data-icon="trending_up">trending_up</span>
+<span class="text-[10px] font-black font-label text-error uppercase tracking-tighter">{% trans "+6 Points Delta" %}</span>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-end opacity-60">
+<div>
+<p class="text-[9px] font-black font-label text-on-surface-variant uppercase tracking-widest mb-1">{% trans "Baseline Period" %}</p>
+<p class="text-sm font-black font-headline text-on-surface">{% trans "2024 (Comparative Week 22)" %}</p>
+</div>
+<span class="text-2xl font-headline font-black text-on-surface">28</span>
+</div>
+<div class="h-4 w-full bg-surface-container-high rounded-full overflow-hidden p-0.5 border border-outline-variant/50">
+<div class="h-full bg-outline rounded-full w-[28%]"></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- CONTEXT FOOTNOTE -->
+<div class="col-span-12 mt-4 p-5 bg-surface-container-low border-l-4 border-outline rounded-r-xl flex items-start gap-4">
+<span class="material-symbols-outlined text-outline mt-0.5" data-icon="info">info</span>
+<div>
+<p class="text-[11px] font-bold font-headline text-on-surface uppercase tracking-wider mb-1">{% trans "Metadata & Methodology" %}</p>
+<p class="text-[10px] font-body text-on-surface-variant leading-relaxed opacity-80">
+{% trans "Historical values are derived from CHIRPS precipitation estimates and ERA5-Land reanalysis. Indices are normalized (0-100) where 100 represents theoretical environmental failure. Data represents the cumulative hydrological state at the end of Week 22." %}
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- Full-width Bottom Panel: Strategic Partners -->
+<div class="col-span-12 bg-surface-container-low border border-outline-variant rounded-lg p-6 shadow-sm mt-2">
+<h3 class="font-headline font-semibold text-on-surface-variant mb-8 text-center text-sm uppercase tracking-widest">{% trans "Strategic Partners" %}</h3>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80">
+<img alt="Partner 1" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzh4yO1rs1uP6ew4C7--_i0tF0XNiSKPOWmiFpd0B0m8AEOp8JU3cUi4E8aoGGcqZ2iDQZpMLR7jgr70Gn0B2G-nXkx3lqRVNNLJORnioINdK3hCZRizCABaSkCFsFRkz605WcHCnntUbvSwH2CqgUHcIJK-PTQ5fIKm5qaBlT_1beWS6hweDIMwBYxICxMwWqVGixgE__RFEwxT6GIWXWvSbhNCr8rZCXOy2ZOro6zfPYg4kjeHOHRPZ9VitusfIEQ0tEaQ3i2wu-"/>
+<img alt="Partner 2" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBchB7Z6yDDAgwMEBWxp5R6AdfgNrsHFye1GmDMJJuVlTjJOdm2qf_lsvfC8m-UICqMSTFQb52udha38yQ1gX96zstn3B5Y6bWji5ekD8xBuEjG4waFZ-Yu2re6jSCFfwC_NXR_MmDRUapiLrr20D_qGF8yHZkR68iBVUnxy8E8T1xncatwP3kvWUNHdviCgHJ2LeDMOqXwn2PRfH2TKCHwoJNsIA69rCy7STFNJZVNLrXh-mIn8RkXYk5GIn9_OwcV6CSrzmYt0pAs"/>
+<img alt="Partner 3" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPGT5yO7Ftcc62gTgrD802pweKfnHUVDt0iKKa26Q9zACeViPAyDT-2jiJ54iw1xdDAwPYTfFq4sSPIMwJekrPTLHMbxSv7wTWwk1VyfgQKhQPtmReEDRPV1vChvVT_uOHPu5O1QYECEGx5zaGC0kEqDsyiWidWbbCOwgviJhcpK8e_2Gj5sFGcoIYo7QEfJQzBmyl8VchUxKnYh6J3Y9tb75cOIgr8jKDTDA2h1gnDEz8uRYeDv0BpeDwHPcWlZgJF-1lp5Akr5G1"/>
+<img alt="Partner 4" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsSBkwewznff9xbCUL-_IVa5u9oekPBtZqOU7BbqpyM_vTWbSs0Jek9xDm9Fd36KqJt8Jj37UsBlZfcBgv53bVFs52_hAyQeCSOgKW_T3i-RD7ntGu-mCndTIrK_0fgRFtf_u33moTzh7CyM882rbsKvUfAEo_savvjlPO0LTb_urqwjE5uf1fTyMvqVpvS_sN5cwUYaiwFtObiaEI3PIYxBJiKaV-yuQIforAqpmOCgbqIuCi_vQlHMcxB8m1-cFRsDWcEO8m51FX"/>
+<img alt="Partner 5" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUjjgybQhGLoYEuC5R-qTcTA-M66lzYwqcj82lp1kCVERasgYCbaIMyZigzXcvPPywEjLKRFjpXzWnrdWdd889g0etSDIch6QKFSyoRJM-Po35u-utQmRdxGu7n__PkefPt-wPmKeLc4AAb1v3Weev619cNRKC-Fj1wDbCS3GbFZzolyAkOFp04JpdqQ74xNX6qPnP8tZpherPA19hGERjBGSxZTXP94A5uZOyc9N6x9bDdrv3LXdIpkM83GMS3wIdh3Mcewlge8RA"/>
+<img alt="Partner 6" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCheGmgZ3dVY5beDDg8SqGO-caxlpvxXGVm62z4CVZrMVFMYM-Kwda4g4hSV853B17h-tx9l0fghlc-wny4vHwyDLRzdqaD1tS6WoXbH6tv7d8w8RxNxFzC3srevjnQHuzgUe7dVo9DI8fAlQ5ShFDkLBD_xRoKzX4BrRVw8mVHrHVkB_5H2Nw414EZMOjt8BANHqrrd83yu2Oj2Da_NkHf9bjKYnYXKVWig9BESrNwk2j4OXj0DmluvxnCsBELhDNmHCvUSKzCjPTz"/>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80 mt-8 border-t border-outline-variant/30 pt-6">
+<img alt="Partner 7" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARQDrUUyqKNYOLZ21jI6vVfYpomqbzd8Gn7jtjxkJ8sPFQPSoFNU1qqXBxcNJvs81oelnEIo4TbNDFa0c8_QSftQcWT-rJGe7opwToxT_muf9aC5VZUwVGmXhZJdB30rnMdntd33B1el_L2YxYx9RhVDpsG0MsG2atHtNjByJzEH0-iI1Qgbgnev3DPsUmr7jKxeY2kbmoculGLEKEgPNZWmIYjyKpFFleNxFfP_A43RPvP_xOG5tURmgO0-EO-d7IPg2Sz9hOzkLk"/>
+<img alt="Partner 8" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASqbTvFZ9gXy8NSpRwH03A0AAQiJFWgeaux3hBUOzxo0bbmn1JfTbkTz1TUyCtHr9ifvotfc23UCLTopmPRzKf8KEK8CqM4k0CVsufcVh3AizAb5YSW2I_cg9onzTMqFUaeD91X2hLVDUBaLFCWKDZHZmlDjkI16UqnCFaqnHtb8wREIEBeJFqgrnLzrCzQb3IFJNrUNdDAiqhI-CTYOv8sCXm6wlrXFUNO-4pcTikBYlWlsGBNQ6KMOPaj3VyoMjpXqtCys3VbN-S"/>
+<img alt="Partner 9" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARbtDpPaV_DRnJs2OGrf_rahE4f4V1vMIagnQ-1b_kCX3p8Dc9u6WYZYxBCYl1uMgLEm_Gp8IwEQ5nRIryC11bjADz7d8eDOBlUu-yzqWfrzzJ4HLNSlMQ-m1m2J283_n-60RyPpy5u_pntI0_csmdkIGpNVxIp1e20Cxgbobbr9T1ig_wjlVYsfLhVQxfWqCAjzRZPJsnIpbGZX3NSvODLB5pX5w98BEJhcjOFLelZxX9NZ0gYbMyF5lncx359BOJ4iyQ9ur88gqy"/>
+<img alt="Partner 10" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqZ6uc-4vka48KfBPj-Q61QPkvruAqhKpK_DEiRGv88kaxv1m6S2PNiM57vfYbAU8Yv72Z5wXD2bUJ54trpyc0DMG3PJmH4oGhTTSCw4IzhViVs1NDpQCiu3VGn3dlQKFNuNKPUVUFsPNNo5t5Y749gAjHwqK4pjQ4U2eT1y6VN2CPjK_hehjI6kb1dMzK5i-GihEtyy8GURWoD-7tGvZSA2h13SGR6SQV3OnFd7lvAinASPt_A8y8xai_vVfGv0thhB6QYMXPS4Af"/>
+<img alt="Partner 11" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjzRjryBIpG_dmjlsC2zAU3geFrSZJXwKhQ19NDAVt7uZgV4gMa5tsVOZp38RVZ5Dd-HfGvtLScEa-ewlFVs_842GZ2v7XNZgPW6XYmRPIFPsQny0itjZbnDBxJSGQKXHfF6yOXFSiqgU0yvtZqC9lgaIHM-Epwuqd0VXk8Jk3JCMbwLZRs454f0WwMsWyEufFSIL6O_3CH18j7arwuAjQ6Mr3qSTUUTuon9s_aACZQ1XtfUbYi2Newfm-feWb3OlKFRknXIWj0JNO"/>
+<img alt="Partner 12" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3o4Cje4TSzEkVJTTxTOjXDdAm4NlN2f6mfJWP4eKnZjygbDzJcysT6JupTO7_ht00gvep25xoO-IaQPJmsUpkjZVm7Tud_pBeKdBWQLsYcdsDm4ik3gzzjT1kYJ_DAVkZFLOxJdZBOf2t7ZmarMT60mHOVDXNAoH4KhL0JgjLPzKGB53rbnvt4aKGugAvx7BTFBUnQxC-ZOdWl72v34BiCOog5dUCY1lc7g4rLUp9MmNSU7wr970gTz-WvMVrRI_CJi5D2GAB82SS"/>
+</div>
+</div>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-surface border-t border-outline-variant p-6 z-50">
+<div class="flex flex-row justify-between items-center max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<p class="font-label text-[10px] uppercase font-black tracking-tight text-on-surface-variant">
+© 2024 {% trans "Environmental Intelligence System" %}
+</p>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<p class="font-label text-[10px] uppercase font-bold text-on-surface-variant/60">
+{% trans "Partners: Ichkeul Park Authority & Regional Agronomy Network" %}
+</p>
+</div>
+<div class="flex gap-8">
+<a class="font-label text-[10px] uppercase font-black tracking-tighter text-outline hover:text-primary transition-all hover:underline underline-offset-8" href="#">{% trans "Contact" %}</a>
+<a class="font-label text-[10px] uppercase font-black tracking-tighter text-outline hover:text-primary transition-all hover:underline underline-offset-8" href="#">{% trans "Policy" %}</a>
+<a class="font-label text-[10px] uppercase font-black tracking-tighter text-outline hover:text-primary transition-all hover:underline underline-offset-8" href="#">{% trans "Status" %}</a>
+</div>
+</div>
+</footer>
+
+<script>
+        // Smooth hover animations for cards
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

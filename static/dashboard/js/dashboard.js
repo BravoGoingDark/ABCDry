@@ -330,7 +330,11 @@ document.addEventListener("DOMContentLoaded", () => {
             LAT: centerLat.toFixed(5),
             LNG: centerLng.toFixed(5),
         });
-        layer.bindPopup(info).openPopup();
+        layer.bindPopup(info, {
+            className: "abcbasin-popup",
+            closeButton: true,
+            autoPanPadding: [24, 24],
+        }).openPopup();
         layer.on("click", () => {
             if (activeMode === "select") {
                 layer.openPopup();

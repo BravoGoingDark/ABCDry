@@ -1,0 +1,1488 @@
+INFO 2026-05-23 16:46:18,662 autoreload 22404 28908 Watching for file changes with StatReloader
+INFO 2026-05-23 16:46:18,662 autoreload 10544 34116 Watching for file changes with StatReloader
+INFO 2026-05-23 16:46:31,112 autoreload 22404 28908 C:\Users\Taha\Desktop\CURSORAGRI - Copy\agri_dashboard\settings.py changed, reloading.
+INFO 2026-05-23 16:46:31,123 autoreload 10544 34116 C:\Users\Taha\Desktop\CURSORAGRI - Copy\agri_dashboard\settings.py changed, reloading.
+INFO 2026-05-23 16:46:31,524 autoreload 9188 9716 Watching for file changes with StatReloader
+INFO 2026-05-23 16:46:31,526 autoreload 30412 37180 Watching for file changes with StatReloader
+INFO 2026-05-23 16:51:37,139 autoreload 30412 37180 C:\Users\Taha\Desktop\CURSORAGRI - Copy\agri_dashboard\settings.py changed, reloading.
+INFO 2026-05-23 16:51:37,513 autoreload 22204 26552 Watching for file changes with StatReloader
+INFO 2026-05-23 16:52:10,198 autoreload 32712 15004 Watching for file changes with StatReloader
+INFO 2026-05-23 17:10:29,869 autoreload 21744 14216 Watching for file changes with StatReloader
+INFO 2026-05-23 21:46:09,720 autoreload 3084 2708 Watching for file changes with StatReloader
+WARNING 2026-05-23 21:47:21,338 log 21744 32012 Not Found: /favicon.ico
+WARNING 2026-05-23 21:49:04,456 log 21744 22316 Not Found: /favicon.ico
+INFO 2026-05-23 22:12:35,590 autoreload 3084 2708 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-23 22:12:36,537 autoreload 21744 14216 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-23 22:12:37,137 autoreload 18272 29104 Watching for file changes with StatReloader
+INFO 2026-05-23 22:12:38,300 autoreload 32420 32452 Watching for file changes with StatReloader
+INFO 2026-05-23 22:13:34,081 autoreload 18272 29104 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-23 22:13:34,727 autoreload 32420 32452 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-23 22:13:35,659 autoreload 10360 35016 Watching for file changes with StatReloader
+INFO 2026-05-23 22:13:36,419 autoreload 4844 27444 Watching for file changes with StatReloader
+INFO 2026-05-23 22:14:03,995 autoreload 10360 35016 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-23 22:14:04,279 autoreload 4844 27444 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-23 22:14:05,649 autoreload 5888 5844 Watching for file changes with StatReloader
+INFO 2026-05-23 22:14:05,988 autoreload 28612 32320 Watching for file changes with StatReloader
+INFO 2026-05-23 22:15:30,413 autoreload 27288 30024 Watching for file changes with StatReloader
+ERROR 2026-05-23 22:15:48,625 log 27288 26380 Internal Server Error: /data-ingestion/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 287, in data_ingestion
+    'recent_imports': DataImportLog.objects.select_related('created_by').order_by('-created_at')[:5],
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py", line 1659, in order_by
+    obj.query.add_ordering(*field_names)
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\query.py", line 2174, in add_ordering
+    self.names_to_path(item.split(LOOKUP_SEP), self.model._meta)
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\sql\query.py", line 1677, in names_to_path
+    raise FieldError(
+django.core.exceptions.FieldError: Cannot resolve keyword 'created_at' into field. Choices are: filename, id, import_date, imported_by, metric_type, notes, records_imported, source, status
+INFO 2026-05-23 22:16:24,053 autoreload 5888 5844 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-23 22:16:24,069 autoreload 28612 32320 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-23 22:16:24,393 autoreload 27288 30024 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-23 22:16:25,942 autoreload 35708 8156 Watching for file changes with StatReloader
+INFO 2026-05-23 22:16:25,962 autoreload 20532 23812 Watching for file changes with StatReloader
+INFO 2026-05-23 22:16:26,278 autoreload 18852 20844 Watching for file changes with StatReloader
+INFO 2026-05-24 22:08:04,906 autoreload 15396 9744 Watching for file changes with StatReloader
+WARNING 2026-05-24 22:08:38,211 log 15396 5920 Not Found: /favicon.ico
+INFO 2026-05-24 23:11:38,658 autoreload 33228 27696 Watching for file changes with StatReloader
+WARNING 2026-05-24 23:14:22,086 log 33228 18040 Not Found: /favicon.ico
+WARNING 2026-05-24 23:19:35,075 log 33228 2032 Not Found: /favicon.ico
+INFO 2026-05-24 23:25:07,124 autoreload 33228 27696 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-24 23:25:08,254 autoreload 16936 21872 Watching for file changes with StatReloader
+INFO 2026-05-24 23:26:08,777 autoreload 16936 21872 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-24 23:26:09,605 autoreload 19700 21788 Watching for file changes with StatReloader
+INFO 2026-05-24 23:35:54,637 autoreload 19700 21788 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-24 23:35:55,697 autoreload 35744 38264 Watching for file changes with StatReloader
+WARNING 2026-05-24 23:39:14,098 log 35744 22060 Not Found: /metrics/
+WARNING 2026-05-24 23:43:41,735 log 35744 30056 Not Found: /metrics/
+WARNING 2026-05-24 23:43:42,640 log 35744 30056 Not Found: /metrics/
+WARNING 2026-05-24 23:47:40,352 log 35744 13296 Not Found: /metrics/
+ERROR 2026-05-25 00:00:13,632 log 35744 13296 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-25 00:08:20,801 log 35744 13296 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-25 00:08:30,739 log 35744 17308 Bad Gateway: /api/live-metrics/
+INFO 2026-05-25 09:12:51,311 autoreload 36572 35560 Watching for file changes with StatReloader
+WARNING 2026-05-25 09:12:57,704 log 36572 34292 Not Found: /favicon.ico
+WARNING 2026-05-25 09:24:01,593 log 36572 33432 Not Found: /metrics/
+INFO 2026-05-25 09:39:47,449 autoreload 36572 35560 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-25 09:39:48,392 autoreload 11840 2820 Watching for file changes with StatReloader
+INFO 2026-05-25 09:40:16,530 autoreload 11840 2820 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-25 09:40:17,332 autoreload 15224 36916 Watching for file changes with StatReloader
+INFO 2026-05-25 09:40:48,475 autoreload 15224 36916 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-25 09:40:49,284 autoreload 33828 6052 Watching for file changes with StatReloader
+INFO 2026-05-25 19:08:02,611 autoreload 33828 6052 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-25 19:08:04,699 autoreload 33824 27996 Watching for file changes with StatReloader
+WARNING 2026-05-25 19:12:33,795 log 33824 22216 Not Found: /metrics/
+WARNING 2026-05-25 19:24:46,301 log 33824 39276 Not Found: /metrics/
+INFO 2026-05-25 20:23:11,517 autoreload 33824 27996 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-25 20:23:12,511 autoreload 16132 30620 Watching for file changes with StatReloader
+INFO 2026-05-25 20:23:34,348 autoreload 16132 30620 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-25 20:23:35,203 autoreload 11924 28016 Watching for file changes with StatReloader
+ERROR 2026-05-25 20:43:06,211 log 11924 12944 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 00:00:08,451 log 11924 19912 Bad Gateway: /api/live-metrics/
+INFO 2026-05-26 00:08:42,330 autoreload 11924 28016 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-26 00:08:45,960 autoreload 10348 24556 Watching for file changes with StatReloader
+ERROR 2026-05-26 00:14:36,174 log 10348 8184 Bad Gateway: /api/live-metrics/
+INFO 2026-05-26 00:20:05,275 autoreload 27884 24704 Watching for file changes with StatReloader
+ERROR 2026-05-26 00:28:05,206 log 27884 32064 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 00:29:09,122 log 27884 32064 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 00:30:10,695 log 27884 29944 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 00:56:29,041 log 27884 17652 Internal Server Error: /data-ingestion/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 505, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'trans'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 273, in data_ingestion
+    return render(request, 'dashboard/data_ingestion.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 33, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\engine.py", line 175, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\engine.py", line 157, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 154, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 200, in compile_nodelist
+    return parser.parse()
+           ^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 507, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 568, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 593: 'trans'. Did you forget to register or load this tag?
+INFO 2026-05-26 08:42:51,694 autoreload 17356 22200 Watching for file changes with StatReloader
+ERROR 2026-05-26 10:02:39,460 log 17356 29564 Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 261, in dashboard_view
+    return render(request, "dashboard/dashboard.html", context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'historical' not found. 'historical' is not a valid view function or pattern name.
+ERROR 2026-05-26 10:02:41,054 log 17356 29564 Internal Server Error: /
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 261, in dashboard_view
+    return render(request, "dashboard/dashboard.html", context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'historical' not found. 'historical' is not a valid view function or pattern name.
+INFO 2026-05-26 10:04:11,940 autoreload 17356 22200 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-26 10:04:12,855 autoreload 36044 13296 Watching for file changes with StatReloader
+INFO 2026-05-26 10:04:24,148 autoreload 36044 13296 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-26 10:04:25,041 autoreload 4680 28156 Watching for file changes with StatReloader
+INFO 2026-05-26 10:04:54,094 autoreload 4680 28156 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-26 10:04:54,952 autoreload 20984 10916 Watching for file changes with StatReloader
+ERROR 2026-05-26 10:32:06,069 log 20984 37800 Internal Server Error: /historical/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 771, in historical_view
+    return render(request, 'dashboard/historical.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: dashboard/historical.html
+ERROR 2026-05-26 10:34:34,374 log 20984 8212 Internal Server Error: /historical/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 771, in historical_view
+    return render(request, 'dashboard/historical.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: dashboard/historical.html
+ERROR 2026-05-26 10:38:55,392 log 20984 8212 Internal Server Error: /historical/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 771, in historical_view
+    return render(request, 'dashboard/historical.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2026-05-26 10:38:56,770 log 20984 8212 Internal Server Error: /historical/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 771, in historical_view
+    return render(request, 'dashboard/historical.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2026-05-26 10:39:00,443 log 20984 8212 Internal Server Error: /historical/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 132, in render
+    compiled_parent = self.get_parent(context)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 129, in get_parent
+    return self.find_template(parent, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader_tags.py", line 107, in find_template
+    template, origin = context.template.engine.find_template(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\engine.py", line 161, in find_template
+    raise TemplateDoesNotExist(name, tried=tried)
+django.template.exceptions.TemplateDoesNotExist: base.html
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 771, in historical_view
+    return render(request, 'dashboard/historical.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 63, in render
+    reraise(exc, self.backend)
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 84, in reraise
+    raise new from exc
+django.template.exceptions.TemplateDoesNotExist: base.html
+ERROR 2026-05-26 11:12:22,122 log 20984 14512 Internal Server Error: /historical/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 771, in historical_view
+    return render(request, 'dashboard/historical.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 175, in render
+    return self._render(context)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 167, in _render
+    return self.nodelist.render(context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 1005, in <listcomp>
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\base.py", line 966, in render_annotated
+    return self.render(context)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\defaulttags.py", line 471, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\urls\base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\urls\resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'dashboard' not found. 'dashboard' is not a valid view function or pattern name.
+ERROR 2026-05-26 14:49:53,314 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:50:25,869 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:51:24,946 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:52:24,583 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:53:33,932 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:54:27,534 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:55:27,631 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:56:25,872 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:57:30,222 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:58:25,149 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 14:59:24,016 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:00:25,766 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:01:28,905 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:02:19,836 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:03:25,709 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:04:30,537 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:05:27,217 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:06:29,462 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:07:22,868 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:08:25,381 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:09:29,323 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:10:19,845 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:11:27,833 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:12:24,245 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:13:28,130 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:14:27,420 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:15:25,817 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:16:28,373 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:17:29,533 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:18:26,161 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:19:27,620 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:20:29,240 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:21:29,626 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:22:28,206 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:23:26,012 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:24:22,421 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:25:25,109 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:26:29,399 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:27:26,450 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:28:35,676 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:29:22,406 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:30:27,213 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:31:18,656 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:32:28,526 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:33:28,017 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:34:28,190 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:35:23,266 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:36:26,814 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:37:32,843 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:38:22,155 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:39:36,122 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:40:28,878 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:41:28,203 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:42:26,594 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:43:33,376 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:44:22,844 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:45:31,571 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:46:25,878 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:47:25,130 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:48:20,371 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:49:30,801 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:50:23,727 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:50:46,538 log 20984 17660 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:50:54,532 log 20984 35040 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:51:30,012 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:51:41,552 log 20984 35040 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:52:25,771 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:52:46,566 log 20984 35040 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:53:27,393 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:53:42,818 log 20984 35040 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:54:21,275 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:54:48,643 log 20984 35040 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:55:24,892 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:55:49,119 log 20984 35040 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:56:30,007 log 20984 37284 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:56:51,917 log 20984 35040 Internal Server Error: /api/live-metrics/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 188, in live_metrics_api
+    with urlopen(api_url, timeout=10) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\urllib\request.py", line 1352, in do_open
+    r = h.getresponse()
+        ^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 1378, in getresponse
+    response.begin()
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 318, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\http\client.py", line 279, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\socket.py", line 706, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1311, in recv_into
+    return self.read(nbytes, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\ssl.py", line 1167, in read
+    return self._sslobj.read(len, buffer)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: The read operation timed out
+ERROR 2026-05-26 15:57:20,802 log 20984 37284 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-26 15:57:41,687 log 20984 35040 Bad Gateway: /api/live-metrics/
+INFO 2026-05-26 16:03:54,945 autoreload 20984 10916 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-26 16:03:59,242 autoreload 26096 32440 Watching for file changes with StatReloader
+WARNING 2026-05-26 17:16:00,566 log 26096 22772 Not Found: /login/
+INFO 2026-05-26 17:17:50,016 autoreload 26096 32440 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-26 17:17:53,254 autoreload 29128 3640 Watching for file changes with StatReloader
+WARNING 2026-05-26 17:18:22,160 log 29128 2272 Not Found: /favicon.ico
+INFO 2026-05-26 17:49:15,875 autoreload 29128 3640 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-26 17:49:16,803 autoreload 8484 19476 Watching for file changes with StatReloader
+ERROR 2026-05-26 18:17:28,603 log 8484 19872 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-27 00:18:28,566 log 8484 19872 Bad Gateway: /api/live-metrics/
+INFO 2026-05-27 10:55:16,214 autoreload 36220 26084 Watching for file changes with StatReloader
+WARNING 2026-05-27 10:55:33,267 log 36220 34260 Not Found: /favicon.ico
+INFO 2026-05-27 11:00:52,145 autoreload 36220 26084 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 11:00:52,998 autoreload 30368 30084 Watching for file changes with StatReloader
+INFO 2026-05-27 11:01:06,392 autoreload 30368 30084 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 11:01:07,184 autoreload 31712 19244 Watching for file changes with StatReloader
+INFO 2026-05-27 11:01:17,376 autoreload 31712 19244 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-27 11:01:18,156 autoreload 3080 22960 Watching for file changes with StatReloader
+INFO 2026-05-27 11:01:25,217 autoreload 3080 22960 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-27 11:01:26,003 autoreload 15556 20688 Watching for file changes with StatReloader
+ERROR 2026-05-27 11:04:08,401 log 15556 11060 Internal Server Error: /data-ingestion/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py", line 916, in get_or_create
+    return self.get(**kwargs), False
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py", line 637, in get
+    raise self.model.DoesNotExist(
+dashboard.models.Region.DoesNotExist: Region matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 270, in data_ingestion
+    create_reference_data()
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py", line 244, in create_reference_data
+    Region.objects.get_or_create(name=name, defaults={'country': country})
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py", line 918, in get_or_create
+    params = self._extract_model_params(defaults, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\db\models\query.py", line 999, in _extract_model_params
+    raise exceptions.FieldError(
+django.core.exceptions.FieldError: Invalid field name(s) for model Region: 'country'.
+INFO 2026-05-27 11:04:35,851 autoreload 15556 20688 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 11:04:36,717 autoreload 12024 27600 Watching for file changes with StatReloader
+INFO 2026-05-27 11:25:24,147 autoreload 12024 27600 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 11:25:25,049 autoreload 7356 38540 Watching for file changes with StatReloader
+INFO 2026-05-27 11:44:18,629 autoreload 3500 12284 Watching for file changes with StatReloader
+INFO 2026-05-27 11:58:05,349 autoreload 3500 12284 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 11:58:06,448 autoreload 6120 22700 Watching for file changes with StatReloader
+INFO 2026-05-27 11:58:28,094 autoreload 6120 22700 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 11:58:29,047 autoreload 17312 24232 Watching for file changes with StatReloader
+INFO 2026-05-27 11:58:41,021 autoreload 17312 24232 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-27 11:58:42,072 autoreload 31540 28772 Watching for file changes with StatReloader
+WARNING 2026-05-27 12:26:48,540 log 31540 4964 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 12:26:48,565 log 31540 4964 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 12:26:48,580 log 31540 4964 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 12:26:48,611 log 31540 4964 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 12:26:48,626 log 31540 4964 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:33:37,718 log 31540 14012 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:33:37,742 log 31540 14012 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:33:37,758 log 31540 14012 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:33:37,793 log 31540 14012 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:33:37,812 log 31540 14012 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:39:05,939 log 31540 30776 Not Found: /favicon.ico
+WARNING 2026-05-27 17:40:33,454 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:40:33,481 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:40:40,128 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:40:40,153 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:40:52,622 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:40:52,636 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:41:26,382 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:41:33,758 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:41:33,809 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:44:50,163 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:44:50,178 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:45:00,003 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:45:45,607 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:50:11,495 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:50:11,511 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:50:23,807 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:51:37,495 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:51:37,521 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:52:25,103 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:52:25,119 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:53:33,923 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:53:33,938 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:53:46,515 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:53:46,532 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:54:05,242 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:55:22,146 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 17:55:22,190 log 31540 30776 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 18:06:05,189 log 31540 19652 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 18:06:24,055 log 31540 19652 Bad Request: /api/submit-metrics/
+ERROR 2026-05-27 18:06:31,581 log 31540 19652 Internal Server Error: /metrics/soil/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 393, in soil_metrics_view
+    return render(request, 'dashboard/metrics_list.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: dashboard/metrics_list.html
+INFO 2026-05-27 18:15:50,272 autoreload 31540 28772 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 18:15:51,254 autoreload 33336 35060 Watching for file changes with StatReloader
+INFO 2026-05-27 18:16:05,739 autoreload 33336 35060 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 18:16:06,572 autoreload 35480 25932 Watching for file changes with StatReloader
+INFO 2026-05-27 18:16:15,772 autoreload 35480 25932 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 18:16:16,615 autoreload 9408 29712 Watching for file changes with StatReloader
+INFO 2026-05-27 18:16:19,576 autoreload 9408 29712 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 18:16:20,430 autoreload 13040 37020 Watching for file changes with StatReloader
+INFO 2026-05-27 18:16:40,240 autoreload 13040 37020 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 18:16:41,082 autoreload 35628 3508 Watching for file changes with StatReloader
+INFO 2026-05-27 18:18:47,598 autoreload 35628 3508 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:18:48,430 autoreload 28032 28048 Watching for file changes with StatReloader
+INFO 2026-05-27 18:19:09,104 autoreload 28032 28048 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:19:09,897 autoreload 12504 31696 Watching for file changes with StatReloader
+INFO 2026-05-27 18:19:22,236 autoreload 12504 31696 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:19:23,047 autoreload 5712 9520 Watching for file changes with StatReloader
+INFO 2026-05-27 18:19:37,729 autoreload 5712 9520 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:19:38,555 autoreload 33208 32864 Watching for file changes with StatReloader
+INFO 2026-05-27 18:20:22,310 autoreload 33208 32864 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:20:23,116 autoreload 28956 21460 Watching for file changes with StatReloader
+INFO 2026-05-27 18:20:34,461 autoreload 28956 21460 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:20:35,250 autoreload 12360 38092 Watching for file changes with StatReloader
+INFO 2026-05-27 18:25:14,130 autoreload 32876 39328 Watching for file changes with StatReloader
+WARNING 2026-05-27 18:29:43,139 log 32876 13364 Bad Request: /api/submit-metrics/
+INFO 2026-05-27 18:30:21,651 autoreload 32876 39328 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:30:22,462 autoreload 21456 39836 Watching for file changes with StatReloader
+INFO 2026-05-27 18:32:26,258 autoreload 21456 39836 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:32:27,051 autoreload 6956 6152 Watching for file changes with StatReloader
+INFO 2026-05-27 18:33:44,507 autoreload 6956 6152 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-27 18:33:45,300 autoreload 23068 8624 Watching for file changes with StatReloader
+INFO 2026-05-27 18:33:49,289 autoreload 23068 8624 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:33:50,104 autoreload 12140 29712 Watching for file changes with StatReloader
+INFO 2026-05-27 18:37:12,053 autoreload 12140 29712 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:37:12,879 autoreload 34344 10576 Watching for file changes with StatReloader
+INFO 2026-05-27 18:37:26,546 autoreload 34344 10576 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:37:27,378 autoreload 29764 36140 Watching for file changes with StatReloader
+INFO 2026-05-27 18:37:36,573 autoreload 29764 36140 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:37:37,431 autoreload 22732 15528 Watching for file changes with StatReloader
+INFO 2026-05-27 18:37:47,732 autoreload 22732 15528 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:37:48,531 autoreload 17384 15196 Watching for file changes with StatReloader
+INFO 2026-05-27 18:37:57,706 autoreload 17384 15196 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:37:58,495 autoreload 31956 29200 Watching for file changes with StatReloader
+INFO 2026-05-27 18:38:11,950 autoreload 31956 29200 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:38:12,802 autoreload 25404 24656 Watching for file changes with StatReloader
+INFO 2026-05-27 18:38:47,578 autoreload 25404 24656 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-27 18:38:48,401 autoreload 39672 13040 Watching for file changes with StatReloader
+INFO 2026-05-27 23:03:09,766 autoreload 39672 13040 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 23:03:11,868 autoreload 40764 25980 Watching for file changes with StatReloader
+INFO 2026-05-27 23:07:04,286 autoreload 40764 25980 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-27 23:07:06,103 autoreload 25504 33152 Watching for file changes with StatReloader
+WARNING 2026-05-27 23:16:37,466 log 25504 25368 Bad Request: /api/submit-metrics/
+ERROR 2026-05-27 23:16:48,639 log 25504 25368 Internal Server Error: /api/submit-metrics/
+ERROR 2026-05-27 23:17:01,142 log 25504 25368 Internal Server Error: /api/submit-metrics/
+WARNING 2026-05-27 23:34:32,630 log 25504 19700 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 23:34:45,637 log 25504 19700 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 23:37:01,862 log 25504 19700 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 23:37:10,438 log 25504 19700 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 23:37:19,315 log 25504 19700 Bad Request: /api/submit-metrics/
+WARNING 2026-05-27 23:37:45,018 log 25504 19700 Bad Request: /api/submit-metrics/
+WARNING 2026-05-28 00:02:55,467 log 25504 11784 Bad Request: /api/submit-metrics/
+WARNING 2026-05-28 00:03:05,927 log 25504 11784 Bad Request: /api/submit-metrics/
+WARNING 2026-05-28 00:03:07,134 log 25504 11784 Bad Request: /api/submit-metrics/
+WARNING 2026-05-28 00:15:06,698 log 25504 31368 Bad Request: /api/submit-metrics/
+WARNING 2026-05-28 00:15:18,226 log 25504 31368 Bad Request: /api/submit-metrics/
+WARNING 2026-05-28 00:17:34,953 log 25504 31368 Bad Request: /api/submit-metrics/
+INFO 2026-05-28 00:17:49,508 autoreload 25504 33152 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-28 00:17:50,486 autoreload 21392 18584 Watching for file changes with StatReloader
+INFO 2026-05-28 00:18:33,428 autoreload 21392 18584 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-28 00:18:34,316 autoreload 7156 35228 Watching for file changes with StatReloader
+INFO 2026-05-28 00:20:09,503 autoreload 7156 35228 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-28 00:20:10,331 autoreload 34188 39580 Watching for file changes with StatReloader
+INFO 2026-05-28 00:21:03,592 autoreload 34188 39580 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-28 00:21:04,448 autoreload 1308 18476 Watching for file changes with StatReloader
+INFO 2026-05-28 00:21:23,192 autoreload 1308 18476 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-28 00:21:24,039 autoreload 34780 22368 Watching for file changes with StatReloader
+ERROR 2026-05-28 00:24:26,849 log 34780 24016 Bad Gateway: /api/live-metrics/
+ERROR 2026-05-28 00:40:05,059 log 34780 25784 Internal Server Error: /metrics/soil/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 394, in soil_metrics_view
+    return render(request, 'dashboard/metrics_list.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: dashboard/metrics_list.html
+ERROR 2026-05-28 00:40:05,086 log 34780 3332 Internal Server Error: /metrics/soil/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py", line 394, in soil_metrics_view
+    return render(request, 'dashboard/metrics_list.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\shortcuts.py", line 24, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\template\loader.py", line 19, in get_template
+    raise TemplateDoesNotExist(template_name, chain=chain)
+django.template.exceptions.TemplateDoesNotExist: dashboard/metrics_list.html
+INFO 2026-05-28 00:44:18,893 autoreload 34780 22368 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-05-28 00:44:19,971 autoreload 24628 19292 Watching for file changes with StatReloader
+INFO 2026-05-28 00:52:49,918 autoreload 24628 19292 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-28 00:52:50,847 autoreload 11828 2160 Watching for file changes with StatReloader
+INFO 2026-05-28 00:52:54,940 autoreload 11828 2160 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-28 00:52:55,849 autoreload 20568 22384 Watching for file changes with StatReloader
+INFO 2026-05-28 00:56:01,435 autoreload 20568 22384 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-28 00:56:02,296 autoreload 25504 3272 Watching for file changes with StatReloader
+INFO 2026-05-28 00:57:18,701 autoreload 25504 3272 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-28 00:57:19,523 autoreload 30884 33812 Watching for file changes with StatReloader
+INFO 2026-05-28 00:58:24,321 autoreload 30884 33812 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-28 00:58:25,156 autoreload 11228 19768 Watching for file changes with StatReloader
+INFO 2026-05-28 09:55:40,223 autoreload 34732 10148 Watching for file changes with StatReloader
+WARNING 2026-05-28 09:58:08,740 log 34732 17956 Not Found: /favicon.ico
+INFO 2026-05-28 11:12:44,884 autoreload 34732 10148 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\models.py changed, reloading.
+INFO 2026-05-28 11:12:51,167 autoreload 31400 29712 Watching for file changes with StatReloader
+INFO 2026-05-28 11:13:47,272 autoreload 31400 29712 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-28 11:13:49,201 autoreload 19272 6292 Watching for file changes with StatReloader
+INFO 2026-05-28 11:51:01,914 autoreload 19272 6292 C:\Users\Taha\Desktop\CURSORAGRI - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-28 11:51:03,891 autoreload 31736 16060 Watching for file changes with StatReloader
+INFO 2026-05-28 22:17:22,561 autoreload 30316 12876 Watching for file changes with StatReloader
+WARNING 2026-05-28 22:17:35,010 log 30316 17928 Not Found: /favicon.ico
+INFO 2026-05-30 10:26:39,481 autoreload 23960 15960 Watching for file changes with StatReloader
+WARNING 2026-05-30 10:27:35,357 log 23960 5236 Not Found: /favicon.ico
+INFO 2026-05-30 11:03:08,924 autoreload 18428 22116 Watching for file changes with StatReloader
+INFO 2026-05-30 11:18:39,493 autoreload 18428 22116 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-30 11:18:40,307 autoreload 16516 28556 Watching for file changes with StatReloader
+INFO 2026-05-30 11:18:47,439 autoreload 16516 28556 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-30 11:18:48,232 autoreload 12328 12612 Watching for file changes with StatReloader
+INFO 2026-05-30 11:19:07,577 autoreload 12328 12612 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-30 11:19:08,349 autoreload 16908 2844 Watching for file changes with StatReloader
+INFO 2026-05-30 11:22:31,106 autoreload 16908 2844 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-30 11:22:34,426 autoreload 29352 28420 Watching for file changes with StatReloader
+INFO 2026-05-30 11:24:44,825 autoreload 29352 28420 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-30 11:24:45,672 autoreload 29448 26896 Watching for file changes with StatReloader
+INFO 2026-05-30 11:24:50,731 autoreload 29448 26896 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-30 11:24:51,512 autoreload 13948 2400 Watching for file changes with StatReloader
+INFO 2026-05-30 11:50:31,729 autoreload 13948 2400 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-30 11:50:34,966 autoreload 29632 28644 Watching for file changes with StatReloader
+INFO 2026-05-30 11:50:49,378 autoreload 29632 28644 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-30 11:50:50,202 autoreload 21140 22996 Watching for file changes with StatReloader
+INFO 2026-05-30 11:52:00,673 autoreload 21140 22996 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-05-30 11:52:01,469 autoreload 30680 7884 Watching for file changes with StatReloader
+INFO 2026-05-30 12:05:42,285 autoreload 30680 7884 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-05-30 12:05:46,833 autoreload 22920 14956 Watching for file changes with StatReloader
+ERROR 2026-05-30 12:15:26,172 log 22920 28880 Bad Gateway: /api/live-metrics/
+INFO 2026-05-30 12:26:50,497 autoreload 22388 10328 Watching for file changes with StatReloader

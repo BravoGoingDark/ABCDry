@@ -1,0 +1,2 @@
+crop_id,crop_name,scientific_name,crop_family,water_requirement_mm_season,growing_period_days,crop_description
+1,Wheat,Triticum aestivum,Poaceae,450.0,150,Synthetic wheat sample for model testing

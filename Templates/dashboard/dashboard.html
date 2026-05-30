@@ -120,11 +120,10 @@
             </a>
             
             <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="#">{% trans "Home" %}</a>
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="#">{% trans "Maps" %}</a>
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="#">{% trans "Reports" %}</a>
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="#">{% trans "Downloads" %}</a>
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="#">{% trans "Help" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="/">{% trans "Home" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">{% trans "Data" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">{% trans "Analysis" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">{% trans "Historical" %}</a>
             </nav>
         </div>
         
@@ -158,10 +157,6 @@
             
         
 
-            <!-- Run Simulation Button -->
-            <button id="run-simulation-header-btn" type="button" class="bg-primary text-on-primary px-4 py-1.5 rounded-DEFAULT text-sm font-semibold hover:bg-primary-container transition-colors shadow-sm cursor-pointer active:opacity-70 shrink-0">
-                {% trans "Run Simulation" %}
-            </button>
             
             <!-- Language Switcher Dynamic POST Form -->
             <form action="{% url 'set_language' %}" class="flex items-center" method="post" id="lang-form">
@@ -272,99 +267,10 @@
                 </div>
             </div>
             
-            <!-- Soil Properties Specifications Card -->
-            <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 shadow-sm hover:border-primary transition-colors group">
-                <div class="flex justify-between items-start mb-4 border-b border-outline-variant/50 pb-3">
-                    <h3 class="font-headline font-semibold text-on-surface flex items-center gap-2">
-                        <span class="material-symbols-outlined text-secondary text-xl">grass</span> 
-                        {% trans "Soil Data" %}
-                    </h3>
-                    <span class="text-[10px] font-label bg-surface-container-high px-2 py-1 rounded text-on-surface-variant">SATELLITE/LAB</span>
-                </div>
-                <div class="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">% clay</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="0-100" type="number" value="28"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">% silt</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="0-100" type="number" value="35"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">% sand</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="0-100" type="number" value="37"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Soil pH</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="0-14" step="0.1" type="number" value="7.2"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Water Content</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="%" type="number" value="22"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Potassium (K)</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="-43" type="number" value="210"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Phosphorus (P)</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="mg/kg" type="number" value="34"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">CEC</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="cmol/kg" type="number" value="18"/>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Org. Matter (OM)</label>
-                        <input class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none" placeholder="%" type="number" value="2.4"/>
-                    </div>
-                    <div class="col-span-1">
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">Soil Type</label>
-                        <select class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-1 text-xs focus:ring-1 focus:ring-secondary focus:outline-none">
-                            <option>Clayey</option>
-                            <option selected>Silty</option>
-                            <option>Sandy</option>
-                            <option>Calcareous</option>
-                        </select>
-                    </div>
-                </div>
-                <button class="w-full mt-4 bg-secondary text-on-secondary font-bold py-1.5 rounded text-xs hover:opacity-90 transition-opacity" type="button">
-                    {% trans "Update Profile" %}
-                </button>
-            </div>
             
-            <!-- Dynamic Agriculture Simulator Form -->
-            <form method="post" id="simulation-form" class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 shadow-sm hover:border-primary transition-colors group">
-                {% csrf_token %}
-                <input type="hidden" name="region" id="id_hidden_region" value=""/>
-                <input type="hidden" name="year" id="id_hidden_year" value=""/>
-                <h2 class="font-headline font-semibold text-on-surface mb-4 flex items-center gap-2 border-b border-outline-variant/50 pb-3">
-                    <span class="material-symbols-outlined text-secondary text-xl">science</span>
-                    {% trans "Agricultural Input Simulator" %}
-                </h2>
-                
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{% trans "IRRIGATION METHOD" %}</label>
-                        <select class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-2 text-xs focus:ring-1 focus:ring-secondary focus:outline-none text-on-surface" name="irrigation">
-                            {% for option in form.irrigation.field.queryset %}
-                            <option value="{{ option.pk }}" {% if form.is_bound and form.irrigation.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% endif %}>{{ option.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
                     
-                    <div>
-                        <label class="block text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider mb-1">{% trans "CROP TYPE" %}</label>
-                        <select class="w-full bg-surface-container-low border border-outline-variant rounded px-2 py-2 text-xs focus:ring-1 focus:ring-secondary focus:outline-none text-on-surface" name="crop">
-                            {% for option in form.crop.field.queryset %}
-                            <option value="{{ option.pk }}" {% if form.is_bound and form.crop.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% endif %}>{{ option.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
                     
-                    <button class="w-full bg-primary text-on-primary font-bold py-2 rounded text-xs hover:bg-primary-container transition-colors border border-primary shadow-sm active:translate-y-px" type="submit">
-                        {% trans "Analyze Risk" %}
-                    </button>
                 </div>
             </form>
             
@@ -647,6 +553,43 @@
                 <img alt="Partner 12" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3o4Cje4TSzEkVJTTxTOjXDdAm4NlN2f6mfJWP4eKnZjygbDzJcysT6JupTO7_ht00gvep25xoO-IaQPJmsUpkjZVm7Tud_pBeKdBWQLsYcdsDm4ik3gzzjT1kYJ_DAVkZFLOxJdZBOf2t7ZmarMT60mHOVDXNAoH4KhL0JgjLPzKGB53rbnvt4aKGugAvx7BTFBUnQxC-ZOdWl72v34BiCOog5dUCY1lc7g4rLUp9MmNSU7wr970gTz-WvMVrRI_CJi5D2GAB82SS"/>
             </div>
         </div>
+        <!-- Location Ping Modal -->
+        <div id="locationModal" class="hidden fixed inset-0 bg-[rgba(21,28,39,0.58)] backdrop-blur-[10px] flex items-center justify-center z-[9999] p-4">
+            <div class="bg-[linear-gradient(180deg,#ffffff_0%,#f0f3ff_100%)] border border-outline-variant rounded-2xl p-6 shadow-[0_24px_70px_rgba(21,28,39,0.24)] max-w-md w-full mx-4 overflow-hidden">
+                <div class="h-1 w-full bg-[linear-gradient(90deg,#012d1d_0%,#00677d_52%,#1b4332_100%)] -mx-6 -mt-6 mb-5"></div>
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="font-headline font-semibold text-on-surface text-lg flex items-center gap-2">
+                        <span class="material-symbols-outlined">location_on</span>
+                        {% trans "Ping Location" %}
+                    </h2>
+                    <button onclick="document.getElementById('locationModal').classList.add('hidden')" class="text-on-surface-variant hover:text-on-surface">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <form id="locationForm" onsubmit="submitLocation(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Latitude" %}</label>
+                        <input id="latitude" type="number" step="0.0001" placeholder="36.8619" class="w-full bg-surface-container-low border border-outline-variant rounded px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none" required/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Longitude" %}</label>
+                        <input id="longitude" type="number" step="0.0001" placeholder="8.7065" class="w-full bg-surface-container-low border border-outline-variant rounded px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none" required/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Altitude (meters)" %}</label>
+                        <input id="altitude" type="number" step="1" placeholder="0" class="w-full bg-surface-container-low border border-outline-variant rounded px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none" required/>
+                    </div>
+                    <div class="flex gap-3 pt-4 border-t border-outline-variant/50">
+                        <button type="button" onclick="document.getElementById('locationModal').classList.add('hidden')" class="flex-1 bg-surface-container-high text-on-surface font-semibold py-2 rounded transition-colors hover:bg-surface-container">
+                            {% trans "Cancel" %}
+                        </button>
+                        <button type="submit" class="flex-1 bg-secondary text-on-secondary font-semibold py-2 rounded transition-colors hover:opacity-90">
+                            {% trans "Go to Data Entry" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
         
     </main>
 </div>
@@ -661,5 +604,28 @@
 <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
 <script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+
+<script>
+// Location Ping Modal Handler
+function submitLocation(event) {
+    event.preventDefault();
+    const latitude = document.getElementById('latitude').value;
+    const longitude = document.getElementById('longitude').value;
+    const altitude = document.getElementById('altitude').value;
+    
+    // Navigate to data ingestion page with coordinates
+    window.location.href = `/data-ingestion/?lat=${latitude}&lon=${longitude}&alt=${altitude}`;
+}
+
+// Initialize location button event listener
+document.addEventListener('DOMContentLoaded', function() {
+    const pingBtn = document.getElementById('ping-tool-btn');
+    if (pingBtn) {
+        pingBtn.addEventListener('click', function() {
+            document.getElementById('locationModal').classList.remove('hidden');
+        });
+    }
+});
+</script>
 </body>
 </html>

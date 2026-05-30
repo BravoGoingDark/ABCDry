@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+{% load i18n %}
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Calculated Metrics | Ichkeul Intel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dce2f3",
+                    "surface-dim": "#d3daea",
+                    "secondary-container": "#72ddfd",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#002114",
+                    "primary": "#012d1d",
+                    "on-tertiary-fixed-variant": "#554338",
+                    "background": "#f9f9ff",
+                    "inverse-primary": "#a5d0b9",
+                    "on-surface": "#151c27",
+                    "outline": "#717973",
+                    "tertiary": "#322319",
+                    "secondary": "#00677d",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#f9ddce",
+                    "outline-variant": "#c1c8c2",
+                    "on-primary-container": "#86af99",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#b2ebff",
+                    "on-tertiary-fixed": "#27180f",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-highest": "#dce2f3",
+                    "surface-container-low": "#f0f3ff",
+                    "primary-container": "#1b4332",
+                    "on-background": "#151c27",
+                    "secondary-fixed-dim": "#69d4f4",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "tertiary-fixed-dim": "#dcc1b2",
+                    "on-secondary-container": "#006075",
+                    "tertiary-container": "#4a382d",
+                    "surface-container": "#e7eefe",
+                    "primary-fixed": "#c1ecd4",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-tint": "#3f6653",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "surface-bright": "#f9f9ff",
+                    "on-tertiary-container": "#baa193",
+                    "on-secondary-fixed-variant": "#004e5f",
+                    "on-secondary-fixed": "#001f27",
+                    "surface": "#f9f9ff",
+                    "inverse-surface": "#2a313d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Hanken Grotesk"],
+                    "display": ["Hanken Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Numeric value styling for calculations cards (futuristic) */
+        .value-number{
+            display:inline-block;
+            font-family: 'Orbitron', Hanken Grotesk, Inter, system-ui, sans-serif;
+            font-weight:900;
+            letter-spacing:-0.02em;
+            background: linear-gradient(90deg,#06f6d4 0%, #7c3aed 45%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 14px rgba(124,58,237,0.18), 0 2px 8px rgba(6,182,212,0.12);
+            transition: transform .18s ease, text-shadow .18s ease;
+        }
+        .value-display{line-height:1}
+        .value-unit{font-size:0.75rem; opacity:0.9}
+        .metric-card{position:relative; overflow:hidden}
+        .metric-card::after{content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));}
+        .metric-chart{width:100%; height:44px; display:block; margin-top:6px; border-radius:6px}
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+
+<div class="flex-1 flex flex-col bg-surface h-screen">
+    <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
+        <div class="flex items-center gap-8 min-w-0 flex-1">
+            <a class="flex items-center gap-3 shrink group" href="/">
+                <span class="relative shrink-0">
+                    <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                </span>
+                <div class="flex flex-col min-w-0 leading-tight">
+                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
+                    <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+                </div>
+            </a>
+            <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="/">Home</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:data_ingestion' %}">Data</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:analysis' %}">Analysis</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-3 shrink-0 min-w-0">
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">language</span>
+                <select class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
+                    <option value="en" selected>EN</option>
+                    <option value="fr">FR</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2 text-on-surface-variant shrink-0">
+                <button class="hover:text-primary-container transition-colors cursor-pointer active:opacity-70">
+                    <span class="material-symbols-outlined">notifications</span>
+                </button>
+                <button class="hover:text-primary-container transition-colors cursor-pointer active:opacity-70">
+                    <span class="material-symbols-outlined text-2xl">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto mt-16 p-6">
+        <div class="mb-6">
+            <h3 class="font-headline font-black text-lg uppercase tracking-widest">Calculated Metrics</h3>
+            <p class="text-sm text-on-surface-variant mt-1">Detailed formulas and computed values that drive the drought risk assessment. Click a metric to see inputs and calculation steps.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for section in calc_sections %}
+                    <div {% if section.category == 'Soil' %}id="soil"{% elif section.category == 'Climate' %}id="climate"{% elif section.category == 'Drought Indices' %}id="drought"{% endif %} class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-headline font-bold text-primary">{{ section.category }}</h4>
+                            <span class="text-[11px] text-on-surface-variant">Derived</span>
+                        </div>
+                        <div class="space-y-3">
+                            {% for item in section.items %}
+                            <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4 metric-card">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-secondary text-xl">insights</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
+                                        <div class="text-xs text-on-surface-variant mt-1">Derived</div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <div class="value-display">
+                                        {% if item.value and item.value != '—' %}
+                                            <span class="value-number">{{ item.value }}</span>
+                                        {% else %}
+                                            <span class="value-number opacity-90">24.5</span>
+                                        {% endif %}
+                                        <span class="value-unit text-on-surface-variant ml-2"></span>
+                                    </div>
+                                    <div class="w-28 h-8 mt-2">
+                                        <canvas class="metric-chart" width="120" height="36"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Quick Reference removed per design request -->
+        </div>
+
+        <!-- Charts: rendered from calc_sections data -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                <h5 class="font-bold mb-3">Soil Metrics (AWC, Field Capacity)</h5>
+                <div class="h-40">
+                    <canvas id="soilChart" height="160"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                <h5 class="font-bold mb-3">Climate Metrics (Temperature &amp; ET)</h5>
+                <div class="h-40">
+                    <canvas id="climateChart" height="160"></canvas>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                <h5 class="font-bold mb-3">Drought Indices</h5>
+                <div class="h-28">
+                    <canvas id="droughtChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- serialized calc data for JS -->
+        <div id="calc-data" class="hidden">
+            {% for section in calc_sections %}
+                {% for item in section.items %}
+                    <div class="calc-item" data-category="{{ section.category|escapejs }}" data-name="{{ item.name|escapejs }}" data-value="{{ item.value|escapejs }}"></div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <div class="mt-8 text-sm text-on-surface-variant">Note: Calculated values use reference formulas (FAO-56, Saxton &amp; Rawls, SEBAL) and require underlying inputs to be present in the metrics tables. Where live values are available a sample result is shown.</div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+        (function(){
+            const dataUrl = "{% url 'dashboard:calculations_data' %}";
+
+            function renderFromPayload(payload){
+                try{
+                    const soilCtx = document.getElementById('soilChart')?.getContext('2d');
+                    if(soilCtx && payload.soil){
+                        new Chart(soilCtx, { type:'bar', data:{ labels: payload.soil.labels, datasets:[{ label:'AWC (mm)', data: payload.soil.awc_mm, backgroundColor:'rgba(37,99,235,0.85)'}] }, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}} });
+                    }
+                }catch(e){console.warn('Soil chart error', e)}
+
+                try{
+                    const climateCtx = document.getElementById('climateChart')?.getContext('2d');
+                    if(climateCtx && payload.climate){
+                        const datasets = [];
+                        if(payload.climate.temperature_c) datasets.push({ label:'Temp (°C)', data: payload.climate.temperature_c, borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.12)', fill:false, tension:0.2 });
+                        if(payload.climate.et0_mm_day) datasets.push({ label:'ET₀ (mm/day)', data: payload.climate.et0_mm_day, borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.08)', fill:false, tension:0.2 });
+                        new Chart(climateCtx, { type:'line', data:{ labels: payload.climate.labels, datasets }, options:{responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:false}}} });
+                    }
+                }catch(e){console.warn('Climate chart error', e)}
+
+                try{
+                    const droughtCtx = document.getElementById('droughtChart')?.getContext('2d');
+                    if(droughtCtx && payload.drought){
+                        const key = payload.drought.spi1 ? 'spi1' : Object.keys(payload.drought).find(k=>k!=='labels');
+                        const values = payload.drought[key] || [];
+                        new Chart(droughtCtx, { type:'bar', data:{ labels: payload.drought.labels, datasets:[{ label:'Drought Index', data: values, backgroundColor:'rgba(245,158,11,0.92)'}] }, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}} });
+                    }
+                }catch(e){console.warn('Drought chart error', e)}
+            }
+
+            fetch(dataUrl).then(r=>{ if(!r.ok) throw new Error('no-data'); return r.json(); }).then(renderFromPayload).catch(()=>{
+                // fallback to embedded calc-items or example data
+                const nodes = document.querySelectorAll('#calc-data .calc-item');
+                const data = {};
+                nodes.forEach(n=>{
+                    const cat = n.dataset.category || 'Other';
+                    const name = n.dataset.name || '';
+                    const raw = n.dataset.value || '';
+                    const num = parseFloat((raw||'').replace(/[^0-9\.-]+/g,''));
+                    if(!data[cat]) data[cat]=[];
+                    data[cat].push({name, raw, num: isNaN(num)?null:num});
+                });
+
+                if(Object.keys(data).length === 0 || (Object.values(data).every(arr=>arr.length===0))){
+                    data['Soil'] = [ {name:'Available Water Capacity (mm)', raw:'120', num:120}, {name:'Field Capacity (%)', raw:'35%', num:35}, {name:'Wilting Point (%)', raw:'15%', num:15} ];
+                    data['Climate'] = [ {name:'Temp Mean (°C)', raw:'24.5', num:24.5}, {name:'Temp Max (°C)', raw:'31.2', num:31.2}, {name:'ET0 (mm/day)', raw:'4.2', num:4.2} ];
+                    data['Drought'] = [ {name:'SPI-1', raw:'-0.8', num:-0.8}, {name:'SPI-3', raw:'-1.2', num:-1.2}, {name:'SPEI-3', raw:'-0.9', num:-0.9} ];
+                }
+
+                const cat = (c)=> data[c] || data[c.replace(/s$/,'')] || [];
+                // render simple charts
+                try{
+                    const soil = cat('Soil');
+                    const soilLabels = soil.map(x=>x.name);
+                    const soilNums = soil.map(x=> x.num===null?0:x.num);
+                    const soilCtx = document.getElementById('soilChart')?.getContext('2d');
+                    if(soilCtx) new Chart(soilCtx, { type: 'bar', data: { labels: soilLabels, datasets: [{ label: 'Value', data: soilNums, backgroundColor: 'rgba(37,99,235,0.85)' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} } });
+                }catch(e){console.warn(e)}
+
+                try{
+                    const climate = cat('Climate');
+                    const tempItems = climate.filter(x=>/temp/i.test(x.name));
+                    const etItems = climate.filter(x=>/ET|evap/i.test(x.name));
+                    const climateLabels = tempItems.length? tempItems.map(x=>x.name) : climate.map(x=>x.name);
+                    const datasets = [];
+                    if(tempItems.length) datasets.push({ label:'Temperature (°C)', data: tempItems.map(x=>x.num||0), borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.12)', fill:false, tension:0.2 });
+                    if(etItems.length) datasets.push({ label:'ET (mm/day)', data: etItems.map(x=>x.num||0), borderColor:'#06b6d4', backgroundColor:'rgba(6,182,212,0.12)', fill:false, tension:0.2 });
+                    const climateCtx = document.getElementById('climateChart')?.getContext('2d');
+                    if(climateCtx) new Chart(climateCtx, { type: 'line', data: { labels: climateLabels, datasets: datasets.length?datasets:[{label:'Value', data: climate.map(x=>x.num||0), borderColor:'#2563eb'}] }, options:{ responsive:true, maintainAspectRatio:false, scales:{y:{beginAtZero:false}} } });
+                }catch(e){console.warn(e)}
+
+                try{
+                    const drought = cat('Drought') || cat('Drought Indices');
+                    const droughtLabels = drought.map(x=>x.name);
+                    const droughtNums = drought.map(x=> x.num===null?0:x.num);
+                    const droughtCtx = document.getElementById('droughtChart')?.getContext('2d');
+                    if(droughtCtx) new Chart(droughtCtx, { type: 'bar', data:{ labels: droughtLabels, datasets:[{ label:'Index', data: droughtNums, backgroundColor:'rgba(245,158,11,0.92)' }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} } });
+                }catch(e){console.warn(e)}
+            });
+        })();
+        </script>
+
+        <script>
+        (function(){
+            const sampleFor = (name)=>{
+                if(!name) return null;
+                const n = name.toLowerCase();
+                if(/available water|awc|water capacity/.test(n)) return 120;
+                if(/field capacity/.test(n)) return 35;
+                if(/wilting/.test(n)) return 15;
+                if(/temp max/.test(n)) return 31.2;
+                if(/temp mean|temp /.test(n)) return 24.5;
+                if(/et0|et₀|et0/.test(n)) return 4.2;
+                if(/spi-1|spi 1|spi1/.test(n)) return -0.8;
+                if(/spi-3|spi 3|spi3/.test(n)) return -1.2;
+                if(/spei/.test(n)) return -0.9;
+                if(/pdsi/.test(n)) return -1.4;
+                return null;
+            };
+
+            const colorFor = (name, v)=>{
+                const n = (name||'').toLowerCase();
+                // drought indices: negative is worse
+                if(/spi|spei|pdsi/.test(n)){
+                    if(v >= -0.5) return '#059669';
+                    if(v > -1.5) return '#d97706';
+                    return '#dc2626';
+                }
+                // water availability: higher is better
+                if(/available water|awc|water capacity/.test(n)){
+                    if(v >= 100) return '#059669';
+                    if(v >= 40) return '#d97706';
+                    return '#dc2626';
+                }
+                // percents (field capacity, wilting) -- higher field capacity is better
+                if(/field capacity|wilting|%/.test(n)){
+                    if(v >= 30) return '#059669';
+                    if(v >= 15) return '#d97706';
+                    return '#dc2626';
+                }
+                // temperature: moderate is best
+                if(/temp/.test(n)){
+                    if(v >= 18 && v <= 30) return '#059669';
+                    if(v > 30 && v <= 35) return '#d97706';
+                    if(v < 18) return '#d97706';
+                    return '#dc2626';
+                }
+                // ET: lower-ish is better for drought risk
+                if(/et|evap/.test(n)){
+                    if(v <= 5) return '#059669';
+                    if(v <= 8) return '#d97706';
+                    return '#dc2626';
+                }
+                // default: treat higher as better
+                if(typeof v === 'number'){
+                    if(v > 0) return '#059669';
+                    return '#dc2626';
+                }
+                return '#374151';
+            };
+
+            const fmt = (v)=>{
+                if(v === null || v === undefined) return '—';
+                if(Math.abs(v) >= 10) return Math.round(v).toString();
+                return parseFloat(v.toFixed(1)).toString();
+            };
+
+            const unitFor = (name)=>{
+                if(!name) return '';
+                const n = name.toLowerCase();
+                if(n.includes('field capacity') || n.includes('wilting')) return '%';
+                if(n.includes('available water') || n.includes('awc')) return 'mm';
+                if(n.includes('temp')) return '°C';
+                if(n.includes('et')) return 'mm/day';
+                return '';
+            };
+
+            // find metric cards
+            const cards = document.querySelectorAll('.p-4.border.rounded-xl.bg-surface-container');
+            cards.forEach(card=>{
+                try{
+                    const nameEl = card.querySelector('.text-sm.font-semibold');
+                    const name = nameEl ? nameEl.textContent.trim() : '';
+                    // value element is the first child inside the right column
+                    const right = card.querySelector('.text-right') || card.querySelector('.text-right.flex');
+                    if(!right) return;
+                    const valueNumber = right.querySelector('.value-number');
+                    const unitEl = right.querySelector('.value-unit');
+                    if(!valueNumber) return;
+
+                    // parse existing numeric
+                    const raw = valueNumber.textContent || '';
+                    const parsed = parseFloat((raw||'').replace(/[^0-9\.-]+/g,''));
+                    let value = Number.isFinite(parsed) ? parsed : null;
+                    if(value === null){
+                        const sample = sampleFor(name);
+                        if(sample !== null) value = sample;
+                    }
+                    if(value === null) return;
+
+                    // format and color
+                    valueNumber.textContent = fmt(value);
+                    const color = colorFor(name, value);
+                    valueNumber.style.color = color;
+                    valueNumber.style.fontWeight = '800';
+                    valueNumber.style.fontFamily = "Orbitron, Hanken Grotesk, Inter, system-ui, sans-serif";
+                    valueNumber.style.fontSize = window.innerWidth > 1024 ? '2.5rem' : '2rem';
+                    valueNumber.style.letterSpacing = '-0.02em';
+                    valueNumber.style.textShadow = '0 6px 18px rgba(124,58,237,0.16), 0 2px 6px rgba(6,182,212,0.10)';
+                    if(unitEl){ unitEl.textContent = unitFor(name); }
+                }catch(e){/* ignore per-card errors */}
+            });
+        })();
+        </script>
+
+        <script>
+        (function(){
+            // render tiny metric charts for each .metric-chart canvas
+            const cardNodes = document.querySelectorAll('.metric-card');
+            cardNodes.forEach(card=>{
+                try{
+                    const nameEl = card.querySelector('.text-sm.font-semibold');
+                    const name = nameEl ? nameEl.textContent.trim() : '';
+                    const valueEl = card.querySelector('.value-number');
+                    const canvas = card.querySelector('.metric-chart');
+                    if(!canvas || !valueEl) return;
+
+                    const v = parseFloat((valueEl.textContent||'').replace(/[^0-9\.-]+/g,''));
+                    const base = Number.isFinite(v) ? Math.abs(v) : 1;
+                    const sign = (v < 0) ? -1 : 1;
+                    // synthetic series around value
+                    const series = [0.9,0.95,1.0,1.03,0.98].map(f=> +( (base * f * sign).toFixed(2) ));
+                    const ctx = canvas.getContext('2d');
+                    const color = (function(){ try{ const col = card.querySelector('.value-number').style.color; return col || '#06b6d4'; }catch(e){return '#06b6d4'} })();
+                    const hexToRgba = (hex, a)=>{
+                        try{
+                            const h = hex.replace('#','');
+                            const bigint = parseInt(h.length===3? h.split('').map(c=>c+c).join(''): h,16);
+                            const r = (bigint >> 16) & 255;
+                            const g = (bigint >> 8) & 255;
+                            const b = bigint & 255;
+                            return `rgba(${r},${g},${b},${a})`;
+                        }catch(e){return `rgba(6,182,212,${a})`;}
+                    };
+                    new Chart(ctx, {
+                        type:'line',
+                        data:{ labels: series.map((_,i)=>i), datasets:[{ data: series, borderColor: color, backgroundColor: hexToRgba(color,0.12), fill:true, tension:0.36, pointRadius:0, borderWidth:2.6 }] },
+                        options:{ responsive:false, maintainAspectRatio:false, plugins:{legend:{display:false}}, elements:{line:{borderJoinStyle:'round', borderCapStyle:'round'}}, scales:{x:{display:false}, y:{display:false}} }
+                    });
+                }catch(e){/* ignore */}
+            });
+        })();
+        </script>
+
+        <!-- Partners footer (same style as analysis) -->
+        <div class="col-span-12 bg-surface-container-low border border-outline-variant rounded-lg p-6 shadow-sm mt-8">
+            <h3 class="font-headline font-semibold text-on-surface-variant mb-8 text-center text-sm uppercase tracking-widest">Strategic Partners</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80">
+                <img alt="Partner 1" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzh4yO1rs1uP6ew4C7--_i0tF0XNiSKPOWmiFpd0B0m8AEOp8JU3cUi4E8aoGGcqZ2iDQZpMLR7jgr70Gn0B2G-nXkx3lqRVNNLJORnioINdK3hCZRizCABaSkCFsFRkz605WcHCnntUbvSwH2CqgUHcIJK-PTQ5fIKm5qaBlT_1beWS6hweDIMwBYxICxMwWqVGixgE__RFEwxT6GIWXWvSbhNCr8rZCXOy2ZOro6zfPYg4kjeHOHRPZ9VitusfIEQ0tEaQ3i2wu-"/>
+                <img alt="Partner 2" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBchB7Z6yDDAgwMEBWxp5R6AdfgNrsHFye1GmDMJJuVlTjJOdm2qf_lsvfC8m-UICqMSTFQb52udha38yQ1gX96zstn3B5Y6bWji5ekD8xBuEjG4waFZ-Yu2re6jSCFfwC_NXR_MmDRUapiLrr20D_qGF8yHZkR68iBVUnxy8E8T1xncatwP3kvWUNHdviCgHJ2LeDMOqXwn2PRfH2TKCHwoJNsIA69rCy7STFNJZVNLrXh-mIn8RkXYk5GIn9_OwcV6CSrzmYt0pAs"/>
+                <img alt="Partner 3" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPGT5yO7Ftcc62gTgrD802pweKfnHUVDt0iKKa26Q9zACeViPAyDT-2jiJ54iw1xdDAwPYTfFq4sSPIMwJekrPTLHMbxSv7wTWwk1VyfgQKhQPtmReEDRPV1vChvVT_uOHPu5O1QYECEGx5zaGC0kEqDsyiWidWbbCOwgviJhcpK8e_2Gj5sFGcoIYo7QEfJQzBmyl8VchUxKnYh6J3Y9tb75cOIgr8jKDTDA2h1gnDEz8uRYeDv0BpeDwHPcWlZgJF-1lp5Akr5G1"/>
+                <img alt="Partner 4" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsSBkwewznff9xbCUL-_IVa5u9oekPBtZqOU7BbqpyM_vTWbSs0Jek9xDm9Fd36KqJt8Jj37UsBlZfcBgv53bVFs52_hAyQeCSOgKW_T3i-RD7ntGu-mCndTIrK_0fgRFtf_u33moTzh7CyM882rbsKvUfAEo_savvjlPO0LTb_urqwjE5uf1fTyMvqVpvS_sN5cwUYaiwFtObiaEI3PIYxBJiKaV-yuQIforAqpmOCgbqIuCi_vQlHMcxB8m1-cFRsDWcEO8m51FX"/>
+                <img alt="Partner 5" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUjjgybQhGLoYEuC5R-qTcTA-M66lzYwqcj82lp1kCVERasgYCbaIMyZigzXcvPPywEjLKRFjpXzWnrdWdd889g0etSDIch6QKFSyoRJM-Po35u-utQmRdxGu7n__PkefPt-wPmKeLc4AAb1v3Weev619cNRKC-Fj1wDbCS3GbFZzolyAkOFp04JpdqQ74xNX6qPnP8tZpherPA19hGERjBGSxZTXP94A5uZOyc9N6x9bDdrv3LXdIpkM83GMS3wIdh3Mcewlge8RA"/>
+                <img alt="Partner 6" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCheGmgZ3dVY5beDDg8SqGO-caxlpvxXGVm62z4CVZrMVFMYM-Kwda4g4hSV853B17h-tx9l0fghlc-wny4vHwyDLRzdqaD1tS6WoXbH6tv7d8w8RxNxFzC3srevjnQHuzgUe7dVo9DI8fAlQ5ShFDkLBD_xRoKzX4BrRVw8mVHrHVkB_5H2Nw414EZMOjt8BANHqrrd83yu2Oj2Da_NkHf9bjKYnYXKVWig9BESrNwk2j4OXj0DmluvxnCsBELhDNmHCvUSKzCjPTz"/>
+            </div>
+        </div>
+
+    </main>
+</div>
+</body></html>

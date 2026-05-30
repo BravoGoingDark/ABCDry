@@ -1,0 +1,6 @@
+region_id,region_name,region_country,region_latitude,region_longitude,region_elevation_m,region_area_km2,region_description
+1,Test Region Alpha,Morocco,31.79,-7.08,450,1250.0,Synthetic test region for drought forecasting
+2,Test Region Alpha,Morocco,31.79,-7.08,450,1250.0,Synthetic test region for drought forecasting
+3,Test Region Alpha,Morocco,31.79,-7.08,450,1250.0,Synthetic test region for drought forecasting
+4,Test Region Alpha,Morocco,31.79,-7.08,450,1250.0,Synthetic test region for drought forecasting
+5,Test Region Alpha,Morocco,31.79,-7.08,450,1250.0,Synthetic test region for drought forecasting

@@ -90,3 +90,40 @@ svg.overflow-visible line {
         opacity: 0;
     }
 }
+
+/* Leaflet popup styling to match the dashboard theme */
+.leaflet-popup.abcbasin-popup .leaflet-popup-content-wrapper {
+    background: linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+    color: #151c27;
+    border: 1px solid rgba(193, 200, 194, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(21, 28, 39, 0.2);
+    overflow: hidden;
+}
+
+.leaflet-popup.abcbasin-popup .leaflet-popup-content {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.leaflet-popup.abcbasin-popup .leaflet-popup-tip {
+    background: #f0f3ff;
+    border: 1px solid rgba(193, 200, 194, 0.95);
+    box-shadow: 0 20px 60px rgba(21, 28, 39, 0.08);
+}
+
+.leaflet-popup.abcbasin-popup .leaflet-popup-close-button {
+    color: #414844;
+    font-size: 18px;
+    padding: 8px 10px 0 0;
+}
+
+.leaflet-popup.abcbasin-popup .leaflet-popup-close-button:hover {
+    color: #012d1d;
+}
+
+.leaflet-popup.abcbasin-popup .leaflet-popup-content strong {
+    color: #012d1d;
+}

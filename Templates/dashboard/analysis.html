@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+{% load i18n %}
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analysis Results | Ichkeul Intel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dce2f3",
+                    "surface-dim": "#d3daea",
+                    "secondary-container": "#72ddfd",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#002114",
+                    "primary": "#012d1d",
+                    "on-tertiary-fixed-variant": "#554338",
+                    "background": "#f9f9ff",
+                    "inverse-primary": "#a5d0b9",
+                    "on-surface": "#151c27",
+                    "outline": "#717973",
+                    "tertiary": "#322319",
+                    "secondary": "#00677d",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#f9ddce",
+                    "outline-variant": "#c1c8c2",
+                    "on-primary-container": "#86af99",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#b2ebff",
+                    "on-tertiary-fixed": "#27180f",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-highest": "#dce2f3",
+                    "surface-container-low": "#f0f3ff",
+                    "primary-container": "#1b4332",
+                    "on-background": "#151c27",
+                    "secondary-fixed-dim": "#69d4f4",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "tertiary-fixed-dim": "#dcc1b2",
+                    "on-secondary-container": "#006075",
+                    "tertiary-container": "#4a382d",
+                    "surface-container": "#e7eefe",
+                    "primary-fixed": "#c1ecd4",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-tint": "#3f6653",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "surface-bright": "#f9f9ff",
+                    "on-tertiary-container": "#baa193",
+                    "on-secondary-fixed-variant": "#004e5f",
+                    "on-secondary-fixed": "#001f27",
+                    "surface": "#f9f9ff",
+                    "inverse-surface": "#2a313d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Hanken Grotesk"],
+                    "display": ["Hanken Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .map-gradient {
+            background: radial-gradient(circle at center, rgba(186, 26, 26, 0.15) 0%, rgba(255, 184, 0, 0.1) 40%, rgba(0, 103, 125, 0.05) 100%);
+        }
+            /* Leaflet map sits behind overlays inside the map container */
+            #ichkeul-heatmap { z-index: 0; }
+            .map-overlay-panel { z-index: 20; }
+    </style>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col bg-surface h-screen">
+<!-- Top Navigation Header -->
+    <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
+        <div class="flex items-center gap-8 min-w-0 flex-1">
+            <a class="flex items-center gap-3 shrink group" href="/">
+                <span class="relative shrink-0">
+                    <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+                    <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                </span>
+                <div class="flex flex-col min-w-0 leading-tight">
+                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
+                    <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+                </div>
+            </a>
+            
+            <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="/">Home</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">Data</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:analysis' %}">Analysis</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
+            </nav>
+        </div>
+        
+        <div class="flex items-center gap-3 shrink-0 min-w-0">
+            <!-- Region Selector Dropdown -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
+                <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-32" id="region-selector" name="region">
+                    <option value="tunisia">Tunisia</option>
+                    <option value="morocco">Morocco</option>
+                    <option value="algeria">Algeria</option>
+                </select>
+            </div>
+            
+            <!-- Year Selector Dropdown -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">calendar_today</span>
+                <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-40" name="year" id="year-selector">
+                    <option value="2024">2024 (Current)</option>
+                    <option value="2023">2023</option>
+                    <option value="2022">2022</option>
+                    <option value="2020-2024">2020 - 2024</option>
+                    <option value="2015-2019">2015 - 2019</option>
+                    <option value="historical">Historical Archive</option>
+                </select>
+            </div>
+            
+            <!-- Run Simulation Button -->
+            <button id="run-simulation-header-btn" type="button" class="bg-primary text-on-primary px-4 py-1.5 rounded-DEFAULT text-sm font-semibold hover:bg-primary-container transition-colors shadow-sm cursor-pointer active:opacity-70 shrink-0">
+                Run Simulation
+            </button>
+            
+            <!-- Language Switcher -->
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">language</span>
+                <select class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
+                    <option value="en" selected>EN</option>
+                    <option value="fr">FR</option>
+                </select>
+            </div>
+            
+            <!-- Profile Actions -->
+            <div class="flex items-center gap-2 text-on-surface-variant shrink-0">
+                <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+                    <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+                </button>
+                <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
+                    <span class="material-symbols-outlined text-2xl">account_circle</span>
+                </button>
+            </div>
+        </div>
+    </header>
+<!-- Scrollable Content Area -->
+<main class="flex-1 overflow-y-auto mt-16 p-6">
+<!-- SECTION 1: Current Drought Status -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Today Risk -->
+<div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label text-xs uppercase text-on-surface-variant">Today Risk</span>
+<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-yellow-200">Watch</span>
+</div>
+<div class="flex items-end gap-2 mb-2">
+<span class="text-5xl font-black font-headline text-on-surface">34</span>
+<span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
+</div>
+<p class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Implement preventative monitoring in northern sectors.</p>
+<div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="monitoring">monitoring</span>
+</div>
+</div>
+<!-- 7 Days Risk -->
+<div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label text-xs uppercase text-on-surface-variant">7 Days Risk</span>
+<span class="bg-orange-100 text-orange-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-orange-200">Severe</span>
+</div>
+<div class="flex items-end gap-2 mb-2">
+<span class="text-5xl font-black font-headline text-on-surface">52</span>
+<span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
+</div>
+<p class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Initiate irrigation restrictions for non-critical zones.</p>
+<div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="water_drop">water_drop</span>
+</div>
+</div>
+<!-- 30 Days Risk -->
+<div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label text-xs uppercase text-on-surface-variant">30 Days Risk</span>
+<span class="bg-red-100 text-red-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-red-200">Extreme</span>
+</div>
+<div class="flex items-end gap-2 mb-2">
+<span class="text-5xl font-black font-headline text-on-surface">78</span>
+<span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
+</div>
+<p class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Activate regional emergency water management protocols.</p>
+<div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="emergency_home">emergency_home</span>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Heatmap & Alerts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+<div class="lg:col-span-8 space-y-8">
+<!-- Risk Zone Heatmap -->
+<div class="bg-surface border border-outline-variant h-[500px] flex flex-col overflow-hidden relative">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h3 class="font-headline font-bold text-sm uppercase tracking-wider">Spatial Risk Distribution (Ichkeul Basin)</h3>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-primary text-white text-xs font-bold uppercase">Satellite</button>
+<button class="px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-bold uppercase">Topography</button>
+</div>
+</div>
+<!-- Map Canvas Placeholder -->
+<div class="flex-grow relative map-gradient bg-[#E2E8F0]" data-location="Lake Ichkeul National Park">
+    <!-- Leaflet map canvas (absolute, fills the panel behind overlays) -->
+    <div id="ichkeul-heatmap" class="absolute inset-0 z-0"></div>
+    <div class="absolute top-4 left-4 z-10 space-y-2">
+<div class="bg-white/90 backdrop-blur-md p-3 border border-outline-variant shadow-sm w-48">
+<p class="font-label text-[10px] uppercase font-bold text-on-surface-variant mb-2">Legend</p>
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-[11px]">
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-red-600 rounded-sm"></span> Danger</span>
+<span class="font-label">&gt; 75</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-orange-500 rounded-sm"></span> Warning</span>
+<span class="font-label">50-75</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-yellow-400 rounded-sm"></span> Watch</span>
+<span class="font-label">25-50</span>
+</div>
+<div class="flex items-center justify-between text-[11px]">
+<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-green-500 rounded-sm"></span> Safe</span>
+<span class="font-label">&lt; 25</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Summary Overlay -->
+<div class="absolute bottom-4 right-4 z-10 bg-primary-container text-white p-4 w-64 shadow-lg border border-primary">
+<h4 class="font-label text-[10px] uppercase font-bold mb-3 opacity-80 border-b border-white/20 pb-2">Risk Zone Summary</h4>
+<div class="space-y-2">
+<div class="flex justify-between items-center text-xs">
+<span class="opacity-70">Extreme Zone:</span>
+<span class="font-bold">42.4 km²</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="opacity-70">Severe Zone:</span>
+<span class="font-bold">118.2 km²</span>
+</div>
+<div class="flex justify-between items-center text-xs">
+<span class="opacity-70">Moderate Zone:</span>
+<span class="font-bold">285.6 km²</span>
+</div>
+<div class="flex justify-between items-center text-xs pt-1 border-t border-white/10 mt-1">
+<span class="opacity-70">Total Basin Area:</span>
+<span class="font-bold">1,200 km²</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 7: Active Alerts -->
+<div class="lg:col-span-4 flex flex-col">
+<div class="bg-surface border border-outline-variant flex-grow flex flex-col">
+<div class="p-4 border-b border-outline-variant bg-surface-container-low flex items-center justify-between">
+<h3 class="font-headline font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-error" data-icon="notification_important">notification_important</span>
+                            Active Alerts
+                        </h3>
+<span class="bg-error text-white rounded-full text-[10px] px-2 py-0.5 font-bold">2 New</span>
+</div>
+<div class="p-4 space-y-4 overflow-y-auto">
+<!-- High Priority -->
+<div class="border-l-4 border-error bg-error-container/20 p-4">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-xs text-error uppercase">High Priority</span>
+<span class="font-label text-[10px] text-on-surface-variant">2h ago</span>
+</div>
+<h4 class="text-sm font-bold text-on-surface mb-2">Soil Moisture Critical Drop</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">Sensor station S-04 (Sector North) reported &lt; 12% moisture. Immediate verification required.</p>
+<button class="mt-3 text-[10px] font-black uppercase text-error flex items-center gap-1 hover:underline">
+                                Action Required <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Medium Priority -->
+<div class="border-l-4 border-secondary bg-surface-container-low p-4">
+<div class="flex justify-between items-start mb-1">
+<span class="font-bold text-xs text-secondary uppercase">Medium Priority</span>
+<span class="font-label text-[10px] text-on-surface-variant">5h ago</span>
+</div>
+<h4 class="text-sm font-bold text-on-surface mb-2">Precipitation Gap Warning</h4>
+<p class="text-xs text-on-surface-variant leading-relaxed">No rainfall forecast for the next 14 days in the main catchment area. Trend analysis updated.</p>
+<button class="mt-3 text-[10px] font-black uppercase text-secondary flex items-center gap-1 hover:underline">
+                                View Trends <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="mt-auto border-t border-outline-variant p-4">
+<button class="w-full py-2 border border-outline text-[11px] font-bold uppercase hover:bg-surface-variant/30 transition-colors">Clear All Read Alerts</button>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Key Drought Metrics Grid -->
+<div class="mb-12">
+<h3 class="font-headline font-black text-lg uppercase tracking-widest mb-6 border-b-2 border-primary-container inline-block pb-1">Real-time Metrics</h3>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<!-- Metric 1 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="humidity_percentage">humidity_percentage</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Soil Moisture</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black font-headline">25.5%</span>
+<span class="text-error text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs">arrow_downward</span>8%
+                        </span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="rainy">rainy</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Rainfall</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black font-headline">45mm</span>
+<span class="text-error text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs">arrow_downward</span>47%
+                        </span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="eco">eco</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">NDVI Index</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black font-headline">0.65</span>
+<span class="text-error text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs">arrow_downward</span>0.07
+                        </span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="air">air</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">ETc (Daily)</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black font-headline">3.2</span>
+<span class="text-secondary text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs">arrow_upward</span>0.5
+                        </span>
+</div>
+</div>
+<!-- Metric 5 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="waves">waves</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Water Level</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black font-headline">5.25m</span>
+<span class="text-error text-xs font-bold flex items-center">
+<span class="material-symbols-outlined text-xs">arrow_downward</span>0.8m
+                        </span>
+</div>
+</div>
+<!-- Metric 6 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="potted_plant">potted_plant</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Crop Stress</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-black font-headline">67%</span>
+<span class="bg-yellow-100 text-yellow-800 px-1 text-[10px] font-bold rounded">Moderate</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 4 & 5: Trends and Drivers -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+<!-- Trends & Forecasts Charts -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-surface border border-outline-variant p-6">
+<h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">Trends &amp; Predictive Forecasts</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-64 mb-6">
+<!-- Soil Water Balance Chart Placeholders -->
+<div class="flex flex-col">
+<p class="font-label text-[10px] uppercase mb-4 text-on-surface-variant">Soil Water Balance (mm)</p>
+<div class="flex-grow flex items-end gap-1.5 border-b border-l border-outline-variant relative" style="overflow:visible;">
+    <!-- Y axis labels -->
+    <div style="position:absolute; left:0; top:10px; bottom:26px; width:44px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; padding-right:8px; transform:translateX(-56px); z-index:5;">
+        <span class="font-label text-[11px] text-on-surface-variant">100</span>
+        <span class="font-label text-[11px] text-on-surface-variant">50</span>
+        <span class="font-label text-[11px] text-on-surface-variant">0</span>
+    </div>
+    <!-- Minimalist bar chart representation -->
+    <div class="w-full bg-primary/20 h-3/4"></div>
+    <div class="w-full bg-primary/20 h-4/5"></div>
+    <div class="w-full bg-primary/20 h-2/3"></div>
+    <div class="w-full bg-primary h-1/2"></div>
+    <div class="w-full bg-primary h-1/3"></div>
+    <div class="w-full bg-primary h-1/4"></div>
+    <div class="w-full bg-secondary-container h-[10%] opacity-50 border-t-2 border-dashed border-secondary"></div>
+
+    <!-- X axis labels -->
+    <div style="position:absolute; left:20px; right:8px; bottom:-18px; display:flex; justify-content:space-between; font-size:11px;">
+        <span class="font-label text-[10px] text-on-surface-variant">T-5</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-4</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-3</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-2</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-1</span>
+        <span class="font-label text-[10px] text-on-surface-variant">F</span>
+    </div>
+
+    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <span class="text-[10px] bg-white px-2 py-1 border border-outline-variant shadow-sm uppercase font-bold">Historical vs Forecast</span>
+    </div>
+</div>
+</div>
+<!-- Drought Risk Trend -->
+<div class="flex flex-col">
+<p class="font-label text-[10px] uppercase mb-4 text-on-surface-variant">Drought Risk Trend (0-100)</p>
+<div class="flex-grow border-b border-l border-outline-variant relative" style="overflow:visible;">
+    <!-- Y axis labels -->
+    <div style="position:absolute; left:0; top:8px; bottom:8px; width:44px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; padding-right:6px; transform:translateX(-56px); z-index:5;">
+        <span class="font-label text-[11px] text-on-surface-variant">100</span>
+        <span class="font-label text-[11px] text-on-surface-variant">75</span>
+        <span class="font-label text-[11px] text-on-surface-variant">50</span>
+        <span class="font-label text-[11px] text-on-surface-variant">25</span>
+        <span class="font-label text-[11px] text-on-surface-variant">0</span>
+    </div>
+    <!-- Wave path representation -->
+    <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 200">
+        <path d="M0,150 Q50,140 100,160 T200,120 T300,80 T400,40" fill="none" stroke="#1B4332" stroke-width="3"></path>
+        <path d="M0,150 Q50,140 100,160 T200,120 T300,80 T400,40 L400,200 L0,200 Z" fill="rgba(27, 67, 50, 0.05)"></path>
+    </svg>
+    <!-- X axis labels -->
+    <div style="position:absolute; left:30px; right:8px; bottom:-18px; display:flex; justify-content:space-between; font-size:11px;">
+        <span class="font-label text-[10px] text-on-surface-variant">T-5</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-4</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-3</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-2</span>
+        <span class="font-label text-[10px] text-on-surface-variant">T-1</span>
+        <span class="font-label text-[10px] text-on-surface-variant">Forecast</span>
+    </div>
+</div>
+</div>
+</div>
+<!-- Refined Insight Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Qualitative Insight -->
+<div class="bg-surface-container-low border border-outline-variant p-4 flex gap-4">
+<div class="flex-shrink-0">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="lightbulb">lightbulb</span>
+</div>
+<div class="flex-grow">
+<p class="text-xs text-on-surface-variant leading-relaxed italic">
+            "Models indicate a sustained period of low precipitation coupled with above-average mean temperatures. Soil moisture recharge is not expected before Q4."
+        </p>
+</div>
+</div>
+<!-- Quantitative Trajectory -->
+<div class="bg-primary-container p-4 border border-primary flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-white/80 text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-label text-[10px] uppercase font-bold text-white/60 tracking-wider">Trend</span>
+</div>
+<span class="text-[11px] font-bold text-white">Increasing risk (+12 points in 2 weeks)</span>
+</div>
+<div class="h-[1px] bg-white/10 w-full my-2"></div>
+<div class="flex justify-between items-end">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label text-[10px] uppercase font-bold text-white/60 tracking-wider">Forecast</span>
+</div>
+<span class="text-[11px] font-bold text-secondary-fixed-dim">Risk expected to reach 65 by next week</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Drought Drivers -->
+<div class="lg:col-span-1">
+<div class="bg-surface border border-outline-variant p-6 h-full">
+<h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">What's Driving Risk?</h3>
+<div class="space-y-6">
+<!-- Driver 1 -->
+<a href="{% url 'dashboard:calculations' %}#drought" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Rainfall Deficit</span>
+        <span class="font-label text-xs font-bold">58%</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-error w-[58%]"></div>
+    </div>
+</a>
+<!-- Driver 2 -->
+<a href="{% url 'dashboard:calculations' %}#climate" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">High Temperature</span>
+        <span class="font-label text-xs font-bold">32%</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-orange-500 w-[32%]"></div>
+    </div>
+</a>
+<!-- Driver 3 -->
+<a href="{% url 'dashboard:calculations' %}#soil" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Soil Moisture Decline</span>
+        <span class="font-label text-xs font-bold">45%</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-orange-400 w-[45%]"></div>
+    </div>
+</a>
+<!-- Driver 4 -->
+<a href="{% url 'dashboard:calculations' %}#drought" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Vegetation Stress</span>
+        <span class="font-label text-xs font-bold">28%</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-yellow-500 w-[28%]"></div>
+    </div>
+</a>
+</div>
+<div class="mt-10 pt-6 border-t border-outline-variant">
+<div class="bg-primary-container p-4 flex items-center gap-4">
+<span class="material-symbols-outlined text-white text-3xl">lightbulb</span>
+<div>
+<p class="text-[10px] font-bold text-white/70 uppercase">Insight</p>
+<p class="text-xs text-white font-medium">Precipitation deficit remains the dominant factor across all sub-catchments.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 6: Prediction Table -->
+<div class="mb-12">
+<h3 class="font-headline font-black text-lg uppercase tracking-widest mb-6 border-b-2 border-primary-container inline-block pb-1">Actionable Forecasts</h3>
+<div class="overflow-x-auto">
+<table class="w-full border-collapse bg-surface border border-outline-variant">
+<thead>
+<tr class="bg-surface-container font-label text-[10px] text-on-surface-variant uppercase tracking-tighter">
+<th class="p-4 text-left border-b border-outline-variant">Time Frame</th>
+<th class="p-4 text-left border-b border-outline-variant">Risk Level</th>
+<th class="p-4 text-left border-b border-outline-variant">Prediction</th>
+<th class="p-4 text-left border-b border-outline-variant">Recommended Action</th>
+<th class="p-4 text-right border-b border-outline-variant">Confidence</th>
+</tr>
+</thead>
+<tbody class="text-sm">
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 font-bold border-b border-outline-variant/30">Today</td>
+<td class="p-4 border-b border-outline-variant/30">
+<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase border border-yellow-200">Watch (34)</span>
+</td>
+<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Minor stress in shallow root systems.</td>
+<td class="p-4 border-b border-outline-variant/30 font-medium">Maintain standard monitoring.</td>
+<td class="p-4 text-right font-label text-xs text-secondary font-bold border-b border-outline-variant/30">98%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 font-bold border-b border-outline-variant/30">+7 Days</td>
+<td class="p-4 border-b border-outline-variant/30">
+<span class="px-2 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-bold uppercase border border-orange-200">Severe (52)</span>
+</td>
+<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Water balance deficit expected to widen.</td>
+<td class="p-4 border-b border-outline-variant/30 font-medium">Restrict irrigation in non-food crops.</td>
+<td class="p-4 text-right font-label text-xs text-secondary font-bold border-b border-outline-variant/30">85%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 font-bold border-b border-outline-variant/30">+14 Days</td>
+<td class="p-4 border-b border-outline-variant/30">
+<span class="px-2 py-0.5 bg-orange-200 text-orange-900 text-[10px] font-bold uppercase border border-orange-300">Severe (68)</span>
+</td>
+<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Extreme wilting point reached for cereals.</td>
+<td class="p-4 border-b border-outline-variant/30 font-medium">Activate auxiliary reservoir supply.</td>
+<td class="p-4 text-right font-label text-xs text-secondary font-bold border-b border-outline-variant/30">72%</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="p-4 font-bold border-b border-outline-variant/30">+30 Days</td>
+<td class="p-4 border-b border-outline-variant/30">
+<span class="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-bold uppercase border border-red-200">Extreme (78)</span>
+</td>
+<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Widespread ecosystem desiccation risks.</td>
+<td class="p-4 border-b border-outline-variant/30 font-medium">Declare regional water emergency.</td>
+<td class="p-4 text-right font-label text-xs text-on-surface-variant font-bold border-b border-outline-variant/30">60%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<!-- Full-width Bottom Panel: Strategic Partners -->
+<div class="col-span-12 bg-surface-container-low border border-outline-variant rounded-lg p-6 shadow-sm mt-2">
+    <h3 class="font-headline font-semibold text-on-surface-variant mb-8 text-center text-sm uppercase tracking-widest">{% trans "Strategic Partners" %}</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80">
+        <img alt="Partner 1" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzh4yO1rs1uP6ew4C7--_i0tF0XNiSKPOWmiFpd0B0m8AEOp8JU3cUi4E8aoGGcqZ2iDQZpMLR7jgr70Gn0B2G-nXkx3lqRVNNLJORnioINdK3hCZRizCABaSkCFsFRkz605WcHCnntUbvSwH2CqgUHcIJK-PTQ5fIKm5qaBlT_1beWS6hweDIMwBYxICxMwWqVGixgE__RFEwxT6GIWXWvSbhNCr8rZCXOy2ZOro6zfPYg4kjeHOHRPZ9VitusfIEQ0tEaQ3i2wu-"/>
+        <img alt="Partner 2" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBchB7Z6yDDAgwMEBWxp5R6AdfgNrsHFye1GmDMJJuVlTjJOdm2qf_lsvfC8m-UICqMSTFQb52udha38yQ1gX96zstn3B5Y6bWji5ekD8xBuEjG4waFZ-Yu2re6jSCFfwC_NXR_MmDRUapiLrr20D_qGF8yHZkR68iBVUnxy8E8T1xncatwP3kvWUNHdviCgHJ2LeDMOqXwn2PRfH2TKCHwoJNsIA69rCy7STFNJZVNLrXh-mIn8RkXYk5GIn9_OwcV6CSrzmYt0pAs"/>
+        <img alt="Partner 3" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPGT5yO7Ftcc62gTgrD802pweKfnHUVDt0iKKa26Q9zACeViPAyDT-2jiJ54iw1xdDAwPYTfFq4sSPIMwJekrPTLHMbxSv7wTWwk1VyfgQKhQPtmReEDRPV1vChvVT_uOHPu5O1QYECEGx5zaGC0kEqDsyiWidWbbCOwgviJhcpK8e_2Gj5sFGcoIYo7QEfJQzBmyl8VchUxKnYh6J3Y9tb75cOIgr8jKDTDA2h1gnDEz8uRYeDv0BpeDwHPcWlZgJF-1lp5Akr5G1"/>
+        <img alt="Partner 4" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsSBkwewznff9xbCUL-_IVa5u9oekPBtZqOU7BbqpyM_vTWbSs0Jek9xDm9Fd36KqJt8Jj37UsBlZfcBgv53bVFs52_hAyQeCSOgKW_T3i-RD7ntGu-mCndTIrK_0fgRFtf_u33moTzh7CyM882rbsKvUfAEo_savvjlPO0LTb_urqwjE5uf1fTyMvqVpvS_sN5cwUYaiwFtObiaEI3PIYxBJiKaV-yuQIforAqpmOCgbqIuCi_vQlHMcxB8m1-cFRsDWcEO8m51FX"/>
+        <img alt="Partner 5" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUjjgybQhGLoYEuC5R-qTcTA-M66lzYwqcj82lp1kCVERasgYCbaIMyZigzXcvPPywEjLKRFjpXzWnrdWdd889g0etSDIch6QKFSyoRJM-Po35u-utQmRdxGu7n__PkefPt-wPmKeLc4AAb1v3Weev619cNRKC-Fj1wDbCS3GbFZzolyAkOFp04JpdqQ74xNX6qPnP8tZpherPA19hGERjBGSxZTXP94A5uZOyc9N6x9bDdrv3LXdIpkM83GMS3wIdh3Mcewlge8RA"/>
+        <img alt="Partner 6" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCheGmgZ3dVY5beDDg8SqGO-caxlpvxXGVm62z4CVZrMVFMYM-Kwda4g4hSV853B17h-tx9l0fghlc-wny4vHwyDLRzdqaD1tS6WoXbH6tv7d8w8RxNxFzC3srevjnQHuzgUe7dVo9DI8fAlQ5ShFDkLBD_xRoKzX4BrRVw8mVHrHVkB_5H2Nw414EZMOjt8BANHqrrd83yu2Oj2Da_NkHf9bjKYnYXKVWig9BESrNwk2j4OXj0DmluvxnCsBELhDNmHCvUSKzCjPTz"/>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80 mt-8 border-t border-outline-variant/30 pt-6">
+        <img alt="Partner 7" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARQDrUUyqKNYOLZ21jI6vVfYpomqbzd8Gn7jtjxkJ8sPFQPSoFNU1qqXBxcNJvs81oelnEIo4TbNDFa0c8_QSftQcWT-rJGe7opwToxT_muf9aC5VZUwVGmXhZJdB30rnMdntd33B1el_L2YxYx9RhVDpsG0MsG2atHtNjByJzEH0-iI1Qgbgnev3DPsUmr7jKxeY2kbmoculGLEKEgPNZWmIYjyKpFFleNxFfP_A43RPvP_xOG5tURmgO0-EO-d7IPg2Sz9hOzkLk"/>
+        <img alt="Partner 8" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASqbTvFZ9gXy8NSpRwH03A0AAQiJFWgeaux3hBUOzxo0bbmn1JfTbkTz1TUyCtHr9ifvotfc23UCLTopmPRzKf8KEK8CqM4k0CVsufcVh3AizAb5YSW2I_cg9onzTMqFUaeD91X2hLVDUBaLFCWKDZHZmlDjkI16UqnCFaqnHtb8wREIEBeJFqgrnLzrCzQb3IFJNrUNdDAiqhI-CTYOv8sCXm6wlrXFUNO-4pcTikBYlWlsGBNQ6KMOPaj3VyoMjpXqtCys3VbN-S"/>
+        <img alt="Partner 9" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARbtDpPaV_DRnJs2OGrf_rahE4f4V1vMIagnQ-1b_kCX3p8Dc9u6WYZYxBCYl1uMgLEm_Gp8IwEQ5nRIryC11bjADz7d8eDOBlUu-yzqWfrzzJ4HLNSlMQ-m1m2J283_n-60RyPpy5u_pntI0_csmdkIGpNVxIp1e20Cxgbobbr9T1ig_wjlVYsfLhVQxfWqCAjzRZPJsnIpbGZX3NSvODLB5pX5w98BEJhcjOFLelZxX9NZ0gYbMyF5lncx359BOJ4iyQ9ur88gqy"/>
+        <img alt="Partner 10" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqZ6uc-4vka48KfBPj-Q61QPkvruAqhKpK_DEiRGv88kaxv1m6S2PNiM57vfYbAU8Yv72Z5wXD2bUJ54trpyc0DMG3PJmH4oGhTTSCw4IzhViVs1NDpQCiu3VGn3dlQKFNuNKPUVUFsPNNo5t5Y749gAjHwqK4pjQ4U2eT1y6VN2CPjK_hehjI6kb1dMzK5i-GihEtyy8GURWoD-7tGvZSA2h13SGR6SQV3OnFd7lvAinASPt_A8y8xai_vVfGv0thhB6QYMXPS4Af"/>
+        <img alt="Partner 11" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjzRjryBIpG_dmjlsC2zAU3geFrSZJXwKhQ19NDAVt7uZgV4gMa5tsVOZp38RVZ5Dd-HfGvtLScEa-ewlFVs_842GZ2v7XNZgPW6XYmRPIFPsQny0itjZbnDBxJSGQKXHfF6yOXFSiqgU0yvtZqC9lgaIHM-Epwuqd0VXk8Jk3JCMbwLZRs454f0WwMsWyEufFSIL6O_3CH18j7arwuAjQ6Mr3qSTUUTuon9s_aACZQ1XtfUbYi2Newfm-feWb3OlKFRknXIWj0JNO"/>
+        <img alt="Partner 12" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3o4Cje4TSzEkVJTTxTOjXDdAm4NlN2f6mfJWP4eKnZjygbDzJcysT6JupTO7_ht00gvep25xoO-IaQPJmsUpkjZVm7Tud_pBeKdBWQLsYcdsDm4ik3gzzjT1kYJ_DAVkZFLOxJdZBOf2t7ZmarMT60mHOVDXNAoH4KhL0JgjLPzKGB53rbnvt4aKGugAvx7BTFBUnQxC-ZOdWl72v34BiCOog5dUCY1lc7g4rLUp9MmNSU7wr970gTz-WvMVrRI_CJi5D2GAB82SS"/>
+    </div>
+</div>
+</main>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof L === 'undefined') return;
+
+    const map = L.map('ichkeul-heatmap', { zoomControl: false, scrollWheelZoom: false, attributionControl: false }).setView([37.17, 9.62], 11);
+    map.createPane('heatPane'); map.getPane('heatPane').style.zIndex = '300';
+    map.createPane('outlinePane'); map.getPane('outlinePane').style.zIndex = '400';
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom: 18 }).addTo(map);
+
+    const basinBounds = L.latLngBounds([[37.06, 9.44], [37.28, 9.80]]);
+    const riskMatrix = [
+        [18,22,35,58,67,82,88,91],
+        [16,23,41,49,59,76,84,90],
+        [14,20,36,44,56,63,79,86],
+        [12,18,25,38,47,60,72,84],
+        [10,15,21,34,42,55,69,80],
+        [8,12,18,28,36,48,62,75]
+    ];
+
+    const rows = riskMatrix.length; const cols = riskMatrix[0].length;
+    const latStep = (basinBounds.getNorth() - basinBounds.getSouth()) / rows;
+    const lngStep = (basinBounds.getEast() - basinBounds.getWest()) / cols;
+
+    const heatPoints = [];
+    const block = 2;
+    for (let r=0;r<rows;r+=block){
+        for (let c=0;c<cols;c+=block){
+            let sumLat=0,sumLng=0,sumRisk=0,count=0;
+            for (let br=0;br<block;br++) for (let bc=0;bc<block;bc++){
+                const rr=r+br, cc=c+bc; if (rr>=rows||cc>=cols) continue;
+                const south = basinBounds.getSouth() + (rows - rr - 1) * latStep;
+                const north = south + latStep;
+                const west = basinBounds.getWest() + cc * lngStep;
+                const east = west + lngStep;
+                const centerLat = (south+north)/2; const centerLng=(west+east)/2;
+                sumLat+=centerLat; sumLng+=centerLng; sumRisk+=riskMatrix[rr][cc]; count++;
+            }
+            if (!count) continue;
+            const avgLat=sumLat/count, avgLng=sumLng/count, avgRisk=sumRisk/count;
+            const norm = Math.max(0.02, Math.min(1.0, avgRisk/100.0));
+            heatPoints.push([avgLat, avgLng, norm]);
+            heatPoints.push([avgLat + (Math.random()-0.5)*latStep*0.7, avgLng + (Math.random()-0.5)*lngStep*0.7, Math.max(0.08, norm*0.78)]);
+            if (avgRisk>60) heatPoints.push([avgLat + (Math.random()-0.5)*latStep*1.4, avgLng + (Math.random()-0.5)*lngStep*1.4, Math.max(0.1, norm*0.9)]);
+        }
+    }
+    // hotspot seeds
+    heatPoints.push([37.20,9.68,0.95]); heatPoints.push([37.18,9.66,0.85]); heatPoints.push([37.14,9.52,0.68]);
+
+    L.heatLayer(heatPoints, {
+        pane: 'heatPane', radius: 64, blur: 48, maxZoom: 13, minOpacity: 0.28,
+        gradient: { 0.00:'#22c55e', 0.249:'#22c55e', 0.25:'#f59e0b', 0.499:'#f59e0b', 0.50:'#f97316', 0.749:'#f97316', 0.75:'#dc2626', 1.00:'#7f1d1d' }
+    }).addTo(map);
+
+    // hide polygon stroke (no border) and keep core marker silent
+    L.polygon([[37.08,9.50],[37.12,9.68],[37.22,9.75],[37.26,9.61],[37.20,9.46]], { pane:'outlinePane', color:'#0f766e', weight:0, fill:false }).addTo(map);
+    L.circleMarker([37.17,9.60],{ pane:'outlinePane', radius:7, color:'#ffffff', weight:0, fillColor:'#1b4332', fillOpacity:1 }).addTo(map);
+
+    setTimeout(()=>map.invalidateSize(),0);
+});
+</script>
+</body></html>

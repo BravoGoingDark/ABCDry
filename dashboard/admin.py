@@ -7,6 +7,7 @@ from .models import (
     ObservationYear,
     Region,
     RiskAssessment,
+    DroughtPrediction,
 )
 
 admin.site.register(Region)
@@ -15,3 +16,4 @@ admin.site.register(CropType)
 admin.site.register(IrrigationMethod)
 admin.site.register(EnvironmentalSnapshot)
 admin.site.register(RiskAssessment)
+admin.site.register(DroughtPrediction)
