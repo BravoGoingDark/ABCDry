@@ -6,7 +6,6 @@
 <title>Calculated Metrics | Ichkeul Intel</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
       tailwind.config = {
@@ -86,24 +85,16 @@
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Numeric value styling for calculations cards (futuristic) */
+        /* Numeric value styling for calculations cards */
         .value-number{
             display:inline-block;
-            font-family: 'Orbitron', Hanken Grotesk, Inter, system-ui, sans-serif;
-            font-weight:900;
-            letter-spacing:-0.02em;
-            background: linear-gradient(90deg,#06f6d4 0%, #7c3aed 45%, #06b6d4 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 4px 14px rgba(124,58,237,0.18), 0 2px 8px rgba(6,182,212,0.12);
-            transition: transform .18s ease, text-shadow .18s ease;
+            font-family: Hanken Grotesk, Inter, system-ui, sans-serif;
+            font-weight:800;
+            letter-spacing:-0.01em;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.6);
         }
         .value-display{line-height:1}
         .value-unit{font-size:0.75rem; opacity:0.9}
-        .metric-card{position:relative; overflow:hidden}
-        .metric-card::after{content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));}
-        .metric-chart{width:100%; height:44px; display:block; margin-top:6px; border-radius:6px}
     </style>
 </head>
 <body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
@@ -154,48 +145,107 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {% for section in calc_sections %}
-                    <div {% if section.category == 'Soil' %}id="soil"{% elif section.category == 'Climate' %}id="climate"{% elif section.category == 'Drought Indices' %}id="drought"{% endif %} class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
-                        <div class="flex items-center justify-between mb-4">
-                            <h4 class="font-headline font-bold text-primary">{{ section.category }}</h4>
-                            <span class="text-[11px] text-on-surface-variant">Derived</span>
-                        </div>
-                        <div class="space-y-3">
-                            {% for item in section.items %}
-                            <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4 metric-card">
-                                <div class="flex items-center gap-3 min-w-0">
-                                    <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
-                                        <span class="material-symbols-outlined text-secondary text-xl">insights</span>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
-                                        <div class="text-xs text-on-surface-variant mt-1">Derived</div>
-                                    </div>
+            <!-- Soil column -->
+            <div id="soil" class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-headline font-bold text-primary">Soil</h4>
+                    <span class="text-[11px] text-on-surface-variant">Derived</span>
+                </div>
+                <div class="space-y-3">
+                    {% for section in calc_sections %}{% if section.category == 'Soil' %}
+                        {% for item in section.items %}
+                        <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-secondary text-xl">insights</span>
                                 </div>
-                                <div class="text-right flex flex-col items-end">
-                                    <div class="value-display">
-                                        {% if item.value and item.value != '—' %}
-                                            <span class="value-number">{{ item.value }}</span>
-                                        {% else %}
-                                            <span class="value-number opacity-90">24.5</span>
-                                        {% endif %}
-                                        <span class="value-unit text-on-surface-variant ml-2"></span>
-                                    </div>
-                                    <div class="w-28 h-8 mt-2">
-                                        <canvas class="metric-chart" width="120" height="36"></canvas>
-                                    </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
                                 </div>
                             </div>
-                            {% endfor %}
+                            <div class="text-right flex flex-col items-end">
+                                <div class="value-display">
+                                    {% if item.value and item.value != '—' %}
+                                        <span class="value-number">{{ item.value }}</span>
+                                    {% else %}
+                                        <span class="value-number opacity-90">24.5</span>
+                                    {% endif %}
+                                    <span class="value-unit text-on-surface-variant ml-2"></span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    {% endfor %}
+                        {% endfor %}
+                    {% endif %}{% endfor %}
                 </div>
             </div>
 
-            <!-- Quick Reference removed per design request -->
+            <!-- Climate column -->
+            <div id="climate" class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-headline font-bold text-primary">Climate</h4>
+                    <span class="text-[11px] text-on-surface-variant">Derived</span>
+                </div>
+                <div class="space-y-3">
+                    {% for section in calc_sections %}{% if section.category == 'Climate' %}
+                        {% for item in section.items %}
+                        <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-secondary text-xl">insights</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <div class="value-display">
+                                    {% if item.value and item.value != '—' %}
+                                        <span class="value-number">{{ item.value }}</span>
+                                    {% else %}
+                                        <span class="value-number opacity-90">24.5</span>
+                                    {% endif %}
+                                    <span class="value-unit text-on-surface-variant ml-2"></span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}{% endfor %}
+                </div>
+            </div>
+
+            <!-- Drought column -->
+            <div id="drought" class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-headline font-bold text-primary">Drought Indices</h4>
+                    <span class="text-[11px] text-on-surface-variant">Derived</span>
+                </div>
+                <div class="space-y-3">
+                    {% for section in calc_sections %}{% if section.category == 'Drought Indices' %}
+                        {% for item in section.items %}
+                        <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
+                                    <span class="material-symbols-outlined text-secondary text-xl">insights</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <div class="value-display">
+                                    {% if item.value and item.value != '—' %}
+                                        <span class="value-number">{{ item.value }}</span>
+                                    {% else %}
+                                        <span class="value-number opacity-90">24.5</span>
+                                    {% endif %}
+                                    <span class="value-unit text-on-surface-variant ml-2"></span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}{% endfor %}
+                </div>
+            </div>
         </div>
 
         <!-- Charts: rendered from calc_sections data -->
@@ -421,51 +471,12 @@
                     const color = colorFor(name, value);
                     valueNumber.style.color = color;
                     valueNumber.style.fontWeight = '800';
-                    valueNumber.style.fontFamily = "Orbitron, Hanken Grotesk, Inter, system-ui, sans-serif";
-                    valueNumber.style.fontSize = window.innerWidth > 1024 ? '2.5rem' : '2rem';
-                    valueNumber.style.letterSpacing = '-0.02em';
-                    valueNumber.style.textShadow = '0 6px 18px rgba(124,58,237,0.16), 0 2px 6px rgba(6,182,212,0.10)';
+                    valueNumber.style.fontFamily = 'Hanken Grotesk, Inter, system-ui, sans-serif';
+                    valueNumber.style.fontSize = window.innerWidth > 1024 ? '2.25rem' : '1.75rem';
+                    valueNumber.style.letterSpacing = '-0.01em';
+                    valueNumber.style.textShadow = '0 1px 0 rgba(255,255,255,0.6)';
                     if(unitEl){ unitEl.textContent = unitFor(name); }
                 }catch(e){/* ignore per-card errors */}
-            });
-        })();
-        </script>
-
-        <script>
-        (function(){
-            // render tiny metric charts for each .metric-chart canvas
-            const cardNodes = document.querySelectorAll('.metric-card');
-            cardNodes.forEach(card=>{
-                try{
-                    const nameEl = card.querySelector('.text-sm.font-semibold');
-                    const name = nameEl ? nameEl.textContent.trim() : '';
-                    const valueEl = card.querySelector('.value-number');
-                    const canvas = card.querySelector('.metric-chart');
-                    if(!canvas || !valueEl) return;
-
-                    const v = parseFloat((valueEl.textContent||'').replace(/[^0-9\.-]+/g,''));
-                    const base = Number.isFinite(v) ? Math.abs(v) : 1;
-                    const sign = (v < 0) ? -1 : 1;
-                    // synthetic series around value
-                    const series = [0.9,0.95,1.0,1.03,0.98].map(f=> +( (base * f * sign).toFixed(2) ));
-                    const ctx = canvas.getContext('2d');
-                    const color = (function(){ try{ const col = card.querySelector('.value-number').style.color; return col || '#06b6d4'; }catch(e){return '#06b6d4'} })();
-                    const hexToRgba = (hex, a)=>{
-                        try{
-                            const h = hex.replace('#','');
-                            const bigint = parseInt(h.length===3? h.split('').map(c=>c+c).join(''): h,16);
-                            const r = (bigint >> 16) & 255;
-                            const g = (bigint >> 8) & 255;
-                            const b = bigint & 255;
-                            return `rgba(${r},${g},${b},${a})`;
-                        }catch(e){return `rgba(6,182,212,${a})`;}
-                    };
-                    new Chart(ctx, {
-                        type:'line',
-                        data:{ labels: series.map((_,i)=>i), datasets:[{ data: series, borderColor: color, backgroundColor: hexToRgba(color,0.12), fill:true, tension:0.36, pointRadius:0, borderWidth:2.6 }] },
-                        options:{ responsive:false, maintainAspectRatio:false, plugins:{legend:{display:false}}, elements:{line:{borderJoinStyle:'round', borderCapStyle:'round'}}, scales:{x:{display:false}, y:{display:false}} }
-                    });
-                }catch(e){/* ignore */}
             });
         })();
         </script>
@@ -480,6 +491,14 @@
                 <img alt="Partner 4" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsSBkwewznff9xbCUL-_IVa5u9oekPBtZqOU7BbqpyM_vTWbSs0Jek9xDm9Fd36KqJt8Jj37UsBlZfcBgv53bVFs52_hAyQeCSOgKW_T3i-RD7ntGu-mCndTIrK_0fgRFtf_u33moTzh7CyM882rbsKvUfAEo_savvjlPO0LTb_urqwjE5uf1fTyMvqVpvS_sN5cwUYaiwFtObiaEI3PIYxBJiKaV-yuQIforAqpmOCgbqIuCi_vQlHMcxB8m1-cFRsDWcEO8m51FX"/>
                 <img alt="Partner 5" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUjjgybQhGLoYEuC5R-qTcTA-M66lzYwqcj82lp1kCVERasgYCbaIMyZigzXcvPPywEjLKRFjpXzWnrdWdd889g0etSDIch6QKFSyoRJM-Po35u-utQmRdxGu7n__PkefPt-wPmKeLc4AAb1v3Weev619cNRKC-Fj1wDbCS3GbFZzolyAkOFp04JpdqQ74xNX6qPnP8tZpherPA19hGERjBGSxZTXP94A5uZOyc9N6x9bDdrv3LXdIpkM83GMS3wIdh3Mcewlge8RA"/>
                 <img alt="Partner 6" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCheGmgZ3dVY5beDDg8SqGO-caxlpvxXGVm62z4CVZrMVFMYM-Kwda4g4hSV853B17h-tx9l0fghlc-wny4vHwyDLRzdqaD1tS6WoXbH6tv7d8w8RxNxFzC3srevjnQHuzgUe7dVo9DI8fAlQ5ShFDkLBD_xRoKzX4BrRVw8mVHrHVkB_5H2Nw414EZMOjt8BANHqrrd83yu2Oj2Da_NkHf9bjKYnYXKVWig9BESrNwk2j4OXj0DmluvxnCsBELhDNmHCvUSKzCjPTz"/>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-12 gap-y-8 items-center justify-items-center opacity-80 mt-8 border-t border-outline-variant/30 pt-6">
+                <img alt="Partner 7" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARQDrUUyqKNYOLZ21jI6vVfYpomqbzd8Gn7jtjxkJ8sPFQPSoFNU1qqXBxcNJvs81oelnEIo4TbNDFa0c8_QSftQcWT-rJGe7opwToxT_muf9aC5VZUwVGmXhZJdB30rnMdntd33B1el_L2YxYx9RhVDpsG0MsG2atHtNjByJzEH0-iI1Qgbgnev3DPsUmr7jKxeY2kbmoculGLEKEgPNZWmIYjyKpFFleNxFfP_A43RPvP_xOG5tURmgO0-EO-d7IPg2Sz9hOzkLk"/>
+                <img alt="Partner 8" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASqbTvFZ9gXy8NSpRwH03A0AAQiJFWgeaux3hBUOzxo0bbmn1JfTbkTz1TUyCtHr9ifvotfc23UCLTopmPRzKf8KEK8CqM4k0CVsufcVh3AizAb5YSW2I_cg9onzTMqFUaeD91X2hLVDUBaLFCWKDZHZmlDjkI16UqnCFaqnHtb8wREIEBeJFqgrnLzrCzQb3IFJNrUNdDAiqhI-CTYOv8sCXm6wlrXFUNO-4pcTikBYlWlsGBNQ6KMOPaj3VyoMjpXqtCys3VbN-S"/>
+                <img alt="Partner 9" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARbtDpPaV_DRnJs2OGrf_rahE4f4V1vMIagnQ-1b_kCX3p8Dc9u6WYZYxBCYl1uMgLEm_Gp8IwEQ5nRIryC11bjADz7d8eDOBlUu-yzqWfrzzJ4HLNSlMQ-m1m2J283_n-60RyPpy5u_pntI0_csmdkIGpNVxIp1e20Cxgbobbr9T1ig_wjlVYsfLhVQxfWqCAjzRZPJsnIpbGZX3NSvODLB5pX5w98BEJhcjOFLelZxX9NZ0gYbMyF5lncx359BOJ4iyQ9ur88gqy"/>
+                <img alt="Partner 10" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqZ6uc-4vka48KfBPj-Q61QPkvruAqhKpK_DEiRGv88kaxv1m6S2PNiM57vfYbAU8Yv72Z5wXD2bUJ54trpyc0DMG3PJmH4oGhTTSCw4IzhViVs1NDpQCiu3VGn3dlQKFNuNKPUVUFsPNNo5t5Y749gAjHwqK4pjQ4U2eT1y6VN2CPjK_hehjI6kb1dMzK5i-GihEtyy8GURWoD-7tGvZSA2h13SGR6SQV3OnFd7lvAinASPt_A8y8xai_vVfGv0thhB6QYMXPS4Af"/>
+                <img alt="Partner 11" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjzRjryBIpG_dmjlsC2zAU3geFrSZJXwKhQ19NDAVt7uZgV4gMa5tsVOZp38RVZ5Dd-HfGvtLScEa-ewlFVs_842GZ2v7XNZgPW6XYmRPIFPsQny0itjZbnDBxJSGQKXHfF6yOXFSiqgU0yvtZqC9lgaIHM-Epwuqd0VXk8Jk3JCMbwLZRs454f0WwMsWyEufFSIL6O_3CH18j7arwuAjQ6Mr3qSTUUTuon9s_aACZQ1XtfUbYi2Newfm-feWb3OlKFRknXIWj0JNO"/>
+                <img alt="Partner 12" class="h-16 w-auto object-contain grayscale hover:grayscale-0 transition-all duration-300 cursor-pointer" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3o4Cje4TSzEkVJTTxTOjXDdAm4NlN2f6mfJWP4eKnZjygbDzJcysT6JupTO7_ht00gvep25xoO-IaQPJmsUpkjZVm7Tud_pBeKdBWQLsYcdsDm4ik3gzzjT1kYJ_DAVkZFLOxJdZBOf2t7ZmarMT60mHOVDXNAoH4KhL0JgjLPzKGB53rbnvt4aKGugAvx7BTFBUnQxC-ZOdWl72v34BiCOog5dUCY1lc7g4rLUp9MmNSU7wr970gTz-WvMVrRI_CJi5D2GAB82SS"/>
             </div>
         </div>
 
