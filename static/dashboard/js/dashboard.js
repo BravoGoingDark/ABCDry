@@ -384,6 +384,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 setMapInfo(tr("ping_no_live"));
             }
             scheduleLiveMetricsRefresh();
+            // Also resolve region and update charts for this location
+            resolveRegionAndUpdateCharts(event.latlng.lat, event.latlng.lng);
             return;
         }
 
@@ -424,6 +426,102 @@ document.addEventListener("DOMContentLoaded", () => {
             measurePoints = [];
         }
     });
+
+    // ── Chart data update ─────────────────────────────────────────────
+    const fetchChartData = async (regionId, yearId) => {
+        try {
+            let url = `/api/chart-data/?region_id=${encodeURIComponent(regionId)}`;
+            if (yearId) url += `&year_id=${encodeURIComponent(yearId)}`;
+            const response = await fetch(url);
+            if (!response.ok) return;
+            const data = await response.json();
+
+            // Update polylines
+            const setPoints = (id, pts) => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('points', pts || '');
+            };
+            setPoints('chart-climate-rainfall', data.climate_points_rainfall);
+            setPoints('chart-climate-temp', data.climate_points_temp);
+            setPoints('chart-climate-spi', data.climate_points_spi);
+            setPoints('chart-climate-ndvi', data.climate_points_ndvi);
+            setPoints('chart-drought-spi', data.drought_points_spi);
+            setPoints('chart-drought-spei', data.drought_points_spei);
+            setPoints('chart-ndvi', data.ndvi_points);
+
+            // Update Y-axis labels
+            const setLabels = (prefix, labels) => {
+                for (let i = 0; i < 4; i++) {
+                    const el = document.getElementById(prefix + '-y' + i);
+                    if (el) {
+                        const suffix = prefix === 'climate' ? '%' : '';
+                        const fmt = prefix === 'climate' ? Number(labels[i]).toFixed(0) : Number(labels[i]).toFixed(1);
+                        el.textContent = fmt + suffix;
+                    }
+                }
+            };
+            setLabels('climate', data.climate_labels);
+            setLabels('drought', data.drought_labels);
+            setLabels('ndvi', data.ndvi_labels);
+
+            // Update month labels
+            const setMonths = (id, months) => {
+                const el = document.getElementById(id);
+                if (el) el.innerHTML = months.map(function(m) { return '<span>' + m + '</span>'; }).join('');
+            };
+            setMonths('climate-months', data.chart_months);
+            setMonths('drought-months', data.chart_months);
+            setMonths('ndvi-months', data.chart_months);
+        } catch (e) {
+            // chart update is non-critical
+        }
+    };
+
+    const resolveRegionAndUpdateCharts = async (lat, lon) => {
+        try {
+            const resp = await fetch(`/api/resolve-region/?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+            if (!resp.ok) return;
+            const region = await resp.json();
+            if (region.region_id && regionSelector) {
+                // Update the region selector to match
+                for (let i = 0; i < regionSelector.options.length; i++) {
+                    if (regionSelector.options[i].value == region.region_id) {
+                        regionSelector.selectedIndex = i;
+                        break;
+                    }
+                }
+                // Update charts
+                await fetchChartData(region.region_id, yearSelector ? yearSelector.value : null);
+            }
+        } catch (e) {
+            // non-critical
+        }
+    };
+
+    const getYearId = () => yearSelector ? yearSelector.value : null;
+
+    // Region selector change → update charts
+    if (regionSelector) {
+        regionSelector.addEventListener('change', async function() {
+            const val = regionSelector.value;
+            if (val) await fetchChartData(val, getYearId());
+        });
+    }
+
+    // Year selector change → update charts
+    if (yearSelector) {
+        yearSelector.addEventListener('change', async function() {
+            const regionVal = regionSelector ? regionSelector.value : null;
+            if (regionVal) await fetchChartData(regionVal, yearSelector.value);
+        });
+    }
+
+    // Initial chart load: get region + year from the currently selected options
+    (function initCharts() {
+        if (regionSelector && regionSelector.value) {
+            fetchChartData(regionSelector.value, getYearId());
+        }
+    })();
 
     activateSelectMode();
     scheduleLiveMetricsRefresh();

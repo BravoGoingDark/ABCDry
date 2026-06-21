@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 from urllib.error import URLError
 from urllib.request import urlopen
 from io import BytesIO
@@ -9,7 +10,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.utils.translation import gettext as _
+from django.utils import timezone
 from django.urls import reverse
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Avg
 
 from .forms import (
     RiskSimulationForm,
@@ -21,6 +27,7 @@ from .forms import (
     HydrologyMetricsForm,
     ExcelImportForm,
     BulkMetricsImportForm,
+    UserCreateForm,
 )
 from .models import (
     CropType,
@@ -37,49 +44,182 @@ from .models import (
     RemoteSensingMetrics,
     HydrologyMetrics,
     DataImportLog,
+    UserProfile,
 )
 from .data_ingestion_utils import DataImporter, DataIngestionError, create_reference_data
 
 
 def _seed_reference_data():
-    CropType.objects.filter(name="Ble (Durum)").update(name="Blé (Durum)")
-    IrrigationMethod.objects.filter(name="Irrigation au goutte-a-goutte").update(
-        name="Irrigation au goutte-à-goutte"
-    )
-    IrrigationMethod.objects.filter(name="Alimente par la pluie").update(
-        name="Alimenté par la pluie"
-    )
+    needs_seed = Region.objects.filter(name__in=["Tunisia", "Morocco", "Algeria", "Bizerte"]).count() < 4
+    if needs_seed:
+        CropType.objects.filter(name="Ble (Durum)").update(name="Blé (Durum)")
+        IrrigationMethod.objects.filter(name="Irrigation au goutte-a-goutte").update(
+            name="Irrigation au goutte-à-goutte"
+        )
+        IrrigationMethod.objects.filter(name="Alimente par la pluie").update(
+            name="Alimenté par la pluie"
+        )
 
-    for region in ["Tunisia", "Morocco", "Algeria"]:
-        Region.objects.get_or_create(name=region)
-    for year in ["2024 (Current)", "2023", "2022", "2020 - 2024", "2015 - 2019"]:
-        ObservationYear.objects.get_or_create(label=year)
-    for crop in ["Blé (Durum)", "Olives", "Tomates", "Orge"]:
-        CropType.objects.get_or_create(name=crop)
-    for irrigation in [
-        "Irrigation au goutte-à-goutte",
-        "Asperseurs",
-        "Alimenté par la pluie",
-    ]:
-        IrrigationMethod.objects.get_or_create(name=irrigation)
+        for region in ["Tunisia", "Morocco", "Algeria", "Bizerte"]:
+            Region.objects.get_or_create(name=region)
+        for year in ["2026", "2025", "2024", "2023", "2022", "2020 - 2024", "2015 - 2019"]:
+            ObservationYear.objects.get_or_create(label=year)
+        for crop in ["Blé (Durum)", "Olives", "Tomates", "Orge"]:
+            CropType.objects.get_or_create(name=crop)
+        for irrigation in [
+            "Irrigation au goutte-à-goutte",
+            "Asperseurs",
+            "Alimenté par la pluie",
+        ]:
+            IrrigationMethod.objects.get_or_create(name=irrigation)
 
-    region = Region.objects.get(name="Tunisia")
-    year = ObservationYear.objects.get(label="2024 (Current)")
-    EnvironmentalSnapshot.objects.get_or_create(
-        region=region,
-        year=year,
-        defaults={
-            "wind_speed_kmh": 24,
-            "wind_gust_kmh": 32,
-            "wind_direction": "NE",
-            "rainfall_mm": 18.5,
-            "rainfall_delta_percent": -12,
-            "ph_level": 7.2,
-            "npk_index": "Med-High",
-            "temperature_c": 28,
-            "humidity_percent": 64,
-        },
-    )
+        region = Region.objects.get(name="Tunisia")
+        year = ObservationYear.objects.get(label="2026")
+        EnvironmentalSnapshot.objects.get_or_create(
+            region=region,
+            year=year,
+            defaults={
+                "wind_speed_kmh": 24,
+                "wind_gust_kmh": 32,
+                "wind_direction": "NE",
+                "rainfall_mm": 18.5,
+                "rainfall_delta_percent": -12,
+                "ph_level": 7.2,
+                "npk_index": "Med-High",
+                "temperature_c": 28,
+                "humidity_percent": 64,
+            },
+        )
+
+    # Always clean up duplicate (Current) year labels and ensure current year exists
+    ObservationYear.objects.filter(label__endswith="(Current)").delete()
+    ObservationYear.objects.get_or_create(label=str(timezone.now().year))
+
+    bizerte = Region.objects.filter(name="Bizerte").first()
+    if bizerte:
+        from decimal import Decimal
+        changed = False
+        if bizerte.latitude is None:
+            bizerte.latitude = Decimal("37.27")
+            changed = True
+        if bizerte.longitude is None:
+            bizerte.longitude = Decimal("9.87")
+            changed = True
+        if bizerte.country is None:
+            bizerte.country = "Tunisia"
+            changed = True
+        if bizerte.area_km2 is None:
+            bizerte.area_km2 = Decimal("3680")
+            changed = True
+        if changed:
+            bizerte.save()
+
+
+# ============== RBAC HELPERS ==============
+
+
+def _is_admin_user(user):
+    """Check if user is superadmin (full access)."""
+    if not user.is_authenticated:
+        return False
+    return getattr(user, 'profile', None) and user.profile.role == 'superadmin'
+
+
+def _is_subadmin_user(user):
+    """Check if user is subadmin (region-restricted access)."""
+    if not user.is_authenticated:
+        return False
+    return getattr(user, 'profile', None) and user.profile.role == 'subadmin'
+
+
+def _is_viewer_user(user):
+    """Check if user is viewer (read-only access)."""
+    if not user.is_authenticated:
+        return False
+    return getattr(user, 'profile', None) and user.profile.role == 'viewer'
+
+
+def _deny_admin_access(request):
+    """Redirect non-superadmin users away from admin pages."""
+    messages.error(request, _('You do not have permission to access this page.'))
+    return redirect('dashboard:dashboard')
+
+
+def _deny_data_access(request):
+    """Redirect users without data mutation permission."""
+    messages.error(request, _('You do not have permission to modify data.'))
+    return redirect('dashboard:dashboard')
+
+
+def _user_can_access_region(user, region_id):
+    """Check if a subadmin can access the given region."""
+    if _is_admin_user(user):
+        return True
+    if _is_subadmin_user(user):
+        return str(user.profile.region_id) == str(region_id)
+    return False
+
+
+def _check_data_permission(request, region_id=None):
+    """Check if user can mutate data.
+    - Viewer: always denied
+    - Subadmin: allowed only if region_id matches their assigned region
+    - Superadmin: always allowed
+    """
+    if not request.user.is_authenticated:
+        return False
+    profile = getattr(request.user, 'profile', None)
+    if not profile:
+        return False
+    if profile.is_viewer():
+        return False
+    if profile.is_superadmin():
+        return True
+    if profile.is_subadmin():
+        if region_id is not None:
+            return str(profile.region_id) == str(region_id)
+        return True
+    return False
+
+
+# ============== COORDINATE VALIDATION ==============
+
+import math
+
+
+def _haversine_distance(lat1, lon1, lat2, lon2):
+    """Calculate distance in km between two lat/lng pairs (Haversine formula)."""
+    R = 6371
+    dlat = math.radians(float(lat2) - float(lat1))
+    dlon = math.radians(float(lon2) - float(lon1))
+    a = math.sin(dlat / 2) ** 2 + math.cos(math.radians(float(lat1))) * math.cos(math.radians(float(lat2))) * math.sin(dlon / 2) ** 2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
+
+def _validate_coordinates_for_region(region, latitude, longitude):
+    """Check if lat/lng falls within the region's radius from its center.
+    Returns (is_valid: bool, error_message: str or None).
+    """
+    if not region.latitude or not region.longitude:
+        return True, None
+    if latitude is None or longitude is None:
+        return False, _('Latitude and longitude are required.')
+    try:
+        lat = float(latitude)
+        lng = float(longitude)
+    except (TypeError, ValueError):
+        return False, _('Invalid latitude or longitude values.')
+    if not (-90 <= lat <= 90) or not (-180 <= lng <= 180):
+        return False, _('Latitude must be between -90 and 90, longitude between -180 and 180.')
+    distance = _haversine_distance(region.latitude, region.longitude, lat, lng)
+    radius = float(region.radius_km) if region.radius_km else 100.0
+    if distance > radius:
+        return False, _('Coordinates are {:.0f} km from the center of {}, which exceeds the {:.0f} km limit.').format(distance, region.name, radius)
+    return True, None
+
+
+# ============== METRIC BROWSER ==============
 
 
 def _metric_browser_value(value):
@@ -163,7 +303,8 @@ def _build_browser_row(obj):
 
 
 def _build_browser_section(key, config):
-    queryset = config["model"].objects.select_related(*config["select_related"]).order_by("-measurement_date")
+    total_count = config["model"].objects.count()
+    queryset = config["model"].objects.select_related(*config["select_related"]).order_by("-id")[:25]
     rows = [_build_browser_row(obj) for obj in queryset]
     return {
         "key": key,
@@ -171,7 +312,8 @@ def _build_browser_section(key, config):
         "model_name": config["model"].__name__,
         "headers": [field.verbose_name.title() for field in config["model"]._meta.fields],
         "rows": rows,
-        "count": len(rows),
+        "count": total_count,
+        "display_count": len(rows),
         "add_url": reverse(config["add_url"]),
         "export_url": reverse("dashboard:export_metrics", args=[config["export_type"]]),
     }
@@ -200,6 +342,10 @@ def edit_metric_entry(request, metric_type, pk):
         return redirect("dashboard:metrics_browser")
 
     instance = get_object_or_404(config["model"], pk=pk)
+    region_id = getattr(instance, 'region_id', None)
+    if not _check_data_permission(request, region_id):
+        return _deny_data_access(request)
+
     form_class = config["form"]
 
     if request.method == "POST":
@@ -231,15 +377,71 @@ def delete_metric_entry(request, metric_type, pk):
         return redirect("dashboard:metrics_browser")
 
     instance = get_object_or_404(config["model"], pk=pk)
+    region_id = getattr(instance, 'region_id', None)
+    if not _check_data_permission(request, region_id):
+        return _deny_data_access(request)
+
     instance.delete()
     messages.success(request, _("%s deleted successfully!") % config["title"])
     return redirect(reverse("dashboard:metrics_browser") + f"#{metric_type}")
 
 
+@require_http_methods(["POST"])
+def delete_metric_table(request, metric_type):
+    """Delete all entries for a given metric type. Region-restricted for subadmins."""
+    config = METRIC_BROWSER_CONFIGS.get(metric_type)
+    if not config:
+        messages.error(request, _("Unknown metric type."))
+        return redirect("dashboard:metrics_browser")
+
+    if _is_viewer_user(request.user):
+        return _deny_data_access(request)
+
+    model = config["model"]
+    if _is_admin_user(request.user):
+        model.objects.all().delete()
+    elif _is_subadmin_user(request.user):
+        region_id = request.user.profile.region_id
+        if region_id:
+            model.objects.filter(region_id=region_id).delete()
+        else:
+            messages.error(request, _("No region assigned to your account."))
+            return redirect("dashboard:metrics_browser")
+    else:
+        return _deny_data_access(request)
+
+    messages.success(request, _("All %s deleted successfully!") % config["title"])
+    return redirect(reverse("dashboard:metrics_browser") + f"#{metric_type}")
+
+
+@require_http_methods(["POST"])
+def delete_all_metrics(request):
+    """Delete all metric data across all tables. Superadmin — full; Subadmin — own region only."""
+    if _is_viewer_user(request.user):
+        return _deny_data_access(request)
+
+    if _is_admin_user(request.user):
+        for config in METRIC_BROWSER_CONFIGS.values():
+            config["model"].objects.all().delete()
+        messages.success(request, _("All metric data deleted successfully!"))
+    elif _is_subadmin_user(request.user):
+        region_id = request.user.profile.region_id
+        if not region_id:
+            messages.error(request, _("No region assigned to your account."))
+            return redirect("dashboard:metrics_browser")
+        for config in METRIC_BROWSER_CONFIGS.values():
+            config["model"].objects.filter(region_id=region_id).delete()
+        messages.success(request, _("All data for your region deleted successfully!"))
+    else:
+        return _deny_data_access(request)
+
+    return redirect("dashboard:metrics_browser")
+
+
 def _calculate_risk(crop_name, irrigation_name):
     crop_lower = crop_name.lower()
     irr_lower = irrigation_name.lower()
-    wheat_like = "blé" in crop_lower or "ble" in crop_lower or "durum" in crop_lower or "wheat" in crop_lower
+    wheat_like = "blé" in crop_lower or crop_lower.startswith("ble") or "durum" in crop_lower or "wheat" in crop_lower
     drip_like = "goutte" in irr_lower or "drip" in irr_lower
     if wheat_like and drip_like:
         return (
@@ -355,13 +557,20 @@ def live_metrics_api(request):
     temperature = float(current.get("temperature_2m", 0))
     humidity = int(current.get("relative_humidity_2m", 0))
 
+    delta = 0
+    avg_rainfall = ClimateMetrics.objects.filter(
+        rainfall_mm__isnull=False
+    ).aggregate(avg=Avg("rainfall_mm"))["avg"]
+    if avg_rainfall is not None and avg_rainfall > 0:
+        delta = round(((precipitation - float(avg_rainfall)) / float(avg_rainfall)) * 100)
+
     return JsonResponse(
         {
             "wind_speed_kmh": round(wind_speed, 1),
             "wind_gust_kmh": round(wind_gust, 1),
             "wind_direction": _degree_to_compass(wind_deg),
             "rainfall_mm": round(precipitation, 1),
-            "rainfall_delta_percent": 0,
+            "rainfall_delta_percent": delta,
             "temperature_c": round(temperature, 1),
             "humidity_percent": humidity,
             "source": "open-meteo",
@@ -369,13 +578,134 @@ def live_metrics_api(request):
     )
 
 
+def _svg_points(values, vmin=None, vmax=None, svg_x_start=25, svg_x_end=295, svg_y_top=10, svg_y_bottom=130):
+    n = len(values)
+    if n == 0:
+        return ""
+    if n == 1:
+        x = (svg_x_start + svg_x_end) / 2
+        return f"{x:.1f},{((svg_y_top + svg_y_bottom) / 2):.1f}"
+    lo = vmin if vmin is not None else min(values)
+    hi = vmax if vmax is not None else max(values)
+    if hi == lo:
+        hi = lo + 1
+    pts = []
+    for i, v in enumerate(values):
+        x = svg_x_start + (i / (n - 1)) * (svg_x_end - svg_x_start)
+        norm = (v - lo) / (hi - lo)
+        y = svg_y_bottom - norm * (svg_y_bottom - svg_y_top)
+        pts.append(f"{x:.1f},{y:.1f}")
+    return " ".join(pts)
+
+
+def _month_labels(queryset=None, limit=12):
+    if queryset is None:
+        return ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+                "Jan", "Feb", "Mar", "Apr", "May"]
+    ms = []
+    seen = set()
+    for obj in queryset:
+        if obj.measurement_date:
+            m = obj.measurement_date.strftime("%b")
+            if m not in seen:
+                ms.append(m)
+                seen.add(m)
+            if len(ms) >= limit:
+                break
+    ms.reverse()
+    while len(ms) < limit:
+        ms.insert(0, "")
+    return ms[:limit]
+
+
+def _chart_series(queryset, field, limit=12):
+    vals = []
+    for obj in queryset:
+        v = getattr(obj, field)
+        if v is not None:
+            vals.append(float(v))
+        if len(vals) >= limit:
+            break
+    vals.reverse()  # newest-first → chronological order
+    return vals
+
+
+def _chart_months(queryset, field, limit=12):
+    """Return exactly `limit` month labels aligned 1:1 with _chart_series()."""
+    labels = []
+    for obj in queryset:
+        v = getattr(obj, field, None)
+        if v is not None:
+            labels.append(obj.measurement_date.strftime("%b") if obj.measurement_date else "")
+        if len(labels) >= limit:
+            break
+    labels.reverse()
+    while len(labels) < limit:
+        labels.insert(0, "")
+    return labels[:limit]
+
+
+def _normalize(values):
+    """Scale values to 0-100% based on data min/max."""
+    if not values:
+        return values
+    lo, hi = min(values), max(values)
+    if hi == lo:
+        return [50.0] * len(values)
+    return [(v - lo) / (hi - lo) * 100 for v in values]
+
+
+def _year_series(queryset, field, n=12):
+    """Extract n evenly-spaced values from a queryset (newest-first) for yearly view."""
+    all_vals = []
+    for obj in queryset:
+        v = getattr(obj, field)
+        if v is not None:
+            all_vals.append(float(v))
+    if not all_vals:
+        return []
+    all_vals.reverse()  # chronological
+    if len(all_vals) <= n:
+        return all_vals
+    step = (len(all_vals) - 1) / n
+    return [all_vals[round(i * step)] for i in range(n)]
+
+
+def _year_months(queryset, field, n=12):
+    """Month labels aligned with _year_series()."""
+    all_dates = []
+    for obj in queryset:
+        v = getattr(obj, field, None)
+        if v is not None:
+            all_dates.append(obj.measurement_date)
+    if not all_dates:
+        return [""] * n
+    all_dates.reverse()
+    if len(all_dates) <= n:
+        labels = [d.strftime("%b") if d else "" for d in all_dates]
+        while len(labels) < n:
+            labels.insert(0, "")
+        return labels[:n]
+    step = (len(all_dates) - 1) / n
+    labels = []
+    for i in range(n):
+        d = all_dates[round(i * step)]
+        labels.append(d.strftime("%b") if d else "")
+    return labels
+
+
 def dashboard_view(request):
     _seed_reference_data()
     result = None
     form = RiskSimulationForm(request.POST or None)
+    now = timezone.now()
+    year_ago = now - timedelta(days=365)
 
     if request.method == "POST" and form.is_valid():
         region = form.cleaned_data["region"]
+        if not _check_data_permission(request, region.id if region else None):
+            messages.error(request, _('You do not have permission to submit risk assessments.'))
+            return redirect('dashboard:dashboard')
         year = form.cleaned_data["year"]
         crop = form.cleaned_data["crop"]
         irrigation = form.cleaned_data["irrigation"]
@@ -391,14 +721,107 @@ def dashboard_view(request):
             irrigation=irrigation,
             risk_level=risk_level,
             recommendation=recommendation,
+            created_by=request.user if request.user.is_authenticated else None,
         )
         snapshot = EnvironmentalSnapshot.objects.filter(region=region, year=year).first()
+        chart_region = region
+        chart_year = year
     else:
-        default_region = Region.objects.get(name="Tunisia")
-        default_year = ObservationYear.objects.get(label="2024 (Current)")
+        default_region = Region.objects.filter(name="Bizerte").first() or Region.objects.first()
+        default_year = ObservationYear.objects.filter(label=str(timezone.now().year)).first()
+        if not default_year:
+            default_year = ObservationYear.objects.order_by('-label').first()
         snapshot = EnvironmentalSnapshot.objects.filter(
             region=default_region, year=default_year
         ).first()
+        chart_region = default_region
+        chart_year = default_year
+
+    # ---- Live chart data ----
+    months = _month_labels()
+
+    # Extract year number from chart_year for yearly filtering
+    try:
+        year_num = int(chart_year.label.split()[0])
+    except (ValueError, AttributeError):
+        year_num = None
+
+    if year_num:
+        climate_qs = ClimateMetrics.objects.filter(
+            region=chart_region, measurement_date__year=year_num
+        ).order_by("-measurement_date")
+        drought_qs = DroughtIndices.objects.filter(
+            region=chart_region, measurement_date__year=year_num
+        ).order_by("-measurement_date")
+        rs_qs = RemoteSensingMetrics.objects.filter(
+            region=chart_region, measurement_date__year=year_num
+        ).order_by("-measurement_date")
+
+        climate_rainfall = _year_series(climate_qs, "rainfall_mm")
+        climate_temp = _year_series(climate_qs, "temperature_mean_c")
+        drought_spi = _year_series(drought_qs, "spi_3month")
+        drought_spei = _year_series(drought_qs, "spei_3month")
+        ndvi_values = _year_series(rs_qs, "ndvi")
+
+        chart_months = _year_months(climate_qs, "rainfall_mm")
+    else:
+        climate_qs = ClimateMetrics.objects.filter(
+            region=chart_region, measurement_date__gte=year_ago
+        ).order_by("-measurement_date")
+        drought_qs = DroughtIndices.objects.filter(
+            region=chart_region, measurement_date__gte=year_ago
+        ).order_by("-measurement_date")
+        rs_qs = RemoteSensingMetrics.objects.filter(
+            region=chart_region, measurement_date__gte=year_ago
+        ).order_by("-measurement_date")
+
+        climate_rainfall = _chart_series(climate_qs, "rainfall_mm")
+        climate_temp = _chart_series(climate_qs, "temperature_mean_c")
+        drought_spi = _chart_series(drought_qs, "spi_3month")
+        drought_spei = _chart_series(drought_qs, "spei_3month")
+        ndvi_values = _chart_series(rs_qs, "ndvi")
+
+        chart_months = _chart_months(climate_qs, "rainfall_mm")
+
+    if not any(chart_months):
+        chart_months = months
+
+    # Normalized (0-100%) versions for the overlaid climate chart
+    climate_rainfall_norm = _normalize(climate_rainfall)
+    climate_temp_norm = _normalize(climate_temp)
+    drought_spi_norm = _normalize(drought_spi)
+    ndvi_values_norm = _normalize(ndvi_values)
+
+    # Fixed display ranges for standalone drought/NDVI charts
+    spi_min, spi_max = -3, 3
+    ndvi_min, ndvi_max = 0, 1
+
+    def _labels(lo, hi):
+        return [hi, hi - (hi - lo) / 3, lo + (hi - lo) / 3, lo]
+
+    chart_data = {
+        "climate_points_rainfall": _svg_points(climate_rainfall_norm, vmin=0, vmax=100),
+        "climate_points_temp": _svg_points(climate_temp_norm, vmin=0, vmax=100),
+        "climate_points_spi": _svg_points(drought_spi_norm, vmin=0, vmax=100),
+        "climate_points_ndvi": _svg_points(ndvi_values_norm, vmin=0, vmax=100),
+        "drought_points_spi": _svg_points(drought_spi, vmin=spi_min, vmax=spi_max),
+        "drought_points_spei": _svg_points(drought_spei, vmin=spi_min, vmax=spi_max),
+        "ndvi_points": _svg_points(ndvi_values, vmin=ndvi_min, vmax=ndvi_max),
+        "chart_months": chart_months,
+        "climate_labels": _labels(0, 100),
+        "drought_labels": _labels(-3.0, 3.0),
+        "ndvi_labels": _labels(0, 1.0),
+    }
+
+    demo_banner_level = _("High risk")
+    demo_banner_body = _(
+        "Current soil salinity levels in sector 4 are incompatible with durum wheat under drip irrigation. "
+        "Consider switching to highly salt-tolerant crops or scheduling intensive leaching protocols before sowing."
+    )
+    latest_ra = RiskAssessment.objects.order_by("-created_at").first()
+    if latest_ra:
+        demo_banner_level = latest_ra.risk_level
+        demo_banner_body = latest_ra.recommendation
 
     context = {
         "form": form,
@@ -408,12 +831,10 @@ def dashboard_view(request):
         "lakes_by_region_json": json.dumps(_lakes_by_region()),
         "dashboard_js_i18n_json": json.dumps(_dashboard_js_i18n()),
         "demo_risk_banner": {
-            "level": _("High risk"),
-            "body": _(
-                "Current soil salinity levels in sector 4 are incompatible with durum wheat under drip irrigation. "
-                "Consider switching to highly salt-tolerant crops or scheduling intensive leaching protocols before sowing."
-            ),
+            "level": demo_banner_level,
+            "body": demo_banner_body,
         },
+        **chart_data,
     }
     return render(request, "dashboard/dashboard.html", context)
 
@@ -456,6 +877,33 @@ def api_submit_metrics(request):
                 pass
         if data.get('region_id') and isinstance(data.get('region_id'), str) and data.get('region_id').isdigit():
             data['region_id'] = int(data['region_id'])
+
+        # RBAC: viewers cannot submit data
+        if _is_viewer_user(request.user):
+            return JsonResponse({
+                'success': False,
+                'error': _('Viewers cannot submit data.'),
+            }, status=403)
+
+        # RBAC: subadmins may only submit data for their assigned region
+        if _is_subadmin_user(request.user):
+            allowed = request.user.profile.region_id
+            submitted = data.get('region_id')
+            if allowed and str(submitted) != str(allowed):
+                return JsonResponse({
+                    'success': False,
+                    'error': _('You can only submit data for your assigned region.'),
+                }, status=403)
+
+        # Coordinate validation against region bounds
+        region = Region.objects.filter(id=data.get('region_id')).first()
+        if region:
+            lat = data.get('latitude')
+            lng = data.get('longitude')
+            if lat is not None and lng is not None:
+                is_valid, error_msg = _validate_coordinates_for_region(region, lat, lng)
+                if not is_valid:
+                    return JsonResponse({'success': False, 'error': error_msg}, status=400)
 
         # Year
         if data.get('year') and not data.get('year_id'):
@@ -526,9 +974,189 @@ def parameter_review(request):
 
 def analysis_results(request):
     """Display analysis results and drought risk assessment"""
+    import json
+    from decimal import Decimal
+    from django.core.serializers.json import DjangoJSONEncoder
+
+    def safe_float(val):
+        if val is None: return None
+        try: return float(val)
+        except: return None
+
+    # Default to Bizerte for initial data
+    default_region = Region.objects.filter(name="Bizerte").first() or Region.objects.order_by('name').first()
+
+    # Latest metrics from each table, filtered to Bizerte
+    latest_soil = SoilMetrics.objects.filter(region=default_region).order_by('-measurement_date').first()
+    latest_climate = ClimateMetrics.objects.filter(region=default_region).order_by('-measurement_date').first()
+    latest_remote = RemoteSensingMetrics.objects.filter(region=default_region).order_by('-measurement_date').first()
+    latest_hydro = HydrologyMetrics.objects.filter(region=default_region).order_by('-measurement_date').first()
+    latest_agri = AgriculturalMetrics.objects.filter(region=default_region).order_by('-measurement_date').first()
+
+    latest_prediction = DroughtPrediction.objects.filter(region=default_region).order_by('-generated_at').select_related('region', 'year').first()
+
+    # Extended initial data for metrics
+    initial_data = {
+        'soil_moisture_pct': safe_float(getattr(latest_soil, 'moisture_content_percent', None)),
+        'rainfall_mm': safe_float(getattr(latest_climate, 'rainfall_mm', None)),
+        'ndvi': safe_float(getattr(latest_remote, 'ndvi', None)),
+        'etc_mm': safe_float(getattr(latest_climate, 'evapotranspiration_etc_mmday', None)),
+        'groundwater_m': safe_float(getattr(latest_hydro, 'groundwater_depth_m', None)),
+        'stress_pct': safe_float(getattr(latest_agri, 'yield_reduction_factor', None)),
+        'temperature_c': safe_float(getattr(latest_climate, 'temperature_mean_c', None)),
+        'wind_speed': safe_float(getattr(latest_climate, 'wind_speed_ms', None)),
+        'humidity': safe_float(getattr(latest_climate, 'relative_humidity_percent', None)),
+        'solar_radiation': safe_float(getattr(latest_climate, 'solar_radiation_mjm2day', None)),
+    }
+
+    # ── Region / Year maps for JS ──
+    region_map = {r.name.lower(): r.id for r in Region.objects.all()}
+    year_map = {y.label.split()[0]: y.id for y in ObservationYear.objects.all() if y.label.split()[0].isdigit()}
+    default_region_id = region_map.get(default_region.name.lower()) if default_region else 1
+    default_year_id = year_map.get(str(timezone.now().year), 1)
+
+    # ── Soil water balance bars (last 6 records for Bizerte) ──
+    soil_qs = list(SoilMetrics.objects.filter(region=default_region).order_by('-measurement_date')[:6])
+    soil_qs.reverse()
+    soil_water_vals = [safe_float(s.moisture_content_percent) or 0 for s in soil_qs]
+    # Normalize to field capacity (100% = field capacity, not saturation)
+    fc_soil = SoilMetrics.objects.filter(region=default_region, field_capacity_percent__isnull=False).order_by('-measurement_date').first()
+    fc_val = float(fc_soil.field_capacity_percent) if fc_soil and fc_soil.field_capacity_percent else 30.0
+    soil_water_bars = [min(1.0, v / fc_val) if v > 0 else 0 for v in soil_water_vals]
+    while len(soil_water_bars) < 6:
+        soil_water_bars.append(0)
+
+    # ── Drought risk trend SVG path ──
+    risk_today_raw = safe_float(getattr(latest_prediction, 'current_risk_score', None))
+    risk_7_raw = safe_float(getattr(latest_prediction, 'risk_7day', None))
+    risk_30_raw = safe_float(getattr(latest_prediction, 'risk_30day', None))
+    risk_today = risk_today_raw if risk_today_raw is not None else 50
+    risk_7 = risk_7_raw if risk_7_raw is not None else 60
+    risk_30 = risk_30_raw if risk_30_raw is not None else 70
+    risk_pts = [
+        max(0, risk_today - 20), max(0, risk_today - 12), max(0, risk_today - 6),
+        risk_today, min(100, risk_7), min(100, (risk_7 + risk_30) / 2), min(100, risk_30),
+    ]
+
+    def _risk_svg(pts, svg_w=400, svg_h=200, pad_l=29, pad_r=29, pad_t=0, pad_b=0):
+        cw = svg_w - pad_l - pad_r
+        ch = svg_h - pad_t - pad_b
+        n = len(pts)
+        if n == 0:
+            return ""
+        coords = []
+        for i, v in enumerate(pts):
+            x = pad_l + (i / (n - 1)) * cw
+            y = pad_t + ch - (v / 100) * ch
+            coords.append((x, y))
+        d = f"M{coords[0][0]},{coords[0][1]}"
+        for i in range(1, n):
+            px, py = coords[i - 1]
+            cx, cy = (px + coords[i][0]) / 2, py
+            d += f" Q{cx},{cy} {coords[i][0]},{coords[i][1]}"
+        fill = d + f" L{coords[-1][0]},{pad_b + ch} L{coords[0][0]},{pad_b + ch} Z"
+        return d, fill
+
+    trend_line, trend_fill = _risk_svg(risk_pts)
+
+    def _time_ago(date_val):
+        if date_val is None:
+            return "Unknown"
+        delta = (timezone.now().date() - date_val).days
+        if delta == 0:
+            return "Today"
+        if delta == 1:
+            return "Yesterday"
+        return f"{delta}d ago"
+
+    # ── Dynamic alerts from data ──
+    alerts = []
+    sm = safe_float(getattr(latest_soil, 'moisture_content_percent', None))
+    if sm is not None and sm < 12:
+        sm_date = getattr(latest_soil, 'measurement_date', None)
+        alerts.append({
+            'priority': 'High Priority', 'priority_cls': 'border-error bg-error-container/20 text-error',
+            'time': _time_ago(sm_date), 'title': 'Soil Moisture Critical Drop',
+            'desc': f'Sensor station S-04 reported &lt; {sm:.0f}% moisture. Immediate verification required.',
+            'btn_text': 'Action Required', 'btn_cls': 'text-error',
+        })
+    rf_30d = safe_float(getattr(latest_climate, 'rainfall_mm', None))
+    if rf_30d is not None and rf_30d < 20:
+        rf_date = getattr(latest_climate, 'measurement_date', None)
+        alerts.append({
+            'priority': 'Medium Priority', 'priority_cls': 'border-secondary bg-surface-container-low text-secondary',
+            'time': _time_ago(rf_date), 'title': 'Precipitation Gap Warning',
+            'desc': f'Low rainfall ({rf_30d:.1f}mm recorded). Trend analysis updated.',
+            'btn_text': 'View Trends', 'btn_cls': 'text-secondary',
+        })
+    ndvi_val = safe_float(getattr(latest_remote, 'ndvi', None))
+    if ndvi_val is not None and ndvi_val < 0.3:
+        ndvi_date = getattr(latest_remote, 'measurement_date', None)
+        alerts.append({
+            'priority': 'Medium Priority', 'priority_cls': 'border-yellow-500 bg-yellow-50 text-yellow-700',
+            'time': _time_ago(ndvi_date), 'title': 'Vegetation Stress Detected',
+            'desc': f'NDVI at {ndvi_val:.2f} indicates significant vegetation water stress in the basin.',
+            'btn_text': 'Analyze', 'btn_cls': 'text-yellow-600',
+        })
+    if not alerts:
+        alerts.append({
+            'priority': 'Info', 'priority_cls': 'border-primary bg-primary-container/10 text-primary',
+            'time': 'Just now', 'title': 'All Clear',
+            'desc': 'No critical thresholds exceeded. Standard monitoring continues.',
+            'btn_text': 'Dashboard', 'btn_cls': 'text-primary',
+        })
+
+    # ── Soil water bar labels (from measurement dates) ──
+    soil_labels = []
+    for s in soil_qs:
+        d = getattr(s, 'measurement_date', None)
+        if d:
+            soil_labels.append(d.strftime('%b %d'))
+        else:
+            soil_labels.append('—')
+    while len(soil_labels) < 6:
+        soil_labels.append('—')
+
+    # ── Trend chart labels ──
+    trend_labels = ['T-21', 'T-14', 'T-7', 'Today', '+7 Days', '+14 Days', '+30 Days']
+
+    # ── Heatmap zone areas (proportional to current risk) ──
+    base_area = 1200
+    extreme_pct = max(0.05, (risk_today / 100) * 0.35)
+    severe_pct = max(0.05, (risk_7 / 100) * 0.30)
+    moderate_pct = max(0.05, 0.25 - (risk_today / 100) * 0.10)
+    safe_pct = max(0.05, 1.0 - extreme_pct - severe_pct - moderate_pct)
+    total_pct = extreme_pct + severe_pct + moderate_pct + safe_pct
+    # Normalize
+    extreme_pct /= total_pct; severe_pct /= total_pct; moderate_pct /= total_pct; safe_pct /= total_pct
+
+    heatmap_zones = {
+        'extreme_km2': f"{extreme_pct * base_area:.1f}",
+        'severe_km2': f"{severe_pct * base_area:.1f}",
+        'moderate_km2': f"{moderate_pct * base_area:.1f}",
+        'total_km2': f"{base_area:,}",
+    }
+
+    # Year choices for template
+    year_choices = [(y.label.split()[0], y.label) for y in ObservationYear.objects.all() if y.label.split()[0].isdigit()]
+
     context = {
         'regions': Region.objects.all(),
-        'years': ObservationYear.objects.all(),
+        'years': year_choices,
+        'now_year': str(timezone.now().year),
+        'initial_data_json': json.dumps(initial_data, cls=DjangoJSONEncoder),
+        'region_map_json': json.dumps(region_map),
+        'year_map_json': json.dumps(year_map),
+        'default_region_id': default_region_id,
+        'default_region_name': default_region.name if default_region else 'Bizerte',
+        'default_year_id': default_year_id,
+        'soil_water_bars': json.dumps(soil_water_bars),
+        'trend_line': trend_line,
+        'trend_fill': trend_fill,
+        'trend_labels': trend_labels,
+        'alerts': alerts,
+        'heatmap_zones': heatmap_zones,
+        'soil_water_labels': soil_labels,
     }
     return render(request, 'dashboard/analysis.html', context)
 
@@ -660,10 +1288,18 @@ def hydrology_metrics_view(request):
 
 def add_soil_metrics(request):
     """Add new soil metrics"""
+    if not _check_data_permission(request):
+        return _deny_data_access(request)
     if request.method == 'POST':
         form = SoilMetricsForm(request.POST)
         if form.is_valid():
-            form.save()
+            region = form.cleaned_data.get('region')
+            if not _check_data_permission(request, region.id if region else None):
+                messages.error(request, _('You can only add data for your assigned region.'))
+                return render(request, 'dashboard/metrics_form.html', {'form': form, 'title': 'Add Soil Metrics'})
+            instance = form.save(commit=False)
+            instance.created_by = request.user if request.user.is_authenticated else None
+            instance.save()
             messages.success(request, _('Soil metrics added successfully!'))
             return redirect('dashboard:soil_metrics')
     else:
@@ -674,10 +1310,18 @@ def add_soil_metrics(request):
 
 def add_climate_metrics(request):
     """Add new climate metrics"""
+    if not _check_data_permission(request):
+        return _deny_data_access(request)
     if request.method == 'POST':
         form = ClimateMetricsForm(request.POST)
         if form.is_valid():
-            form.save()
+            region = form.cleaned_data.get('region')
+            if not _check_data_permission(request, region.id if region else None):
+                messages.error(request, _('You can only add data for your assigned region.'))
+                return render(request, 'dashboard/metrics_form.html', {'form': form, 'title': 'Add Climate Metrics'})
+            instance = form.save(commit=False)
+            instance.created_by = request.user if request.user.is_authenticated else None
+            instance.save()
             messages.success(request, _('Climate metrics added successfully!'))
             return redirect('dashboard:climate_metrics')
     else:
@@ -688,10 +1332,18 @@ def add_climate_metrics(request):
 
 def add_drought_indices(request):
     """Add new drought indices"""
+    if not _check_data_permission(request):
+        return _deny_data_access(request)
     if request.method == 'POST':
         form = DroughtIndicesForm(request.POST)
         if form.is_valid():
-            form.save()
+            region = form.cleaned_data.get('region')
+            if not _check_data_permission(request, region.id if region else None):
+                messages.error(request, _('You can only add data for your assigned region.'))
+                return render(request, 'dashboard/metrics_form.html', {'form': form, 'title': 'Add Drought Indices'})
+            instance = form.save(commit=False)
+            instance.created_by = request.user if request.user.is_authenticated else None
+            instance.save()
             messages.success(request, _('Drought indices added successfully!'))
             return redirect('dashboard:drought_indices')
     else:
@@ -702,10 +1354,18 @@ def add_drought_indices(request):
 
 def add_agricultural_metrics(request):
     """Add new agricultural metrics"""
+    if not _check_data_permission(request):
+        return _deny_data_access(request)
     if request.method == 'POST':
         form = AgriculturalMetricsForm(request.POST)
         if form.is_valid():
-            form.save()
+            region = form.cleaned_data.get('region')
+            if not _check_data_permission(request, region.id if region else None):
+                messages.error(request, _('You can only add data for your assigned region.'))
+                return render(request, 'dashboard/metrics_form.html', {'form': form, 'title': 'Add Agricultural Metrics'})
+            instance = form.save(commit=False)
+            instance.created_by = request.user if request.user.is_authenticated else None
+            instance.save()
             messages.success(request, _('Agricultural metrics added successfully!'))
             return redirect('dashboard:agricultural_metrics')
     else:
@@ -716,10 +1376,18 @@ def add_agricultural_metrics(request):
 
 def add_remote_sensing_metrics(request):
     """Add new remote sensing metrics"""
+    if not _check_data_permission(request):
+        return _deny_data_access(request)
     if request.method == 'POST':
         form = RemoteSensingMetricsForm(request.POST)
         if form.is_valid():
-            form.save()
+            region = form.cleaned_data.get('region')
+            if not _check_data_permission(request, region.id if region else None):
+                messages.error(request, _('You can only add data for your assigned region.'))
+                return render(request, 'dashboard/metrics_form.html', {'form': form, 'title': 'Add Remote Sensing Metrics'})
+            instance = form.save(commit=False)
+            instance.created_by = request.user if request.user.is_authenticated else None
+            instance.save()
             messages.success(request, _('Remote sensing metrics added successfully!'))
             return redirect('dashboard:remote_sensing')
     else:
@@ -730,10 +1398,18 @@ def add_remote_sensing_metrics(request):
 
 def add_hydrology_metrics(request):
     """Add new hydrology metrics"""
+    if not _check_data_permission(request):
+        return _deny_data_access(request)
     if request.method == 'POST':
         form = HydrologyMetricsForm(request.POST)
         if form.is_valid():
-            form.save()
+            region = form.cleaned_data.get('region')
+            if not _check_data_permission(request, region.id if region else None):
+                messages.error(request, _('You can only add data for your assigned region.'))
+                return render(request, 'dashboard/metrics_form.html', {'form': form, 'title': 'Add Hydrology Metrics'})
+            instance = form.save(commit=False)
+            instance.created_by = request.user if request.user.is_authenticated else None
+            instance.save()
             messages.success(request, _('Hydrology metrics added successfully!'))
             return redirect('dashboard:hydrology_metrics')
     else:
@@ -747,6 +1423,9 @@ def add_hydrology_metrics(request):
 def import_excel_metrics(request):
     """Import metrics from Excel file"""
     if request.method == 'POST':
+        if _is_viewer_user(request.user):
+            messages.error(request, _('Viewers cannot import data.'))
+            return redirect('dashboard:data_ingestion')
         form = ExcelImportForm(request.POST, request.FILES)
         if form.is_valid():
             try:
@@ -852,45 +1531,215 @@ def _import_soil_metrics(df, errors):
 
 
 def _import_climate_metrics(df, errors):
-    """Import climate metrics from DataFrame"""
-    count = 0
-    created = 0
-    updated = 0
+    """Import climate metrics from DataFrame using batch upsert (without ON CONFLICT)."""
+    from datetime import datetime
+    from collections import defaultdict
+
+    region_map = {r.name: r for r in Region.objects.all()}
+    year_map = {y.label: y for y in ObservationYear.objects.all()}
+
+    region_ids = set()
+    rows_data = []  # (region, year, measurement_date, row)
+
     for idx, row in df.iterrows():
         try:
-            region = Region.objects.get(name=row.get('region', ''))
-            year = ObservationYear.objects.get(label=row.get('year', ''))
+            region_name = row.get('region', '')
+            year_label = str(row.get('year', ''))
+
+            region = region_map.get(region_name)
+            if not region:
+                errors.append(f"Row {idx}: Region '{region_name}' not found")
+                continue
+
+            year = year_map.get(year_label)
+            if not year:
+                errors.append(f"Row {idx}: Year '{year_label}' not found")
+                continue
+
             measurement_date = pd.to_datetime(row.get('measurement_date')).date() if pd.notna(row.get('measurement_date')) else None
+            if not measurement_date:
+                errors.append(f"Row {idx}: Invalid measurement_date")
+                continue
 
-            defaults = {
-                'rainfall_mm': float(row.get('rainfall_mm')) if pd.notna(row.get('rainfall_mm')) else None,
-                'seasonal_rainfall_variability': row.get('seasonal_rainfall_variability', ''),
-                'temperature_max_c': float(row.get('temperature_max_c')) if pd.notna(row.get('temperature_max_c')) else None,
-                'temperature_min_c': float(row.get('temperature_min_c')) if pd.notna(row.get('temperature_min_c')) else None,
-                'temperature_mean_c': float(row.get('temperature_mean_c')) if pd.notna(row.get('temperature_mean_c')) else None,
-                'relative_humidity_percent': int(row.get('relative_humidity_percent')) if pd.notna(row.get('relative_humidity_percent')) else None,
-                'wind_speed_ms': float(row.get('wind_speed_ms')) if pd.notna(row.get('wind_speed_ms')) else None,
-                'solar_radiation_mjm2day': float(row.get('solar_radiation_mjm2day')) if pd.notna(row.get('solar_radiation_mjm2day')) else None,
-                'evapotranspiration_et0_mmday': float(row.get('evapotranspiration_et0_mmday')) if pd.notna(row.get('evapotranspiration_et0_mmday')) else None,
-                'evapotranspiration_etc_mmday': float(row.get('evapotranspiration_etc_mmday')) if pd.notna(row.get('evapotranspiration_etc_mmday')) else None,
-            }
+            region_ids.add(region.id)
+            rows_data.append((region, year, measurement_date, row))
 
-            obj, created_flag = ClimateMetrics.objects.update_or_create(
-                region=region,
-                year=year,
-                measurement_date=measurement_date,
-                defaults=defaults,
-            )
-            count += 1
-            if created_flag:
-                created += 1
-            else:
-                updated += 1
         except Exception as e:
             errors.append(f"Row {idx}: {str(e)}")
 
-    return {'count': count, 'created': created, 'updated': updated}
+    if not rows_data:
+        return {'count': 0, 'created': 0, 'updated': 0}
 
+    now = datetime.now()
+
+    def _safe_val(v, caster=float):
+        if pd.isna(v):
+            return None
+        try:
+            val = caster(v)
+            # Reject common sentinel values (-999, -9999, etc.)
+            if isinstance(val, (int, float)) and val < -900:
+                return None
+            return val
+        except (ValueError, TypeError):
+            return None
+
+    def _build_record(region, year, measurement_date, row):
+        return ClimateMetrics(
+            region=region,
+            year=year,
+            measurement_date=measurement_date,
+            rainfall_mm=_safe_val(row.get('rainfall_mm')),
+            seasonal_rainfall_variability=row.get('seasonal_rainfall_variability', ''),
+            temperature_max_c=_safe_val(row.get('temperature_max_c')),
+            temperature_min_c=_safe_val(row.get('temperature_min_c')),
+            temperature_mean_c=_safe_val(row.get('temperature_mean_c')),
+            relative_humidity_percent=_safe_val(row.get('relative_humidity_percent'), int),
+            wind_speed_ms=_safe_val(row.get('wind_speed_ms')),
+            solar_radiation_mjm2day=_safe_val(row.get('solar_radiation_mjm2day')),
+            evapotranspiration_et0_mmday=_safe_val(row.get('evapotranspiration_et0_mmday')),
+            evapotranspiration_etc_mmday=_safe_val(row.get('evapotranspiration_etc_mmday')),
+            updated_at=now,
+        )
+
+    update_fields = [
+        'rainfall_mm', 'seasonal_rainfall_variability',
+        'temperature_max_c', 'temperature_min_c', 'temperature_mean_c',
+        'relative_humidity_percent', 'wind_speed_ms',
+        'solar_radiation_mjm2day', 'evapotranspiration_et0_mmday',
+        'evapotranspiration_etc_mmday', 'latitude', 'longitude',
+        'updated_at',
+    ]
+
+    existing = ClimateMetrics.objects.filter(
+        region_id__in=region_ids,
+    ).values_list('id', 'region_id', 'year_id', 'measurement_date')
+
+    existing_keys = {}
+    for pk, rid, yid, mdate in existing:
+        existing_keys[(rid, yid, mdate)] = pk
+
+    to_create = []
+    to_update = []
+    rainfall_by_region = defaultdict(list)
+
+    for region, year, measurement_date, row in rows_data:
+        rec = _build_record(region, year, measurement_date, row)
+        key = (region.id, year.id, measurement_date)
+        pk = existing_keys.get(key)
+        if pk is not None:
+            rec.id = pk
+            to_update.append(rec)
+        else:
+            to_create.append(rec)
+
+        rainfall_mm = float(row.get('rainfall_mm')) if pd.notna(row.get('rainfall_mm')) else None
+        if rainfall_mm is not None:
+            rainfall_by_region[region.id].append((measurement_date, rainfall_mm))
+
+    if to_create:
+        ClimateMetrics.objects.bulk_create(to_create)
+
+    if to_update:
+        ClimateMetrics.objects.bulk_update(to_update, update_fields)
+
+    _batch_calculate_spi(dict(rainfall_by_region))
+
+    return {
+        'count': len(to_create) + len(to_update),
+        'created': len(to_create),
+        'updated': len(to_update),
+    }
+
+
+def _batch_calculate_spi(rainfall_by_region):
+    """Calculate SPI for all rainfall points, grouped by region, in bulk."""
+    if not rainfall_by_region:
+        return
+
+    for region_id, points in rainfall_by_region.items():
+        region = Region.objects.get(id=region_id)
+
+        all_climate = list(ClimateMetrics.objects.filter(
+            region=region, rainfall_mm__isnull=False,
+        ).order_by('measurement_date').values_list('measurement_date', 'rainfall_mm'))
+
+        if len(all_climate) < 2:
+            continue
+
+        vals = [float(c[1]) for c in all_climate]
+        series = pd.Series(vals)
+        overall_mean = float(series.mean())
+        overall_std = float(series.std())
+        if overall_std == 0:
+            continue
+
+        def _clamp_spi(v):
+            return round(max(-3.0, min(3.0, v)), 2)
+
+        roll_90_mean = series.rolling(90, min_periods=1).mean()
+        roll_90_std = series.rolling(90, min_periods=1).std(ddof=0)
+        roll_365_mean = series.rolling(365, min_periods=1).mean()
+        roll_365_std = series.rolling(365, min_periods=1).std(ddof=0)
+
+        date_to_idx = {d: i for i, (d, _) in enumerate(all_climate)}
+
+        drought_records = []
+        year_cache = {}
+
+        for date, rainfall_mm in points:
+            idx = date_to_idx.get(date)
+            if idx is None:
+                continue
+
+            spi_1 = _clamp_spi((rainfall_mm - overall_mean) / overall_std)
+
+            m90 = float(roll_90_mean.iloc[idx])
+            s90 = float(roll_90_std.iloc[idx])
+            spi_3 = _clamp_spi((rainfall_mm - m90) / s90) if s90 > 0 else spi_1
+
+            m365 = float(roll_365_mean.iloc[idx])
+            s365 = float(roll_365_std.iloc[idx])
+            spi_12 = _clamp_spi((rainfall_mm - m365) / s365) if s365 > 0 else spi_1
+
+            year_label = str(date.year)
+            if year_label not in year_cache:
+                year_obj, _ = ObservationYear.objects.get_or_create(label=year_label)
+                year_cache[year_label] = year_obj
+            year = year_cache[year_label]
+
+            drought_records.append(DroughtIndices(
+                region=region,
+                year=year,
+                measurement_date=date,
+                spi_1month=spi_1,
+                spi_3month=spi_3,
+                spi_12month=spi_12,
+            ))
+
+        if drought_records:
+            existing_di = DroughtIndices.objects.filter(
+                region=region,
+                measurement_date__in=[d.measurement_date for d in drought_records],
+            ).values_list('id', 'year_id', 'measurement_date')
+            di_existing = {(yid, md): pk for pk, yid, md in existing_di}
+
+            to_create_di = []
+            to_update_di = []
+            for drec in drought_records:
+                pk = di_existing.get((drec.year_id, drec.measurement_date))
+                if pk is not None:
+                    drec.id = pk
+                    to_update_di.append(drec)
+                else:
+                    to_create_di.append(drec)
+
+            if to_create_di:
+                DroughtIndices.objects.bulk_create(to_create_di)
+            if to_update_di:
+                DroughtIndices.objects.bulk_update(
+                    to_update_di, ['spi_1month', 'spi_3month', 'spi_12month']
+                )
 
 def _import_drought_indices(df, errors):
     """Import drought indices from DataFrame"""
@@ -1118,9 +1967,33 @@ def historical_view(request):
     return render(request, 'dashboard/historical.html', context)
 
 
-def login_view(request):
-    """Display login page"""
+def landing_view(request):
+    """Always show the login/landing page — no redirect for authenticated users."""
     return render(request, 'dashboard/login.html')
+
+
+def login_view(request):
+    """Display login page and handle authentication"""
+    if request.user.is_authenticated:
+        return redirect('dashboard:dashboard')
+
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('dashboard:dashboard')
+        messages.error(request, _('Invalid username or password.'))
+
+    return render(request, 'dashboard/login.html')
+
+
+def logout_view(request):
+    """Log out current user and redirect to login"""
+    auth_logout(request)
+    messages.info(request, _('You have been logged out.'))
+    return redirect('dashboard:login')
 
 
 @require_http_methods(["GET"])
@@ -1146,7 +2019,12 @@ def drought_prediction_api(request):
         return JsonResponse({'success': False, 'error': 'Region and year are required.'}, status=400)
 
     latest_prediction = DroughtPrediction.objects.filter(region=region, year=year).order_by('-generated_at').first()
+    _fc_soil = SoilMetrics.objects.filter(region=region, field_capacity_percent__isnull=False).order_by('-measurement_date').first()
+    _fc = float(_fc_soil.field_capacity_percent) if _fc_soil and _fc_soil.field_capacity_percent else 30.0
     if latest_prediction and not refresh:
+        sm_today = float(latest_prediction.soil_moisture_today_pct or 0)
+        sm_7 = float(latest_prediction.soil_moisture_7day_pct or 0)
+        sm_30 = float(latest_prediction.soil_moisture_30day_pct or 0)
         return JsonResponse({
             'success': True,
             'source': 'database',
@@ -1160,11 +2038,12 @@ def drought_prediction_api(request):
                     'day_30': float(latest_prediction.risk_30day),
                 },
                 'current': {
-                    'soil_moisture_pct': float(latest_prediction.soil_moisture_today_pct or 0),
+                    'soil_moisture_pct': sm_today,
+                    'soil_water_percent_of_capacity': round(min(100, (sm_today / 35) * 100), 1) if sm_today else 0,
                 },
                 'forecasts': {
-                    'soil_moisture_7day_pct': float(latest_prediction.soil_moisture_7day_pct or 0),
-                    'soil_moisture_30day_pct': float(latest_prediction.soil_moisture_30day_pct or 0),
+                    'soil_moisture_7day_pct': sm_7,
+                    'soil_moisture_30day_pct': sm_30,
                 },
                 'drivers': latest_prediction.drivers,
                 'llm_explanation': latest_prediction.explanation,
@@ -1195,6 +2074,7 @@ def drought_prediction_api(request):
         })
     except Exception as exc:
         if latest_prediction is not None:
+            sm_today = float(latest_prediction.soil_moisture_today_pct or 0)
             return JsonResponse({
                 'success': True,
                 'source': 'database',
@@ -1209,7 +2089,8 @@ def drought_prediction_api(request):
                         'day_30': float(latest_prediction.risk_30day),
                     },
                     'current': {
-                        'soil_moisture_pct': float(latest_prediction.soil_moisture_today_pct or 0),
+                        'soil_moisture_pct': sm_today,
+                    'soil_water_percent_of_capacity': round(min(100, (sm_today / _fc) * 100), 1) if sm_today and _fc > 0 else 0,
                     },
                     'forecasts': {
                         'soil_moisture_7day_pct': float(latest_prediction.soil_moisture_7day_pct or 0),
@@ -1222,10 +2103,137 @@ def drought_prediction_api(request):
         return JsonResponse({'success': False, 'error': str(exc)}, status=500)
 
 
+@require_http_methods(["GET"])
+def resolve_region_api(request):
+    """Given lat/lon, return the nearest region's ID and name."""
+    try:
+        lat = float(request.GET.get("lat", "0"))
+        lon = float(request.GET.get("lon", "0"))
+    except ValueError:
+        return JsonResponse({"error": "Invalid coordinates"}, status=400)
+    regions = Region.objects.exclude(latitude__isnull=True, longitude__isnull=True)
+    nearest = None
+    nearest_dist = float('inf')
+    for region in regions:
+        dist = _haversine_distance(lat, lon, float(region.latitude), float(region.longitude))
+        if dist < nearest_dist:
+            nearest_dist = dist
+            nearest = region
+    if nearest is None:
+        first = Region.objects.order_by("name").first()
+        if first:
+            return JsonResponse({"region_id": first.id, "region_name": first.name, "distance_km": 0})
+        return JsonResponse({"error": "No regions found"}, status=404)
+    return JsonResponse({
+        "region_id": nearest.id,
+        "region_name": nearest.name,
+        "distance_km": round(nearest_dist, 1),
+    })
+
+
+@require_http_methods(["GET"])
+def chart_data_api(request):
+    """Return chart data for a given region, matching dashboard_view format."""
+    region_id = request.GET.get("region_id")
+    if not region_id:
+        return JsonResponse({"error": "region_id required"}, status=400)
+    try:
+        region = Region.objects.get(pk=region_id)
+    except Region.DoesNotExist:
+        return JsonResponse({"error": "Region not found"}, status=404)
+
+    now = timezone.now()
+    year_ago = now - timedelta(days=365)
+    year_id = request.GET.get("year_id")
+    year_num = None
+    if year_id:
+        try:
+            year_obj = ObservationYear.objects.get(pk=year_id)
+            year_num = int(year_obj.label.split()[0])
+        except (ObservationYear.DoesNotExist, ValueError, AttributeError):
+            pass
+
+    if year_num:
+        climate_qs = ClimateMetrics.objects.filter(
+            region=region, measurement_date__year=year_num
+        ).order_by("-measurement_date")
+        drought_qs = DroughtIndices.objects.filter(
+            region=region, measurement_date__year=year_num
+        ).order_by("-measurement_date")
+        rs_qs = RemoteSensingMetrics.objects.filter(
+            region=region, measurement_date__year=year_num
+        ).order_by("-measurement_date")
+
+        climate_rainfall = _year_series(climate_qs, "rainfall_mm")
+        climate_temp = _year_series(climate_qs, "temperature_mean_c")
+        drought_spi = _year_series(drought_qs, "spi_3month")
+        drought_spei = _year_series(drought_qs, "spei_3month")
+        ndvi_values = _year_series(rs_qs, "ndvi")
+
+        chart_months = _year_months(climate_qs, "rainfall_mm")
+    else:
+        climate_qs = ClimateMetrics.objects.filter(
+            region=region, measurement_date__gte=year_ago
+        ).order_by("-measurement_date")
+        climate_rainfall = _chart_series(climate_qs, "rainfall_mm")
+        climate_temp = _chart_series(climate_qs, "temperature_mean_c")
+
+        drought_qs = DroughtIndices.objects.filter(
+            region=region, measurement_date__gte=year_ago
+        ).order_by("-measurement_date")
+        drought_spi = _chart_series(drought_qs, "spi_3month")
+        drought_spei = _chart_series(drought_qs, "spei_3month")
+
+        rs_qs = RemoteSensingMetrics.objects.filter(
+            region=region, measurement_date__gte=year_ago
+        ).order_by("-measurement_date")
+        ndvi_values = _chart_series(rs_qs, "ndvi")
+
+        chart_months = _chart_months(climate_qs, "rainfall_mm")
+
+    if not any(chart_months):
+        chart_months = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+                        "Jan", "Feb", "Mar", "Apr", "May"]
+
+    # Normalized (0-100%) versions for the overlaid climate chart
+    climate_rainfall_norm = _normalize(climate_rainfall)
+    climate_temp_norm = _normalize(climate_temp)
+    drought_spi_norm = _normalize(drought_spi)
+    ndvi_values_norm = _normalize(ndvi_values)
+
+    spi_min, spi_max = -3, 3
+    ndvi_min, ndvi_max = 0, 1
+
+    def _labels(lo, hi):
+        return [hi, hi - (hi - lo) / 3, lo + (hi - lo) / 3, lo]
+
+    from django.core.serializers.json import DjangoJSONEncoder
+    return JsonResponse({
+        "climate_points_rainfall": _svg_points(climate_rainfall_norm, vmin=0, vmax=100),
+        "climate_points_temp": _svg_points(climate_temp_norm, vmin=0, vmax=100),
+        "climate_points_spi": _svg_points(drought_spi_norm, vmin=0, vmax=100),
+        "climate_points_ndvi": _svg_points(ndvi_values_norm, vmin=0, vmax=100),
+        "drought_points_spi": _svg_points(drought_spi, vmin=spi_min, vmax=spi_max),
+        "drought_points_spei": _svg_points(drought_spei, vmin=spi_min, vmax=spi_max),
+        "ndvi_points": _svg_points(ndvi_values, vmin=ndvi_min, vmax=ndvi_max),
+        "chart_months": chart_months,
+        "climate_labels": _labels(0, 100),
+        "drought_labels": _labels(-3.0, 3.0),
+        "ndvi_labels": _labels(0, 1.0),
+        "region_name": region.name,
+    })
+
+
 @require_http_methods(["POST"])
 def ajax_upload_file(request):
     """AJAX endpoint for drag-and-drop file upload — saves to PostgreSQL"""
     try:
+        if _is_viewer_user(request.user):
+            return JsonResponse({
+                'success': False,
+                'error': _('Viewers cannot import data.'),
+            }, status=403)
+
         uploaded_file = request.FILES.get('file')
         metric_type = request.POST.get('metric_type', '')
 
@@ -1313,3 +2321,76 @@ def ajax_upload_file(request):
             'success': False,
             'error': f'Upload failed: {str(e)}'
         }, status=500)
+
+
+@login_required(login_url='dashboard:login')
+def admin_panel(request):
+    """Admin user management panel"""
+    if not _is_admin_user(request.user):
+        return _deny_admin_access(request)
+
+    users = User.objects.all().select_related('profile').order_by('-date_joined')
+
+    if request.method == 'POST':
+        form = UserCreateForm(request.POST, user=request.user)
+        if form.is_valid():
+            user = form.save()
+            messages.success(request, _('User "{}" created successfully!').format(user.username))
+            return redirect('dashboard:admin_panel')
+    else:
+        form = UserCreateForm(user=request.user)
+
+    context = {
+        'form': form,
+        'users': users,
+    }
+    return render(request, 'dashboard/admin_panel.html', context)
+
+
+@login_required(login_url='dashboard:login')
+def admin_edit_user(request, user_id):
+    """Edit user role and region assignment"""
+    if not _is_admin_user(request.user):
+        return _deny_admin_access(request)
+
+    target_user = get_object_or_404(User, pk=user_id)
+    profile = target_user.profile
+
+    if request.method == 'POST':
+        role = request.POST.get('role')
+        region_id = request.POST.get('region')
+
+        if role in dict(UserProfile.ROLE_CHOICES):
+            profile.role = role
+        if region_id:
+            profile.region_id = region_id
+        else:
+            profile.region = None
+        profile.save()
+
+        messages.success(request, _('User profile updated!'))
+        return redirect('dashboard:admin_panel')
+
+    context = {
+        'target_user': target_user,
+        'regions': Region.objects.all(),
+        'role_choices': UserProfile.ROLE_CHOICES,
+    }
+    return render(request, 'dashboard/admin_edit_user.html', context)
+
+
+@login_required(login_url='dashboard:login')
+@require_http_methods(["POST"])
+def admin_delete_user(request, user_id):
+    """Delete a user (superadmin only)."""
+    if not _is_admin_user(request.user):
+        return _deny_admin_access(request)
+
+    target_user = get_object_or_404(User, pk=user_id)
+    if target_user == request.user:
+        messages.error(request, _('You cannot delete your own account.'))
+        return redirect('dashboard:admin_panel')
+
+    target_user.delete()
+    messages.success(request, _('User deleted successfully.'))
+    return redirect('dashboard:admin_panel')

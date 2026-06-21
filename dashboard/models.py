@@ -1,9 +1,20 @@
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Region(models.Model):
     id = models.BigAutoField(primary_key=True, db_column='region_id')
     name = models.CharField(max_length=100, unique=True)
+    country = models.CharField(max_length=100, blank=True, null=True)
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    elevation_m = models.IntegerField(blank=True, null=True)
+    area_km2 = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    radius_km = models.DecimalField(max_digits=8, decimal_places=2, default=100.0)
 
     class Meta:
         db_table = 'regions'
@@ -59,6 +70,7 @@ class EnvironmentalSnapshot(models.Model):
     npk_index = models.CharField(max_length=20, default="Med-High")
     temperature_c = models.DecimalField(max_digits=4, decimal_places=1, default=25)
     humidity_percent = models.IntegerField(default=60)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='environmental_snapshots')
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -78,6 +90,7 @@ class RiskAssessment(models.Model):
     risk_level = models.CharField(max_length=30)
     recommendation = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='risk_assessments')
 
     class Meta:
         db_table = 'risk_assessments'
@@ -92,6 +105,8 @@ class SoilMetrics(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='soil_metrics')
     year = models.ForeignKey(ObservationYear, on_delete=models.CASCADE)
     measurement_date = models.DateField(db_column='time')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     
     # Moisture Content
     moisture_content_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Volumetric water content (%)")
@@ -118,6 +133,7 @@ class SoilMetrics(models.Model):
     salinity_ece_dsm = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True, help_text="Electrical conductivity (dS/m)")
     ph_level = models.DecimalField(max_digits=3, decimal_places=1, null=True, blank=True, help_text="Soil pH level")
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='soil_metric_entries')
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -135,6 +151,8 @@ class ClimateMetrics(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='climate_metrics')
     year = models.ForeignKey(ObservationYear, on_delete=models.CASCADE)
     measurement_date = models.DateField(db_column='time')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     
     # Rainfall
     rainfall_mm = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, help_text="Rainfall amount (mm)")
@@ -158,6 +176,7 @@ class ClimateMetrics(models.Model):
     evapotranspiration_et0_mmday = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Reference ET₀ (mm/day)")
     evapotranspiration_etc_mmday = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Crop ET (mm/day)")
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='climate_metric_entries')
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -178,6 +197,8 @@ class DroughtIndices(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='drought_indices')
     year = models.ForeignKey(ObservationYear, on_delete=models.CASCADE)
     measurement_date = models.DateField(db_column='time')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     
     # SPI - Standardized Precipitation Index
     spi_1month = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="SPI 1-month")
@@ -204,6 +225,7 @@ class DroughtIndices(models.Model):
         default='None'
     )
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='drought_metric_entries')
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -222,6 +244,8 @@ class AgriculturalMetrics(models.Model):
     year = models.ForeignKey(ObservationYear, on_delete=models.CASCADE)
     crop = models.ForeignKey(CropType, on_delete=models.CASCADE)
     measurement_date = models.DateField(db_column='time')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     
     # Crop Stage
     GROWTH_STAGES = [
@@ -251,6 +275,7 @@ class AgriculturalMetrics(models.Model):
     leaf_temperature_c = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True, help_text="Leaf temperature (°C)")
     stomatal_conductance = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True, help_text="Stomatal conductance (mol/m²/s)")
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='agricultural_metric_entries')
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -270,6 +295,8 @@ class RemoteSensingMetrics(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='remote_sensing')
     year = models.ForeignKey(ObservationYear, on_delete=models.CASCADE)
     measurement_date = models.DateField(db_column='time')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     
     # NDVI - Vegetation Index
     ndvi = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True, help_text="NDVI (-1 to 1, vegetation health)")
@@ -299,6 +326,7 @@ class RemoteSensingMetrics(models.Model):
     # ET from SEBAL/METRIC
     evapotranspiration_sebal_mmday = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="ET from SEBAL/METRIC (mm/day)")
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='remote_sensing_metric_entries')
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -316,6 +344,8 @@ class HydrologyMetrics(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='hydrology_metrics')
     year = models.ForeignKey(ObservationYear, on_delete=models.CASCADE)
     measurement_date = models.DateField(db_column='time')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     
     # Precipitation vs Evapotranspiration
     precipitation_mm = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, help_text="Precipitation (mm)")
@@ -337,6 +367,7 @@ class HydrologyMetrics(models.Model):
 
     water_balance_percent = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True, help_text="Water balance (supply - demand %)")
     
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='hydrology_metric_entries')
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
@@ -409,3 +440,40 @@ class DroughtPrediction(models.Model):
 
     def __str__(self):
         return f"Prediction - {self.region} - {self.prediction_date}"
+
+
+# ============== USER PROFILE & RBAC ==============
+
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ('superadmin', 'Superadmin'),
+        ('subadmin', 'Subadmin'),
+        ('viewer', 'Viewer'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='viewer')
+    region = models.ForeignKey(
+        Region, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='assigned_users'
+    )
+
+    class Meta:
+        pass
+
+    def __str__(self):
+        return f"{self.user.username} ({self.get_role_display()})"
+
+    def is_superadmin(self):
+        return self.role == 'superadmin'
+
+    def is_subadmin(self):
+        return self.role == 'subadmin'
+
+    def is_viewer(self):
+        return self.role == 'viewer'
+
+
+@receiver(post_save, sender=User)
+def ensure_user_profile(sender, instance, **kwargs):
+    UserProfile.objects.get_or_create(user=instance)

@@ -3,7 +3,7 @@
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Login | Ichkeul Intel - ABCDryBASiN</title>
+<title>Login | Ichkeul Intel - APWRS</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -101,21 +101,22 @@
 <!-- Branding Header -->
 <div class="flex flex-col items-center mb-10">
 <div class="mb-6 h-16 w-auto">
-<img alt="ABCDryBASiN Logo" class="h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdPT2Mypw4LJrcB914mcNA6OnON-pcCfTEOsvhZ9OvQjF5AS6dixdstPD12tyJwA1EZ4-4uXtMDzswKO5h8cTTR7mUpXm7MqCfxVTdlLGzCFOM3FTK2RoW8iKOWTeYBWtTViD6qbtpqf5_-s4LU7bo9bWaThPg_ibmcgKFYcHc5UvXL01_BP4hDxdRsoGMs9ujomSwnPBAg0CDDRLHhgWgD_dizv3-UQyAOJcKqSw5-G-8MRligNguR_Rear_UrAoIkoJwew1jBHe7"/>
+<img alt="APWRS Logo" class="h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdPT2Mypw4LJrcB914mcNA6OnON-pcCfTEOsvhZ9OvQjF5AS6dixdstPD12tyJwA1EZ4-4uXtMDzswKO5h8cTTR7mUpXm7MqCfxVTdlLGzCFOM3FTK2RoW8iKOWTeYBWtTViD6qbtpqf5_-s4LU7bo9bWaThPg_ibmcgKFYcHc5UvXL01_BP4hDxdRsoGMs9ujomSwnPBAg0CDDRLHhgWgD_dizv3-UQyAOJcKqSw5-G-8MRligNguR_Rear_UrAoIkoJwew1jBHe7"/>
 </div>
-<h1 class="font-headline text-2xl font-extrabold text-primary tracking-tight text-center">Sign in to ABCDryBASiN</h1>
+<h1 class="font-headline text-2xl font-extrabold text-primary tracking-tight text-center">Sign in to APWRS</h1>
 <p class="text-on-surface-variant text-sm mt-2 text-center max-w-[280px]">
-                        Access drought intelligence and environmental risk assessments.
+                        Adaptive Planting Window Recommendation System
                     </p>
 </div>
 <!-- Form -->
-<form class="space-y-6" onsubmit="event.preventDefault();">
+<form class="space-y-6" method="post" action="{% url 'dashboard:login' %}">
+    {% csrf_token %}
 <!-- Email -->
 <div class="space-y-1.5">
-<label class="text-xs font-bold uppercase tracking-widest text-outline" for="email">Email Address</label>
+<label class="text-xs font-bold uppercase tracking-widest text-outline" for="username">Username</label>
 <div class="relative group">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors">mail</span>
-<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm placeholder:text-outline-variant/50" id="email" name="email" placeholder="agronomist@ichkeul.gov" type="email"/>
+<input class="w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm placeholder:text-outline-variant/50" id="username" name="username" placeholder="admin" type="text" autocomplete="username"/>
 </div>
 </div>
 <!-- Password -->
@@ -126,7 +127,7 @@
 </div>
 <div class="relative group">
 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors">lock</span>
-<input class="w-full pl-10 pr-12 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm placeholder:text-outline-variant/50" id="password" name="password" placeholder="••••••••" type="password"/>
+<input class="w-full pl-10 pr-12 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm placeholder:text-outline-variant/50" id="password" name="password" placeholder="••••••••" type="password" autocomplete="current-password"/>
 <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant hover:text-on-surface" onclick="togglePassword()" type="button">
 <span class="material-symbols-outlined" id="eye-icon">visibility</span>
 </button>

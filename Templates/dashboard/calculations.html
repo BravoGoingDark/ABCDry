@@ -6,6 +6,7 @@
 <title>Calculated Metrics | Ichkeul Intel</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
       tailwind.config = {
@@ -85,16 +86,24 @@
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Numeric value styling for calculations cards */
+        /* Numeric value styling for calculations cards (futuristic) */
         .value-number{
             display:inline-block;
-            font-family: Hanken Grotesk, Inter, system-ui, sans-serif;
-            font-weight:800;
-            letter-spacing:-0.01em;
-            text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+            font-family: 'Orbitron', Hanken Grotesk, Inter, system-ui, sans-serif;
+            font-weight:900;
+            letter-spacing:-0.02em;
+            background: linear-gradient(90deg,#06f6d4 0%, #7c3aed 45%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 14px rgba(124,58,237,0.18), 0 2px 8px rgba(6,182,212,0.12);
+            transition: transform .18s ease, text-shadow .18s ease;
         }
         .value-display{line-height:1}
         .value-unit{font-size:0.75rem; opacity:0.9}
+        .metric-card{position:relative; overflow:hidden}
+        .metric-card::after{content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));}
+        .metric-chart{width:100%; height:44px; display:block; margin-top:6px; border-radius:6px}
     </style>
 </head>
 <body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
@@ -102,17 +111,17 @@
 <div class="flex-1 flex flex-col bg-surface h-screen">
     <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
         <div class="flex items-center gap-8 min-w-0 flex-1">
-            <a class="flex items-center gap-3 shrink group" href="/">
+            <a class="flex items-center gap-3 shrink group" href="{% url 'dashboard:dashboard' %}">
                 <span class="relative shrink-0">
-                    <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                    <img alt="APWRS Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
                 </span>
                 <div class="flex flex-col min-w-0 leading-tight">
-                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
-                    <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">APWRS</span>
+                    <span class="text-[10px] font-normal text-on-surface-variant">Adaptive Planting Window Recommendation System</span>
                 </div>
             </a>
             <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
-                <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="/">Home</a>
+                <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:dashboard' %}">Home</a>
                 <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:data_ingestion' %}">Data</a>
                 <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:analysis' %}">Analysis</a>
                 <a class="text-on-surface-variant hover:text-primary transition-colors font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
@@ -131,9 +140,25 @@
                 <button class="hover:text-primary-container transition-colors cursor-pointer active:opacity-70">
                     <span class="material-symbols-outlined">notifications</span>
                 </button>
-                <button class="hover:text-primary-container transition-colors cursor-pointer active:opacity-70">
-                    <span class="material-symbols-outlined text-2xl">account_circle</span>
-                </button>
+                <!-- Auth Section -->
+                <div class="flex items-center gap-2 shrink-0 border-l border-outline-variant pl-3 ml-1">
+                    {% if user.is_authenticated %}
+                        <span class="text-xs text-on-surface-variant hidden md:inline">{{ user.username }}</span>
+                        {% if user.profile.role == 'superadmin' %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary">{% trans "Admin" %}</span>
+                        <a href="{% url 'dashboard:admin_panel' %}" class="text-xs text-secondary hover:underline font-medium">{% trans "Manage" %}</a>
+                        {% elif user.profile.role == 'subadmin' %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{% trans "Subadmin" %}</span>
+                        {% else %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">{% trans "Viewer" %}</span>
+                        {% endif %}
+                        <a href="{% url 'dashboard:logout' %}" class="text-on-surface-variant hover:text-error transition-colors">
+                            <span class="material-symbols-outlined text-sm">logout</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'dashboard:login' %}" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all">{% trans "Sign In" %}</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
@@ -145,107 +170,48 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Soil column -->
-            <div id="soil" class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="font-headline font-bold text-primary">Soil</h4>
-                    <span class="text-[11px] text-on-surface-variant">Derived</span>
-                </div>
-                <div class="space-y-3">
-                    {% for section in calc_sections %}{% if section.category == 'Soil' %}
-                        {% for item in section.items %}
-                        <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
-                                    <span class="material-symbols-outlined text-secondary text-xl">insights</span>
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
-                                </div>
-                            </div>
-                            <div class="text-right flex flex-col items-end">
-                                <div class="value-display">
-                                    {% if item.value and item.value != '—' %}
-                                        <span class="value-number">{{ item.value }}</span>
-                                    {% else %}
-                                        <span class="value-number opacity-90">24.5</span>
-                                    {% endif %}
-                                    <span class="value-unit text-on-surface-variant ml-2"></span>
-                                </div>
-                            </div>
+            <div class="lg:col-span-2">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for section in calc_sections %}
+                    <div {% if section.category == 'Soil' %}id="soil"{% elif section.category == 'Climate' %}id="climate"{% elif section.category == 'Drought Indices' %}id="drought"{% endif %} class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-headline font-bold text-primary">{{ section.category }}</h4>
+                            <span class="text-[11px] text-on-surface-variant">Derived</span>
                         </div>
-                        {% endfor %}
-                    {% endif %}{% endfor %}
+                        <div class="space-y-3">
+                            {% for item in section.items %}
+                            <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4 metric-card">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-secondary text-xl">insights</span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
+                                        <div class="text-xs text-on-surface-variant mt-1">Derived</div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex flex-col items-end">
+                                    <div class="value-display">
+                                        {% if item.value and item.value != '—' %}
+                                            <span class="value-number">{{ item.value }}</span>
+                                        {% else %}
+                                            <span class="value-number opacity-90">24.5</span>
+                                        {% endif %}
+                                        <span class="value-unit text-on-surface-variant ml-2"></span>
+                                    </div>
+                                    <div class="w-28 h-8 mt-2">
+                                        <canvas class="metric-chart" width="120" height="36"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
-            <!-- Climate column -->
-            <div id="climate" class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="font-headline font-bold text-primary">Climate</h4>
-                    <span class="text-[11px] text-on-surface-variant">Derived</span>
-                </div>
-                <div class="space-y-3">
-                    {% for section in calc_sections %}{% if section.category == 'Climate' %}
-                        {% for item in section.items %}
-                        <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
-                                    <span class="material-symbols-outlined text-secondary text-xl">insights</span>
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
-                                </div>
-                            </div>
-                            <div class="text-right flex flex-col items-end">
-                                <div class="value-display">
-                                    {% if item.value and item.value != '—' %}
-                                        <span class="value-number">{{ item.value }}</span>
-                                    {% else %}
-                                        <span class="value-number opacity-90">24.5</span>
-                                    {% endif %}
-                                    <span class="value-unit text-on-surface-variant ml-2"></span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% endif %}{% endfor %}
-                </div>
-            </div>
-
-            <!-- Drought column -->
-            <div id="drought" class="bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="font-headline font-bold text-primary">Drought Indices</h4>
-                    <span class="text-[11px] text-on-surface-variant">Derived</span>
-                </div>
-                <div class="space-y-3">
-                    {% for section in calc_sections %}{% if section.category == 'Drought Indices' %}
-                        {% for item in section.items %}
-                        <div class="p-4 border rounded-xl bg-surface-container flex items-center justify-between gap-4">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-10 h-10 rounded-md bg-surface-container-high flex items-center justify-center shrink-0">
-                                    <span class="material-symbols-outlined text-secondary text-xl">insights</span>
-                                </div>
-                                <div class="min-w-0">
-                                    <div class="text-sm font-semibold text-on-surface truncate">{{ item.name }}</div>
-                                </div>
-                            </div>
-                            <div class="text-right flex flex-col items-end">
-                                <div class="value-display">
-                                    {% if item.value and item.value != '—' %}
-                                        <span class="value-number">{{ item.value }}</span>
-                                    {% else %}
-                                        <span class="value-number opacity-90">24.5</span>
-                                    {% endif %}
-                                    <span class="value-unit text-on-surface-variant ml-2"></span>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% endif %}{% endfor %}
-                </div>
-            </div>
+            <!-- Quick Reference removed per design request -->
         </div>
 
         <!-- Charts: rendered from calc_sections data -->
@@ -471,12 +437,51 @@
                     const color = colorFor(name, value);
                     valueNumber.style.color = color;
                     valueNumber.style.fontWeight = '800';
-                    valueNumber.style.fontFamily = 'Hanken Grotesk, Inter, system-ui, sans-serif';
-                    valueNumber.style.fontSize = window.innerWidth > 1024 ? '2.25rem' : '1.75rem';
-                    valueNumber.style.letterSpacing = '-0.01em';
-                    valueNumber.style.textShadow = '0 1px 0 rgba(255,255,255,0.6)';
+                    valueNumber.style.fontFamily = "Orbitron, Hanken Grotesk, Inter, system-ui, sans-serif";
+                    valueNumber.style.fontSize = window.innerWidth > 1024 ? '2.5rem' : '2rem';
+                    valueNumber.style.letterSpacing = '-0.02em';
+                    valueNumber.style.textShadow = '0 6px 18px rgba(124,58,237,0.16), 0 2px 6px rgba(6,182,212,0.10)';
                     if(unitEl){ unitEl.textContent = unitFor(name); }
                 }catch(e){/* ignore per-card errors */}
+            });
+        })();
+        </script>
+
+        <script>
+        (function(){
+            // render tiny metric charts for each .metric-chart canvas
+            const cardNodes = document.querySelectorAll('.metric-card');
+            cardNodes.forEach(card=>{
+                try{
+                    const nameEl = card.querySelector('.text-sm.font-semibold');
+                    const name = nameEl ? nameEl.textContent.trim() : '';
+                    const valueEl = card.querySelector('.value-number');
+                    const canvas = card.querySelector('.metric-chart');
+                    if(!canvas || !valueEl) return;
+
+                    const v = parseFloat((valueEl.textContent||'').replace(/[^0-9\.-]+/g,''));
+                    const base = Number.isFinite(v) ? Math.abs(v) : 1;
+                    const sign = (v < 0) ? -1 : 1;
+                    // synthetic series around value
+                    const series = [0.9,0.95,1.0,1.03,0.98].map(f=> +( (base * f * sign).toFixed(2) ));
+                    const ctx = canvas.getContext('2d');
+                    const color = (function(){ try{ const col = card.querySelector('.value-number').style.color; return col || '#06b6d4'; }catch(e){return '#06b6d4'} })();
+                    const hexToRgba = (hex, a)=>{
+                        try{
+                            const h = hex.replace('#','');
+                            const bigint = parseInt(h.length===3? h.split('').map(c=>c+c).join(''): h,16);
+                            const r = (bigint >> 16) & 255;
+                            const g = (bigint >> 8) & 255;
+                            const b = bigint & 255;
+                            return `rgba(${r},${g},${b},${a})`;
+                        }catch(e){return `rgba(6,182,212,${a})`;}
+                    };
+                    new Chart(ctx, {
+                        type:'line',
+                        data:{ labels: series.map((_,i)=>i), datasets:[{ data: series, borderColor: color, backgroundColor: hexToRgba(color,0.12), fill:true, tension:0.36, pointRadius:0, borderWidth:2.6 }] },
+                        options:{ responsive:false, maintainAspectRatio:false, plugins:{legend:{display:false}}, elements:{line:{borderJoinStyle:'round', borderCapStyle:'round'}}, scales:{x:{display:false}, y:{display:false}} }
+                    });
+                }catch(e){/* ignore */}
             });
         })();
         </script>

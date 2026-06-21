@@ -153,19 +153,19 @@
 
 <header class="bg-surface text-primary font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant shadow-sm flex justify-between items-center px-8 w-full left-0 min-w-0">
     <div class="flex items-center gap-8 min-w-0 flex-1">
-        <a class="flex items-center gap-3 shrink group" href="/">
+        <a class="flex items-center gap-3 shrink group" href="{% url 'dashboard:dashboard' %}">
             <span class="relative shrink-0">
                 <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                <img alt="APWRS Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
             </span>
             <div class="flex flex-col min-w-0 leading-tight">
-                <span class="text-base font-extrabold text-primary tracking-tight">ABCDryBASIN</span>
-                <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+                <span class="text-base font-extrabold text-primary tracking-tight">APWRS</span>
+                <span class="text-[10px] font-normal text-on-surface-variant">Adaptive Planting Window Recommendation System</span>
             </div>
         </a>
 
         <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
-            <a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:home' %}">Home</a>
+            <a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:dashboard' %}">Home</a>
             <a class="text-primary border-b-2 border-primary h-full flex items-center px-1 font-bold" href="{% url 'dashboard:data_ingestion' %}">Data</a>
             <a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">Analysis</a>
             <a class="text-on-surface-variant hover:text-primary transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
@@ -174,6 +174,25 @@
 
     <div class="flex items-center gap-3 shrink-0 min-w-0">
         <a href="{% url 'dashboard:data_ingestion' %}" class="px-4 py-2 rounded-lg bg-surface-container-low border border-outline-variant text-sm font-bold text-on-surface hover:bg-surface-container transition-colors">Back to Entry</a>
+        <!-- Auth Section -->
+        <div class="flex items-center gap-2 shrink-0 border-l border-outline-variant pl-3 ml-1">
+            {% if user.is_authenticated %}
+                <span class="text-xs text-on-surface-variant hidden md:inline">{{ user.username }}</span>
+                {% if user.profile.role == 'superadmin' %}
+                <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary">{% trans "Admin" %}</span>
+                <a href="{% url 'dashboard:admin_panel' %}" class="text-xs text-secondary hover:underline font-medium">{% trans "Manage" %}</a>
+                {% elif user.profile.role == 'subadmin' %}
+                <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{% trans "Subadmin" %}</span>
+                {% else %}
+                <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">{% trans "Viewer" %}</span>
+                {% endif %}
+                <a href="{% url 'dashboard:logout' %}" class="text-on-surface-variant hover:text-error transition-colors">
+                    <span class="material-symbols-outlined text-sm">logout</span>
+                </a>
+            {% else %}
+                <a href="{% url 'dashboard:login' %}" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all">{% trans "Sign In" %}</a>
+            {% endif %}
+        </div>
     </div>
 </header>
 
@@ -206,6 +225,15 @@
                         <span class="material-symbols-outlined text-[18px]">history</span>
                         Import Logs
                     </a>
+                    {% if user.is_authenticated and user.profile.role != 'viewer' %}
+                    <form id="delete-all-form" method="post" action="{% url 'dashboard:delete_all_metrics' %}">
+                        {% csrf_token %}
+                        <button type="button" onclick="confirmDeleteAll(this.form)" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error font-bold text-sm hover:bg-error-container/40 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+                            Delete All Data
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -285,11 +313,20 @@
                 <div class="min-w-0">
                     <p class="text-[11px] font-bold font-label uppercase tracking-[0.2em] text-secondary">{{ section.model_name }}</p>
                     <h3 class="font-headline font-black text-xl text-primary">{{ section.title }}</h3>
-                    <p class="text-xs text-on-surface-variant mt-1">{{ section.count }} record(s)</p>
+                    <p class="text-xs text-on-surface-variant mt-1">{% if section.display_count < section.count %}Showing {{ section.display_count }} of {{ section.count }} records{% else %}{{ section.count }} record(s){% endif %}</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <a href="{{ section.add_url }}" class="px-3 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase tracking-widest hover:bg-primary-container transition-colors">Add New</a>
                     <a href="{{ section.export_url }}" class="px-3 py-2 rounded-lg border border-outline-variant bg-white text-xs font-bold uppercase tracking-widest text-on-surface hover:bg-surface-container transition-colors">Export</a>
+                    {% if user.is_authenticated and user.profile.role != 'viewer' %}
+                    <form method="post" action="{% url 'dashboard:delete_metric_table' section.key %}">
+                        {% csrf_token %}
+                        <button type="button" onclick="confirmDeleteTable(this.form, '{{ section.title|escapejs }}')" class="px-3 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container/40 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                            Delete Table
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
             </div>
             <div class="p-4 overflow-x-auto hide-scrollbar">
@@ -340,6 +377,21 @@
 </main>
 
 <script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const CSRF_TOKEN = getCookie('csrftoken') || '{{ csrf_token }}';
     const browserConfirmModal = document.getElementById('browser-confirm-modal');
     const browserConfirmTitle = document.getElementById('browser-confirm-title');
     const browserConfirmMessage = document.getElementById('browser-confirm-message');
@@ -385,6 +437,30 @@
             message: `This will permanently delete the record ${itemLabel}.`,
             confirmLabel: 'Delete',
             cancelLabel: 'Keep it',
+        });
+        if (allow) {
+            form.submit();
+        }
+    }
+
+    async function confirmDeleteTable(form, sectionTitle) {
+        const allow = await showBrowserConfirm({
+            title: `Delete entire ${sectionTitle} table?`,
+            message: `This will permanently delete ALL records in the ${sectionTitle} table. This action cannot be undone.`,
+            confirmLabel: 'Delete All',
+            cancelLabel: 'Cancel',
+        });
+        if (allow) {
+            form.submit();
+        }
+    }
+
+    async function confirmDeleteAll(form) {
+        const allow = await showBrowserConfirm({
+            title: 'Delete ALL metric data?',
+            message: 'This will permanently delete ALL records across every metrics table. This action cannot be undone.',
+            confirmLabel: 'Delete Everything',
+            cancelLabel: 'Cancel',
         });
         if (allow) {
             form.submit();

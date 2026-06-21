@@ -279,19 +279,19 @@
 <div class="flex-1 flex flex-col bg-surface h-screen">
 <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
     <div class="flex items-center gap-8 min-w-0 flex-1">
-        <a class="flex items-center gap-3 shrink group" href="/">
+        <a class="flex items-center gap-3 shrink group" href="{% url 'dashboard:dashboard' %}">
             <span class="relative shrink-0">
                 <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                <img alt="APWRS Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
             </span>
             <div class="flex flex-col min-w-0 leading-tight">
-                <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
-                <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+                <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">APWRS</span>
+                <span class="text-[10px] font-normal text-on-surface-variant">Adaptive Planting Window Recommendation System</span>
             </div>
         </a>
         
         <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
-            <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="/">Home</a>
+            <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:dashboard' %}">Home</a>
             <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:data_ingestion' %}">Data</a>
             <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">Analysis</a>
             <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
@@ -317,9 +317,25 @@
             <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
                 <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
             </button>
-            <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
-                <span class="material-symbols-outlined text-2xl">account_circle</span>
-            </button>
+            <!-- Auth Section -->
+            <div class="flex items-center gap-2 shrink-0 border-l border-outline-variant pl-3 ml-1">
+                {% if user.is_authenticated %}
+                    <span class="text-xs text-on-surface-variant hidden md:inline">{{ user.username }}</span>
+                    {% if user.profile.role == 'superadmin' %}
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary">{% trans "Admin" %}</span>
+                    <a href="{% url 'dashboard:admin_panel' %}" class="text-xs text-secondary hover:underline font-medium">{% trans "Manage" %}</a>
+                    {% elif user.profile.role == 'subadmin' %}
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{% trans "Subadmin" %}</span>
+                    {% else %}
+                    <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">{% trans "Viewer" %}</span>
+                    {% endif %}
+                    <a href="{% url 'dashboard:logout' %}" class="text-on-surface-variant hover:text-error transition-colors">
+                        <span class="material-symbols-outlined text-sm">logout</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'dashboard:login' %}" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all">{% trans "Sign In" %}</a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </header>
@@ -535,7 +551,49 @@
                     </div>
                 </div>
 
-                
+                <!-- Drought Indices -->
+                <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="drought">
+                    <button class="w-full px-5 py-4 flex items-center justify-between hover:bg-surface-container-low transition-colors group" onclick="this.nextElementSibling.classList.toggle('hidden')">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">water</span>
+                            <span class="font-headline font-bold text-primary">Drought Indices</span>
+                            <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container text-[10px] rounded uppercase font-bold">7 Parameters</span>
+                        </div>
+                        <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors expand-icon">expand_more</span>
+                    </button>
+                    <div class="p-5 pt-0 border-t border-outline-variant/50 hidden">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">SPI 1-month</label>
+                                <input name="spi_1month" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="-0.5" min="-3" max="3"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">SPI 3-month</label>
+                                <input name="spi_3month" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="-0.8" min="-3" max="3"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">SPI 12-month</label>
+                                <input name="spi_12month" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="-1.2" min="-3" max="3"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">SPEI 1-month</label>
+                                <input name="spei_1month" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="-0.6" min="-3" max="3"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">SPEI 3-month</label>
+                                <input name="spei_3month" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="-0.9" min="-3" max="3"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">SPEI 12-month</label>
+                                <input name="spei_12month" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="-1.1" min="-3" max="3"/>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-outline uppercase mb-1">PDSI Value</label>
+                                <input name="pdsi_value" class="w-full text-sm border border-outline-variant rounded focus:ring-primary focus:border-primary px-2 py-2" step="0.01" type="number" placeholder="0.5" min="-6" max="6"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Agricultural Metrics -->
                 <div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm" data-metric-section="agricultural">
@@ -773,7 +831,7 @@
                         <span class="material-symbols-outlined text-primary text-lg">database</span>
                         <div>
                             <p class="text-xs font-bold text-primary uppercase mb-1">PostgreSQL Connected</p>
-                            <p class="text-[11px] text-on-surface-variant leading-tight">Database: <strong>ABCDry_db</strong></p>
+                            <p class="text-[11px] text-on-surface-variant leading-tight">Database: <strong>APWRS_db</strong></p>
                             <p class="text-[11px] text-on-surface-variant leading-tight">All data is saved to PostgreSQL automatically.</p>
                         </div>
                     </div>
@@ -974,6 +1032,8 @@
     async function saveAllMetrics() {
         const regionId = document.getElementById('global-region').value;
         const yearId = document.getElementById('global-year').value;
+        const latValue = document.getElementById('latitude-input').value;
+        const lngValue = document.getElementById('longitude-input').value;
         const timestamp = document.getElementById('timestamp-input').value;
 
         if (!regionId) {
@@ -1044,6 +1104,8 @@
             payload.measurement_date = measurementDate;
             payload.metric_type = sectionType;
             if (timestamp) payload.timestamp = timestamp;
+            if (latValue) payload.latitude = parseFloat(latValue);
+            if (lngValue) payload.longitude = parseFloat(lngValue);
 
             try {
                 const response = await fetch('/api/submit-metrics/', {
@@ -1083,7 +1145,7 @@
         if (totalSaved === 0 && totalErrors === 0) {
             showToast('No data entered in any section. Fill at least one metric category.', 'info');
         } else if (totalSaved > 0 && totalErrors === 0) {
-            showToast(`✓ ${totalSaved} record(s) saved to ABCDry_db successfully!`, 'success');
+            showToast(`✓ ${totalSaved} record(s) saved to APWRS_db successfully!`, 'success');
         } else {
             if (totalSaved > 0) {
                 showToast(`✓ ${totalSaved} record(s) saved successfully.`, 'success', 4000);

@@ -4,6 +4,8 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
+from decimal import Decimal
+
 from ..models import (
     AgriculturalMetrics,
     ClimateMetrics,
@@ -51,7 +53,7 @@ class DroughtPredictionPipeline:
         return self
 
     def set_soil_properties_from_metrics(self, region, year, root_depth_mm=600):
-        latest = SoilMetrics.objects.filter(region=region, year=year).order_by('-measurement_date').first()
+        latest = SoilMetrics.objects.filter(region=region).order_by('-measurement_date').first()
         if latest and latest.sand_ratio is not None and latest.clay_ratio is not None and latest.silt_ratio is not None:
             return self.set_soil_properties(
                 float(latest.sand_ratio),
@@ -70,6 +72,8 @@ class DroughtPredictionPipeline:
                 value = getattr(obj, source_field)
                 if hasattr(value, 'name'):
                     value = value.name
+                elif isinstance(value, Decimal):
+                    value = float(str(value))
                 row[target_field] = value
             rows.append(row)
         if not rows:
@@ -78,7 +82,7 @@ class DroughtPredictionPipeline:
 
     def build_prediction_frame(self, region, year, lookback_days=120):
         soil_df = self._query_frame(
-            SoilMetrics.objects.filter(region=region, year=year).order_by('measurement_date')[:lookback_days],
+            SoilMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
             {
                 'moisture_content_percent': 'soil_moisture_pct',
                 'sand_ratio': 'sand_pct',
@@ -92,7 +96,7 @@ class DroughtPredictionPipeline:
         )
 
         climate_df = self._query_frame(
-            ClimateMetrics.objects.filter(region=region, year=year).order_by('measurement_date')[:lookback_days],
+            ClimateMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
             {
                 'rainfall_mm': 'rainfall_mm',
                 'temperature_max_c': 'temp_max_c',
@@ -107,7 +111,7 @@ class DroughtPredictionPipeline:
         )
 
         drought_df = self._query_frame(
-            DroughtIndices.objects.filter(region=region, year=year).order_by('measurement_date')[:lookback_days],
+            DroughtIndices.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
             {
                 'spi_1month': 'spi',
                 'spei_1month': 'spei',
@@ -116,7 +120,7 @@ class DroughtPredictionPipeline:
         )
 
         remote_df = self._query_frame(
-            RemoteSensingMetrics.objects.filter(region=region, year=year).order_by('measurement_date')[:lookback_days],
+            RemoteSensingMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
             {
                 'ndvi': 'ndvi',
                 'land_surface_temperature_c': 'lst_c',
@@ -127,7 +131,7 @@ class DroughtPredictionPipeline:
         )
 
         hydro_df = self._query_frame(
-            HydrologyMetrics.objects.filter(region=region, year=year).order_by('measurement_date')[:lookback_days],
+            HydrologyMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
             {
                 'precipitation_mm': 'precipitation_mm',
                 'evapotranspiration_mm': 'hydro_et_mm',
@@ -140,7 +144,7 @@ class DroughtPredictionPipeline:
         )
 
         agricultural_df = self._query_frame(
-            AgriculturalMetrics.objects.filter(region=region, year=year).order_by('measurement_date')[:lookback_days],
+            AgriculturalMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
             {
                 'growth_stage': 'growth_stage',
                 'crop_coefficient_kc': 'kc',
@@ -255,7 +259,8 @@ class DroughtPredictionPipeline:
                     rain = float(df['rainfall_mm'].iloc[i] if 'rainfall_mm' in df.columns else 0)
                     irrigation = float(df['irrigation_mm'].iloc[i] if 'irrigation_mm' in df.columns else 0)
                     etc = float(df['etc_mm'].iloc[i])
-                    df.loc[df.index[i], 'soil_water_mm'] = update_soil_water(prev, rain, irrigation, etc)
+                    runoff = max(0, rain - 5) * 0.3
+                    df.loc[df.index[i], 'soil_water_mm'] = update_soil_water(prev, rain, irrigation, etc, runoff)
 
         return df
 
@@ -295,8 +300,8 @@ class DroughtPredictionPipeline:
                 'soil_moisture_pct': current_soil_moisture,
                 'soil_water_mm': current_soil_water_mm,
                 'soil_water_percent_of_capacity': round(
-                    current_soil_water_mm / self.available_water_capacity_mm * 100, 1
-                ) if self.available_water_capacity_mm > 0 else 0,
+                    current_soil_moisture / self.field_capacity_pct * 100, 1
+                ) if self.field_capacity_pct and self.field_capacity_pct > 0 else 0,
             },
             'risk_scores': {
                 'today': risk_today,
@@ -361,16 +366,18 @@ class DroughtPredictionPipeline:
         ndvi = float(prepared_df['ndvi'].iloc[-1]) if 'ndvi' in prepared_df.columns else 0.5
         etc_avg = float(prepared_df['etc_mm'].tail(7).mean()) if 'etc_mm' in prepared_df.columns else 3.0
 
-        scores = {
-            'rainfall_deficit': max(0, 100 - min(100, (rainfall_30d / 30) * 10)) + max(0, 100 - min(100, rainfall_7d * 10)),
-            'soil_moisture_decline': max(0, min(100, abs(soil_trend) * 300)),
-            'high_temperature': max(0, min(100, temp_anomaly * 15)),
-            'vegetation_stress': max(0, min(100, (1 - ndvi) * 100)),
-            'high_evapotranspiration': max(0, min(100, etc_avg * 20)),
+        abs_scores = {
+            'rainfall_deficit': round(max(0, 100 - min(100, (rainfall_30d / 30) * 10)) + max(0, 100 - min(100, rainfall_7d * 10)), 1),
+            'soil_moisture_decline': round(max(0, min(100, abs(soil_trend) * 300)), 1),
+            'high_temperature': round(max(0, min(100, temp_anomaly * 15)), 1),
+            'vegetation_stress': round(max(0, min(100, (1 - ndvi) * 100)), 1),
+            'high_evapotranspiration': round(max(0, min(100, etc_avg * 20)), 1),
         }
 
-        total = sum(scores.values()) or 1
-        return {key: round((value / total) * 100, 1) for key, value in scores.items()}
+        total = sum(abs_scores.values()) or 1
+        norm = {key: round((value / total) * 100, 1) for key, value in abs_scores.items()}
+
+        return {**norm, 'absolute': abs_scores}
 
     def _heuristic_prediction(self, prepared_df, use_llm=True, llm_model='llama3.2:3b'):
         current_soil_moisture = float(prepared_df['soil_moisture_pct'].iloc[-1]) if 'soil_moisture_pct' in prepared_df.columns else 0
@@ -381,10 +388,10 @@ class DroughtPredictionPipeline:
         ndvi = float(prepared_df['ndvi'].iloc[-1]) if 'ndvi' in prepared_df.columns else 0.5
         spi_value = float(prepared_df['spi'].iloc[-1]) if 'spi' in prepared_df.columns and len(prepared_df) else 0
 
-        if self.available_water_capacity_mm and self.available_water_capacity_mm > 0:
+        if self.field_capacity_pct and self.field_capacity_pct > 0:
+            soil_risk = max(0, (1 - min(1, current_soil_moisture / self.field_capacity_pct)) * 100)
+        elif self.available_water_capacity_mm and self.available_water_capacity_mm > 0:
             soil_risk = (1 - min(1, current_soil_water_mm / self.available_water_capacity_mm)) * 100
-        elif self.field_capacity_pct:
-            soil_risk = (1 - min(1, current_soil_moisture / self.field_capacity_pct)) * 100
         else:
             soil_risk = max(0, 100 - current_soil_moisture)
 
@@ -425,8 +432,8 @@ class DroughtPredictionPipeline:
                 'soil_moisture_pct': current_soil_moisture,
                 'soil_water_mm': current_soil_water_mm,
                 'soil_water_percent_of_capacity': round(
-                    current_soil_water_mm / self.available_water_capacity_mm * 100, 1
-                ) if self.available_water_capacity_mm and self.available_water_capacity_mm > 0 else 0,
+                    current_soil_moisture / self.field_capacity_pct * 100, 1
+                ) if self.field_capacity_pct and self.field_capacity_pct > 0 else 0,
             },
             'risk_scores': {
                 'today': risk_today,

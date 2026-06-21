@@ -91,6 +91,34 @@
             /* Leaflet map sits behind overlays inside the map container */
             #ichkeul-heatmap { z-index: 0; }
             .map-overlay-panel { z-index: 20; }
+
+        /* ── Trends & Predictive Forecasts Charts ── */
+        .chart-box { display:flex; flex-direction:column; height:100%; }
+        .chart-box-title { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; text-transform:uppercase; margin-bottom:12px; letter-spacing:.05em; color:#414844; }
+        .chart-box-body { flex:1; display:flex; flex-direction:column; min-height:0; }
+        .chart-row { flex:1; display:flex; min-height:0; }
+
+        .chart-y { display:flex; flex-direction:column; align-items:flex-end; width:32px; flex-shrink:0; padding-right:6px; }
+        .chart-y-item { flex:1; display:flex; font-size:10px; font-family:'JetBrains Mono',monospace; font-weight:500; line-height:1; color:#414844; align-items:flex-start; }
+        .chart-y-item:last-child { align-items:flex-end; padding-bottom:1px; }
+
+        .chart-body { flex:1; position:relative; border-left:1px solid #c1c8c2; border-bottom:1px solid #c1c8c2; }
+
+        .chart-grid { position:absolute; inset:0; display:flex; flex-direction:column; pointer-events:none; }
+        .chart-grid-line { border-top:1px solid rgba(193,200,194,0.25); flex:1; }
+        .chart-grid-line:last-child { border-top:none; }
+
+        .chart-bars { position:absolute; inset:0; display:flex; align-items:flex-end; gap:1px; z-index:10; }
+        .chart-bar { flex:1; min-height:2px; border-radius:2px 2px 0 0; }
+        .chart-bar.hist { background:rgba(1,45,29,0.18); }
+        .chart-bar.cur { background:rgba(1,45,29,0.82); }
+        .chart-bar.fcst { background:rgba(114,221,253,0.45); border-top:2px dashed #00677d; }
+
+        .chart-svg-wrap { position:absolute; inset:0; z-index:10; }
+        .chart-svg-wrap svg { width:100%; height:100%; display:block; }
+
+        .chart-x { display:flex; border-left:1px solid #c1c8c2; margin-left:33px; }
+        .chart-x-label { flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:500; line-height:1.25; padding-top:1px; color:#414844; }
     </style>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
@@ -100,19 +128,19 @@
 <!-- Top Navigation Header -->
     <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
         <div class="flex items-center gap-8 min-w-0 flex-1">
-            <a class="flex items-center gap-3 shrink group" href="/">
+            <a class="flex items-center gap-3 shrink group" href="{% url 'dashboard:dashboard' %}">
                 <span class="relative shrink-0">
                     <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                    <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
+                    <img alt="APWRS Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRtaLEQaIxnJpQT_2JOKcyzPinXIFwGzv9OXxTYf01sVaNfoCQtjK7jogDF6lo83ixeEMvmHolkwmtckoQtuCiF9C9LtHxDYoVuXYatlC1pOsRwhxEzQLH7DujyetnL8cBJ7gbg1wBU7zWpECwDro4UmwRsasF0YiK-OByMKps6yJHD9Nz7_e_6KZXMR3M2BYQHpYgtANZawJ3Hpzy1_oT3aGLvzlKbbYz5MhL9CpnNO85AT6__OmyNNFBkefSBsGaabV_vUnCHfs7" width="40" height="40"/>
                 </span>
                 <div class="flex flex-col min-w-0 leading-tight">
-                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
-                    <span class="text-[10px] font-normal text-on-surface-variant">Drought risk assessment tool</span>
+                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">APWRS</span>
+                    <span class="text-[10px] font-normal text-on-surface-variant">Adaptive Planting Window Recommendation System</span>
                 </div>
             </a>
             
             <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="/">Home</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:dashboard' %}">Home</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">Data</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:analysis' %}">Analysis</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
@@ -124,9 +152,9 @@
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
                 <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-32" id="region-selector" name="region">
-                    <option value="tunisia">Tunisia</option>
-                    <option value="morocco">Morocco</option>
-                    <option value="algeria">Algeria</option>
+                    {% for r in regions %}
+                    <option value="{{ r.name|lower }}"{% if r.name == 'Ichkeul' %} selected{% endif %}>{{ r.name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             
@@ -134,26 +162,18 @@
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">calendar_today</span>
                 <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-40" name="year" id="year-selector">
-                    <option value="2024">2024 (Current)</option>
-                    <option value="2023">2023</option>
-                    <option value="2022">2022</option>
-                    <option value="2020-2024">2020 - 2024</option>
-                    <option value="2015-2019">2015 - 2019</option>
-                    <option value="historical">Historical Archive</option>
+                    {% for val, label in years %}
+                    <option value="{{ val }}"{% if val == now_year %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            
-            <!-- Run Simulation Button -->
-            <button id="run-simulation-header-btn" type="button" class="bg-primary text-on-primary px-4 py-1.5 rounded-DEFAULT text-sm font-semibold hover:bg-primary-container transition-colors shadow-sm cursor-pointer active:opacity-70 shrink-0">
-                Run Simulation
-            </button>
             
             <!-- Language Switcher -->
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">language</span>
-                <select class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
-                    <option value="en" selected>EN</option>
-                    <option value="fr">FR</option>
+                <select id="lang-switcher" class="pl-8 pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24">
+                    <option value="en" {% if request.LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                    <option value="fr" {% if request.LANGUAGE_CODE == 'fr' %}selected{% endif %}>FR</option>
                 </select>
             </div>
             
@@ -162,27 +182,44 @@
                 <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
                     <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
                 </button>
-                <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
-                    <span class="material-symbols-outlined text-2xl">account_circle</span>
-                </button>
+                <!-- Auth Section -->
+                <div class="flex items-center gap-2 shrink-0 border-l border-outline-variant pl-3 ml-1">
+                    {% if user.is_authenticated %}
+                        <span class="text-xs text-on-surface-variant hidden md:inline">{{ user.username }}</span>
+                        {% if user.profile.role == 'superadmin' %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary">{% trans "Admin" %}</span>
+                        <a href="{% url 'dashboard:admin_panel' %}" class="text-xs text-secondary hover:underline font-medium">{% trans "Manage" %}</a>
+                        {% elif user.profile.role == 'subadmin' %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{% trans "Subadmin" %}</span>
+                        {% else %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">{% trans "Viewer" %}</span>
+                        {% endif %}
+                        <a href="{% url 'dashboard:logout' %}" class="text-on-surface-variant hover:text-error transition-colors">
+                            <span class="material-symbols-outlined text-sm">logout</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'dashboard:login' %}" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all">{% trans "Sign In" %}</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
 <!-- Scrollable Content Area -->
 <main class="flex-1 overflow-y-auto mt-16 p-6">
+<script id="initial-data" type="application/json">{{ initial_data_json|safe }}</script>
 <!-- SECTION 1: Current Drought Status -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
 <!-- Today Risk -->
 <div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
 <div class="flex justify-between items-start mb-4">
 <span class="font-label text-xs uppercase text-on-surface-variant">Today Risk</span>
-<span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-yellow-200">Watch</span>
+<span id="risk-today-badge" class="bg-yellow-100 text-yellow-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-yellow-200">—</span>
 </div>
 <div class="flex items-end gap-2 mb-2">
-<span class="text-5xl font-black font-headline text-on-surface">34</span>
+<span id="risk-today-score" class="text-5xl font-black font-headline text-on-surface">—</span>
 <span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
 </div>
-<p class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Implement preventative monitoring in northern sectors.</p>
+<p id="risk-today-desc" class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Loading prediction…</p>
 <div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-6xl" data-icon="monitoring">monitoring</span>
 </div>
@@ -191,13 +228,13 @@
 <div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
 <div class="flex justify-between items-start mb-4">
 <span class="font-label text-xs uppercase text-on-surface-variant">7 Days Risk</span>
-<span class="bg-orange-100 text-orange-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-orange-200">Severe</span>
+<span id="risk-7day-badge" class="bg-orange-100 text-orange-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-orange-200">—</span>
 </div>
 <div class="flex items-end gap-2 mb-2">
-<span class="text-5xl font-black font-headline text-on-surface">52</span>
+<span id="risk-7day-score" class="text-5xl font-black font-headline text-on-surface">—</span>
 <span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
 </div>
-<p class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Initiate irrigation restrictions for non-critical zones.</p>
+<p id="risk-7day-desc" class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Loading prediction…</p>
 <div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-6xl" data-icon="water_drop">water_drop</span>
 </div>
@@ -206,13 +243,13 @@
 <div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
 <div class="flex justify-between items-start mb-4">
 <span class="font-label text-xs uppercase text-on-surface-variant">30 Days Risk</span>
-<span class="bg-red-100 text-red-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-red-200">Extreme</span>
+<span id="risk-30day-badge" class="bg-red-100 text-red-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-red-200">—</span>
 </div>
 <div class="flex items-end gap-2 mb-2">
-<span class="text-5xl font-black font-headline text-on-surface">78</span>
+<span id="risk-30day-score" class="text-5xl font-black font-headline text-on-surface">—</span>
 <span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
 </div>
-<p class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Activate regional emergency water management protocols.</p>
+<p id="risk-30day-desc" class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Loading prediction…</p>
 <div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
 <span class="material-symbols-outlined text-6xl" data-icon="emergency_home">emergency_home</span>
 </div>
@@ -226,8 +263,8 @@
 <div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
 <h3 class="font-headline font-bold text-sm uppercase tracking-wider">Spatial Risk Distribution (Ichkeul Basin)</h3>
 <div class="flex gap-2">
-<button class="px-3 py-1 bg-primary text-white text-xs font-bold uppercase">Satellite</button>
-<button class="px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-bold uppercase">Topography</button>
+<button id="satellite-btn" class="px-3 py-1 bg-primary text-white text-xs font-bold uppercase">Satellite</button>
+<button id="topography-btn" class="px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-bold uppercase">Topography</button>
 </div>
 </div>
 <!-- Map Canvas Placeholder -->
@@ -261,22 +298,22 @@
 <div class="absolute bottom-4 right-4 z-10 bg-primary-container text-white p-4 w-64 shadow-lg border border-primary">
 <h4 class="font-label text-[10px] uppercase font-bold mb-3 opacity-80 border-b border-white/20 pb-2">Risk Zone Summary</h4>
 <div class="space-y-2">
-<div class="flex justify-between items-center text-xs">
-<span class="opacity-70">Extreme Zone:</span>
-<span class="font-bold">42.4 km²</span>
-</div>
-<div class="flex justify-between items-center text-xs">
-<span class="opacity-70">Severe Zone:</span>
-<span class="font-bold">118.2 km²</span>
-</div>
-<div class="flex justify-between items-center text-xs">
-<span class="opacity-70">Moderate Zone:</span>
-<span class="font-bold">285.6 km²</span>
-</div>
-<div class="flex justify-between items-center text-xs pt-1 border-t border-white/10 mt-1">
-<span class="opacity-70">Total Basin Area:</span>
-<span class="font-bold">1,200 km²</span>
-</div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="opacity-70">Extreme Zone:</span>
+                        <span class="font-bold">{{ heatmap_zones.extreme_km2 }} km²</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="opacity-70">Severe Zone:</span>
+                        <span class="font-bold">{{ heatmap_zones.severe_km2 }} km²</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="opacity-70">Moderate Zone:</span>
+                        <span class="font-bold">{{ heatmap_zones.moderate_km2 }} km²</span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs pt-1 border-t border-white/10 mt-1">
+                        <span class="opacity-70">Total Basin Area:</span>
+                        <span class="font-bold">{{ heatmap_zones.total_km2 }} km²</span>
+                    </div>
 </div>
 </div>
 </div>
@@ -290,36 +327,25 @@
 <span class="material-symbols-outlined text-error" data-icon="notification_important">notification_important</span>
                             Active Alerts
                         </h3>
-<span class="bg-error text-white rounded-full text-[10px] px-2 py-0.5 font-bold">2 New</span>
-</div>
-<div class="p-4 space-y-4 overflow-y-auto">
-<!-- High Priority -->
-<div class="border-l-4 border-error bg-error-container/20 p-4">
-<div class="flex justify-between items-start mb-1">
-<span class="font-bold text-xs text-error uppercase">High Priority</span>
-<span class="font-label text-[10px] text-on-surface-variant">2h ago</span>
-</div>
-<h4 class="text-sm font-bold text-on-surface mb-2">Soil Moisture Critical Drop</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">Sensor station S-04 (Sector North) reported &lt; 12% moisture. Immediate verification required.</p>
-<button class="mt-3 text-[10px] font-black uppercase text-error flex items-center gap-1 hover:underline">
-                                Action Required <span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
-</div>
-<!-- Medium Priority -->
-<div class="border-l-4 border-secondary bg-surface-container-low p-4">
-<div class="flex justify-between items-start mb-1">
-<span class="font-bold text-xs text-secondary uppercase">Medium Priority</span>
-<span class="font-label text-[10px] text-on-surface-variant">5h ago</span>
-</div>
-<h4 class="text-sm font-bold text-on-surface mb-2">Precipitation Gap Warning</h4>
-<p class="text-xs text-on-surface-variant leading-relaxed">No rainfall forecast for the next 14 days in the main catchment area. Trend analysis updated.</p>
-<button class="mt-3 text-[10px] font-black uppercase text-secondary flex items-center gap-1 hover:underline">
-                                View Trends <span class="material-symbols-outlined text-sm">arrow_forward</span>
-</button>
-</div>
-</div>
+<span class="bg-error text-white rounded-full text-[10px] px-2 py-0.5 font-bold">{{ alerts|length }} New</span>
+                    </div>
+                    <div class="p-4 space-y-4 overflow-y-auto">
+                        {% for alert in alerts %}
+                        <div class="border-l-4 {{ alert.priority_cls }} p-4 alert-item">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="font-bold text-xs {{ alert.priority_cls }} uppercase">{{ alert.priority }}</span>
+                                <span class="font-label text-[10px] text-on-surface-variant">{{ alert.time }}</span>
+                            </div>
+                            <h4 class="text-sm font-bold text-on-surface mb-2">{{ alert.title }}</h4>
+                            <p class="text-xs text-on-surface-variant leading-relaxed">{{ alert.desc|safe }}</p>
+                            <button class="mt-3 text-[10px] font-black uppercase {{ alert.btn_cls }} flex items-center gap-1 hover:underline">
+                                    {{ alert.btn_text }} <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
 <div class="mt-auto border-t border-outline-variant p-4">
-<button class="w-full py-2 border border-outline text-[11px] font-bold uppercase hover:bg-surface-variant/30 transition-colors">Clear All Read Alerts</button>
+<button id="clear-alerts-btn" class="w-full py-2 border border-outline text-[11px] font-bold uppercase hover:bg-surface-variant/30 transition-colors">Clear All Read Alerts</button>
 </div>
 </div>
 </div>
@@ -335,23 +361,17 @@
 <span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Soil Moisture</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black font-headline">25.5%</span>
-<span class="text-error text-xs font-bold flex items-center">
-<span class="material-symbols-outlined text-xs">arrow_downward</span>8%
-                        </span>
+<span id="metric-soil-moisture" class="text-2xl font-black font-headline">—</span>
 </div>
 </div>
 <!-- Metric 2 -->
 <div class="bg-surface border border-outline-variant p-4">
 <div class="flex items-center gap-2 mb-3">
 <span class="material-symbols-outlined text-primary" data-icon="rainy">rainy</span>
-<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Rainfall</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Rainfall (30d)</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black font-headline">45mm</span>
-<span class="text-error text-xs font-bold flex items-center">
-<span class="material-symbols-outlined text-xs">arrow_downward</span>47%
-                        </span>
+<span id="metric-rainfall" class="text-2xl font-black font-headline">—</span>
 </div>
 </div>
 <!-- Metric 3 -->
@@ -361,10 +381,7 @@
 <span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">NDVI Index</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black font-headline">0.65</span>
-<span class="text-error text-xs font-bold flex items-center">
-<span class="material-symbols-outlined text-xs">arrow_downward</span>0.07
-                        </span>
+<span id="metric-ndvi" class="text-2xl font-black font-headline">—</span>
 </div>
 </div>
 <!-- Metric 4 -->
@@ -374,23 +391,17 @@
 <span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">ETc (Daily)</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black font-headline">3.2</span>
-<span class="text-secondary text-xs font-bold flex items-center">
-<span class="material-symbols-outlined text-xs">arrow_upward</span>0.5
-                        </span>
+<span id="metric-etc" class="text-2xl font-black font-headline">—</span>
 </div>
 </div>
 <!-- Metric 5 -->
 <div class="bg-surface border border-outline-variant p-4">
 <div class="flex items-center gap-2 mb-3">
 <span class="material-symbols-outlined text-primary" data-icon="waves">waves</span>
-<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Water Level</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Soil Water</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black font-headline">5.25m</span>
-<span class="text-error text-xs font-bold flex items-center">
-<span class="material-symbols-outlined text-xs">arrow_downward</span>0.8m
-                        </span>
+<span id="metric-soil-water" class="text-2xl font-black font-headline">—</span>
 </div>
 </div>
 <!-- Metric 6 -->
@@ -400,8 +411,7 @@
 <span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Crop Stress</span>
 </div>
 <div class="flex items-baseline gap-2">
-<span class="text-2xl font-black font-headline">67%</span>
-<span class="bg-yellow-100 text-yellow-800 px-1 text-[10px] font-bold rounded">Moderate</span>
+<span id="metric-crop-stress" class="text-2xl font-black font-headline">—</span>
 </div>
 </div>
 </div>
@@ -413,65 +423,72 @@
 <div class="bg-surface border border-outline-variant p-6">
 <h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">Trends &amp; Predictive Forecasts</h3>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-64 mb-6">
-<!-- Soil Water Balance Chart Placeholders -->
-<div class="flex flex-col">
-<p class="font-label text-[10px] uppercase mb-4 text-on-surface-variant">Soil Water Balance (mm)</p>
-<div class="flex-grow flex items-end gap-1.5 border-b border-l border-outline-variant relative" style="overflow:visible;">
-    <!-- Y axis labels -->
-    <div style="position:absolute; left:0; top:10px; bottom:26px; width:44px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; padding-right:8px; transform:translateX(-56px); z-index:5;">
-        <span class="font-label text-[11px] text-on-surface-variant">100</span>
-        <span class="font-label text-[11px] text-on-surface-variant">50</span>
-        <span class="font-label text-[11px] text-on-surface-variant">0</span>
+<!-- Soil Water Balance Chart -->
+<div class="chart-box">
+<div class="chart-box-title">Soil Water Balance (mm)</div>
+<div class="chart-box-body">
+    <div class="chart-row">
+        <div class="chart-y">
+            <div class="chart-y-item">100</div>
+            <div class="chart-y-item">50</div>
+            <div class="chart-y-item">0</div>
+        </div>
+        <div class="chart-body">
+            <div class="chart-grid">
+                <div class="chart-grid-line"></div>
+                <div class="chart-grid-line"></div>
+                <div class="chart-grid-line"></div>
+            </div>
+            <div class="chart-bars">
+                <div class="chart-bar hist sw-bar"></div>
+                <div class="chart-bar hist sw-bar"></div>
+                <div class="chart-bar hist sw-bar"></div>
+                <div class="chart-bar cur sw-bar"></div>
+                <div class="chart-bar cur sw-bar"></div>
+                <div class="chart-bar cur sw-bar"></div>
+                <div class="chart-bar fcst sw-bar-dash"></div>
+            </div>
+        </div>
     </div>
-    <!-- Minimalist bar chart representation -->
-    <div class="w-full bg-primary/20 h-3/4"></div>
-    <div class="w-full bg-primary/20 h-4/5"></div>
-    <div class="w-full bg-primary/20 h-2/3"></div>
-    <div class="w-full bg-primary h-1/2"></div>
-    <div class="w-full bg-primary h-1/3"></div>
-    <div class="w-full bg-primary h-1/4"></div>
-    <div class="w-full bg-secondary-container h-[10%] opacity-50 border-t-2 border-dashed border-secondary"></div>
-
-    <!-- X axis labels -->
-    <div style="position:absolute; left:20px; right:8px; bottom:-18px; display:flex; justify-content:space-between; font-size:11px;">
-        <span class="font-label text-[10px] text-on-surface-variant">T-5</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-4</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-3</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-2</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-1</span>
-        <span class="font-label text-[10px] text-on-surface-variant">F</span>
-    </div>
-
-    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <span class="text-[10px] bg-white px-2 py-1 border border-outline-variant shadow-sm uppercase font-bold">Historical vs Forecast</span>
+    <div class="chart-x">
+        {% for label in soil_water_labels %}
+        <span class="chart-x-label">{{ label }}</span>
+        {% endfor %}
     </div>
 </div>
 </div>
 <!-- Drought Risk Trend -->
-<div class="flex flex-col">
-<p class="font-label text-[10px] uppercase mb-4 text-on-surface-variant">Drought Risk Trend (0-100)</p>
-<div class="flex-grow border-b border-l border-outline-variant relative" style="overflow:visible;">
-    <!-- Y axis labels -->
-    <div style="position:absolute; left:0; top:8px; bottom:8px; width:44px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-end; padding-right:6px; transform:translateX(-56px); z-index:5;">
-        <span class="font-label text-[11px] text-on-surface-variant">100</span>
-        <span class="font-label text-[11px] text-on-surface-variant">75</span>
-        <span class="font-label text-[11px] text-on-surface-variant">50</span>
-        <span class="font-label text-[11px] text-on-surface-variant">25</span>
-        <span class="font-label text-[11px] text-on-surface-variant">0</span>
+<div class="chart-box">
+<div class="chart-box-title">Drought Risk Trend (0-100)</div>
+<div class="chart-box-body">
+    <div class="chart-row">
+        <div class="chart-y">
+            <div class="chart-y-item">100</div>
+            <div class="chart-y-item">75</div>
+            <div class="chart-y-item">50</div>
+            <div class="chart-y-item">25</div>
+            <div class="chart-y-item">0</div>
+        </div>
+        <div class="chart-body">
+            <div class="chart-grid">
+                <div class="chart-grid-line"></div>
+                <div class="chart-grid-line"></div>
+                <div class="chart-grid-line"></div>
+                <div class="chart-grid-line"></div>
+                <div class="chart-grid-line"></div>
+            </div>
+            <div class="chart-svg-wrap">
+                <svg preserveaspectratio="none" viewbox="0 0 400 200">
+                    <path d="{{ trend_line }}" fill="none" stroke="#1B4332" stroke-width="3"></path>
+                    <path d="{{ trend_fill }}" fill="rgba(27, 67, 50, 0.05)"></path>
+                </svg>
+            </div>
+        </div>
     </div>
-    <!-- Wave path representation -->
-    <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 200">
-        <path d="M0,150 Q50,140 100,160 T200,120 T300,80 T400,40" fill="none" stroke="#1B4332" stroke-width="3"></path>
-        <path d="M0,150 Q50,140 100,160 T200,120 T300,80 T400,40 L400,200 L0,200 Z" fill="rgba(27, 67, 50, 0.05)"></path>
-    </svg>
-    <!-- X axis labels -->
-    <div style="position:absolute; left:30px; right:8px; bottom:-18px; display:flex; justify-content:space-between; font-size:11px;">
-        <span class="font-label text-[10px] text-on-surface-variant">T-5</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-4</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-3</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-2</span>
-        <span class="font-label text-[10px] text-on-surface-variant">T-1</span>
-        <span class="font-label text-[10px] text-on-surface-variant">Forecast</span>
+    <div class="chart-x">
+        {% for label in trend_labels %}
+        <span class="chart-x-label">{{ label }}</span>
+        {% endfor %}
     </div>
 </div>
 </div>
@@ -484,8 +501,8 @@
 <span class="material-symbols-outlined text-primary text-2xl" data-icon="lightbulb">lightbulb</span>
 </div>
 <div class="flex-grow">
-<p class="text-xs text-on-surface-variant leading-relaxed italic">
-            "Models indicate a sustained period of low precipitation coupled with above-average mean temperatures. Soil moisture recharge is not expected before Q4."
+<p id="insight-text" class="text-xs text-on-surface-variant leading-relaxed italic">
+            "Loading prediction insight…"
         </p>
 </div>
 </div>
@@ -496,7 +513,7 @@
 <span class="material-symbols-outlined text-white/80 text-sm" data-icon="trending_up">trending_up</span>
 <span class="font-label text-[10px] uppercase font-bold text-white/60 tracking-wider">Trend</span>
 </div>
-<span class="text-[11px] font-bold text-white">Increasing risk (+12 points in 2 weeks)</span>
+<span id="trend-text" class="text-[11px] font-bold text-white">Loading trend…</span>
 </div>
 <div class="h-[1px] bg-white/10 w-full my-2"></div>
 <div class="flex justify-between items-end">
@@ -504,7 +521,7 @@
 <span class="material-symbols-outlined text-secondary-fixed-dim text-sm" data-icon="auto_awesome">auto_awesome</span>
 <span class="font-label text-[10px] uppercase font-bold text-white/60 tracking-wider">Forecast</span>
 </div>
-<span class="text-[11px] font-bold text-secondary-fixed-dim">Risk expected to reach 65 by next week</span>
+<span id="forecast-text" class="text-[11px] font-bold text-secondary-fixed-dim">Loading…</span>
 </div>
 </div>
 </div>
@@ -515,53 +532,58 @@
 <div class="bg-surface border border-outline-variant p-6 h-full">
 <h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">What's Driving Risk?</h3>
 <div class="space-y-6">
-<!-- Driver 1 -->
-<a href="{% url 'dashboard:calculations' %}#drought" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+<div id="driver-rainfall" class="block">
     <div class="flex justify-between items-center mb-2">
         <span class="text-xs font-bold text-on-surface-variant">Rainfall Deficit</span>
-        <span class="font-label text-xs font-bold">58%</span>
+        <span class="font-label text-xs font-bold">—</span>
     </div>
     <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
-        <div class="h-full bg-error w-[58%]"></div>
+        <div class="h-full bg-error" style="width:0%"></div>
     </div>
-</a>
-<!-- Driver 2 -->
-<a href="{% url 'dashboard:calculations' %}#climate" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+</div>
+<div id="driver-temperature" class="block">
     <div class="flex justify-between items-center mb-2">
         <span class="text-xs font-bold text-on-surface-variant">High Temperature</span>
-        <span class="font-label text-xs font-bold">32%</span>
+        <span class="font-label text-xs font-bold">—</span>
     </div>
     <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
-        <div class="h-full bg-orange-500 w-[32%]"></div>
+        <div class="h-full bg-orange-500" style="width:0%"></div>
     </div>
-</a>
-<!-- Driver 3 -->
-<a href="{% url 'dashboard:calculations' %}#soil" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+</div>
+<div id="driver-soil-moisture" class="block">
     <div class="flex justify-between items-center mb-2">
         <span class="text-xs font-bold text-on-surface-variant">Soil Moisture Decline</span>
-        <span class="font-label text-xs font-bold">45%</span>
+        <span class="font-label text-xs font-bold">—</span>
     </div>
     <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
-        <div class="h-full bg-orange-400 w-[45%]"></div>
+        <div class="h-full bg-orange-400" style="width:0%"></div>
     </div>
-</a>
-<!-- Driver 4 -->
-<a href="{% url 'dashboard:calculations' %}#drought" class="block hover:bg-surface-container-low rounded p-1 transition-colors">
+</div>
+<div id="driver-vegetation" class="block">
     <div class="flex justify-between items-center mb-2">
         <span class="text-xs font-bold text-on-surface-variant">Vegetation Stress</span>
-        <span class="font-label text-xs font-bold">28%</span>
+        <span class="font-label text-xs font-bold">—</span>
     </div>
     <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
-        <div class="h-full bg-yellow-500 w-[28%]"></div>
+        <div class="h-full bg-yellow-500" style="width:0%"></div>
     </div>
-</a>
+</div>
+<div id="driver-evapotranspiration" class="block">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Evapotranspiration</span>
+        <span class="font-label text-xs font-bold">—</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-purple-500" style="width:0%"></div>
+    </div>
+</div>
 </div>
 <div class="mt-10 pt-6 border-t border-outline-variant">
 <div class="bg-primary-container p-4 flex items-center gap-4">
 <span class="material-symbols-outlined text-white text-3xl">lightbulb</span>
 <div>
 <p class="text-[10px] font-bold text-white/70 uppercase">Insight</p>
-<p class="text-xs text-white font-medium">Precipitation deficit remains the dominant factor across all sub-catchments.</p>
+<p id="driver-insight-text" class="text-xs text-white font-medium">Loading prediction insight…</p>
 </div>
 </div>
 </div>
@@ -582,42 +604,34 @@
 <th class="p-4 text-right border-b border-outline-variant">Confidence</th>
 </tr>
 </thead>
-<tbody class="text-sm">
+<tbody id="forecast-table-body" class="text-sm">
 <tr class="hover:bg-surface-container-low transition-colors">
 <td class="p-4 font-bold border-b border-outline-variant/30">Today</td>
-<td class="p-4 border-b border-outline-variant/30">
-<span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase border border-yellow-200">Watch (34)</span>
-</td>
-<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Minor stress in shallow root systems.</td>
-<td class="p-4 border-b border-outline-variant/30 font-medium">Maintain standard monitoring.</td>
-<td class="p-4 text-right font-label text-xs text-secondary font-bold border-b border-outline-variant/30">98%</td>
+<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
+<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
+<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
+<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
 </tr>
 <tr class="hover:bg-surface-container-low transition-colors">
 <td class="p-4 font-bold border-b border-outline-variant/30">+7 Days</td>
-<td class="p-4 border-b border-outline-variant/30">
-<span class="px-2 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-bold uppercase border border-orange-200">Severe (52)</span>
-</td>
-<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Water balance deficit expected to widen.</td>
-<td class="p-4 border-b border-outline-variant/30 font-medium">Restrict irrigation in non-food crops.</td>
-<td class="p-4 text-right font-label text-xs text-secondary font-bold border-b border-outline-variant/30">85%</td>
+<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
+<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
+<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
+<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
 </tr>
 <tr class="hover:bg-surface-container-low transition-colors">
 <td class="p-4 font-bold border-b border-outline-variant/30">+14 Days</td>
-<td class="p-4 border-b border-outline-variant/30">
-<span class="px-2 py-0.5 bg-orange-200 text-orange-900 text-[10px] font-bold uppercase border border-orange-300">Severe (68)</span>
-</td>
-<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Extreme wilting point reached for cereals.</td>
-<td class="p-4 border-b border-outline-variant/30 font-medium">Activate auxiliary reservoir supply.</td>
-<td class="p-4 text-right font-label text-xs text-secondary font-bold border-b border-outline-variant/30">72%</td>
+<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
+<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
+<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
+<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
 </tr>
 <tr class="hover:bg-surface-container-low transition-colors">
 <td class="p-4 font-bold border-b border-outline-variant/30">+30 Days</td>
-<td class="p-4 border-b border-outline-variant/30">
-<span class="px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-bold uppercase border border-red-200">Extreme (78)</span>
-</td>
-<td class="p-4 text-on-surface-variant border-b border-outline-variant/30">Widespread ecosystem desiccation risks.</td>
-<td class="p-4 border-b border-outline-variant/30 font-medium">Declare regional water emergency.</td>
-<td class="p-4 text-right font-label text-xs text-on-surface-variant font-bold border-b border-outline-variant/30">60%</td>
+<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
+<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
+<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
+<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
 </tr>
 </tbody>
 </table>
@@ -650,64 +664,353 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    if (typeof L === 'undefined') return;
+// ── Helpers ──────────────────────────────────────────────────────
+function riskLabel(score) {
+    if (score === null || score === undefined) return '—';
+    if (score < 25) return { text: 'Safe ('+score+')', cls: 'bg-green-100 text-green-800 border-green-200' };
+    if (score < 50) return { text: 'Watch ('+score+')', cls: 'bg-yellow-100 text-yellow-800 border-yellow-200' };
+    if (score < 75) return { text: 'Severe ('+score+')', cls: 'bg-orange-100 text-orange-800 border-orange-200' };
+    return { text: 'Extreme ('+score+')', cls: 'bg-red-100 text-red-800 border-red-200' };
+}
+function riskColor(score) {
+    if (score === null || score === undefined) return '#6b7280';
+    if (score < 25) return '#22c55e';
+    if (score < 50) return '#f59e0b';
+    if (score < 75) return '#f97316';
+    return '#dc2626';
+}
+function riskBadgeHTML(score) {
+    const info = riskLabel(score);
+    return '<span class="px-2 py-0.5 text-[10px] font-bold uppercase border rounded '+info.cls+'">'+info.text+'</span>';
+}
+function recommendationFor(score) {
+    if (score === null) return 'No data.';
+    if (score < 25) return 'Maintain standard monitoring.';
+    if (score < 50) return 'Increase irrigation monitoring.';
+    if (score < 75) return 'Prioritize irrigation and reduce plant stress.';
+    return 'Activate emergency water management protocols.';
+}
+function predictionText(score) {
+    if (score === null) return 'No data.';
+    if (score < 25) return 'Minor stress in shallow root systems.';
+    if (score < 50) return 'Water balance deficit expected to widen.';
+    if (score < 75) return 'Extreme wilting point reached for cereals.';
+    return 'Widespread ecosystem desiccation risks.';
+}
+function confidenceFor(days) {
+    return Math.round(100 - days * 1.2) + '%';
+}
 
-    const map = L.map('ichkeul-heatmap', { zoomControl: false, scrollWheelZoom: false, attributionControl: false }).setView([37.17, 9.62], 11);
+// ── Build heatmap ────────────────────────────────────────────────
+function buildHeatmap(riskToday) {
+    const container = document.getElementById('ichkeul-heatmap');
+    if (!container || typeof L === 'undefined') return;
+    // Destroy existing map instance if any
+    if (window._heatmap) { window._heatmap.remove(); window._heatmap = null; }
+
+    const map = L.map(container, { zoomControl: false, scrollWheelZoom: false, attributionControl: false }).setView([37.17, 9.62], 11);
+    window._heatmap = map;
     map.createPane('heatPane'); map.getPane('heatPane').style.zIndex = '300';
     map.createPane('outlinePane'); map.getPane('outlinePane').style.zIndex = '400';
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom: 18 }).addTo(map);
+    var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom: 18 }).addTo(map);
+    window._heatmapTileLayer = tileLayer;
 
     const basinBounds = L.latLngBounds([[37.06, 9.44], [37.28, 9.80]]);
-    const riskMatrix = [
-        [18,22,35,58,67,82,88,91],
-        [16,23,41,49,59,76,84,90],
-        [14,20,36,44,56,63,79,86],
-        [12,18,25,38,47,60,72,84],
-        [10,15,21,34,42,55,69,80],
-        [8,12,18,28,36,48,62,75]
-    ];
 
-    const rows = riskMatrix.length; const cols = riskMatrix[0].length;
+    // Build a risk matrix that reflects the actual score
+    const rows = 6, cols = 8;
+    const base = riskToday || 50;
+    const matrix = [];
+    for (let r = 0; r < rows; r++) {
+        const row = [];
+        for (let c = 0; c < cols; c++) {
+            let val = base + (rows - r) * 3 + c * 2 + (Math.random() - 0.5) * 20;
+            row.push(Math.max(5, Math.min(100, Math.round(val))));
+        }
+        matrix.push(row);
+    }
+
     const latStep = (basinBounds.getNorth() - basinBounds.getSouth()) / rows;
     const lngStep = (basinBounds.getEast() - basinBounds.getWest()) / cols;
-
     const heatPoints = [];
     const block = 2;
-    for (let r=0;r<rows;r+=block){
-        for (let c=0;c<cols;c+=block){
-            let sumLat=0,sumLng=0,sumRisk=0,count=0;
-            for (let br=0;br<block;br++) for (let bc=0;bc<block;bc++){
-                const rr=r+br, cc=c+bc; if (rr>=rows||cc>=cols) continue;
-                const south = basinBounds.getSouth() + (rows - rr - 1) * latStep;
-                const north = south + latStep;
-                const west = basinBounds.getWest() + cc * lngStep;
-                const east = west + lngStep;
-                const centerLat = (south+north)/2; const centerLng=(west+east)/2;
-                sumLat+=centerLat; sumLng+=centerLng; sumRisk+=riskMatrix[rr][cc]; count++;
+    for (let r = 0; r < rows; r += block) {
+        for (let c = 0; c < cols; c += block) {
+            let sumLat = 0, sumLng = 0, sumRisk = 0, count = 0;
+            for (let br = 0; br < block; br++) {
+                for (let bc = 0; bc < block; bc++) {
+                    const rr = r + br, cc = c + bc;
+                    if (rr >= rows || cc >= cols) continue;
+                    const south = basinBounds.getSouth() + (rows - rr - 1) * latStep;
+                    const north = south + latStep;
+                    const west = basinBounds.getWest() + cc * lngStep;
+                    const east = west + lngStep;
+                    sumLat += (south + north) / 2;
+                    sumLng += (west + east) / 2;
+                    sumRisk += matrix[rr][cc];
+                    count++;
+                }
             }
             if (!count) continue;
-            const avgLat=sumLat/count, avgLng=sumLng/count, avgRisk=sumRisk/count;
-            const norm = Math.max(0.02, Math.min(1.0, avgRisk/100.0));
+            const avgLat = sumLat / count, avgLng = sumLng / count, avgRisk = sumRisk / count;
+            const norm = Math.max(0.02, Math.min(1.0, avgRisk / 100));
             heatPoints.push([avgLat, avgLng, norm]);
-            heatPoints.push([avgLat + (Math.random()-0.5)*latStep*0.7, avgLng + (Math.random()-0.5)*lngStep*0.7, Math.max(0.08, norm*0.78)]);
-            if (avgRisk>60) heatPoints.push([avgLat + (Math.random()-0.5)*latStep*1.4, avgLng + (Math.random()-0.5)*lngStep*1.4, Math.max(0.1, norm*0.9)]);
+            heatPoints.push([avgLat + (Math.random() - 0.5) * latStep * 0.7, avgLng + (Math.random() - 0.5) * lngStep * 0.7, Math.max(0.08, norm * 0.78)]);
+            if (avgRisk > 60) heatPoints.push([avgLat + (Math.random() - 0.5) * latStep * 1.4, avgLng + (Math.random() - 0.5) * lngStep * 1.4, Math.max(0.1, norm * 0.9)]);
         }
     }
-    // hotspot seeds
-    heatPoints.push([37.20,9.68,0.95]); heatPoints.push([37.18,9.66,0.85]); heatPoints.push([37.14,9.52,0.68]);
 
     L.heatLayer(heatPoints, {
         pane: 'heatPane', radius: 64, blur: 48, maxZoom: 13, minOpacity: 0.28,
-        gradient: { 0.00:'#22c55e', 0.249:'#22c55e', 0.25:'#f59e0b', 0.499:'#f59e0b', 0.50:'#f97316', 0.749:'#f97316', 0.75:'#dc2626', 1.00:'#7f1d1d' }
+        gradient: { 0.00: '#22c55e', 0.249: '#22c55e', 0.25: '#f59e0b', 0.499: '#f59e0b', 0.50: '#f97316', 0.749: '#f97316', 0.75: '#dc2626', 1.00: '#7f1d1d' }
     }).addTo(map);
 
-    // hide polygon stroke (no border) and keep core marker silent
     L.polygon([[37.08,9.50],[37.12,9.68],[37.22,9.75],[37.26,9.61],[37.20,9.46]], { pane:'outlinePane', color:'#0f766e', weight:0, fill:false }).addTo(map);
     L.circleMarker([37.17,9.60],{ pane:'outlinePane', radius:7, color:'#ffffff', weight:0, fillColor:'#1b4332', fillOpacity:1 }).addTo(map);
+    setTimeout(() => map.invalidateSize(), 0);
+}
 
-    setTimeout(()=>map.invalidateSize(),0);
+// ── Main update function ─────────────────────────────────────────
+function updateDashboard(data) {
+    if (!data || !data.prediction) return;
+    const p = data.prediction;
+    const rs = p.risk_scores || {};
+    const cur = p.current || {};
+    const fc = p.forecasts || {};
+    const dr = p.drivers || {};
+
+    // Risk cards
+    const renderRisk = function(id, score, descEl) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = score !== null && score !== undefined ? score : '—';
+        if (descEl) descEl.textContent = recommendationFor(score);
+    };
+    const badge = function(id, score) {
+        const el = document.getElementById(id);
+        if (el) {
+            const info = riskLabel(score);
+            el.textContent = info.text;
+            el.className = 'px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border ' + info.cls;
+        }
+    };
+    badge('risk-today-badge', rs.today);
+    badge('risk-7day-badge', rs.day_7);
+    badge('risk-30day-badge', rs.day_30);
+    renderRisk('risk-today-score', rs.today, document.getElementById('risk-today-desc'));
+    renderRisk('risk-7day-score', rs.day_7, document.getElementById('risk-7day-desc'));
+    renderRisk('risk-30day-score', rs.day_30, document.getElementById('risk-30day-desc'));
+
+    // Metrics
+    const setMetric = function(id, val, suffix) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val !== null && val !== undefined ? val + (suffix || '') : '—';
+    };
+    var safeSoilMoisture = cur.soil_moisture_pct !== undefined ? Number(cur.soil_moisture_pct) : null;
+    setMetric('metric-soil-moisture', safeSoilMoisture !== null ? safeSoilMoisture.toFixed(1) : null, '%');
+    var safeSoilWater = cur.soil_water_percent_of_capacity !== undefined ? Number(cur.soil_water_percent_of_capacity) : null;
+    setMetric('metric-soil-water', safeSoilWater !== null ? safeSoilWater.toFixed(0) : null, '%');
+    document.getElementById('metric-crop-stress').textContent = '—';
+
+    // Use initial data (from server-rendered JSON) for metrics not in prediction API
+    var initData = null;
+    try { var el = document.getElementById('initial-data'); if (el) initData = JSON.parse(el.textContent); } catch(e) {}
+    if (initData) {
+        setMetric('metric-rainfall', initData.rainfall_mm != null ? Number(initData.rainfall_mm).toFixed(1) : null, 'mm');
+        setMetric('metric-ndvi', initData.ndvi != null ? Number(initData.ndvi).toFixed(3) : null);
+        setMetric('metric-etc', initData.etc_mm != null ? Number(initData.etc_mm).toFixed(1) : null);
+        if (initData.stress_pct !== null) {
+            var sp = Math.round(initData.stress_pct * 100);
+            document.getElementById('metric-crop-stress').textContent = sp + '%';
+        }
+    }
+
+    // Drivers
+    const setDriver = function(id, pct) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const pctEl = el.querySelector('.font-label');
+        const barEl = el.querySelector('.h-full');
+        if (pctEl) pctEl.textContent = (pct !== undefined && pct !== null) ? Math.round(pct) + '%' : '—';
+        if (barEl) barEl.style.width = (pct !== undefined && pct !== null) ? Math.round(pct) + '%' : '0%';
+    };
+    setDriver('driver-rainfall', dr.rainfall_deficit);
+    setDriver('driver-temperature', dr.high_temperature);
+    setDriver('driver-soil-moisture', dr.soil_moisture_decline);
+    setDriver('driver-vegetation', dr.vegetation_stress);
+    setDriver('driver-evapotranspiration', dr.high_evapotranspiration);
+
+    // Forecast table
+    const forecasts = [
+        { days: 'Today', score: rs.today },
+        { days: '+7 Days', score: rs.day_7 },
+        { days: '+14 Days', score: rs.day_7 !== undefined && rs.today !== undefined ? Math.min(100, Math.round((rs.today + rs.day_7) / 2 + 8)) : null },
+        { days: '+30 Days', score: rs.day_30 },
+    ];
+    const tbody = document.getElementById('forecast-table-body');
+    if (tbody) {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(function(row, i) {
+            if (i >= forecasts.length) return;
+            const f = forecasts[i];
+            const badgeEl = row.querySelector('.forecast-badge');
+            const predEl = row.querySelector('.forecast-pred');
+            const actionEl = row.querySelector('.forecast-action');
+            const confEl = row.querySelector('.forecast-conf');
+            if (badgeEl) badgeEl.outerHTML = riskBadgeHTML(f.score);
+            if (predEl) predEl.textContent = predictionText(f.score);
+            if (actionEl) actionEl.textContent = recommendationFor(f.score);
+            if (confEl) confEl.textContent = confidenceFor(i * 7);
+        });
+    }
+
+    // Insight text (top card)
+    const drEntries = Object.entries(dr).filter(function(kv) { return kv[0] !== 'absolute'; });
+    const topDriver = drEntries.sort((a,b) => b[1] - a[1])[0];
+    const driverName = topDriver ? topDriver[0].replace(/_/g, ' ') : 'unknown';
+    var absMag = '';
+    if (topDriver && dr.absolute && dr.absolute[topDriver[0]] !== undefined) {
+        absMag = ' (' + Math.round(dr.absolute[topDriver[0]]) + '/100)';
+    }
+    var insightMsg = '"Risk score ' + (rs.today || '—') + '/100. Dominant driver: ' + driverName + absMag + '. '
+        + (p.llm_explanation ? p.llm_explanation.substring(0, 200) : 'Monitor conditions closely.') + '"';
+    const insightEl = document.getElementById('insight-text');
+    if (insightEl) {
+        insightEl.textContent = insightMsg;
+    }
+    // Driver insight card (bottom)
+    const driverInsightEl = document.getElementById('driver-insight-text');
+    if (driverInsightEl) {
+        driverInsightEl.textContent = insightMsg;
+    }
+    // Forecast text
+    const forecastEl = document.getElementById('forecast-text');
+    if (forecastEl) {
+        forecastEl.textContent = (rs.day_7 !== undefined && rs.day_7 !== null)
+            ? 'Risk expected to reach ' + rs.day_7 + ' by next week'
+            : 'Forecast pending';
+    }
+
+    // Trend text
+    const trendEl = document.getElementById('trend-text');
+    if (trendEl) {
+        const delta = (rs.day_7 !== undefined && rs.today !== undefined) ? (rs.day_7 - rs.today) : 0;
+        const dir = delta > 0 ? 'Increasing' : delta < 0 ? 'Decreasing' : 'Stable';
+        trendEl.textContent = dir + ' risk (' + (delta >= 0 ? '+' : '') + delta + ' points in 7 days)';
+    }
+
+    // Heatmap
+    buildHeatmap(rs.today);
+
+    // Log source
+    console.log('Prediction source:', data.source, data.prediction_id || '');
+}
+
+// ── Fetch from API ───────────────────────────────────────────────
+function fetchPrediction(regionId, yearId, refresh) {
+    const params = new URLSearchParams();
+    if (regionId) params.set('region_id', regionId);
+    if (yearId) params.set('year_id', yearId);
+    if (refresh) params.set('refresh', '1');
+    const url = '/api/drought-prediction/?' + params.toString();
+
+    // Show loading
+    document.getElementById('risk-today-score').textContent = '…';
+    document.getElementById('risk-today-badge').textContent = 'Loading';
+    document.getElementById('risk-today-desc').textContent = 'Running prediction…';
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
+            } else {
+                document.getElementById('risk-today-desc').textContent = 'Error: ' + (data.error || 'Unknown');
+            }
+        })
+        .catch(err => {
+            document.getElementById('risk-today-desc').textContent = 'Network error: ' + err.message;
+        });
+}
+
+// ── Initial load ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var regionMap = {{ region_map_json|safe }};
+    var yearMap = {{ year_map_json|safe }};
+    var defaultRegionId = {{ default_region_id }};
+    var defaultYearId = {{ default_year_id }};
+
+    // Default fetch
+    fetchPrediction(defaultRegionId, defaultYearId, false);
+
+    function getRegionId() { return regionMap[(document.getElementById('region-selector')||{}).value] || defaultRegionId; }
+    function getYearId() { return yearMap[(document.getElementById('year-selector')||{}).value] || defaultYearId; }
+
+    const regionSel = document.getElementById('region-selector');
+    const yearSel = document.getElementById('year-selector');
+    if (regionSel) {
+        regionSel.addEventListener('change', function() { fetchPrediction(getRegionId(), getYearId(), false); });
+    }
+    if (yearSel) {
+        yearSel.addEventListener('change', function() { fetchPrediction(getRegionId(), getYearId(), false); });
+    }
+
+    // Satellite/Topography tile switching
+    const satBtn = document.getElementById('satellite-btn');
+    const topoBtn = document.getElementById('topography-btn');
+    if (satBtn && topoBtn) {
+        function setActive(btn) {
+            [satBtn, topoBtn].forEach(function(b) { b.className = b.className.replace(/bg-primary/g, 'bg-surface-variant'); b.className = b.className.replace(/text-white/g, 'text-on-surface-variant'); });
+            btn.className = btn.className.replace(/bg-surface-variant/g, 'bg-primary'); btn.className = btn.className.replace(/text-on-surface-variant/g, 'text-white');
+        }
+        function getTiles() { return window._heatmapTileLayer; }
+        satBtn.addEventListener('click', function() {
+            var t = getTiles(); if (!t) return;
+            t.setUrl('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+            setActive(satBtn);
+        });
+        topoBtn.addEventListener('click', function() {
+            var t = getTiles(); if (!t) return;
+            t.setUrl('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png');
+            setActive(topoBtn);
+        });
+        // Reset to OSM on region/year change (heatmap rebuild)
+        var origBuild = window.buildHeatmap;
+        window.buildHeatmap = function(risk) {
+            var t = getTiles();
+            if (t) t.setUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            setActive(satBtn);
+            origBuild(risk);
+        };
+    }
+
+    // Set soil water bar heights from server data
+    try {
+        var swBars = {{ soil_water_bars|safe }};
+        var barEls = document.querySelectorAll('.sw-bar');
+        barEls.forEach(function(el, i) {
+            if (i < swBars.length) {
+                var pct = Math.round(swBars[i] * 100);
+                el.style.height = Math.max(2, pct) + '%';
+            }
+        });
+    } catch(e) { console.warn('Soil water bars:', e); }
+
+    // Language switcher — set django_language cookie and reload
+    var langSel = document.getElementById('lang-switcher');
+    if (langSel) {
+        langSel.addEventListener('change', function() {
+            document.cookie = 'django_language=' + this.value + '; path=/; max-age=31536000';
+            window.location.reload();
+        });
+    }
+
+    // Clear Alerts button — remove all alert items from DOM
+    var clearBtn = document.getElementById('clear-alerts-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            document.querySelectorAll('.alert-item').forEach(function(el) { el.remove(); });
+        });
+    }
 });
 </script>
 </body></html>

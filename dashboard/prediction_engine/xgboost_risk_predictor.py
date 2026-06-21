@@ -178,6 +178,7 @@ class XGBoostDroughtRiskPredictor:
                 driver_scores[driver_name] += float(importance_score)
 
         total = sum(driver_scores.values())
+        abs_scores = {k: round(v, 1) for k, v in driver_scores.items()}
         if total > 0:
             driver_scores = {key: round((value / total) * 100, 1) for key, value in driver_scores.items()}
 
@@ -186,4 +187,6 @@ class XGBoostDroughtRiskPredictor:
             'high_temperature': driver_scores.get('high_temperature', 0),
             'soil_moisture_decline': driver_scores.get('soil_moisture_decline', 0),
             'vegetation_stress': driver_scores.get('vegetation_stress', 0),
+            'high_evapotranspiration': driver_scores.get('high_evapotranspiration', 0),
+            'absolute': abs_scores,
         }

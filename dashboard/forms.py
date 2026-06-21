@@ -1,5 +1,7 @@
 from django import forms
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext as _
 import pandas as pd
 
 from .models import (
@@ -13,6 +15,7 @@ from .models import (
     AgriculturalMetrics,
     RemoteSensingMetrics,
     HydrologyMetrics,
+    UserProfile,
 )
 
 
@@ -228,3 +231,50 @@ class BulkMetricsImportForm(forms.Form):
             if excel_file.size > 50 * 1024 * 1024:  # 50 MB limit
                 raise ValidationError('File size must not exceed 50 MB.')
         return excel_file
+
+
+BASE_INPUT = 'w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm placeholder:text-outline-variant/50'
+BASE_SELECT = 'w-full pl-10 pr-10 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm appearance-none'
+
+
+class UserCreateForm(forms.ModelForm):
+    """Form for superadmin to create users with role & region assignment."""
+
+    password = forms.CharField(
+        label=_('Password'),
+        widget=forms.PasswordInput(attrs={'class': BASE_INPUT, 'placeholder': 'Password'}),
+    )
+    role = forms.ChoiceField(
+        choices=UserProfile.ROLE_CHOICES,
+        label=_('Role'),
+        widget=forms.Select(attrs={'class': BASE_SELECT}),
+    )
+    region = forms.ModelChoiceField(
+        queryset=Region.objects.all(),
+        required=False,
+        label=_('Assigned Region'),
+        widget=forms.Select(attrs={'class': BASE_SELECT}),
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': BASE_INPUT, 'placeholder': 'Username'}),
+            'email': forms.EmailInput(attrs={'class': BASE_INPUT, 'placeholder': 'Email'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.request_user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.set_password(self.cleaned_data['password'])
+        if commit:
+            user.save()
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.role = self.cleaned_data['role']
+            profile.region = self.cleaned_data.get('region')
+            profile.save()
+        return user

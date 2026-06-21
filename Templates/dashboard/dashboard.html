@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>{% trans "ABCDryBASIN — drought risk assessment tool" %}</title>
+    <title>{% trans "APWRS — Adaptive Planting Window Recommendation System" %}</title>
     
     <!-- Styling Frameworks & Leaflet Stylesheets -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -108,19 +108,19 @@
     <!-- Top Navigation Header -->
     <header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center px-8 w-full left-0 min-w-0">
         <div class="flex items-center gap-8 min-w-0 flex-1">
-            <a class="flex items-center gap-3 shrink group" href="/">
+            <a class="flex items-center gap-3 shrink group" href="{% url 'dashboard:dashboard' %}">
                 <span class="relative shrink-0">
                     <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
-                    <img alt="ABCDryBASIN Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="{% static 'dashboard/img/abcdrybasin-logo.png' %}" width="40" height="40"/>
+                    <img alt="APWRS Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="{% static 'dashboard/img/apwrs-logo.png' %}" width="40" height="40"/>
                 </span>
                 <div class="flex flex-col min-w-0 leading-tight">
-                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">ABCDryBASIN</span>
-                    <span class="text-[10px] font-normal text-on-surface-variant">{% trans "Drought risk assessment tool" %}</span>
+                    <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">APWRS</span>
+                    <span class="text-[10px] font-normal text-on-surface-variant">{% trans "Adaptive Planting Window Recommendation System" %}</span>
                 </div>
             </a>
             
             <nav class="hidden md:flex gap-8 h-16 items-center shrink-0">
-                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="/">{% trans "Home" %}</a>
+                <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:dashboard' %}">{% trans "Home" %}</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">{% trans "Data" %}</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">{% trans "Analysis" %}</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">{% trans "Historical" %}</a>
@@ -176,9 +176,25 @@
                 <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
                     <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
                 </button>
-                <button class="hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70">
-                    <span class="material-symbols-outlined text-2xl">account_circle</span>
-                </button>
+                <!-- Auth Section -->
+                <div class="flex items-center gap-2 shrink-0 border-l border-outline-variant pl-3 ml-1">
+                    {% if user.is_authenticated %}
+                        <span class="text-xs text-on-surface-variant hidden md:inline">{{ user.username }}</span>
+                        {% if user.profile.role == 'superadmin' %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary">{% trans "Admin" %}</span>
+                        <a href="{% url 'dashboard:admin_panel' %}" class="text-xs text-secondary hover:underline font-medium">{% trans "Manage" %}</a>
+                        {% elif user.profile.role == 'subadmin' %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{% trans "Subadmin" %}</span>
+                        {% else %}
+                        <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">{% trans "Viewer" %}</span>
+                        {% endif %}
+                        <a href="{% url 'dashboard:logout' %}" class="text-on-surface-variant hover:text-error transition-colors">
+                            <span class="material-symbols-outlined text-sm">logout</span>
+                        </a>
+                    {% else %}
+                        <a href="{% url 'dashboard:login' %}" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all">{% trans "Sign In" %}</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
@@ -427,19 +443,19 @@
                         <line stroke="currentColor" stroke-width="0.5" x1="25" x2="295" y1="130" y2="130"></line>
                         <line stroke="currentColor" stroke-width="0.5" x1="25" x2="25" y1="10" y2="130"></line>
                         <line stroke="currentColor" stroke-width="0.5" x1="295" x2="295" y1="10" y2="130"></line>
-                        <!-- Y-Axis Labels -->
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="13">100</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="53">50</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="93">0</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="133">-50</text>
-                        <!-- Lines Mockup paths -->
-                        <polyline fill="none" points="35,135 55,135 75,135 95,130 115,120 135,118 155,122 175,126 195,132 215,134 235,134 255,134 275,135" stroke="#22c55e" stroke-width="1.5"></polyline>
-                        <polyline fill="none" points="35,105 55,100 75,100 95,100 115,115 135,122 155,120 175,118 195,115 215,112 235,112 255,115 275,122" stroke="#f97316" stroke-width="1.5"></polyline>
-                        <polyline fill="none" points="35,80 55,78 75,78 95,85 115,92 135,93 155,95 175,95 195,92 215,88 235,80 255,85 275,78" stroke="#ef4444" stroke-width="1.5"></polyline>
-                        <polyline fill="none" points="35,130 55,130 75,130 95,100 115,60 135,30 155,15 175,35 195,45 215,65 235,80 255,95 275,115" stroke="#3b82f6" stroke-width="2"></polyline>
+                        <!-- Y-Axis Labels (dynamic range) -->
+                        <text id="climate-y0" fill="#717973" font-size="8" text-anchor="end" x="20" y="13">{{ climate_labels.0|floatformat:0 }}%</text>
+                        <text id="climate-y1" fill="#717973" font-size="8" text-anchor="end" x="20" y="53">{{ climate_labels.1|floatformat:0 }}%</text>
+                        <text id="climate-y2" fill="#717973" font-size="8" text-anchor="end" x="20" y="93">{{ climate_labels.2|floatformat:0 }}%</text>
+                        <text id="climate-y3" fill="#717973" font-size="8" text-anchor="end" x="20" y="133">{{ climate_labels.3|floatformat:0 }}%</text>
+                        <!-- Live data paths -->
+                        <polyline id="chart-climate-ndvi" fill="none" points="{{ climate_points_ndvi }}" stroke="#22c55e" stroke-width="1.5"></polyline>
+                        <polyline id="chart-climate-spi" fill="none" points="{{ climate_points_spi }}" stroke="#f97316" stroke-width="1.5"></polyline>
+                        <polyline id="chart-climate-temp" fill="none" points="{{ climate_points_temp }}" stroke="#ef4444" stroke-width="1.5"></polyline>
+                        <polyline id="chart-climate-rainfall" fill="none" points="{{ climate_points_rainfall }}" stroke="#3b82f6" stroke-width="2"></polyline>
                     </svg>
-                    <div class="flex justify-between w-[calc(100%-40px)] ml-[30px] text-[8px] text-on-surface-variant mt-2 font-label">
-                        <span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span>
+                    <div id="climate-months" class="flex justify-between w-[calc(100%-40px)] ml-[30px] text-[8px] text-on-surface-variant mt-2 font-label">
+                        {% for m in chart_months %}<span>{{ m }}</span>{% endfor %}
                     </div>
                 </div>
             </div>
@@ -474,16 +490,16 @@
                         <line stroke="currentColor" stroke-width="0.5" x1="25" x2="25" y1="10" y2="130"></line>
                         <line stroke="currentColor" stroke-width="0.5" x1="295" x2="295" y1="10" y2="130"></line>
                         <!-- Y-Axis Labels -->
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="13">2.0</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="53">0.0</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="93">-1.0</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="133">-3.0</text>
-                        <!-- Lines Mockup paths -->
-                        <polyline fill="none" points="35,85 55,80 75,75 95,70 115,60 135,50 155,45 175,50 195,60 215,75 235,85 255,90 275,92" stroke="#ef4444" stroke-width="1.5"></polyline>
-                        <polyline fill="none" points="35,95 55,90 75,85 95,80 115,70 135,60 155,55 175,60 195,65 215,80 235,90 255,95 275,100" stroke="#f97316" stroke-width="1.5"></polyline>
+                        <text id="drought-y0" fill="#717973" font-size="8" text-anchor="end" x="20" y="13">{{ drought_labels.0|floatformat:1 }}</text>
+                        <text id="drought-y1" fill="#717973" font-size="8" text-anchor="end" x="20" y="53">{{ drought_labels.1|floatformat:1 }}</text>
+                        <text id="drought-y2" fill="#717973" font-size="8" text-anchor="end" x="20" y="93">{{ drought_labels.2|floatformat:1 }}</text>
+                        <text id="drought-y3" fill="#717973" font-size="8" text-anchor="end" x="20" y="133">{{ drought_labels.3|floatformat:1 }}</text>
+                        <!-- Live data paths -->
+                        <polyline id="chart-drought-spi" fill="none" points="{{ drought_points_spi }}" stroke="#ef4444" stroke-width="1.5"></polyline>
+                        <polyline id="chart-drought-spei" fill="none" points="{{ drought_points_spei }}" stroke="#f97316" stroke-width="1.5"></polyline>
                     </svg>
-                    <div class="flex justify-between w-[calc(100%-40px)] ml-[30px] text-[8px] text-on-surface-variant mt-2 font-label">
-                        <span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span>
+                    <div id="drought-months" class="flex justify-between w-[calc(100%-40px)] ml-[30px] text-[8px] text-on-surface-variant mt-2 font-label">
+                        {% for m in chart_months %}<span>{{ m }}</span>{% endfor %}
                     </div>
                 </div>
             </div>
@@ -517,15 +533,15 @@
                         <line stroke="currentColor" stroke-width="0.5" x1="25" x2="25" y1="10" y2="130"></line>
                         <line stroke="currentColor" stroke-width="0.5" x1="295" x2="295" y1="10" y2="130"></line>
                         <!-- Y-Axis Labels -->
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="13">1.0</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="53">0.5</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="93">0.0</text>
-                        <text fill="#717973" font-size="8" text-anchor="end" x="20" y="133">-0.5</text>
-                        <!-- Lines Mockup paths -->
-                        <polyline fill="none" points="35,120 55,115 75,100 95,80 115,50 135,30 155,20 175,35 195,55 215,85 235,105 255,120 275,125" stroke="#16a34a" stroke-width="2"></polyline>
+                        <text id="ndvi-y0" fill="#717973" font-size="8" text-anchor="end" x="20" y="13">{{ ndvi_labels.0|floatformat:1 }}</text>
+                        <text id="ndvi-y1" fill="#717973" font-size="8" text-anchor="end" x="20" y="53">{{ ndvi_labels.1|floatformat:1 }}</text>
+                        <text id="ndvi-y2" fill="#717973" font-size="8" text-anchor="end" x="20" y="93">{{ ndvi_labels.2|floatformat:1 }}</text>
+                        <text id="ndvi-y3" fill="#717973" font-size="8" text-anchor="end" x="20" y="133">{{ ndvi_labels.3|floatformat:1 }}</text>
+                        <!-- Live data paths -->
+                        <polyline id="chart-ndvi" fill="none" points="{{ ndvi_points }}" stroke="#16a34a" stroke-width="2"></polyline>
                     </svg>
-                    <div class="flex justify-between w-[calc(100%-40px)] ml-[30px] text-[8px] text-on-surface-variant mt-2 font-label">
-                        <span>Jun</span><span>Jul</span><span>Aug</span><span>Sep</span><span>Oct</span><span>Nov</span><span>Dec</span><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span>
+                    <div id="ndvi-months" class="flex justify-between w-[calc(100%-40px)] ml-[30px] text-[8px] text-on-surface-variant mt-2 font-label">
+                        {% for m in chart_months %}<span>{{ m }}</span>{% endfor %}
                     </div>
                 </div>
             </div>

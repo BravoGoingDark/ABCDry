@@ -2,6 +2,7 @@
 # Utility functions for data ingestion and import handling
 
 import json
+import numpy as np
 import pandas as pd
 from datetime import datetime
 from django.contrib.auth.models import User
@@ -64,6 +65,8 @@ class DataImporter:
                 'wilting_point_percent': _get('wilting_point_percent', float, None, allow_partial),
                 'salinity_ece_dsm': _get('salinity_ece_dsm', float, None, allow_partial),
                 'ph_level': _get('ph_level', float, None, allow_partial),
+                'latitude': data_dict.get('latitude'),
+                'longitude': data_dict.get('longitude'),
             }
 
             obj, created = SoilMetrics.objects.update_or_create(
@@ -80,6 +83,58 @@ class DataImporter:
             self.errors.append(f"Soil import error: {str(e)}")
             raise
     
+    def _calculate_and_save_spi(self, region, measurement_date, rainfall_mm):
+        """Calculate SPI-1/3/12 from historical rainfall and save to DroughtIndices."""
+        all_climate = ClimateMetrics.objects.filter(
+            region=region,
+            rainfall_mm__isnull=False,
+        ).order_by('measurement_date')
+
+        vals = [float(c.rainfall_mm) for c in all_climate]
+        if len(vals) < 2:
+            return
+
+        series = pd.Series(vals)
+        overall_mean = float(series.mean())
+        overall_std = float(series.std())
+        if overall_std == 0:
+            return
+
+        def _clamp_spi(v):
+            return round(max(-3.0, min(3.0, v)), 2)
+
+        spi_1 = _clamp_spi((rainfall_mm - overall_mean) / overall_std)
+
+        spi_3 = spi_1
+        if len(series) >= 90:
+            m90 = float(series.rolling(90, min_periods=1).mean().iloc[-1])
+            s90 = float(series.rolling(90, min_periods=1).std(ddof=0).iloc[-1])
+            if s90 > 0:
+                spi_3 = _clamp_spi((rainfall_mm - m90) / s90)
+
+        spi_12 = spi_1
+        if len(series) >= 365:
+            m365 = float(series.rolling(365, min_periods=1).mean().iloc[-1])
+            s365 = float(series.rolling(365, min_periods=1).std(ddof=0).iloc[-1])
+            if s365 > 0:
+                spi_12 = _clamp_spi((rainfall_mm - m365) / s365)
+
+        year_label = str(measurement_date.year)
+        year = ObservationYear.objects.filter(label=year_label).first()
+        if not year:
+            year = ObservationYear.objects.create(label=year_label)
+
+        DroughtIndices.objects.update_or_create(
+            region=region,
+            year=year,
+            measurement_date=measurement_date,
+            defaults={
+                'spi_1month': spi_1,
+                'spi_3month': spi_3,
+                'spi_12month': spi_12,
+            },
+        )
+
     def import_climate_metrics(self, data_dict):
         """Import climate metrics from dictionary/form data"""
         def _get(key, caster=float, default=None, allow_partial=False):
@@ -111,6 +166,8 @@ class DataImporter:
                 'evapotranspiration_et0_mmday': _get('evapotranspiration_et0_mmday', float, None, allow_partial),
                 'evapotranspiration_etc_mmday': _get('evapotranspiration_etc_mmday', float, None, allow_partial),
                 'seasonal_rainfall_variability': data_dict.get('seasonal_rainfall_variability', ''),
+                'latitude': data_dict.get('latitude'),
+                'longitude': data_dict.get('longitude'),
             }
 
             obj, created = ClimateMetrics.objects.update_or_create(
@@ -121,6 +178,12 @@ class DataImporter:
             )
             self.last_action = 'created' if created else 'updated'
             self.imported_records += 1
+
+            # Auto-calculate SPI from rainfall if rainfall was provided
+            rainfall_val = defaults.get('rainfall_mm')
+            if rainfall_val is not None:
+                self._calculate_and_save_spi(region, data_dict.get('measurement_date'), rainfall_val)
+
             return obj
         except Exception as e:
             self.errors.append(f"Climate import error: {str(e)}")
@@ -147,6 +210,8 @@ class DataImporter:
                 'spei_12month': _safe_float(data_dict.get('spei_12month')),
                 'pdsi_value': _safe_float(data_dict.get('pdsi_value')),
                 'drought_severity_class': data_dict.get('drought_severity_class', 'None'),
+                'latitude': data_dict.get('latitude'),
+                'longitude': data_dict.get('longitude'),
             }
 
             obj, created = DroughtIndices.objects.update_or_create(
@@ -199,6 +264,8 @@ class DataImporter:
                 'water_applied_mm': _get('water_applied_mm', float, None, allow_partial),
                 'leaf_temperature_c': _get('leaf_temperature_c', float, None, allow_partial),
                 'stomatal_conductance': _get('stomatal_conductance', float, None, allow_partial),
+                'latitude': data_dict.get('latitude'),
+                'longitude': data_dict.get('longitude'),
             }
 
             obj, created = AgriculturalMetrics.objects.update_or_create(
@@ -244,6 +311,8 @@ class DataImporter:
                 'satellite_source': data_dict.get('satellite_source', 'Sentinel-2'),
                 'vegetation_condition_index': _get('vegetation_condition_index', float, None, allow_partial),
                 'evapotranspiration_sebal_mmday': _get('evapotranspiration_sebal_mmday', float, None, allow_partial),
+                'latitude': data_dict.get('latitude'),
+                'longitude': data_dict.get('longitude'),
             }
 
             obj, created = RemoteSensingMetrics.objects.update_or_create(
@@ -289,6 +358,8 @@ class DataImporter:
                 'irrigation_supply_available_m3': _get('irrigation_supply_available_m3', float, None, allow_partial),
                 'soil_water_deficit_index_mm': _get('soil_water_deficit_index_mm', float, None, allow_partial),
                 'water_balance_percent': _get('water_balance_percent', float, None, allow_partial),
+                'latitude': data_dict.get('latitude'),
+                'longitude': data_dict.get('longitude'),
             }
 
             obj, created = HydrologyMetrics.objects.update_or_create(
@@ -347,12 +418,12 @@ class DataImporter:
 def create_reference_data():
     """Create or verify reference data exists"""
     # Regions
-    regions_data = ['Ichkeul', 'Kairouan', 'Meknes', 'Skhira', 'Tunisia', 'Morocco', 'Algeria']
+    regions_data = ['Ichkeul', 'Kairouan', 'Meknes', 'Skhira', 'Tunisia', 'Morocco', 'Algeria', 'Bizerte']
     for name in regions_data:
         Region.objects.get_or_create(name=name)
     
     # Years
-    years_data = ['2024', '2025', '2026']
+    years_data = [str(y) for y in range(2006, 2027)]
     for label in years_data:
         ObservationYear.objects.get_or_create(label=label)
     

@@ -72,7 +72,7 @@ PAIRS: list[tuple[str, str]] = [
         "Ping : __LAT__, __LNG__ | Vent : __WS__ km/h | Temp : __T__°C | Humidité : __H__% | Pluie : __R__ mm",
     ),
     # Template strings
-    ("ABCDryBASIN — drought risk assessment tool", "ABCDryBASIN — outil d'évaluation du risque de sécheresse"),
+    ("APWRS — Adaptive Planting Window Recommendation System", "APWRS — outil d'évaluation du risque de sécheresse"),
     ("Drought risk assessment tool", "Outil d'évaluation du risque de sécheresse"),
     ("Home", "Accueil"),
     ("Maps", "Cartes"),
@@ -121,7 +121,7 @@ def main() -> None:
     PO_PATH.parent.mkdir(parents=True, exist_ok=True)
     po = polib.POFile()
     po.metadata = {
-        "Project-Id-Version": "ABCDryBASIN",
+        "Project-Id-Version": "APWRS",
         "Language": "fr",
         "MIME-Version": "1.0",
         "Content-Type": "text/plain; charset=UTF-8",
