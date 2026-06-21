@@ -199,6 +199,19 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+# ============== CSRF / SECURITY (Render / HTTPS) ==============
+CSRF_TRUSTED_ORIGINS = [
+    "https://abcdry-1.onrender.com",
+    "https://*.onrender.com",
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # needed for JS CSRF token access
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 # ============== CACHING ==============
 CACHES = {
     'default': {
