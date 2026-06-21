@@ -92,11 +92,12 @@ WSGI_APPLICATION = 'agri_dashboard.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# PostgreSQL via DATABASE_URL (Render) or local SQLite
-if os.environ.get('RENDER') and os.environ.get('DATABASE_URL'):
+# PostgreSQL via DATABASE_URL (Render/Heroku) or local SQLite
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
     import dj_database_url
     DATABASES = {
-        'default': dj_database_url.parse(os.environ['DATABASE_URL'], conn_max_age=600),
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600),
     }
 else:
     DATABASES = {
