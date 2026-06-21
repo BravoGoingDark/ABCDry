@@ -93,24 +93,18 @@ WSGI_APPLICATION = 'agri_dashboard.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # PostgreSQL + PostGIS Configuration (Recommended for Production)
+import dj_database_url  # parse DATABASE_URL (Render / Heroku default)
 DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.getenv('DB_NAME', str(BASE_DIR / 'db.sqlite3')),
-        'USER': os.getenv('DB_USER', ''),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', ''),
-        'ATOMIC_REQUESTS': True,
-        'CONN_MAX_AGE': 600,
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DB_ENGINE', 'sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
+        conn_max_age=600,
+        engine=os.getenv('DB_ENGINE'),
+    )
 }
 
-# Use PostGIS if PostgreSQL is configured
+# Use PostGIS if explicitly requested
 if os.getenv('DB_ENGINE') == 'django.contrib.gis.db.backends.postgis':
     DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
-    if 'ATOMIC_REQUESTS' not in DATABASES['default']:
-        DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 
 # Password validation
