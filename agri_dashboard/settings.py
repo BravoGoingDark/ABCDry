@@ -92,19 +92,30 @@ WSGI_APPLICATION = 'agri_dashboard.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# PostgreSQL + PostGIS Configuration (Recommended for Production)
-import dj_database_url  # parse DATABASE_URL (Render / Heroku default)
-DB_PATH = str(BASE_DIR / 'db.sqlite3').replace('\\', '/')
-DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + DB_PATH,
-        conn_max_age=600,
-    )
-}
+# PostgreSQL via DATABASE_URL (Render/Heroku) or local SQLite
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600),
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
+            'NAME': os.getenv('DB_NAME', str(BASE_DIR / 'db.sqlite3')),
+            'USER': os.getenv('DB_USER', ''),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', ''),
+            'PORT': os.getenv('DB_PORT', ''),
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': 600,
+        }
+    }
 
-# If DB_ENGINE is explicitly set, override the engine
-if os.getenv('DB_ENGINE'):
-    DATABASES['default']['ENGINE'] = os.getenv('DB_ENGINE')
+# Use PostGIS if PostgreSQL is configured with PostGIS engine
+if os.getenv('DB_ENGINE') == 'django.contrib.gis.db.backends.postgis':
+    DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
 
 # Password validation
