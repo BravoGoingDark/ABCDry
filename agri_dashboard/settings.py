@@ -94,17 +94,17 @@ WSGI_APPLICATION = 'agri_dashboard.wsgi.application'
 
 # PostgreSQL + PostGIS Configuration (Recommended for Production)
 import dj_database_url  # parse DATABASE_URL (Render / Heroku default)
+DB_PATH = str(BASE_DIR / 'db.sqlite3').replace('\\', '/')
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.getenv('DB_ENGINE', 'sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
+        default='sqlite:///' + DB_PATH,
         conn_max_age=600,
-        engine=os.getenv('DB_ENGINE'),
     )
 }
 
-# Use PostGIS if explicitly requested
-if os.getenv('DB_ENGINE') == 'django.contrib.gis.db.backends.postgis':
-    DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
+# If DB_ENGINE is explicitly set, override the engine
+if os.getenv('DB_ENGINE'):
+    DATABASES['default']['ENGINE'] = os.getenv('DB_ENGINE')
 
 
 # Password validation
