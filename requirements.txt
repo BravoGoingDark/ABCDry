@@ -4,7 +4,6 @@ python-dotenv>=1.0.0
 gunicorn>=21.0.0
 whitenoise>=6.5.0
 psycopg2-binary>=2.9.0
-dj-database-url>=2.0.0
 requests>=2.31.0
 djangorestframework>=3.14.0
 django-cors-headers>=4.2.0
