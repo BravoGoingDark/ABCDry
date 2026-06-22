@@ -1,14 +1,13 @@
-import importlib
-import os
-import sys
+import os, sys
 from django.core.management import call_command
 from django.core.management.base import BaseCommand
-from django.apps import apps
 from django.db import connection
+from django.apps import apps
 
 
-# Delete in reverse-dependency order (metrics first, then reference tables)
-MODELS_DELETE_ORDER = [
+# Truncation order: metric/data tables first (they FK to reference tables),
+# then reference tables last. Models not listed are skipped.
+TRUNCATE_ORDER = [
     "EnvironmentalSnapshot",
     "AgriculturalMetrics",
     "RemoteSensingMetrics",
@@ -27,51 +26,71 @@ MODELS_DELETE_ORDER = [
 
 
 class Command(BaseCommand):
-    help = "Clear dashboard data and load fixture.json (for fresh Render deploys)."
+    help = "Clear dashboard data and load fixture (for fresh Render deploys)."
 
     def add_arguments(self, parser):
         parser.add_argument("fixture", nargs="?", default="fixture.json")
 
     def handle(self, *args, **options):
         fixture = options["fixture"]
-        self.stdout.write(f"Python: {sys.version}")
-        self.stdout.write(f"CWD: {os.getcwd()}")
-        self.stdout.write(f"Fixture exists: {os.path.exists(fixture)}")
+        fixture = os.path.abspath(fixture)
+        self.stdout.write(f"Python: {sys.version}, CWD: {os.getcwd()}")
+        self.stdout.write(f"Fixture: {fixture}")
+
         if not os.path.exists(fixture):
-            self.stdout.write(self.style.ERROR(f"Fixture {fixture} not found"))
+            self.stdout.write(self.style.ERROR(f"Fixture not found: {fixture}"))
+            self.stdout.write(f"Files in CWD: {os.listdir('.')}")
             return
 
-        for model_name in MODELS_DELETE_ORDER:
-            model = apps.get_model("dashboard", model_name)
-            if model is None:
-                self.stdout.write(self.style.WARNING(f"  Model {model_name} not found, skipping"))
-                continue
-            if model.objects.exists():
-                self.stdout.write(f"  Clearing {model_name} …")
-                n, info = model.objects.all().delete()
-                self.stdout.write(f"    Deleted {n} objects")
+        engine = connection.vendor
+        self.stdout.write(f"Engine: {engine}")
 
-        self.stdout.write(self.style.SUCCESS("Cleared all dashboard data."))
-        self.stdout.write(f"Loading fixture {fixture} …")
+        # Build a lookup of model name -> model class
+        app_models = {}
+        for m in apps.get_app_config("dashboard").get_models():
+            app_models[m.__name__] = m
+
+        self.stdout.write("Deleting dashboard data …")
+        with connection.cursor() as cursor:
+            for name in TRUNCATE_ORDER:
+                m = app_models.get(name)
+                if m is None:
+                    continue
+                table = m._meta.db_table
+                cursor.execute(f'SELECT COUNT(*) FROM "{table}"')
+                count = cursor.fetchone()[0]
+                if count > 0:
+                    self.stdout.write(f"  {name}: {count} rows")
+                    cursor.execute(f'DELETE FROM "{table}"')
+        self.stdout.write("All dashboard data cleared.")
+
+        self.stdout.write("Loading fixture …")
         call_command("loaddata", fixture)
 
-        # Reset sequences on PostgreSQL
-        engine = connection.vendor
-        self.stdout.write(f"Database engine: {engine}")
+        # Reset sequences so auto-increment picks up after fixture PKs
         if engine == "postgresql":
-            self.stdout.write("Resetting PostgreSQL sequences …")
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT tablename FROM pg_tables "
-                    "WHERE schemaname = 'public' AND tablename LIKE 'dashboard_%'"
-                )
-                tables = [row[0] for row in cursor.fetchall()]
-                for table in tables:
-                    seq = f"pg_get_serial_sequence('{table}', 'id')"
-                    cursor.execute(
-                        f"SELECT setval({seq}, "
-                        f"GREATEST(COALESCE((SELECT MAX(id) FROM \"{table}\"), 1), 1))"
-                    )
-            self.stdout.write(f"  Reset sequences for {len(tables)} tables")
+            try:
+                self.stdout.write("Syncing sequences …")
+                with connection.cursor() as cursor:
+                    for name in TRUNCATE_ORDER:
+                        m = app_models.get(name)
+                        if m is None:
+                            continue
+                        table = m._meta.db_table
+                        pk_col = m._meta.pk.db_column or m._meta.pk.column
+                        seq = f"pg_get_serial_sequence('{table}', '{pk_col}')"
+                        cursor.execute(
+                            f"SELECT setval({seq}, "
+                            f"GREATEST(COALESCE((SELECT MAX(\"{pk_col}\") FROM \"{table}\"), 1), 1))"
+                        )
+            except Exception as e:
+                self.stdout.write(self.style.WARNING(f"Sequence sync: {e}"))
+
+        # Ensure admin user has a UserProfile (may have been cascaded away)
+        from django.contrib.auth.models import User
+        from dashboard.models import UserProfile
+        for u in User.objects.filter(is_superuser=True):
+            UserProfile.objects.get_or_create(user=u, defaults={"role": "superadmin"})
+            self.stdout.write(f"  UserProfile OK for {u.username}")
 
         self.stdout.write(self.style.SUCCESS("Fixture loaded successfully."))
