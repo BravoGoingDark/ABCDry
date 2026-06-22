@@ -3,6 +3,8 @@ from django.core.management import call_command
 from django.core.management.base import BaseCommand
 from django.db import connection
 from django.apps import apps
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 
 # Truncation order: metric/data tables first (they FK to reference tables),
@@ -18,6 +20,7 @@ TRUNCATE_ORDER = [
     "DroughtPrediction",
     "DataImportLog",
     "RiskAssessment",
+    "UserProfile",
     "Region",
     "ObservationYear",
     "CropType",
@@ -38,11 +41,9 @@ class Command(BaseCommand):
         self.stdout.write(f"Fixture: {fixture}")
 
         if not os.path.exists(fixture):
-            self.stdout.write(self.style.WARNING(f"Fixture not found: {fixture}"))
-            self.stdout.write("Falling back to setup_render_data …")
-            call_command("setup_render_data")
-            call_command("verify_data")
-            return
+            self.stdout.write(self.style.ERROR(f"Fixture not found: {fixture}"))
+            self.stdout.write("Run: python manage.py export_render_fixture")
+            raise SystemExit(1)
 
         engine = connection.vendor
         self.stdout.write(f"Engine: {engine}")
@@ -66,8 +67,20 @@ class Command(BaseCommand):
                     cursor.execute(f'DELETE FROM "{table}"')
         self.stdout.write("All dashboard data cleared.")
 
+        from django.contrib.sessions.models import Session
+        user_count = User.objects.count()
+        if user_count:
+            Session.objects.all().delete()
+            User.objects.all().delete()
+            self.stdout.write(f"  Cleared {user_count} auth user(s).")
+
         self.stdout.write("Loading fixture …")
-        call_command("loaddata", fixture)
+        from dashboard.models import UserProfile, ensure_user_profile
+        post_save.disconnect(ensure_user_profile, sender=User)
+        try:
+            call_command("loaddata", fixture)
+        finally:
+            post_save.connect(ensure_user_profile, sender=User)
 
         # Reset sequences so auto-increment picks up after fixture PKs
         if engine == "postgresql":
@@ -88,11 +101,11 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(self.style.WARNING(f"Sequence sync: {e}"))
 
-        # Ensure admin user has a UserProfile (may have been cascaded away)
-        from django.contrib.auth.models import User
+        # Profiles are loaded from the fixture; only backfill if missing.
         from dashboard.models import UserProfile
         for u in User.objects.filter(is_superuser=True):
-            UserProfile.objects.get_or_create(user=u, defaults={"role": "superadmin"})
-            self.stdout.write(f"  UserProfile OK for {u.username}")
+            profile, created = UserProfile.objects.get_or_create(user=u, defaults={"role": "superadmin"})
+            if created:
+                self.stdout.write(f"  UserProfile created for {u.username}")
 
         self.stdout.write(self.style.SUCCESS("Fixture loaded successfully."))

@@ -10,8 +10,8 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear
 
-echo "Seeding demo metrics (if missing or incomplete)..."
-python manage.py verify_data || python manage.py setup_render_data --force
+echo "Loading local data fixture..."
+python manage.py load_render_fixture fixture.json
 
 echo "Verifying data..."
 python manage.py verify_data
