@@ -1,0 +1,2 @@
+# Treat fixture as binary to preserve encoding
+fixture.json -text diff
