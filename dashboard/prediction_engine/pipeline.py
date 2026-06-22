@@ -162,58 +162,9 @@ class DroughtPredictionPipeline:
 
         merged = frames[0]
         for frame in frames[1:]:
-            merged = merged.merge(frame, on='measurement_date', how='outer')
+            merged = merged.merge(frame, on='measurement_date', how='inner')
 
         merged = merged.sort_values('measurement_date').reset_index(drop=True)
-
-        def _fill_column(frame, column_name, default_value):
-            if column_name not in frame.columns:
-                frame[column_name] = default_value
-            else:
-                frame[column_name] = frame[column_name].ffill().bfill().fillna(default_value)
-
-        if 'solar_radiation_mjm2day' in merged.columns and 'solar_radiation_wm2' not in merged.columns:
-            merged['solar_radiation_wm2'] = merged['solar_radiation_mjm2day'] / 0.0864
-
-        if 'temp_mean_c' not in merged.columns:
-            max_series = merged['temp_max_c'] if 'temp_max_c' in merged.columns else pd.Series([0] * len(merged))
-            min_series = merged['temp_min_c'] if 'temp_min_c' in merged.columns else pd.Series([0] * len(merged))
-            merged['temp_mean_c'] = max_series.fillna(0) + min_series.fillna(0)
-            merged['temp_mean_c'] = merged['temp_mean_c'] / 2
-
-        if 'etc_mm' not in merged.columns:
-            merged['etc_mm'] = np.nan
-
-        if 'kc' not in merged.columns:
-            merged['kc'] = 1.0
-
-        if 'et0_mm' not in merged.columns:
-            merged['et0_mm'] = merged.apply(
-                lambda row: calculate_et0(
-                    float(row.get('temp_mean_c', 0) or 0),
-                    float(row.get('wind_speed_ms', 0) or 0),
-                    float(row.get('solar_radiation_wm2', 0) or 0),
-                    float(row.get('humidity_pct', 0) or 0),
-                ),
-                axis=1,
-            )
-
-        merged['etc_mm'] = merged['etc_mm'].fillna(merged['et0_mm'] * merged['kc']) if 'etc_mm' in merged.columns else merged['et0_mm'] * merged['kc']
-        if 'soil_moisture_pct' not in merged.columns and 'satellite_soil_moisture_pct' in merged.columns:
-            merged['soil_moisture_pct'] = merged['satellite_soil_moisture_pct']
-
-        _fill_column(merged, 'soil_moisture_pct', 0)
-        if 'rainfall_mm' not in merged.columns and 'precipitation_mm' in merged.columns:
-            merged['rainfall_mm'] = merged['precipitation_mm']
-        _fill_column(merged, 'rainfall_mm', 0)
-        _fill_column(merged, 'temp_max_c', 0)
-        _fill_column(merged, 'temp_min_c', 0)
-        _fill_column(merged, 'humidity_pct', 0)
-        _fill_column(merged, 'wind_speed_ms', 0)
-        _fill_column(merged, 'ndvi', 0.5)
-        _fill_column(merged, 'lst_c', 0)
-        _fill_column(merged, 'spi', 0)
-        _fill_column(merged, 'irrigation_mm', 0)
 
         if 'soil_water_mm' not in merged.columns:
             merged['soil_water_mm'] = np.nan
