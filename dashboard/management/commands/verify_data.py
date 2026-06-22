@@ -3,6 +3,7 @@ from dashboard.models import (
     Region, ObservationYear, CropType, IrrigationMethod,
     SoilMetrics, ClimateMetrics, DroughtIndices, AgriculturalMetrics,
     RemoteSensingMetrics, HydrologyMetrics, EnvironmentalSnapshot,
+    DroughtPrediction, DataImportLog, RiskAssessment,
 )
 
 
@@ -15,6 +16,7 @@ class Command(BaseCommand):
             Region, ObservationYear, CropType, IrrigationMethod,
             SoilMetrics, ClimateMetrics, DroughtIndices, AgriculturalMetrics,
             RemoteSensingMetrics, HydrologyMetrics, EnvironmentalSnapshot,
+            DroughtPrediction, DataImportLog,
         ]:
             counts[model.__name__] = model.objects.count()
         total = sum(counts.values())
