@@ -53,31 +53,36 @@ class Command(BaseCommand):
         for m in apps.get_app_config("dashboard").get_models():
             app_models[m.__name__] = m
 
-        self.stdout.write("Deleting dashboard data …")
-        with connection.cursor() as cursor:
+        if engine == "postgresql":
+            tables = []
             for name in TRUNCATE_ORDER:
                 m = app_models.get(name)
                 if m is None:
                     continue
-                table = m._meta.db_table
-                cursor.execute(f'SELECT COUNT(*) FROM "{table}"')
-                count = cursor.fetchone()[0]
-                if count > 0:
-                    self.stdout.write(f"  {name}: {count} rows")
+                tables.append(m._meta.db_table)
+            if tables:
+                self.stdout.write("Truncating all dashboard tables with CASCADE …")
+                with connection.cursor() as cursor:
+                    cursor.execute("TRUNCATE TABLE " + ", ".join(f'"{t}"' for t in tables) + " CASCADE")
+                self.stdout.write(f"Truncated {len(tables)} tables.")
+        else:
+            self.stdout.write("Deleting dashboard data …")
+            with connection.cursor() as cursor:
+                for name in TRUNCATE_ORDER:
+                    m = app_models.get(name)
+                    if m is None:
+                        continue
+                    table = m._meta.db_table
                     cursor.execute(f'DELETE FROM "{table}"')
-        self.stdout.write("All dashboard data cleared.")
+            self.stdout.write("All dashboard data cleared.")
 
-        from django.contrib.sessions.models import Session
-        user_count = User.objects.count()
-        if user_count:
-            Session.objects.all().delete()
-            User.objects.all().delete()
-            self.stdout.write(f"  Cleared {user_count} auth user(s).")
-
-        self.stdout.write("Loading fixture …")
-        from dashboard.models import UserProfile, ensure_user_profile
+        # Remove admin user created by post_migrate so loaddata can start clean
+        User.objects.all().delete()
+        # Also disconnect the user-profile signal during loading
+        from dashboard.models import ensure_user_profile
         post_save.disconnect(ensure_user_profile, sender=User)
         try:
+            self.stdout.write("Loading fixture …")
             call_command("loaddata", fixture)
         finally:
             post_save.connect(ensure_user_profile, sender=User)
