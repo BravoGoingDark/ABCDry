@@ -81,7 +81,7 @@ class LSTMDroughtForecaster:
             if col not in df.columns:
                 df[col] = 3.0 if col == 'etc_mm' else 0.0
 
-        data = df[feature_cols].fillna(method='ffill').fillna(method='bfill').fillna(0).values
+        data = df[feature_cols].ffill().bfill().fillna(0).values
         X, y = [], []
 
         for i in range(len(data) - self.sequence_length - forecast_days + 1):
@@ -183,7 +183,7 @@ class LSTMDroughtForecaster:
             if col not in df.columns:
                 df[col] = 3.0 if col == 'etc_mm' else 0.0
 
-        sequence = df[feature_cols].fillna(method='ffill').fillna(method='bfill').fillna(0).values[-self.sequence_length:]
+        sequence = df[feature_cols].ffill().bfill().fillna(0).values[-self.sequence_length:]
         if len(sequence) != self.sequence_length:
             raise ValueError(f'Need {self.sequence_length} days, got {len(sequence)}')
 

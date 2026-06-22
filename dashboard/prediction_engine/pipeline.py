@@ -170,7 +170,7 @@ class DroughtPredictionPipeline:
             if column_name not in frame.columns:
                 frame[column_name] = default_value
             else:
-                frame[column_name] = frame[column_name].fillna(method='ffill').fillna(method='bfill').fillna(default_value)
+                frame[column_name] = frame[column_name].ffill().bfill().fillna(default_value)
 
         if 'solar_radiation_mjm2day' in merged.columns and 'solar_radiation_wm2' not in merged.columns:
             merged['solar_radiation_wm2'] = merged['solar_radiation_mjm2day'] / 0.0864

@@ -2019,6 +2019,8 @@ def drought_prediction_api(request):
         return JsonResponse({'success': False, 'error': 'Region and year are required.'}, status=400)
 
     latest_prediction = DroughtPrediction.objects.filter(region=region, year=year).order_by('-generated_at').first()
+    if latest_prediction is None:
+        latest_prediction = DroughtPrediction.objects.filter(region=region).order_by('-generated_at').first()
     _fc_soil = SoilMetrics.objects.filter(region=region, field_capacity_percent__isnull=False).order_by('-measurement_date').first()
     _fc = float(_fc_soil.field_capacity_percent) if _fc_soil and _fc_soil.field_capacity_percent else 30.0
     if latest_prediction and not refresh:
