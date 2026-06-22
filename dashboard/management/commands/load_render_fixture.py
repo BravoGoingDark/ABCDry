@@ -106,6 +106,12 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(self.style.WARNING(f"Sequence sync: {e}"))
 
+        # Strip cached predictions so they regenerate fresh on first visit.
+        from dashboard.models import DroughtPrediction
+        deleted, _ = DroughtPrediction.objects.all().delete()
+        if deleted:
+            self.stdout.write(f"  Deleted {deleted} stale DroughtPrediction record(s).")
+
         # Profiles are loaded from the fixture; only backfill if missing.
         from dashboard.models import UserProfile
         for u in User.objects.filter(is_superuser=True):
