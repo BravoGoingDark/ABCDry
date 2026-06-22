@@ -38,8 +38,10 @@ class Command(BaseCommand):
         self.stdout.write(f"Fixture: {fixture}")
 
         if not os.path.exists(fixture):
-            self.stdout.write(self.style.ERROR(f"Fixture not found: {fixture}"))
-            self.stdout.write(f"Files in CWD: {os.listdir('.')}")
+            self.stdout.write(self.style.WARNING(f"Fixture not found: {fixture}"))
+            self.stdout.write("Falling back to setup_render_data …")
+            call_command("setup_render_data")
+            call_command("verify_data")
             return
 
         engine = connection.vendor

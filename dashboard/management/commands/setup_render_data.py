@@ -21,7 +21,18 @@ from scripts.generate_sample_drought_data import generate_sample_drought_data
 class Command(BaseCommand):
     help = 'Setup Render with reference data, synthetic metrics, and default admin user.'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            help='Re-populate metrics even if data already exists.',
+        )
+
     def handle(self, *args, **options):
+        if AgriculturalMetrics.objects.exists() and not options['force']:
+            self.stdout.write('Metric data already present — skipping seed (use --force to replace).')
+            return
+
         # 1. Ensure admin user exists
         username = os.getenv('DJANGO_SUPERUSER_USERNAME', 'admin')
         password = os.getenv('DJANGO_SUPERUSER_PASSWORD', 'admin123')
@@ -36,13 +47,14 @@ class Command(BaseCommand):
         create_reference_data()
         self.stdout.write(self.style.SUCCESS('Reference data created.'))
 
-        # 3. Look up objects by name to avoid PK hardcoding
-        region = Region.objects.filter(name__iexact='Ichkeul').first()
+        # 3. Look up objects by name to avoid PK hardcoding (Bizerte = dashboard/analysis default)
+        region = Region.objects.filter(name__iexact='Bizerte').first()
         if not region:
-            region = Region.objects.first()
-        year = ObservationYear.objects.filter(label='2024').first()
+            region = Region.objects.filter(name__iexact='Ichkeul').first() or Region.objects.first()
+        current_year_label = str(date.today().year)
+        year = ObservationYear.objects.filter(label=current_year_label).first()
         if not year:
-            year = ObservationYear.objects.last()
+            year = ObservationYear.objects.order_by('-label').first()
         crop = CropType.objects.first()
         irrigation = IrrigationMethod.objects.first()
 
@@ -252,3 +264,13 @@ class Command(BaseCommand):
             f'{len(agri_batch)} agri, {len(remote_batch)} remote, {len(hydro_batch)} hydro, '
             f'{len(snapshot_batch)} snapshot records for {region.name} / {year.label}.'
         ))
+
+        # 6. Drought predictions for analysis page (heuristic mode — no ML artifacts required)
+        from dashboard.prediction_engine.pipeline import DroughtPredictionPipeline
+        pipeline = DroughtPredictionPipeline()
+        try:
+            result = pipeline.predict_for_region(region, year, use_llm=False)
+            pipeline.save_prediction(region, year, result, source_window_days=120)
+            self.stdout.write(self.style.SUCCESS(f'Drought prediction generated for {region.name} / {year.label}.'))
+        except Exception as exc:
+            self.stdout.write(self.style.WARNING(f'Drought prediction skipped: {exc}'))

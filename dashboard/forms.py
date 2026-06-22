@@ -1,3 +1,5 @@
+from datetime import date
+
 from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
@@ -31,6 +33,13 @@ class RiskSimulationForm(forms.Form):
         self.fields["year"].queryset = ObservationYear.objects.order_by("-label")
         self.fields["crop"].queryset = CropType.objects.order_by("name")
         self.fields["irrigation"].queryset = IrrigationMethod.objects.order_by("name")
+        if not self.is_bound:
+            default_region = Region.objects.filter(name="Bizerte").first()
+            if default_region:
+                self.fields["region"].initial = default_region.pk
+            current_year = ObservationYear.objects.filter(label=str(date.today().year)).first()
+            if current_year:
+                self.fields["year"].initial = current_year.pk
 
 
 # ============== SOIL METRICS FORM ==============

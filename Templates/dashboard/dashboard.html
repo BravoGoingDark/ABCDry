@@ -133,7 +133,7 @@
                 <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
                 <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-32" id="region-selector" name="region">
                     {% for option in form.region.field.queryset %}
-                    <option value="{{ option.pk }}" {% if form.is_bound and form.region.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% elif not form.is_bound and option.name == "Bizerte" %}selected{% endif %}>{{ option.name }}</option>
+                    <option value="{{ option.pk }}" {% if form.region.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% endif %}>{{ option.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -150,7 +150,7 @@
                 <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">calendar_today</span>
                 <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-40" name="year" id="year-selector">
                     {% for option in form.year.field.queryset %}
-                    <option value="{{ option.pk }}" {% if form.is_bound and form.year.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% endif %}>{{ option.label }}</option>
+                    <option value="{{ option.pk }}" {% if form.year.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% endif %}>{{ option.label }}</option>
                     {% endfor %}
                 </select>
             </div>
