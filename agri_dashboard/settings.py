@@ -23,17 +23,12 @@ load_dotenv(BASE_DIR / '.env')
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-66smicwg%c3fi$c84ijtsjn1fuq^^v1m6$$o#pc+)%4%u+@aug'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-66smicwg%c3fi$c84ijtsjn1fuq^^v1m6$$o#pc+)%4%u+@aug')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "localhost",
-    "30f3-196-176-128-61.ngrok-free.app",
-    "abcdry-1.onrender.com",
-]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,abcdry-1.onrender.com,abcdry.onrender.com').split(',')
 
 
 # Application definition
@@ -92,19 +87,26 @@ WSGI_APPLICATION = 'agri_dashboard.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# PostgreSQL + PostGIS Configuration (Recommended for Production)
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
-        'NAME': os.getenv('DB_NAME', str(BASE_DIR / 'db.sqlite3')),
-        'USER': os.getenv('DB_USER', ''),
-        'PASSWORD': os.getenv('DB_PASSWORD', ''),
-        'HOST': os.getenv('DB_HOST', ''),
-        'PORT': os.getenv('DB_PORT', ''),
-        'ATOMIC_REQUESTS': True,
-        'CONN_MAX_AGE': 600,
+# Use DATABASE_URL from Render env if available (dj-database-url)
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL:
+    import dj_database_url
+    DATABASES = {'default': dj_database_url.config(default=DATABASE_URL, conn_max_age=600)}
+    DATABASES['default']['ATOMIC_REQUESTS'] = True
+else:
+    # PostgreSQL + PostGIS Configuration (Recommended for Production)
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.sqlite3'),
+            'NAME': os.getenv('DB_NAME', str(BASE_DIR / 'db.sqlite3')),
+            'USER': os.getenv('DB_USER', ''),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', ''),
+            'PORT': os.getenv('DB_PORT', ''),
+            'ATOMIC_REQUESTS': True,
+            'CONN_MAX_AGE': 600,
+        }
     }
-}
 
 # Use PostGIS if PostgreSQL is configured
 if os.getenv('DB_ENGINE') == 'django.contrib.gis.db.backends.postgis':
@@ -170,6 +172,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # URL to redirect users for login (ensure Django uses our custom login page)
 LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
 
 
 # ============== REST FRAMEWORK CONFIGURATION ==============
@@ -200,13 +203,10 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ============== CSRF / SECURITY (Render / HTTPS) ==============
-CSRF_TRUSTED_ORIGINS = [
-    "https://abcdry-1.onrender.com",
-    "https://*.onrender.com",
-]
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://abcdry-1.onrender.com,https://abcdry.onrender.com').split(',')
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False  # needed for JS CSRF token access
 

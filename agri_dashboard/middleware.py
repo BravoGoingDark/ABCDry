@@ -26,6 +26,9 @@ class LoginRequiredMiddleware:
         self.exact_exempt.add('/api/drought-prediction/')
         self.exact_exempt.add('/api/live-metrics/')
         self.exact_exempt.add('/api/submit-metrics/')
+        self.exact_exempt.add('/accounts/login/')
+        # Django's default post-login redirect target — prevent redirect loops
+        self.exact_exempt.add('/accounts/profile/')
 
     def __call__(self, request):
         path = request.path

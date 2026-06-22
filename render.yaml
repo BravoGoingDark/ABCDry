@@ -3,10 +3,22 @@ services:
     name: abcdry
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && python manage.py migrate
-    startCommand: gunicorn agri_dashboard.wsgi:application
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn agri_dashboard.wsgi:application --workers 2 --timeout 120
     envVars:
       - key: DEBUG
         value: "False"
       - key: PYTHON_VERSION
-        value: "3.14.3"
+        value: "3.11.9"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: "127.0.0.1,localhost,.onrender.com"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://abcdry.onrender.com,https://*.onrender.com"
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: "admin"
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: "admin@abcdry.com"
+      - key: DJANGO_SUPERUSER_PASSWORD
+        value: "admin123"
