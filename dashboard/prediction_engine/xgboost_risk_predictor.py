@@ -2,8 +2,6 @@ import pickle
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 
 try:
     import xgboost as xgb
@@ -17,6 +15,7 @@ class XGBoostDroughtRiskPredictor:
     """Predicts today's drought risk score and returns feature-importance drivers."""
 
     def __init__(self):
+        from sklearn.preprocessing import StandardScaler
         self.model = None
         self.scaler = StandardScaler()
         self.feature_names = None
@@ -106,6 +105,7 @@ class XGBoostDroughtRiskPredictor:
         y = np.array(targets)
         self.feature_names = X.columns.tolist()
 
+        from sklearn.model_selection import train_test_split
         X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.2, random_state=42)
         X_train_scaled = self.scaler.fit_transform(X_train)
         X_val_scaled = self.scaler.transform(X_val)
