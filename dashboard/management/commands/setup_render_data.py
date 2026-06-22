@@ -161,7 +161,6 @@ class Command(BaseCommand):
         agri_batch = []
         remote_batch = []
         hydro_batch = []
-        snapshot_batch = []
 
         for i in range(days):
             dt = dates[i].date()
@@ -238,18 +237,6 @@ class Command(BaseCommand):
                 soil_water_deficit_index_mm=d(np.clip(etc_mm[i] - rainfall[i] - irrigation_arr[i] * 0.5, -50, 80), 2),
                 water_balance_percent=d(np.clip(((rainfall[i] + irrigation_arr[i]) / (etc_mm[i] + 1e-8)) * 100, 0, 250), 2),
             ))
-            snapshot_batch.append(EnvironmentalSnapshot(
-                region=region, year=year,
-                wind_speed_kmh=d(wind_speed_ms[i] * 3.6, 1),
-                wind_gust_kmh=d(np.clip(wind_speed_ms[i] * 3.6 + rng.uniform(5, 18), 0, None), 1),
-                wind_direction='NE',
-                rainfall_mm=d(rainfall[i], 1),
-                rainfall_delta_percent=safe_int(0),
-                ph_level=d(np.clip(7.2 - trend[i] * 0.4 + rng.normal(0, 0.1), 5.5, 8.3), 1),
-                npk_index='Med-High',
-                temperature_c=d(temp_mean[i], 1),
-                humidity_percent=safe_int(humidity[i]),
-            ))
 
         SoilMetrics.objects.bulk_create(soil_batch, batch_size=200)
         ClimateMetrics.objects.bulk_create(climate_batch, batch_size=200)
@@ -257,12 +244,29 @@ class Command(BaseCommand):
         AgriculturalMetrics.objects.bulk_create(agri_batch, batch_size=200)
         RemoteSensingMetrics.objects.bulk_create(remote_batch, batch_size=200)
         HydrologyMetrics.objects.bulk_create(hydro_batch, batch_size=200)
-        EnvironmentalSnapshot.objects.bulk_create(snapshot_batch, batch_size=200)
+
+        # One snapshot per region/year (unique_together constraint)
+        last = days - 1
+        EnvironmentalSnapshot.objects.update_or_create(
+            region=region,
+            year=year,
+            defaults={
+                'wind_speed_kmh': d(wind_speed_ms[last] * 3.6, 1),
+                'wind_gust_kmh': d(np.clip(wind_speed_ms[last] * 3.6 + rng.uniform(5, 18), 0, None), 1),
+                'wind_direction': 'NE',
+                'rainfall_mm': d(rainfall[last], 1),
+                'rainfall_delta_percent': safe_int(0),
+                'ph_level': d(np.clip(7.2 - trend[last] * 0.4 + rng.normal(0, 0.1), 5.5, 8.3), 1),
+                'npk_index': 'Med-High',
+                'temperature_c': d(temp_mean[last], 1),
+                'humidity_percent': safe_int(humidity[last]),
+            },
+        )
 
         self.stdout.write(self.style.SUCCESS(
             f'Inserted {len(soil_batch)} soil, {len(climate_batch)} climate, {len(drought_batch)} drought, '
             f'{len(agri_batch)} agri, {len(remote_batch)} remote, {len(hydro_batch)} hydro, '
-            f'{len(snapshot_batch)} snapshot records for {region.name} / {year.label}.'
+            f'1 snapshot for {region.name} / {year.label}.'
         ))
 
         # 6. Drought predictions for analysis page (heuristic mode — no ML artifacts required)
