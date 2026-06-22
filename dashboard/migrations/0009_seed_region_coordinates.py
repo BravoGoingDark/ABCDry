@@ -13,18 +13,21 @@ def seed_region_coordinates(apps, schema_editor):
         'Skhira': {'lat': 34.30, 'lng': 10.07, 'radius': 50, 'country': 'Tunisia'},
     }
     for name, data in coords.items():
-        Region.objects.filter(name=name).update(
-            latitude=data['lat'],
-            longitude=data['lng'],
-            radius_km=data['radius'],
-            country=data['country'],
+        Region.objects.update_or_create(
+            name=name,
+            defaults={
+                'latitude': data['lat'],
+                'longitude': data['lng'],
+                'radius_km': data['radius'],
+                'country': data['country'],
+            },
         )
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0008_agriculturalmetrics_latitude_and_more'),
+        ('dashboard', '0010_region_add_missing_fields'),
     ]
 
     operations = [

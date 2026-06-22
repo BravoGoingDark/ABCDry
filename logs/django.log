@@ -2137,3 +2137,7 @@ INFO 2026-06-22 11:12:18,689 autoreload 39564 22108 C:\Users\Taha\Desktop\CURSOR
 INFO 2026-06-22 11:12:19,598 autoreload 26308 13564 Watching for file changes with StatReloader
 INFO 2026-06-22 11:12:40,667 autoreload 26308 13564 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\apps.py changed, reloading.
 INFO 2026-06-22 11:12:41,670 autoreload 8532 5188 Watching for file changes with StatReloader
+INFO 2026-06-22 11:37:40,340 autoreload 8532 5188 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\migrations\0009_seed_region_coordinates.py changed, reloading.
+INFO 2026-06-22 11:37:41,333 autoreload 9288 16260 Watching for file changes with StatReloader
+INFO 2026-06-22 11:37:45,702 autoreload 9288 16260 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\migrations\0009_seed_region_coordinates.py changed, reloading.
+INFO 2026-06-22 11:37:46,661 autoreload 10156 2584 Watching for file changes with StatReloader
