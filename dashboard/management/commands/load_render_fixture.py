@@ -4,20 +4,21 @@ from django.core.management.base import BaseCommand
 from django.apps import apps
 
 
-MODELS_IN_ORDER = [
-    "ObservationYear",
-    "CropType",
-    "IrrigationMethod",
-    "Region",
-    "SoilMetrics",
-    "ClimateMetrics",
-    "DroughtIndices",
+# Delete in reverse-dependency order (metrics first, then reference tables)
+MODELS_DELETE_ORDER = [
+    "EnvironmentalSnapshot",
     "AgriculturalMetrics",
     "RemoteSensingMetrics",
     "HydrologyMetrics",
-    "EnvironmentalSnapshot",
+    "DroughtIndices",
+    "ClimateMetrics",
+    "SoilMetrics",
     "DroughtPrediction",
     "DataImportLog",
+    "Region",
+    "ObservationYear",
+    "CropType",
+    "IrrigationMethod",
 ]
 
 
@@ -33,7 +34,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"Fixture {fixture} not found"))
             return
 
-        for model_name in MODELS_IN_ORDER:
+        for model_name in MODELS_DELETE_ORDER:
             model = apps.get_model("dashboard", model_name)
             if model.objects.exists():
                 self.stdout.write(f"  Clearing {model_name} …")
