@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import stats as scipy_stats
 
 
 def calculate_field_capacity(sand_pct, clay_pct, silt_pct, organic_matter_pct):
@@ -57,12 +58,17 @@ def update_soil_water(previous_mm, rainfall_mm, irrigation_mm, etc_mm, runoff_mm
     return max(0, new)
 
 
-def calculate_spi(rainfall_series_30day_sum, historical_30day_means, historical_30day_std):
-    """Standardized Precipitation Index. Returns value from -3 to +3."""
-    if historical_30day_std == 0:
+def calculate_spi(rainfall_series_30day_sum, historical_30day_means, historical_30day_std, n=None):
+    """Standardized Precipitation Index using gamma distribution."""
+    if historical_30day_std == 0 or historical_30day_means == 0:
         return 0
-    spi = (rainfall_series_30day_sum - historical_30day_means) / historical_30day_std
-    return max(-3, min(3, spi))
+    variance = historical_30day_std ** 2
+    alpha = (historical_30day_means ** 2) / variance if variance > 0 else 1.0
+    scale = variance / historical_30day_means if historical_30day_means > 0 else 1.0
+    gamma_cdf = scipy_stats.gamma.cdf(max(0, rainfall_series_30day_sum), a=alpha, scale=scale)
+    gamma_cdf = max(1e-15, min(1 - 1e-15, gamma_cdf))
+    spi = float(scipy_stats.norm.ppf(gamma_cdf))
+    return round(max(-3.29, min(3.29, spi)), 2)
 
 
 def calculate_vci(current_ndvi, historical_ndvi_list):

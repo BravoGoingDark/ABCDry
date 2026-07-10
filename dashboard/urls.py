@@ -5,6 +5,11 @@ from .views import (
     live_metrics_api,
     resolve_region_api,
     chart_data_api,
+    sensor_ingest_api,
+    sensor_list_api,
+    sensor_history_api,
+    sensor_edit_api,
+    sensor_delete_api,
     data_ingestion,
     api_submit_metrics,
     parameter_review,
@@ -35,6 +40,7 @@ from .views import (
     add_hydrology_metrics,
     import_excel_metrics,
     export_metrics_excel,
+    download_metric_template,
     import_logs_view,
     ajax_upload_file,
     admin_panel,
@@ -51,6 +57,11 @@ urlpatterns = [
     path("api/live-metrics/", live_metrics_api, name="live_metrics"),
     path("api/resolve-region/", resolve_region_api, name="resolve_region"),
     path("api/chart-data/", chart_data_api, name="chart_data"),
+    path("api/sensors/", sensor_list_api, name="sensor_list"),
+    path("api/sensors/<int:pk>/history/", sensor_history_api, name="sensor_history"),
+    path("api/sensors/<int:pk>/edit/", sensor_edit_api, name="sensor_edit"),
+    path("api/sensors/<int:pk>/delete/", sensor_delete_api, name="sensor_delete"),
+    path("api/ingest/", sensor_ingest_api, name="sensor_ingest"),
     
     # Data Ingestion
     path("data-ingestion/", data_ingestion, name="data_ingestion"),
@@ -90,6 +101,7 @@ urlpatterns = [
     # Data Import/Export
     path("metrics/import/excel/", import_excel_metrics, name="import_excel"),
     path("metrics/export/<str:metric_type>/", export_metrics_excel, name="export_metrics"),
+    path("metrics/template/<str:metric_type>/", download_metric_template, name="download_template"),
     path("metrics/import-logs/", import_logs_view, name="import_logs"),
     
     # AJAX File Upload

@@ -237,6 +237,38 @@
             background-color: rgba(193, 236, 212, 0.1) !important;
         }
 
+        /* Template picker cards */
+        .template-card {
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .template-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            opacity: 0;
+            background: linear-gradient(135deg, rgba(1, 45, 29, 0.04) 0%, rgba(0, 103, 125, 0.06) 100%);
+            transition: opacity 0.25s ease;
+        }
+        .template-card:hover::after { opacity: 1; }
+        .template-card:hover {
+            border-color: #1b4332 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(1, 45, 29, 0.10);
+        }
+        .template-card:active {
+            transform: translateY(0);
+        }
+        .template-card .template-icon {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .template-card:hover .template-icon {
+            transform: scale(1.12);
+        }
+
         /* Spinner */
         @keyframes spin { to { transform: rotate(360deg); } }
         .spinner {
@@ -254,6 +286,94 @@
 <div id="toast-container"></div>
 
 <!-- Themed Confirm Modal -->
+<div id="template-picker-modal" class="themed-modal-backdrop hidden" aria-hidden="true">
+    <div class="themed-modal-panel" role="dialog" aria-modal="true" aria-labelledby="template-picker-title" style="width: min(100%, 34rem);">
+        <div class="p-7 pt-6">
+            <div class="flex items-start gap-4 mb-6">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 text-primary shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1, 'wght' 400;">download</span>
+                </div>
+                <div class="min-w-0 pt-0.5">
+                    <h2 id="template-picker-title" class="font-headline text-xl font-extrabold text-primary tracking-tight">Download Template</h2>
+                    <p class="mt-1 text-sm leading-6 text-on-surface-variant">Choose a metric type to download a blank Excel template. Fill it with your data and upload via the drag-and-drop area.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <button type="button" class="template-card template-option rounded-xl border border-outline-variant bg-white px-4 py-4 text-left" data-type="soil">
+                    <div class="flex items-center gap-3">
+                        <div class="template-icon flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#1b4332]/10 to-[#2d6a4f]/10 text-primary shrink-0">
+                            <span class="material-symbols-outlined text-xl">humidity_percentage</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Soil Metrics</p>
+                            <p class="text-[11px] text-on-surface-variant/70 leading-tight mt-0.5">Moisture, texture, pH &amp; salinity</p>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" class="template-card template-option rounded-xl border border-outline-variant bg-white px-4 py-4 text-left" data-type="climate">
+                    <div class="flex items-center gap-3">
+                        <div class="template-icon flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-secondary/10 to-secondary-fixed-dim/10 text-secondary shrink-0">
+                            <span class="material-symbols-outlined text-xl">device_thermostat</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Climate Metrics</p>
+                            <p class="text-[11px] text-on-surface-variant/70 leading-tight mt-0.5">Rainfall, temperature, humidity &amp; ET</p>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" class="template-card template-option rounded-xl border border-outline-variant bg-white px-4 py-4 text-left" data-type="drought">
+                    <div class="flex items-center gap-3">
+                        <div class="template-icon flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#ba1a1a]/10 to-[#93000a]/10 text-error shrink-0">
+                            <span class="material-symbols-outlined text-xl">water_drop</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Drought Indices</p>
+                            <p class="text-[11px] text-on-surface-variant/70 leading-tight mt-0.5">SPI, SPEI, PDSI &amp; severity class</p>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" class="template-card template-option rounded-xl border border-outline-variant bg-white px-4 py-4 text-left" data-type="agricultural">
+                    <div class="flex items-center gap-3">
+                        <div class="template-icon flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#4a382d]/10 to-[#554338]/10 text-tertiary shrink-0">
+                            <span class="material-symbols-outlined text-xl">potted_plant</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Agricultural Metrics</p>
+                            <p class="text-[11px] text-on-surface-variant/70 leading-tight mt-0.5">Crop type, growth stage, Kc &amp; irrigation</p>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" class="template-card template-option rounded-xl border border-outline-variant bg-white px-4 py-4 text-left" data-type="remote_sensing">
+                    <div class="flex items-center gap-3">
+                        <div class="template-icon flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#00677d]/10 to-[#004e5f]/10 text-[#00677d] shrink-0">
+                            <span class="material-symbols-outlined text-xl">satellite_alt</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Remote Sensing</p>
+                            <p class="text-[11px] text-on-surface-variant/70 leading-tight mt-0.5">NDVI, NDWI, LST &amp; satellite moisture</p>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" class="template-card template-option rounded-xl border border-outline-variant bg-white px-4 py-4 text-left" data-type="hydrology">
+                    <div class="flex items-center gap-3">
+                        <div class="template-icon flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#1b4332]/10 to-[#004e5f]/10 text-primary shrink-0">
+                            <span class="material-symbols-outlined text-xl">waves</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-on-surface">Hydrology Metrics</p>
+                            <p class="text-[11px] text-on-surface-variant/70 leading-tight mt-0.5">Runoff, groundwater, reservoir &amp; balance</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+            <div class="flex items-center justify-between gap-3 pt-1">
+                <p class="text-[11px] text-on-surface-variant/50 leading-tight italic">Templates include all columns required by the import system</p>
+                <button type="button" id="template-picker-cancel" class="themed-modal-button rounded-xl border border-outline-variant bg-surface-container-low px-5 py-2.5 text-sm font-semibold text-on-surface hover:bg-surface-container hover:shadow-sm active:scale-[0.97]">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="themed-confirm-modal" class="themed-modal-backdrop hidden" aria-hidden="true">
     <div class="themed-modal-panel" role="dialog" aria-modal="true" aria-labelledby="themed-confirm-title">
         <div class="themed-modal-accent"></div>
@@ -815,10 +935,10 @@
                             </div>
                         </a>
                         <!-- Download Templates -->
-                        <div class="flex gap-3 p-3 bg-tertiary-fixed/10 hover:bg-tertiary-fixed/20 rounded-lg transition-colors cursor-pointer" onclick="downloadTemplates()">
-                            <span class="material-symbols-outlined text-tertiary mt-1">download</span>
+                        <div class="flex gap-3 p-3 bg-tertiary-fixed/10 hover:bg-tertiary-fixed/20 rounded-lg transition-all duration-200 cursor-pointer group hover:shadow-sm hover:-translate-y-0.5 active:translate-y-0" onclick="downloadTemplates()">
+                            <span class="material-symbols-outlined text-tertiary mt-1 group-hover:scale-110 transition-transform duration-200">download</span>
                             <div>
-                                <p class="text-xs font-bold text-tertiary uppercase">Download Templates</p>
+                                <p class="text-xs font-bold text-tertiary uppercase group-hover:text-primary transition-colors">Download Templates</p>
                                 <p class="text-[11px] text-on-surface-variant leading-tight">Get Excel templates for each metric type</p>
                             </div>
                         </div>
@@ -1186,9 +1306,37 @@
     }
 
     // ============= Download Templates =============
-    function downloadTemplates() {
-        showToast('Use Export links on each metrics view page to download templates', 'info', 4000);
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const tplModal = document.getElementById('template-picker-modal');
+        const tplCancel = document.getElementById('template-picker-cancel');
+        if (!tplModal || !tplCancel) return;
+
+        window.downloadTemplates = function() {
+            tplModal.classList.remove('hidden');
+            tplModal.setAttribute('aria-hidden', 'false');
+        };
+
+        tplCancel.addEventListener('click', function() {
+            tplModal.classList.add('hidden');
+            tplModal.setAttribute('aria-hidden', 'true');
+        });
+
+        document.querySelectorAll('.template-option').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var type = this.getAttribute('data-type');
+                tplModal.classList.add('hidden');
+                tplModal.setAttribute('aria-hidden', 'true');
+                window.location.href = '{% url "dashboard:download_template" "PLACEHOLDER" %}'.replace('PLACEHOLDER', type);
+            });
+        });
+
+        tplModal.addEventListener('click', function(e) {
+            if (e.target === tplModal) {
+                tplModal.classList.add('hidden');
+                tplModal.setAttribute('aria-hidden', 'true');
+            }
+        });
+    });
 
     // ============= Drag and Drop File Upload =============
     const fileInput = document.getElementById('file-upload');

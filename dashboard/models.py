@@ -477,3 +477,30 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=User)
 def ensure_user_profile(sender, instance, **kwargs):
     UserProfile.objects.get_or_create(user=instance)
+
+
+class Sensor(models.Model):
+    SENSOR_TYPES = [
+        ('aws', 'Weather Station'),
+        ('soil', 'Soil Moisture'),
+        ('water', 'Water Level'),
+        ('custom', 'Custom'),
+    ]
+
+    id = models.BigAutoField(primary_key=True, db_column='sensor_id')
+    name = models.CharField(max_length=200)
+    sensor_type = models.CharField(max_length=20, choices=SENSOR_TYPES, default='custom')
+    latitude = models.DecimalField(max_digits=10, decimal_places=6)
+    longitude = models.DecimalField(max_digits=10, decimal_places=6)
+    coverage_radius_km = models.DecimalField(max_digits=8, decimal_places=2, default=10.0)
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True, null=True)
+    installed_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+
+    class Meta:
+        db_table = 'sensors'
+
+    def __str__(self):
+        return f"{self.name} ({self.get_sensor_type_display()})"

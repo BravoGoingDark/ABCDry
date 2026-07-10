@@ -27,7 +27,7 @@ def seed_region_coordinates(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dashboard', '0010_region_add_missing_fields'),
+        ('dashboard', '0008_agriculturalmetrics_latitude_and_more'),
     ]
 
     operations = [

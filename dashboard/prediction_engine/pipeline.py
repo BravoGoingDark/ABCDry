@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import datetime
 
@@ -5,6 +6,8 @@ import numpy as np
 import pandas as pd
 
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 
 from ..models import (
     AgriculturalMetrics,
@@ -53,7 +56,7 @@ class DroughtPredictionPipeline:
         return self
 
     def set_soil_properties_from_metrics(self, region, year, root_depth_mm=600):
-        latest = SoilMetrics.objects.filter(region=region).order_by('-measurement_date').first()
+        latest = SoilMetrics.objects.filter(region=region, year=year).order_by('-measurement_date').first()
         if latest and latest.sand_ratio is not None and latest.clay_ratio is not None and latest.silt_ratio is not None:
             return self.set_soil_properties(
                 float(latest.sand_ratio),
@@ -82,7 +85,7 @@ class DroughtPredictionPipeline:
 
     def build_prediction_frame(self, region, year, lookback_days=120):
         soil_df = self._query_frame(
-            SoilMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
+            SoilMetrics.objects.filter(region=region, year=year).order_by('-measurement_date')[:lookback_days],
             {
                 'moisture_content_percent': 'soil_moisture_pct',
                 'sand_ratio': 'sand_pct',
@@ -96,7 +99,7 @@ class DroughtPredictionPipeline:
         )
 
         climate_df = self._query_frame(
-            ClimateMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
+            ClimateMetrics.objects.filter(region=region, year=year).order_by('-measurement_date')[:lookback_days],
             {
                 'rainfall_mm': 'rainfall_mm',
                 'temperature_max_c': 'temp_max_c',
@@ -111,7 +114,7 @@ class DroughtPredictionPipeline:
         )
 
         drought_df = self._query_frame(
-            DroughtIndices.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
+            DroughtIndices.objects.filter(region=region, year=year).order_by('-measurement_date')[:lookback_days],
             {
                 'spi_1month': 'spi',
                 'spei_1month': 'spei',
@@ -120,7 +123,7 @@ class DroughtPredictionPipeline:
         )
 
         remote_df = self._query_frame(
-            RemoteSensingMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
+            RemoteSensingMetrics.objects.filter(region=region, year=year).order_by('-measurement_date')[:lookback_days],
             {
                 'ndvi': 'ndvi',
                 'land_surface_temperature_c': 'lst_c',
@@ -131,7 +134,7 @@ class DroughtPredictionPipeline:
         )
 
         hydro_df = self._query_frame(
-            HydrologyMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
+            HydrologyMetrics.objects.filter(region=region, year=year).order_by('-measurement_date')[:lookback_days],
             {
                 'precipitation_mm': 'precipitation_mm',
                 'evapotranspiration_mm': 'hydro_et_mm',
@@ -144,7 +147,7 @@ class DroughtPredictionPipeline:
         )
 
         agricultural_df = self._query_frame(
-            AgriculturalMetrics.objects.filter(region=region).order_by('-measurement_date')[:lookback_days],
+            AgriculturalMetrics.objects.filter(region=region, year=year).order_by('-measurement_date')[:lookback_days],
             {
                 'growth_stage': 'growth_stage',
                 'crop_coefficient_kc': 'kc',
@@ -162,9 +165,10 @@ class DroughtPredictionPipeline:
 
         merged = frames[0]
         for frame in frames[1:]:
-            merged = merged.merge(frame, on='measurement_date', how='inner')
+            merged = merged.merge(frame, on='measurement_date', how='outer')
 
         merged = merged.sort_values('measurement_date').reset_index(drop=True)
+        merged = merged.ffill().bfill()
 
         if 'soil_water_mm' not in merged.columns:
             merged['soil_water_mm'] = np.nan
@@ -195,7 +199,10 @@ class DroughtPredictionPipeline:
         elif 'kc' not in df.columns:
             df['kc'] = 1.0
 
-        df['etc_mm'] = df.get('etc_mm', df['et0_mm'] * df['kc']).fillna(df['et0_mm'] * df['kc']) if 'etc_mm' in df.columns else df['et0_mm'] * df['kc']
+        if 'etc_mm' in df.columns:
+            df['etc_mm'] = df['etc_mm'].fillna(df['et0_mm'] * df['kc'])
+        else:
+            df['etc_mm'] = df['et0_mm'] * df['kc']
 
         if 'soil_water_mm' not in df.columns or df['soil_water_mm'].isna().all():
             df['soil_water_mm'] = 0.0
@@ -210,7 +217,9 @@ class DroughtPredictionPipeline:
                     rain = float(df['rainfall_mm'].iloc[i] if 'rainfall_mm' in df.columns else 0)
                     irrigation = float(df['irrigation_mm'].iloc[i] if 'irrigation_mm' in df.columns else 0)
                     etc = float(df['etc_mm'].iloc[i])
-                    runoff = max(0, rain - 5) * 0.3
+                    cn = 70.0
+                    s_mm = 254 * (100 / cn - 1)
+                    runoff = ((rain - 0.2 * s_mm) ** 2) / (rain + 0.8 * s_mm) if rain > 0.2 * s_mm else 0.0
                     df.loc[df.index[i], 'soil_water_mm'] = update_soil_water(prev, rain, irrigation, etc, runoff)
 
         return df
@@ -242,6 +251,7 @@ class DroughtPredictionPipeline:
             )
 
         return {
+            'prediction_mode': 'ml_model',
             'location': {
                 'field_capacity_pct': self.field_capacity_pct,
                 'wilting_point_pct': self.wilting_point_pct,
@@ -274,10 +284,10 @@ class DroughtPredictionPipeline:
         self.xgb_predictor = XGBoostDroughtRiskPredictor()
         self.xgb_predictor.train(prepared_df, self.available_water_capacity_mm, self.field_capacity_pct)
 
-        self.lstm_7d = LSTMDroughtForecaster(sequence_length=30, n_features=10)
+        self.lstm_7d = LSTMDroughtForecaster(sequence_length=30)
         self.lstm_7d.train(prepared_df, forecast_days=7, epochs=50)
 
-        self.lstm_30d = LSTMDroughtForecaster(sequence_length=60, n_features=10)
+        self.lstm_30d = LSTMDroughtForecaster(sequence_length=60)
         self.lstm_30d.train(prepared_df, forecast_days=30, epochs=50)
 
         self.is_trained = True
@@ -289,12 +299,12 @@ class DroughtPredictionPipeline:
             f'{model_dir}/xgboost_scaler.pkl',
             f'{model_dir}/xgboost_features.pkl',
         )
-        self.lstm_7d = LSTMDroughtForecaster(sequence_length=30, n_features=10).load(
+        self.lstm_7d = LSTMDroughtForecaster(sequence_length=30).load(
             forecast_days=7,
             model_path=f'{model_dir}/lstm_7day_best.pth',
             stats_path=f'{model_dir}/lstm_7day_stats.npz',
         )
-        self.lstm_30d = LSTMDroughtForecaster(sequence_length=60, n_features=10).load(
+        self.lstm_30d = LSTMDroughtForecaster(sequence_length=60).load(
             forecast_days=30,
             model_path=f'{model_dir}/lstm_30day_best.pth',
             stats_path=f'{model_dir}/lstm_30day_stats.npz',
@@ -362,7 +372,8 @@ class DroughtPredictionPipeline:
 
         llm_explanation = None
         if use_llm:
-            self.llm_explainer = DroughtLLMExplainer(model_name=llm_model)
+            if self.llm_explainer is None:
+                self.llm_explainer = DroughtLLMExplainer(model_name=llm_model)
             llm_explanation = self.llm_explainer.generate_explanation(
                 risk_today,
                 risk_7day,
@@ -422,8 +433,9 @@ class DroughtPredictionPipeline:
         if all(os.path.exists(path) for path in model_paths):
             try:
                 self.load(model_dir=model_dir)
-            except Exception:
-                pass
+                logger.info('Loaded ML models from %s', model_dir)
+            except Exception as exc:
+                logger.warning('Model load failed (will use heuristic): %s', exc)
 
         if self.is_trained:
             return self._predict_prepared_df(prepared_df, use_llm=use_llm, llm_model=llm_model)

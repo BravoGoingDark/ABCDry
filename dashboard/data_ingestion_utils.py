@@ -84,7 +84,8 @@ class DataImporter:
             raise
     
     def _calculate_and_save_spi(self, region, measurement_date, rainfall_mm):
-        """Calculate SPI-1/3/12 from historical rainfall and save to DroughtIndices."""
+        """Calculate SPI-1/3/12 from historical rainfall using gamma distribution and save."""
+        from scipy import stats as scipy_stats
         all_climate = ClimateMetrics.objects.filter(
             region=region,
             rainfall_mm__isnull=False,
@@ -100,24 +101,31 @@ class DataImporter:
         if overall_std == 0:
             return
 
-        def _clamp_spi(v):
-            return round(max(-3.0, min(3.0, v)), 2)
+        def _gamma_spi(rainfall_val, mean, std):
+            if std == 0 or mean == 0:
+                return 0.0
+            variance = std ** 2
+            alpha = (mean ** 2) / variance if variance > 0 else 1.0
+            scale = variance / mean if mean > 0 else 1.0
+            gamma_cdf = scipy_stats.gamma.cdf(max(0, rainfall_val), a=alpha, scale=scale)
+            gamma_cdf = max(1e-15, min(1 - 1e-15, gamma_cdf))
+            return float(scipy_stats.norm.ppf(gamma_cdf))
 
-        spi_1 = _clamp_spi((rainfall_mm - overall_mean) / overall_std)
+        spi_1 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, overall_mean, overall_std))), 2)
 
         spi_3 = spi_1
         if len(series) >= 90:
             m90 = float(series.rolling(90, min_periods=1).mean().iloc[-1])
             s90 = float(series.rolling(90, min_periods=1).std(ddof=0).iloc[-1])
             if s90 > 0:
-                spi_3 = _clamp_spi((rainfall_mm - m90) / s90)
+                spi_3 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m90, s90))), 2)
 
         spi_12 = spi_1
         if len(series) >= 365:
             m365 = float(series.rolling(365, min_periods=1).mean().iloc[-1])
             s365 = float(series.rolling(365, min_periods=1).std(ddof=0).iloc[-1])
             if s365 > 0:
-                spi_12 = _clamp_spi((rainfall_mm - m365) / s365)
+                spi_12 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m365, s365))), 2)
 
         year_label = str(measurement_date.year)
         year = ObservationYear.objects.filter(label=year_label).first()

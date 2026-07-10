@@ -1,4 +1,4 @@
-# ABCDryBASiN — Deep Analysis Document
+# APWRS — Deep Analysis Document
 ## Agricultural Drought Risk Monitoring & Prediction System
 
 ---
@@ -21,7 +21,7 @@
 
 ## 1. SYSTEM OVERVIEW
 
-**ABCDryBASiN** (Ichkeul Ag-Intel Dashboard) is a drought early warning system for North African agriculture (Tunisia, Morocco, Algeria), focused on the Ichkeul Lake basin. It ingests **6 categories of environmental data** and uses **3 prediction methods** (XGBoost, LSTM neural networks, physics-based heuristics) to forecast drought risk 7 and 30 days ahead.
+**APWRS** is a drought early warning system. It ingests **6 categories of environmental data** and uses **3 prediction methods** (XGBoost, LSTM neural networks, physics-based heuristics) to forecast drought risk 7 and 30 days ahead.
 
 ### Why 6 Metric Categories?
 
@@ -35,6 +35,21 @@ Agriculture is a multi-dimensional system. No single metric tells the full story
 | **Agricultural** | Crop-specific water demand & stress | The "engine load" |
 | **Remote Sensing** | Actual vegetation health from space | The "objective measurement" |
 | **Hydrology** | Overall water resources balance | The "regional water budget" |
+
+### Analysis Dashboard: The 6 Real-Time Metric Widgets
+
+The analysis page displays 6 real-time metric cards giving an instant snapshot of current conditions:
+
+| Icon | Label | Source | Meaning |
+|------|-------|--------|---------|
+| `humidity_percentage` | **Soil Moisture** | `SoilMetrics.moisture_content_percent` | Current volumetric water content (%). 0% = bone dry, 100% = fully saturated. |
+| `rainy` | **Rainfall (30d)** | `ClimateMetrics.rainfall_mm` (summed over 30 days) | Total precipitation in the last 30 days in mm. Key medium-term water supply indicator. |
+| `eco` | **NDVI Index** | `RemoteSensingMetrics.ndvi` | Satellite vegetation health index (-1 to 1). Below 0.3 = stressed vegetation. |
+| `air` | **ETc (Daily)** | `ClimateMetrics.evapotranspiration_etc_mmday` | Actual crop water consumption in mm/day. Formula: `ETc = ET0 × Kc`. Higher values = more water demand. |
+| `waves` | **Soil Water** | Computed: `(moisture / field_capacity) × 100` | Current soil water as a % of field capacity. 100% = full, lower values = depletion. Calculated from the daily soil water balance. |
+| `potted_plant` | **Crop Stress** | `AgriculturalMetrics.yield_reduction_factor` × 100 | Plant stress level (0-100%). Higher = more stress. Based on crop sensitivity to water deficit (FAO Ky values). |
+
+These widgets are populated from the most recent data in each metric table and updated via the prediction pipeline or direct API calls.
 
 ---
 
@@ -839,5 +854,4 @@ Risk_forecast = (1 - min(1, SM_predicted / FC)) × 100
 
 ---
 
-*Generated from ABCDryBASiN — Ichkeul Ag-Intel Dashboard*
-*Model files: xgboost_risk_model.pkl, xgboost_scaler.pkl, xgboost_features.pkl, lstm_7day_best.pth, lstm_30day_best.pth*
+

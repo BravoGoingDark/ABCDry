@@ -196,6 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
         drawPolygonTool.disable();
         clearMeasure();
         setActiveToolButton(selectToolBtn);
+        map.getContainer().style.cursor = "";
         setMapInfo(tr("select_mode"));
     };
 
@@ -522,6 +523,124 @@ document.addEventListener("DOMContentLoaded", () => {
             fetchChartData(regionSelector.value, getYearId());
         }
     })();
+
+    // ── Sensor Network ────────────────────────────────────────────────
+    const sensorLayer = new L.FeatureGroup();
+    map.addLayer(sensorLayer);
+    window._dashboardMap = map; // expose for inline script
+
+    const TYPE_COLORS = {
+        aws: "#0ea5e9",
+        soil: "#22c55e",
+        water: "#a855f7",
+        custom: "#f59e0b",
+    };
+
+    const TYPE_LABELS = {
+        aws: "Weather Station",
+        soil: "Soil Moisture",
+        water: "Water Level",
+        custom: "Custom",
+    };
+
+    const getSensorColor = (type) => TYPE_COLORS[type] || TYPE_COLORS.custom;
+
+    const addSensorPin = (sensor) => {
+        const color = getSensorColor(sensor.sensor_type);
+        const latlng = L.latLng(sensor.latitude, sensor.longitude);
+
+        // Coverage circle
+        const circle = L.circle(latlng, {
+            radius: sensor.coverage_radius_km * 1000,
+            color: color,
+            weight: 1.5,
+            opacity: 0.4,
+            fillColor: color,
+            fillOpacity: 0.08,
+            className: "sensor-circle",
+        });
+        sensorLayer.addLayer(circle);
+
+        // Pin marker
+        const marker = L.circleMarker(latlng, {
+            radius: 7,
+            color: "#ffffff",
+            weight: 2,
+            fillColor: color,
+            fillOpacity: 1,
+        });
+        marker.bindPopup(
+            '<div class="sensor-popup">' +
+                '<div class="sensor-popup-head">' +
+                    '<span class="sensor-popup-type-label">' + (TYPE_LABELS[sensor.sensor_type] || sensor.sensor_type) + '</span>' +
+                    '<span class="sensor-popup-type-dot" style="background:' + color + '"></span>' +
+                '</div>' +
+                '<div class="sensor-popup-name">' + sensor.name + '</div>' +
+                (sensor.region_name ? '<div class="sensor-popup-row"><span class="sensor-popup-key">Region</span><span class="sensor-popup-val">' + sensor.region_name + '</span></div>' : '') +
+                '<div class="sensor-popup-row"><span class="sensor-popup-key">Radius</span><span class="sensor-popup-val">' + sensor.coverage_radius_km + ' km</span></div>' +
+                '<div class="sensor-popup-row"><span class="sensor-popup-key">Latitude</span><span class="sensor-popup-val">' + sensor.latitude.toFixed(4) + '°N</span></div>' +
+                '<div class="sensor-popup-row"><span class="sensor-popup-key">Longitude</span><span class="sensor-popup-val">' + sensor.longitude.toFixed(4) + '°E</span></div>' +
+            '</div>',
+            { className: "abcbasin-popup", closeButton: true, autoPanPadding: [24, 24], maxWidth: 250, minWidth: 200 }
+        );
+        sensorLayer.addLayer(marker);
+    };
+
+    const updateSensorCounts = (sensors) => {
+        let counts = { aws: 0, soil: 0, water: 0, custom: 0 };
+        sensors.forEach(function(s) {
+            if (counts[s.sensor_type] !== undefined) counts[s.sensor_type]++;
+        });
+        const setText = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+        setText("sensor-count-aws", counts.aws);
+        setText("sensor-count-soil", counts.soil);
+        setText("sensor-count-water", counts.water);
+        setText("sensor-count-custom", counts.custom);
+        const total = counts.aws + counts.soil + counts.water + counts.custom;
+        const badge = document.getElementById("sensor-count-badge");
+        if (badge) badge.textContent = total;
+    };
+
+    const fetchSensors = async () => {
+        try {
+            const resp = await fetch("/api/sensors/");
+            if (!resp.ok) return;
+            const data = await resp.json();
+            window._sensorData = data.sensors || [];
+            sensorLayer.clearLayers();
+            window._sensorData.forEach(addSensorPin);
+            updateSensorCounts(window._sensorData);
+            // Re-render sensor list if open
+            if (window._sensorListOpen && typeof renderSensorList === 'function') {
+                renderSensorList(window._sensorData);
+            }
+        } catch (e) {
+            // non-critical
+        }
+    };
+
+    // Handle "Pick from Map" — fill coordinates and reopen modal
+    map.on("click", (e) => {
+        if (window._sensorPickCallback) {
+            window._sensorPickCallback = false;
+            map.getContainer().style.cursor = "";
+            openSensorModal(e.latlng.lat, e.latlng.lng);
+        }
+    });
+
+    // Expose to global scope so inline script can call these
+    window.addSensorPinToMap = (sensor) => {
+        addSensorPin(sensor);
+    };
+    window.refreshSensorList = () => {
+        fetchSensors();
+    };
+
+    // Load existing sensors on init
+    fetchSensors();
 
     activateSelectMode();
     scheduleLiveMetricsRefresh();

@@ -37,6 +37,7 @@ from .models import (
     Region,
     RiskAssessment,
     DroughtPrediction,
+    Sensor,
     SoilMetrics,
     ClimateMetrics,
     DroughtIndices,
@@ -526,6 +527,8 @@ def _dashboard_js_i18n():
         "ping_line": _(
             "Ping: __LAT__, __LNG__ | Wind: __WS__ km/h | Temp: __T__°C | Humidity: __H__% | Rain: __R__ mm"
         ),
+        "sensor_drop_mode": _("Sensor drop mode: click the map to place a sensor pin."),
+        "sensor_coords_filled": _("Coordinates filled. Complete the form and submit."),
     }
 
 
@@ -1062,6 +1065,9 @@ def analysis_results(request):
     def _time_ago(date_val):
         if date_val is None:
             return "Unknown"
+        from datetime import date as dt_date
+        if hasattr(date_val, 'date'):
+            date_val = date_val.date()
         delta = (timezone.now().date() - date_val).days
         if delta == 0:
             return "Today"
@@ -1201,7 +1207,7 @@ def calculations_view(request):
         {
             'category': 'Drought Indices',
             'items': [
-                {'name': 'SPI (1/3/12-month)', 'formula': 'Anomaly of precipitation ÷ historical std dev (30+ years)', 'value': '—'},
+                {'name': 'SPI (1/3/12-month)', 'formula': 'Gamma distribution fitted to rainfall, transformed to standard normal', 'value': '—'},
                 {'name': 'SPEI (1/3/12-month)', 'formula': 'Water balance anomaly ÷ historical std dev', 'value': '—'},
                 {'name': 'PDSI', 'formula': 'Palmer Drought Severity Index model (multi-variable)', 'value': '—'},
             ]
@@ -1652,6 +1658,19 @@ def _import_climate_metrics(df, errors):
     }
 
 
+def _gamma_spi(rainfall_mm, mean, std):
+    """Standardized Precipitation Index using fitted gamma distribution."""
+    from scipy import stats as scipy_stats
+    if std == 0 or mean == 0:
+        return 0.0
+    variance = std ** 2
+    alpha = (mean ** 2) / variance if variance > 0 else 1.0
+    scale = variance / mean if mean > 0 else 1.0
+    gamma_cdf = scipy_stats.gamma.cdf(max(0, rainfall_mm), a=alpha, scale=scale)
+    gamma_cdf = max(1e-15, min(1 - 1e-15, gamma_cdf))
+    return float(scipy_stats.norm.ppf(gamma_cdf))
+
+
 def _batch_calculate_spi(rainfall_by_region):
     """Calculate SPI for all rainfall points, grouped by region, in bulk."""
     if not rainfall_by_region:
@@ -1674,9 +1693,6 @@ def _batch_calculate_spi(rainfall_by_region):
         if overall_std == 0:
             continue
 
-        def _clamp_spi(v):
-            return round(max(-3.0, min(3.0, v)), 2)
-
         roll_90_mean = series.rolling(90, min_periods=1).mean()
         roll_90_std = series.rolling(90, min_periods=1).std(ddof=0)
         roll_365_mean = series.rolling(365, min_periods=1).mean()
@@ -1692,15 +1708,15 @@ def _batch_calculate_spi(rainfall_by_region):
             if idx is None:
                 continue
 
-            spi_1 = _clamp_spi((rainfall_mm - overall_mean) / overall_std)
+            spi_1 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, overall_mean, overall_std))), 2)
 
             m90 = float(roll_90_mean.iloc[idx])
             s90 = float(roll_90_std.iloc[idx])
-            spi_3 = _clamp_spi((rainfall_mm - m90) / s90) if s90 > 0 else spi_1
+            spi_3 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m90, s90))), 2) if s90 > 0 else spi_1
 
             m365 = float(roll_365_mean.iloc[idx])
             s365 = float(roll_365_std.iloc[idx])
-            spi_12 = _clamp_spi((rainfall_mm - m365) / s365) if s365 > 0 else spi_1
+            spi_12 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m365, s365))), 2) if s365 > 0 else spi_1
 
             year_label = str(date.year)
             if year_label not in year_cache:
@@ -1943,6 +1959,60 @@ def export_metrics_excel(request, metric_type):
     return response
 
 
+TEMPLATE_COLUMNS = {
+    'soil': ['region', 'year', 'measurement_date', 'moisture_content_percent',
+             'sand_ratio', 'clay_ratio', 'silt_ratio', 'root_zone_depth_mm',
+             'organic_matter_percent', 'infiltration_rate_mmhr',
+             'field_capacity_percent', 'wilting_point_percent',
+             'salinity_ece_dsm', 'ph_level'],
+    'climate': ['region', 'year', 'measurement_date', 'rainfall_mm',
+                'seasonal_rainfall_variability', 'temperature_max_c',
+                'temperature_min_c', 'temperature_mean_c',
+                'relative_humidity_percent', 'wind_speed_ms',
+                'solar_radiation_mjm2day', 'evapotranspiration_et0_mmday',
+                'evapotranspiration_etc_mmday'],
+    'drought': ['region', 'year', 'measurement_date', 'spi_1month',
+                'spi_3month', 'spi_12month', 'spei_1month', 'spei_3month',
+                'spei_12month', 'pdsi_value', 'drought_severity_class'],
+    'agricultural': ['region', 'year', 'crop', 'measurement_date',
+                     'growth_stage', 'crop_coefficient_kc',
+                     'crop_water_requirement_mmday', 'yield_reduction_factor',
+                     'irrigation_method', 'irrigation_efficiency_percent',
+                     'water_applied_mm', 'leaf_temperature_c',
+                     'stomatal_conductance'],
+    'remote_sensing': ['region', 'year', 'measurement_date', 'ndvi', 'ndwi',
+                       'land_surface_temperature_c',
+                       'satellite_soil_moisture_percent', 'satellite_source',
+                       'vegetation_condition_index',
+                       'evapotranspiration_sebal_mmday'],
+    'hydrology': ['region', 'year', 'measurement_date', 'precipitation_mm',
+                  'evapotranspiration_mm', 'groundwater_depth_m', 'runoff_mm',
+                  'river_flow_m3s', 'reservoir_storage_m3',
+                  'irrigation_supply_available_m3',
+                  'soil_water_deficit_index_mm', 'water_balance_percent'],
+}
+
+def download_metric_template(request, metric_type):
+    """Download a blank Excel template for the given metric type."""
+    if metric_type not in TEMPLATE_COLUMNS:
+        return HttpResponse('Invalid metric type', status=400)
+
+    cols = TEMPLATE_COLUMNS[metric_type]
+    df = pd.DataFrame(columns=cols)
+
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name=metric_type, index=False)
+
+    output.seek(0)
+    response = HttpResponse(
+        output.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="template_{metric_type}.xlsx"'
+    return response
+
+
 def import_logs_view(request):
     """View import history logs"""
     logs = DataImportLog.objects.order_by('-import_date')
@@ -2009,7 +2079,7 @@ def drought_prediction_api(request):
     if region_id:
         region = get_object_or_404(Region, pk=region_id)
     else:
-        region = Region.objects.order_by('name').first()
+        region = Region.objects.filter(name="Bizerte").first() or Region.objects.order_by('name').first()
     if year_id:
         year = get_object_or_404(ObservationYear, pk=year_id)
     else:
@@ -2131,6 +2201,144 @@ def resolve_region_api(request):
         "region_name": nearest.name,
         "distance_km": round(nearest_dist, 1),
     })
+
+
+@require_http_methods(["POST"])
+def sensor_ingest_api(request):
+    """Register a new sensor pin."""
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    lat = data.get("latitude")
+    lng = data.get("longitude")
+    name = data.get("name", "").strip()
+    sensor_type = data.get("sensor_type", "custom")
+    radius = data.get("coverage_radius_km", 10)
+    description = data.get("description", "")
+    if not name:
+        return JsonResponse({"error": "name is required"}, status=400)
+    if lat is None or lng is None:
+        return JsonResponse({"error": "latitude and longitude are required"}, status=400)
+    # assign nearest region
+    regions = Region.objects.exclude(latitude__isnull=True, longitude__isnull=True)
+    nearest = None
+    nearest_dist = float('inf')
+    for region in regions:
+        dist = _haversine_distance(lat, lng, float(region.latitude), float(region.longitude))
+        if dist < nearest_dist:
+            nearest_dist = dist
+            nearest = region
+    sensor = Sensor.objects.create(
+        name=name,
+        sensor_type=sensor_type,
+        latitude=lat,
+        longitude=lng,
+        coverage_radius_km=radius,
+        region=nearest,
+        description=description,
+        created_by=request.user if request.user.is_authenticated else None,
+    )
+    return JsonResponse({
+        "id": sensor.id,
+        "name": sensor.name,
+        "sensor_type": sensor.sensor_type,
+        "latitude": float(sensor.latitude),
+        "longitude": float(sensor.longitude),
+        "coverage_radius_km": float(sensor.coverage_radius_km),
+        "region_id": sensor.region_id,
+        "region_name": sensor.region.name if sensor.region else None,
+    }, status=201)
+
+
+@require_http_methods(["GET"])
+def sensor_list_api(request):
+    """Return all active sensors."""
+    sensors = Sensor.objects.filter(is_active=True).select_related("region")
+    data = []
+    for s in sensors:
+        data.append({
+            "id": s.id,
+            "name": s.name,
+            "sensor_type": s.sensor_type,
+            "latitude": float(s.latitude),
+            "longitude": float(s.longitude),
+            "coverage_radius_km": float(s.coverage_radius_km),
+            "region_id": s.region_id,
+            "region_name": s.region.name if s.region else None,
+            "installed_at": s.installed_at.isoformat(),
+        })
+    return JsonResponse({"sensors": data})
+
+
+@require_http_methods(["GET"])
+def sensor_history_api(request, pk):
+    """Return sensor details by ID (placeholder for future timeseries)."""
+    try:
+        s = Sensor.objects.get(pk=pk, is_active=True)
+    except Sensor.DoesNotExist:
+        return JsonResponse({"error": "Sensor not found"}, status=404)
+    return JsonResponse({
+        "id": s.id,
+        "name": s.name,
+        "sensor_type": s.sensor_type,
+        "latitude": float(s.latitude),
+        "longitude": float(s.longitude),
+        "coverage_radius_km": float(s.coverage_radius_km),
+        "region_id": s.region_id,
+        "region_name": s.region.name if s.region else None,
+        "installed_at": s.installed_at.isoformat(),
+        "description": s.description or "",
+    })
+
+
+@require_http_methods(["PUT"])
+def sensor_edit_api(request, pk):
+    """Update an existing sensor."""
+    try:
+        s = Sensor.objects.get(pk=pk)
+    except Sensor.DoesNotExist:
+        return JsonResponse({"error": "Sensor not found"}, status=404)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    if "name" in data:
+        name = data["name"].strip()
+        if name:
+            s.name = name
+    if "sensor_type" in data:
+        s.sensor_type = data["sensor_type"]
+    if "latitude" in data and data["latitude"] is not None:
+        s.latitude = data["latitude"]
+    if "longitude" in data and data["longitude"] is not None:
+        s.longitude = data["longitude"]
+    if "coverage_radius_km" in data:
+        s.coverage_radius_km = data["coverage_radius_km"]
+    if "description" in data:
+        s.description = data["description"]
+    s.save()
+    return JsonResponse({
+        "id": s.id,
+        "name": s.name,
+        "sensor_type": s.sensor_type,
+        "latitude": float(s.latitude),
+        "longitude": float(s.longitude),
+        "coverage_radius_km": float(s.coverage_radius_km),
+        "description": s.description or "",
+    })
+
+
+@require_http_methods(["DELETE"])
+def sensor_delete_api(request, pk):
+    """Soft-delete a sensor (set is_active=False)."""
+    try:
+        s = Sensor.objects.get(pk=pk)
+    except Sensor.DoesNotExist:
+        return JsonResponse({"error": "Sensor not found"}, status=404)
+    s.is_active = False
+    s.save()
+    return JsonResponse({"success": True})
 
 
 @require_http_methods(["GET"])

@@ -2145,3 +2145,150 @@ INFO 2026-06-22 11:42:48,954 autoreload 10156 2584 C:\Users\Taha\Desktop\CURSORA
 INFO 2026-06-22 11:42:49,957 autoreload 34548 49956 Watching for file changes with StatReloader
 INFO 2026-06-22 11:42:54,326 autoreload 34548 49956 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\migrations\0010_region_add_missing_fields.py changed, reloading.
 INFO 2026-06-22 11:42:55,267 autoreload 34016 38696 Watching for file changes with StatReloader
+INFO 2026-06-22 14:19:56,055 autoreload 34016 38696 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\forms.py changed, reloading.
+INFO 2026-06-22 14:19:57,241 autoreload 45832 44768 Watching for file changes with StatReloader
+INFO 2026-06-22 14:20:08,731 autoreload 45832 44768 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\forms.py changed, reloading.
+INFO 2026-06-22 14:20:09,874 autoreload 24096 4120 Watching for file changes with StatReloader
+INFO 2026-06-22 15:35:44,211 autoreload 24096 4120 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-06-22 15:35:45,360 autoreload 47932 45892 Watching for file changes with StatReloader
+INFO 2026-06-23 23:04:13,231 autoreload 10800 45796 Watching for file changes with StatReloader
+INFO 2026-06-23 23:04:23,436 autoreload 39736 36628 Watching for file changes with StatReloader
+WARNING 2026-06-23 23:04:37,322 log 39736 30656 Not Found: /favicon.ico
+ERROR 2026-06-23 23:11:38,772 log 39736 9208 Internal Server Error: /analysis/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py", line 1088, in analysis_results
+    'time': _time_ago(rf_date), 'title': 'Precipitation Gap Warning',
+            ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py", line 1065, in _time_ago
+    delta = (timezone.now().date() - date_val).days
+             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'datetime.date' and 'datetime.datetime'
+ERROR 2026-06-23 23:11:53,196 log 39736 9208 Internal Server Error: /analysis/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py", line 1088, in analysis_results
+    'time': _time_ago(rf_date), 'title': 'Precipitation Gap Warning',
+            ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py", line 1065, in _time_ago
+    delta = (timezone.now().date() - date_val).days
+             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'datetime.date' and 'datetime.datetime'
+ERROR 2026-06-23 23:14:06,229 log 39736 9208 Internal Server Error: /analysis/
+Traceback (most recent call last):
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\AppData\Local\Programs\Python\Python311\Lib\contextlib.py", line 81, in inner
+    return func(*args, **kwds)
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py", line 1088, in analysis_results
+    'time': _time_ago(rf_date), 'title': 'Precipitation Gap Warning',
+            ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py", line 1065, in _time_ago
+    delta = (timezone.now().date() - date_val).days
+             ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~
+TypeError: unsupported operand type(s) for -: 'datetime.date' and 'datetime.datetime'
+INFO 2026-06-23 23:14:30,716 autoreload 39736 36628 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-06-23 23:14:32,058 autoreload 35984 16136 Watching for file changes with StatReloader
+INFO 2026-06-23 23:25:07,923 autoreload 35984 16136 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-06-23 23:25:09,012 autoreload 33092 10236 Watching for file changes with StatReloader
+ERROR 2026-06-23 23:42:39,119 log 33092 42092 Bad Gateway: /api/live-metrics/
+ERROR 2026-06-23 23:57:54,069 log 33092 42092 Bad Gateway: /api/live-metrics/
+ERROR 2026-06-24 00:07:02,984 log 33092 42092 Bad Gateway: /api/live-metrics/
+ERROR 2026-06-24 00:15:08,035 log 33092 42092 Bad Gateway: /api/live-metrics/
+INFO 2026-06-24 06:11:55,392 autoreload 32220 29684 Watching for file changes with StatReloader
+WARNING 2026-06-24 06:12:09,223 log 32220 49464 Not Found: /favicon.ico
+WARNING 2026-06-24 06:21:39,741 log 32220 8872 Not Found: /favicon.ico
+WARNING 2026-06-24 06:34:04,919 log 32220 39784 Not Found: /favicon.ico
+ERROR 2026-06-24 12:17:05,424 log 32220 14688 Bad Gateway: /api/live-metrics/
+ERROR 2026-06-24 12:34:05,404 log 32220 14688 Bad Gateway: /api/live-metrics/
+ERROR 2026-06-24 12:45:05,421 log 32220 14688 Bad Gateway: /api/live-metrics/
+INFO 2026-07-02 10:32:48,683 autoreload 49668 4484 Watching for file changes with StatReloader
+INFO 2026-07-02 10:46:14,382 autoreload 14840 2092 Watching for file changes with StatReloader
+WARNING 2026-07-02 10:46:18,471 log 14840 10908 Not Found: /favicon.ico
+WARNING 2026-07-02 10:46:26,254 log 14840 19404 Not Found: /favicon.ico
+INFO 2026-07-05 19:01:01,036 autoreload 10768 34872 Watching for file changes with StatReloader
+INFO 2026-07-05 19:02:00,503 autoreload 43748 11336 Watching for file changes with StatReloader
+WARNING 2026-07-05 19:02:05,809 log 43748 27040 Not Found: /favicon.ico
+INFO 2026-07-05 19:08:41,506 autoreload 43748 11336 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-05 19:08:42,542 autoreload 49568 30116 Watching for file changes with StatReloader
+INFO 2026-07-05 19:08:48,375 autoreload 49568 30116 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-07-05 19:08:49,482 autoreload 16092 15472 Watching for file changes with StatReloader
+INFO 2026-07-05 19:10:05,190 autoreload 16092 15472 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-07-05 19:10:06,060 autoreload 24912 39908 Watching for file changes with StatReloader
+INFO 2026-07-05 19:33:48,051 autoreload 24912 39908 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-05 19:33:49,012 autoreload 25776 45608 Watching for file changes with StatReloader
+INFO 2026-07-05 19:34:00,304 autoreload 25776 45608 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\data_ingestion_utils.py changed, reloading.
+INFO 2026-07-05 19:34:01,171 autoreload 49452 39760 Watching for file changes with StatReloader
+INFO 2026-07-05 19:34:24,155 autoreload 49452 39760 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-05 19:34:25,029 autoreload 45204 2964 Watching for file changes with StatReloader
+ERROR 2026-07-05 19:39:42,143 log 45204 47592 Internal Server Error: /api/drought-prediction/
+ERROR 2026-07-05 19:39:42,145 log 45204 42492 Internal Server Error: /api/drought-prediction/
+ERROR 2026-07-05 19:39:42,151 log 45204 23360 Internal Server Error: /api/drought-prediction/
+ERROR 2026-07-05 19:39:46,219 log 45204 23360 Internal Server Error: /api/drought-prediction/
+ERROR 2026-07-05 19:39:51,407 log 45204 23360 Internal Server Error: /api/drought-prediction/
+INFO 2026-07-07 10:50:53,684 autoreload 32640 28060 Watching for file changes with StatReloader
+WARNING 2026-07-07 10:51:05,355 log 32640 36144 Not Found: /favicon.ico
+INFO 2026-07-07 13:18:01,729 autoreload 32640 28060 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\models.py changed, reloading.
+INFO 2026-07-07 13:18:02,764 autoreload 1072 11616 Watching for file changes with StatReloader
+INFO 2026-07-07 13:18:07,546 autoreload 1072 11616 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\models.py changed, reloading.
+INFO 2026-07-07 13:18:08,480 autoreload 14376 42304 Watching for file changes with StatReloader
+INFO 2026-07-07 13:18:15,389 autoreload 14376 42304 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\models.py changed, reloading.
+INFO 2026-07-07 13:18:16,384 autoreload 42804 28688 Watching for file changes with StatReloader
+INFO 2026-07-07 13:18:54,109 autoreload 42804 28688 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\migrations\0009_seed_region_coordinates.py changed, reloading.
+INFO 2026-07-07 13:18:55,056 autoreload 27660 33284 Watching for file changes with StatReloader
+INFO 2026-07-07 13:19:22,668 autoreload 27660 33284 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-07 13:19:23,603 autoreload 25752 10232 Watching for file changes with StatReloader
+INFO 2026-07-07 13:19:41,489 autoreload 25752 10232 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-07 13:19:42,497 autoreload 31156 42016 Watching for file changes with StatReloader
+INFO 2026-07-07 13:19:57,692 autoreload 31156 42016 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-07-07 13:19:58,635 autoreload 13604 23828 Watching for file changes with StatReloader
+INFO 2026-07-07 13:20:01,546 autoreload 13604 23828 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-07-07 13:20:02,511 autoreload 10508 24320 Watching for file changes with StatReloader
+INFO 2026-07-07 13:21:30,210 autoreload 10508 24320 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-07 13:21:31,136 autoreload 31560 47228 Watching for file changes with StatReloader
+ERROR 2026-07-07 13:28:56,085 log 31560 33424 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-07 13:30:59,410 log 31560 33424 Bad Gateway: /api/live-metrics/
+INFO 2026-07-07 13:35:39,098 autoreload 31560 47228 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-07 13:35:40,112 autoreload 31344 35268 Watching for file changes with StatReloader
+WARNING 2026-07-07 14:01:51,592 log 31344 1544 Not Found: /favicon.ico
+ERROR 2026-07-07 14:08:56,861 log 31344 1544 Bad Gateway: /api/live-metrics/
+INFO 2026-07-07 14:09:11,015 autoreload 31344 35268 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\views.py changed, reloading.
+INFO 2026-07-07 14:09:12,026 autoreload 47748 12308 Watching for file changes with StatReloader
+INFO 2026-07-07 14:09:59,223 autoreload 47748 12308 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-07-07 14:10:00,101 autoreload 43236 26872 Watching for file changes with StatReloader
+INFO 2026-07-07 14:10:16,110 autoreload 43236 26872 C:\Users\Taha\Desktop\CURSORAGRI - Copy - Copy\dashboard\urls.py changed, reloading.
+INFO 2026-07-07 14:10:17,077 autoreload 20756 32792 Watching for file changes with StatReloader
+ERROR 2026-07-07 14:12:56,809 log 20756 31224 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-07 14:17:00,816 log 20756 31224 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-07 14:28:13,003 log 20756 27212 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-07 14:30:05,875 log 20756 27212 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-07 14:31:12,881 log 20756 27212 Bad Gateway: /api/live-metrics/
+INFO 2026-07-08 09:06:28,213 autoreload 34648 29132 Watching for file changes with StatReloader
+WARNING 2026-07-08 09:06:43,344 log 34648 32180 Not Found: /favicon.ico
+INFO 2026-07-08 09:09:33,119 autoreload 15280 31944 Watching for file changes with StatReloader
+ERROR 2026-07-08 12:16:44,533 log 15280 10988 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-08 12:54:42,760 log 15280 47476 Bad Gateway: /api/live-metrics/
+ERROR 2026-07-08 13:08:58,457 log 15280 47476 Bad Gateway: /api/live-metrics/
+INFO 2026-07-10 11:24:17,366 autoreload 4184 21428 Watching for file changes with StatReloader
+WARNING 2026-07-10 11:24:45,171 log 4184 30852 Not Found: /favicon.ico

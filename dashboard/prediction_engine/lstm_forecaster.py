@@ -34,10 +34,16 @@ class DroughtLSTM(nn.Module if nn is not None else object):
         return prediction.squeeze()
 
 
+FEATURE_COLS = [
+    'soil_moisture_pct', 'rainfall_mm', 'temp_max_c', 'temp_min_c',
+    'humidity_pct', 'wind_speed_ms', 'solar_radiation_wm2',
+    'ndvi', 'lst_c', 'etc_mm',
+]
+
 class LSTMDroughtForecaster:
-    def __init__(self, sequence_length=30, n_features=10):
+    def __init__(self, sequence_length=30, n_features=None):
         self.sequence_length = sequence_length
-        self.n_features = n_features
+        self.n_features = n_features if n_features is not None else len(FEATURE_COLS)
         self.model = None
         self.X_mean = None
         self.X_std = None
@@ -71,17 +77,11 @@ class LSTMDroughtForecaster:
         self._require_torch()
         df = self._normalize_columns(df)
 
-        feature_cols = [
-            'soil_moisture_pct', 'rainfall_mm', 'temp_max_c', 'temp_min_c',
-            'humidity_pct', 'wind_speed_ms', 'solar_radiation_wm2',
-            'ndvi', 'lst_c', 'etc_mm',
-        ]
-
-        for col in feature_cols:
+        for col in FEATURE_COLS:
             if col not in df.columns:
                 df[col] = 3.0 if col == 'etc_mm' else 0.0
 
-        data = df[feature_cols].ffill().bfill().fillna(0).values
+        data = df[FEATURE_COLS].ffill().bfill().fillna(0).values
         X, y = [], []
 
         for i in range(len(data) - self.sequence_length - forecast_days + 1):
@@ -172,18 +172,13 @@ class LSTMDroughtForecaster:
 
     def predict_soil_moisture(self, last_30_days_df):
         self._require_torch()
-        feature_cols = [
-            'soil_moisture_pct', 'rainfall_mm', 'temp_max_c', 'temp_min_c',
-            'humidity_pct', 'wind_speed_ms', 'solar_radiation_wm2',
-            'ndvi', 'lst_c', 'etc_mm',
-        ]
 
         df = self._normalize_columns(last_30_days_df)
-        for col in feature_cols:
+        for col in FEATURE_COLS:
             if col not in df.columns:
                 df[col] = 3.0 if col == 'etc_mm' else 0.0
 
-        sequence = df[feature_cols].ffill().bfill().fillna(0).values[-self.sequence_length:]
+        sequence = df[FEATURE_COLS].ffill().bfill().fillna(0).values[-self.sequence_length:]
         if len(sequence) != self.sequence_length:
             raise ValueError(f'Need {self.sequence_length} days, got {len(sequence)}')
 
