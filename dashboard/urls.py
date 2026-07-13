@@ -14,8 +14,11 @@ from .views import (
     api_submit_metrics,
     parameter_review,
     analysis_results,
+    analysis_export_csv,
+    historical_export_excel,
     calculations_view,
     calculations_data,
+    calculations_chart_api,
     historical_view,
     landing_view,
     login_view,
@@ -70,12 +73,15 @@ urlpatterns = [
     path("analysis/", analysis_results, name="analysis"),
     path("analysis/calculations/", calculations_view, name="calculations"),
     path("analysis/calculations/data/", calculations_data, name="calculations_data"),
+    path("analysis/calculations/chart-data/", calculations_chart_api, name="calculations_chart_api"),
     path("historical/", historical_view, name="historical"),
     path("login/", login_view, name="login"),
     path("logout/", logout_view, name="logout"),
     # Compatibility: Django's default login redirect
     path("accounts/login/", login_view, name="accounts_login"),
     path("api/drought-prediction/", drought_prediction_api, name="drought_prediction_api"),
+    path("api/analysis-export/", analysis_export_csv, name="analysis_export_csv"),
+    path("api/historical-export/", historical_export_excel, name="historical_export_excel"),
     
     # View Metrics
     path("metrics/soil/", soil_metrics_view, name="soil_metrics"),

@@ -92,34 +92,9 @@
             #ichkeul-heatmap { z-index: 0; }
             .map-overlay-panel { z-index: 20; }
 
-        /* ── Trends & Predictive Forecasts Charts ── */
-        .chart-box { display:flex; flex-direction:column; height:100%; }
-        .chart-box-title { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; text-transform:uppercase; margin-bottom:12px; letter-spacing:.05em; color:#414844; }
-        .chart-box-body { flex:1; display:flex; flex-direction:column; min-height:0; }
-        .chart-row { flex:1; display:flex; min-height:0; }
 
-        .chart-y { display:flex; flex-direction:column; align-items:flex-end; width:32px; flex-shrink:0; padding-right:6px; }
-        .chart-y-item { flex:1; display:flex; font-size:10px; font-family:'JetBrains Mono',monospace; font-weight:500; line-height:1; color:#414844; align-items:flex-start; }
-        .chart-y-item:last-child { align-items:flex-end; padding-bottom:1px; }
-
-        .chart-body { flex:1; position:relative; border-left:1px solid #c1c8c2; border-bottom:1px solid #c1c8c2; }
-
-        .chart-grid { position:absolute; inset:0; display:flex; flex-direction:column; pointer-events:none; }
-        .chart-grid-line { border-top:1px solid rgba(193,200,194,0.25); flex:1; }
-        .chart-grid-line:last-child { border-top:none; }
-
-        .chart-bars { position:absolute; inset:0; display:flex; align-items:flex-end; gap:1px; z-index:10; }
-        .chart-bar { flex:1; min-height:2px; border-radius:2px 2px 0 0; }
-        .chart-bar.hist { background:rgba(1,45,29,0.18); }
-        .chart-bar.cur { background:rgba(1,45,29,0.82); }
-        .chart-bar.fcst { background:rgba(114,221,253,0.45); border-top:2px dashed #00677d; }
-
-        .chart-svg-wrap { position:absolute; inset:0; z-index:10; }
-        .chart-svg-wrap svg { width:100%; height:100%; display:block; }
-
-        .chart-x { display:flex; border-left:1px solid #c1c8c2; margin-left:33px; }
-        .chart-x-label { flex:1; text-align:center; font-family:'JetBrains Mono',monospace; font-size:9px; font-weight:500; line-height:1.25; padding-top:1px; color:#414844; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 </head>
 <body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
@@ -144,6 +119,7 @@
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">Data</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium font-bold text-primary border-b-2 border-primary h-full flex items-center px-1" href="{% url 'dashboard:analysis' %}">Analysis</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">Historical</a>
+
             </nav>
         </div>
         
@@ -153,7 +129,7 @@
                 <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
                 <select class="pl-8 pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-32" id="region-selector" name="region">
                     {% for r in regions %}
-                    <option value="{{ r.name|lower }}"{% if r.name == 'Ichkeul' %} selected{% endif %}>{{ r.name }}</option>
+                    <option value="{{ r.name|lower }}"{% if r.name|lower == default_region_name|lower %} selected{% endif %}>{{ r.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -167,6 +143,12 @@
                     {% endfor %}
                 </select>
             </div>
+            
+            <!-- Export Button -->
+            <button id="export-btn" class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm text-on-surface-variant hover:text-primary hover:border-primary transition-colors font-medium">
+                <span class="material-symbols-outlined text-sm">download</span>
+                <span class="hidden md:inline text-xs font-bold uppercase tracking-wider">Export</span>
+            </button>
             
             <!-- Language Switcher -->
             <div class="relative">
@@ -422,75 +404,16 @@
 <div class="lg:col-span-2 space-y-6">
 <div class="bg-surface border border-outline-variant p-6">
 <h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">Trends &amp; Predictive Forecasts</h3>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-64 mb-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
 <!-- Soil Water Balance Chart -->
-<div class="chart-box">
-<div class="chart-box-title">Soil Water Balance (mm)</div>
-<div class="chart-box-body">
-    <div class="chart-row">
-        <div class="chart-y">
-            <div class="chart-y-item">100</div>
-            <div class="chart-y-item">50</div>
-            <div class="chart-y-item">0</div>
-        </div>
-        <div class="chart-body">
-            <div class="chart-grid">
-                <div class="chart-grid-line"></div>
-                <div class="chart-grid-line"></div>
-                <div class="chart-grid-line"></div>
-            </div>
-            <div class="chart-bars">
-                <div class="chart-bar hist sw-bar"></div>
-                <div class="chart-bar hist sw-bar"></div>
-                <div class="chart-bar hist sw-bar"></div>
-                <div class="chart-bar cur sw-bar"></div>
-                <div class="chart-bar cur sw-bar"></div>
-                <div class="chart-bar cur sw-bar"></div>
-                <div class="chart-bar fcst sw-bar-dash"></div>
-            </div>
-        </div>
-    </div>
-    <div class="chart-x">
-        {% for label in soil_water_labels %}
-        <span class="chart-x-label">{{ label }}</span>
-        {% endfor %}
-    </div>
-</div>
+<div>
+    <div class="text-[10px] font-bold font-mono uppercase tracking-wider text-on-surface-variant mb-3">Soil Water Balance (mm)</div>
+    <div class="h-48"><canvas id="swb-chart"></canvas></div>
 </div>
 <!-- Drought Risk Trend -->
-<div class="chart-box">
-<div class="chart-box-title">Drought Risk Trend (0-100)</div>
-<div class="chart-box-body">
-    <div class="chart-row">
-        <div class="chart-y">
-            <div class="chart-y-item">100</div>
-            <div class="chart-y-item">75</div>
-            <div class="chart-y-item">50</div>
-            <div class="chart-y-item">25</div>
-            <div class="chart-y-item">0</div>
-        </div>
-        <div class="chart-body">
-            <div class="chart-grid">
-                <div class="chart-grid-line"></div>
-                <div class="chart-grid-line"></div>
-                <div class="chart-grid-line"></div>
-                <div class="chart-grid-line"></div>
-                <div class="chart-grid-line"></div>
-            </div>
-            <div class="chart-svg-wrap">
-                <svg preserveaspectratio="none" viewbox="0 0 400 200">
-                    <path d="{{ trend_line }}" fill="none" stroke="#1B4332" stroke-width="3"></path>
-                    <path d="{{ trend_fill }}" fill="rgba(27, 67, 50, 0.05)"></path>
-                </svg>
-            </div>
-        </div>
-    </div>
-    <div class="chart-x">
-        {% for label in trend_labels %}
-        <span class="chart-x-label">{{ label }}</span>
-        {% endfor %}
-    </div>
-</div>
+<div>
+    <div class="text-[10px] font-bold font-mono uppercase tracking-wider text-on-surface-variant mb-3">Drought Risk Trend (0–100)</div>
+    <div class="h-48"><canvas id="risk-chart"></canvas></div>
 </div>
 </div>
 <!-- Refined Insight Cards Row -->
@@ -983,17 +906,72 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    // Set soil water bar heights from server data
+    // ── Render Chart.js charts for Trends section ──
     try {
-        var swBars = {{ soil_water_bars|safe }};
-        var barEls = document.querySelectorAll('.sw-bar');
-        barEls.forEach(function(el, i) {
-            if (i < swBars.length) {
-                var pct = Math.round(swBars[i] * 100);
-                el.style.height = Math.max(2, pct) + '%';
-            }
-        });
-    } catch(e) { console.warn('Soil water bars:', e); }
+        var swData = {{ soil_water_bars|safe }};
+        var swLabels = {{ soil_water_labels|safe }};
+        var ctx1 = document.getElementById('swb-chart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: swLabels,
+                    datasets: [{
+                        label: 'Soil Water (mm)',
+                        data: swData.map(function(v) { return v * 100; }),
+                        backgroundColor: swData.map(function(v) {
+                            var pct = v * 100;
+                            return pct > 60 ? 'rgba(1,45,29,0.7)' : pct > 30 ? 'rgba(219,163,26,0.7)' : 'rgba(186,26,26,0.7)';
+                        }),
+                        borderRadius: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { font: { size: 10, family: 'JetBrains Mono' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, family: 'JetBrains Mono' }, maxRotation: 45 } }
+                    }
+                }
+            });
+        }
+    } catch(e) { console.warn('SWB chart:', e); }
+
+    try {
+        var riskLabels = {{ trend_labels|safe }};
+        var riskPts = {{ risk_pts_json|safe }};
+        var ctx2 = document.getElementById('risk-chart');
+        if (ctx2 && riskPts.length) {
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: riskLabels,
+                    datasets: [{
+                        label: 'Drought Risk',
+                        data: riskPts,
+                        borderColor: '#1B4332',
+                        backgroundColor: 'rgba(27,67,50,0.06)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#1B4332',
+                        pointRadius: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { font: { size: 10, family: 'JetBrains Mono' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, family: 'JetBrains Mono' } } }
+                    }
+                }
+            });
+        }
+    } catch(e) { console.warn('Risk chart:', e); }
 
     // Language switcher — set django_language cookie and reload
     var langSel = document.getElementById('lang-switcher');
@@ -1009,6 +987,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (clearBtn) {
         clearBtn.addEventListener('click', function() {
             document.querySelectorAll('.alert-item').forEach(function(el) { el.remove(); });
+        });
+    }
+
+    // Export button — download CSV for current region/year
+    var exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            var rid = getRegionId();
+            var yid = getYearId();
+            if (!rid || !yid) return;
+            window.location.href = '/api/analysis-export/?region_id=' + rid + '&year_id=' + yid;
         });
     }
 });

@@ -323,14 +323,16 @@ class DroughtPredictionPipeline:
         rainfall_30d = float(prepared_df['rainfall_mm'].tail(30).sum()) if 'rainfall_mm' in prepared_df.columns else 0
         rainfall_7d = float(prepared_df['rainfall_mm'].tail(7).sum()) if 'rainfall_mm' in prepared_df.columns else 0
         soil_trend = float(prepared_df['soil_moisture_pct'].tail(7).diff().mean()) if 'soil_moisture_pct' in prepared_df.columns else 0
-        temp_anomaly = float(prepared_df['temp_max_c'].iloc[-1] - prepared_df['temp_max_c'].tail(30).mean()) if 'temp_max_c' in prepared_df.columns else 0
+        temp_latest = float(prepared_df['temp_max_c'].iloc[-1]) if 'temp_max_c' in prepared_df.columns else 25
+        temp_anomaly = float(temp_latest - prepared_df['temp_max_c'].tail(30).mean()) if 'temp_max_c' in prepared_df.columns else 0
+        temp_absolute_penalty = max(0, temp_latest - 28) * 5  # 0 at 28°C, 35 at 35°C, 60 at 40°C
         ndvi = float(prepared_df['ndvi'].iloc[-1]) if 'ndvi' in prepared_df.columns else 0.5
         etc_avg = float(prepared_df['etc_mm'].tail(7).mean()) if 'etc_mm' in prepared_df.columns else 3.0
 
         abs_scores = {
             'rainfall_deficit': round(max(0, 100 - min(100, (rainfall_30d / 30) * 10)) + max(0, 100 - min(100, rainfall_7d * 10)), 1),
             'soil_moisture_decline': round(max(0, min(100, abs(soil_trend) * 300)), 1),
-            'high_temperature': round(max(0, min(100, temp_anomaly * 15)), 1),
+            'high_temperature': round(max(0, min(100, temp_anomaly * 15 + temp_absolute_penalty)), 1),
             'vegetation_stress': round(max(0, min(100, (1 - ndvi) * 100)), 1),
             'high_evapotranspiration': round(max(0, min(100, etc_avg * 20)), 1),
         }

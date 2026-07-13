@@ -111,6 +111,7 @@
 <!-- Form -->
 <form class="space-y-6" method="post" action="{% url 'dashboard:login' %}">
     {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.GET.next }}"/>
 <!-- Email -->
 <div class="space-y-1.5">
 <label class="text-xs font-bold uppercase tracking-widest text-outline" for="username">Username</label>
