@@ -2108,21 +2108,10 @@ def _import_climate_metrics(df, errors):
     }
 
 
-def _gamma_spi(rainfall_mm, mean, std):
-    """Standardized Precipitation Index using fitted gamma distribution."""
-    from scipy import stats as scipy_stats
-    if std == 0 or mean == 0:
-        return 0.0
-    variance = std ** 2
-    alpha = (mean ** 2) / variance if variance > 0 else 1.0
-    scale = variance / mean if mean > 0 else 1.0
-    gamma_cdf = scipy_stats.gamma.cdf(max(0, rainfall_mm), a=alpha, scale=scale)
-    gamma_cdf = max(1e-15, min(1 - 1e-15, gamma_cdf))
-    return float(scipy_stats.norm.ppf(gamma_cdf))
-
-
 def _batch_calculate_spi(rainfall_by_region):
-    """Calculate SPI for all rainfall points, grouped by region, in bulk."""
+    """Calculate SPI for all rainfall points, grouped by region, in bulk, using per-month gamma."""
+    from ..prediction_engine.physical_helpers import calculate_spi as calc_spi_monthy
+
     if not rainfall_by_region:
         return
 
@@ -2133,40 +2122,28 @@ def _batch_calculate_spi(rainfall_by_region):
             region=region, rainfall_mm__isnull=False,
         ).order_by('measurement_date').values_list('measurement_date', 'rainfall_mm'))
 
-        if len(all_climate) < 2:
+        if len(all_climate) < 30:
             continue
 
+        dates = [c[0] for c in all_climate]
         vals = [float(c[1]) for c in all_climate]
-        series = pd.Series(vals)
-        overall_mean = float(series.mean())
-        overall_std = float(series.std())
-        if overall_std == 0:
-            continue
+        series = pd.Series(vals, index=pd.DatetimeIndex(dates))
 
-        roll_90_mean = series.rolling(90, min_periods=1).mean()
-        roll_90_std = series.rolling(90, min_periods=1).std(ddof=0)
-        roll_365_mean = series.rolling(365, min_periods=1).mean()
-        roll_365_std = series.rolling(365, min_periods=1).std(ddof=0)
-
-        date_to_idx = {d: i for i, (d, _) in enumerate(all_climate)}
+        # compute SPI series once for each accumulation period
+        spi1_series = calc_spi_monthy(series, nmonth=1)
+        spi3_series = calc_spi_monthy(series, nmonth=3) if len(series) >= 60 else None
+        spi12_series = calc_spi_monthy(series, nmonth=12) if len(series) >= 180 else None
 
         drought_records = []
         year_cache = {}
 
         for date, rainfall_mm in points:
-            idx = date_to_idx.get(date)
-            if idx is None:
+            if date not in spi1_series.index:
                 continue
 
-            spi_1 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, overall_mean, overall_std))), 2)
-
-            m90 = float(roll_90_mean.iloc[idx])
-            s90 = float(roll_90_std.iloc[idx])
-            spi_3 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m90, s90))), 2) if s90 > 0 else spi_1
-
-            m365 = float(roll_365_mean.iloc[idx])
-            s365 = float(roll_365_std.iloc[idx])
-            spi_12 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m365, s365))), 2) if s365 > 0 else spi_1
+            spi_1 = float(spi1_series.loc[date]) if pd.notna(spi1_series.loc[date]) else None
+            spi_3 = float(spi3_series.loc[date]) if spi3_series is not None and pd.notna(spi3_series.loc[date]) else spi_1
+            spi_12 = float(spi12_series.loc[date]) if spi12_series is not None and pd.notna(spi12_series.loc[date]) else spi_1
 
             year_label = str(date.year)
             if year_label not in year_cache:
@@ -2644,6 +2621,40 @@ def logout_view(request):
     return redirect('dashboard:login')
 
 
+def _prediction_warning_block(validation_metrics):
+    """Operational vs trend-only horizon status derived from walk-forward skill.
+
+    The +7d / +30d values served come from the forecast-augmented SPI-3 method,
+    so their confidence is taken from that method's backtest (realistic scenario:
+    3 real days for +7d, 7 real days for +30d), falling back to the XGBoost F1.
+    """
+    metrics = validation_metrics or {}
+    spi = metrics.get('spi_forecast') or {}
+
+    def conf(m, fallback):
+        f1 = (m or {}).get('drought_f1')
+        return round(f1 * 100) if isinstance(f1, (int, float)) else fallback
+
+    def spi_conf(horizon, mode, fallback):
+        m = (((spi.get(horizon) or {}).get('scenarios')) or {}).get(mode)
+        f1 = (m or {}).get('drought_f1')
+        if isinstance(f1, (int, float)) and f1 > 0:
+            return round(f1 * 100)
+        return fallback
+
+    return {
+        'today': {'status': 'operational', 'confidence_pct': conf(metrics.get('nowcast'), 80)},
+        'day_7': {'status': 'operational',
+                  'confidence_pct': spi_conf('7', 'forecast3_plus_clim',
+                                             conf(metrics.get('forecast_7d'), 55))},
+        'day_30': {'status': 'trend_only',
+                   'confidence_pct': spi_conf('30', 'forecast7_plus_clim',
+                                              conf(metrics.get('forecast_30d'), 40))},
+        'note': ('The 7-day horizon is operational. The 30-day figure is trend-only: it reflects '
+                 'the GFS rainfall forecast blended with climatology, not a firm prediction.'),
+    }
+
+
 @require_http_methods(["GET"])
 def drought_prediction_api(request):
     """Return the latest drought prediction or generate a fresh one on demand."""
@@ -2697,6 +2708,13 @@ def drought_prediction_api(request):
                 },
                 'drivers': latest_prediction.drivers,
                 'llm_explanation': latest_prediction.explanation,
+                'warning': _prediction_warning_block(latest_prediction.validation_metrics),
+                'rainfall_forecast': {
+                    'source': latest_prediction.rainfall_forecast.get('source'),
+                    'n_forecast_days': latest_prediction.rainfall_forecast.get('n_forecast_days'),
+                    'rain_7d_mm': float(latest_prediction.forecast_rain_7d_mm) if latest_prediction.forecast_rain_7d_mm is not None else None,
+                    'rain_30d_mm': float(latest_prediction.forecast_rain_30d_mm) if latest_prediction.forecast_rain_30d_mm is not None else None,
+                },
             },
         })
 
@@ -2705,7 +2723,10 @@ def drought_prediction_api(request):
 
         pipeline = DroughtPredictionPipeline()
         result = pipeline.predict_for_region(region, year, use_llm=use_llm)
-        saved_prediction = pipeline.save_prediction(region, year, result)
+        saved_prediction = pipeline.save_prediction(
+            region, year, result,
+            validation_metrics=pipeline.validation_metrics,
+        )
 
         return JsonResponse({
             'success': True,
@@ -2720,6 +2741,8 @@ def drought_prediction_api(request):
                 'forecasts': result['forecasts'],
                 'drivers': result['drivers'],
                 'llm_explanation': result['llm_explanation'],
+                'warning': result.get('warning') or _prediction_warning_block(saved_prediction.validation_metrics),
+                'rainfall_forecast': result.get('rainfall_forecast', {}),
             },
         })
     except Exception as exc:
@@ -2748,6 +2771,13 @@ def drought_prediction_api(request):
                     },
                     'drivers': latest_prediction.drivers,
                     'llm_explanation': latest_prediction.explanation,
+                    'warning': _prediction_warning_block(latest_prediction.validation_metrics),
+                    'rainfall_forecast': {
+                        'source': latest_prediction.rainfall_forecast.get('source'),
+                        'n_forecast_days': latest_prediction.rainfall_forecast.get('n_forecast_days'),
+                        'rain_7d_mm': float(latest_prediction.forecast_rain_7d_mm) if latest_prediction.forecast_rain_7d_mm is not None else None,
+                        'rain_30d_mm': float(latest_prediction.forecast_rain_30d_mm) if latest_prediction.forecast_rain_30d_mm is not None else None,
+                    },
                 },
             })
         return JsonResponse({'success': False, 'error': str(exc)}, status=500)

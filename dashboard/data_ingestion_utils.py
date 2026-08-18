@@ -84,48 +84,32 @@ class DataImporter:
             raise
     
     def _calculate_and_save_spi(self, region, measurement_date, rainfall_mm):
-        """Calculate SPI-1/3/12 from historical rainfall using gamma distribution and save."""
-        from scipy import stats as scipy_stats
+        """Calculate SPI-1/3/12 using per-month gamma distributions and save."""
+        from ..prediction_engine.physical_helpers import calculate_spi as calc_spi
+
         all_climate = ClimateMetrics.objects.filter(
             region=region,
             rainfall_mm__isnull=False,
         ).order_by('measurement_date')
 
         vals = [float(c.rainfall_mm) for c in all_climate]
-        if len(vals) < 2:
+        if len(vals) < 30:
             return
 
-        series = pd.Series(vals)
-        overall_mean = float(series.mean())
-        overall_std = float(series.std())
-        if overall_std == 0:
-            return
+        series = pd.Series(vals, index=[c.measurement_date for c in all_climate])
 
-        def _gamma_spi(rainfall_val, mean, std):
-            if std == 0 or mean == 0:
-                return 0.0
-            variance = std ** 2
-            alpha = (mean ** 2) / variance if variance > 0 else 1.0
-            scale = variance / mean if mean > 0 else 1.0
-            gamma_cdf = scipy_stats.gamma.cdf(max(0, rainfall_val), a=alpha, scale=scale)
-            gamma_cdf = max(1e-15, min(1 - 1e-15, gamma_cdf))
-            return float(scipy_stats.norm.ppf(gamma_cdf))
+        spi1_series = calc_spi(series, nmonth=1)
+        spi_1 = float(spi1_series.iloc[-1]) if len(spi1_series) and pd.notna(spi1_series.iloc[-1]) else None
 
-        spi_1 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, overall_mean, overall_std))), 2)
+        spi_3 = None
+        if len(series) >= 60:
+            spi3_series = calc_spi(series, nmonth=3)
+            spi_3 = float(spi3_series.iloc[-1]) if len(spi3_series) and pd.notna(spi3_series.iloc[-1]) else None
 
-        spi_3 = spi_1
-        if len(series) >= 90:
-            m90 = float(series.rolling(90, min_periods=1).mean().iloc[-1])
-            s90 = float(series.rolling(90, min_periods=1).std(ddof=0).iloc[-1])
-            if s90 > 0:
-                spi_3 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m90, s90))), 2)
-
-        spi_12 = spi_1
-        if len(series) >= 365:
-            m365 = float(series.rolling(365, min_periods=1).mean().iloc[-1])
-            s365 = float(series.rolling(365, min_periods=1).std(ddof=0).iloc[-1])
-            if s365 > 0:
-                spi_12 = round(max(-3.29, min(3.29, _gamma_spi(rainfall_mm, m365, s365))), 2)
+        spi_12 = None
+        if len(series) >= 180:
+            spi12_series = calc_spi(series, nmonth=12)
+            spi_12 = float(spi12_series.iloc[-1]) if len(spi12_series) and pd.notna(spi12_series.iloc[-1]) else None
 
         year_label = str(measurement_date.year)
         year = ObservationYear.objects.filter(label=year_label).first()

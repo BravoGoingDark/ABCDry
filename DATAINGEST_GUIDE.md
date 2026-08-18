@@ -173,6 +173,106 @@ print(response.json())
 
 ---
 
+## 🛰️ Method 4: Google Earth Engine (Real Satellite Data)
+
+The `pull_satellite` command pulls real free satellite/reanalysis data into the metric
+tables (no Excel needed):
+
+| Dataset | Collection | Populates |
+|---------|-----------|-----------|
+| CHIRPS rainfall | `UCSB-CHG/CHIRPS/DAILY` | `ClimateMetrics.rainfall_mm` |
+| ERA5-Land climate | `ECMWF/ERA5_LAND/DAILY_AGGR` | Climate: Tmax/Tmin/Tmean, RH, wind, solar |
+| MODIS NDVI | `MODIS/061/MOD13Q1` | `RemoteSensingMetrics.ndvi` |
+| MODIS LST | `MODIS/061/MOD11A1` | `RemoteSensingMetrics.land_surface_temperature_c` |
+| SMAP soil moisture | `NASA/SMAP/SPL4SMGP` | `RemoteSensingMetrics.satellite_soil_moisture_percent` |
+
+It then recomputes SPI-1/3/12 and VCI into `DroughtIndices`.
+
+### Step 1 — Create a Google Earth Engine service account (one-time)
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com) and create a project
+   (e.g. `abcdry-basin`).
+2. In the console, enable the **Earth Engine API**:
+   APIs & Services → Library → search "Earth Engine API" → Enable.
+3. Sign up the project for Earth Engine:
+   https://signup.earthengine.google.com → sign in → **Get started** → select your project.
+4. Create a service account:
+   IAM & Admin → **Service accounts** → Create service account → grant it any role
+   (e.g. *Earth Engine > Viewer*).
+5. Create a key for that service account: select it → **Keys** → Add key → **JSON**.
+   This downloads `xxx.json`.
+6. **Optional but recommended:** give that service account's email
+   `projects/earthengine-legacy/roles/earthengine.viewer` on the project so it can read
+   public datasets (public collections are readable by all signed-up projects, so this is
+   usually unnecessary).
+
+### Step 2 — Configure credentials
+
+1. Move the downloaded JSON to a safe path, e.g. `C:\Users\you\keys\gee-service-account.json`.
+2. Add it to `.env`:
+
+```
+GEE_CREDENTIALS_FILE=C:\Users\you\keys\gee-service-account.json
+```
+
+3. Install dependencies: `pip install earthengine-api google-auth` (already in requirements.txt).
+
+### Step 3 — Run the pull
+
+```bash
+# Last 90 days, all regions (every 5 days)
+python manage.py pull_satellite
+
+# One region, full year, daily
+python manage.py pull_satellite --region-id 8 --start-date 2025-01-01 --end-date 2025-12-31 --every 1 --verbose
+
+# See what would happen without writing
+python manage.py pull_satellite --dry-run
+```
+
+> Runs are idempotent: re-running overwrites the same (region, year, date) rows.
+> SMAP has ~3-day latency, MODIS LST ~1 day, CHIRPS ~1-2 weeks — the most recent days
+> may return `None` until the upstream data is published.
+
+### Troubleshooting
+
+- **"Earth Engine auth failed"** → the JSON path is wrong, the service account has no key,
+  or the project isn't signed up for Earth Engine. Re-check Steps 1-2.
+- **401 / "Not Authorized"** → confirm the Earth Engine API is enabled and the account is
+  in the project's registered users.
+- **Everything is `None`** → the region point may be outside the dataset's coverage, or
+  the data isn't published yet for that date. Test with `--dry-run --verbose`.
+
+### Units & sampling notes
+
+- **SMAP soil moisture is stored as volume fraction (m³/m³, 0–0.9)**, not kg/m².
+  `pull_satellite` multiplies by 100 to store percent. Rows imported before this fix
+  are ~50× too small — repair them with `repair_satellite --fix-soil-moisture` below.
+- **NDVI is sampled as the max over a ~3 km basin radius** (`NDVI_SAMPLE_RADIUS_M`), not
+  a single point. For basins whose coordinates sit on open water (e.g. a lake inside the
+  basin), a point sample returns water, not vegetation. NDVI < 0.1 (water) is written as
+  `NULL` rather than a negative number.
+
+### Repairing existing rows (`repair_satellite`)
+
+Fixes mis-scaled/contaminated values already in the DB (idempotent, safe to re-run):
+
+```bash
+# Rescale mis-scaled SMAP soil moisture (values <= 5) by x50
+python manage.py repair_satellite --region-id 4 --fix-soil-moisture
+
+# Replace water-like NDVI (< 0.1) with NULL
+python manage.py repair_satellite --region-id 4 --clear-water-ndvi
+
+# Re-pull NDVI from GEE using the basin sampler (needs valid GEE credentials)
+python manage.py repair_satellite --region-id 4 --re-pull-ndvi --start-date 2015-01-01
+
+# Preview only, no writes
+python manage.py repair_satellite --region-id 4 --fix-soil-moisture --dry-run
+```
+
+---
+
 ## ✅ Data Validation
 
 All imports validate against database constraints:

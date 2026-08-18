@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy import stats as scipy_stats
 
 
@@ -58,17 +59,94 @@ def update_soil_water(previous_mm, rainfall_mm, irrigation_mm, etc_mm, runoff_mm
     return max(0, new)
 
 
-def calculate_spi(rainfall_series_30day_sum, historical_30day_means, historical_30day_std, n=None):
-    """Standardized Precipitation Index using gamma distribution."""
-    if historical_30day_std == 0 or historical_30day_means == 0:
-        return 0
-    variance = historical_30day_std ** 2
-    alpha = (historical_30day_means ** 2) / variance if variance > 0 else 1.0
-    scale = variance / historical_30day_means if historical_30day_means > 0 else 1.0
-    gamma_cdf = scipy_stats.gamma.cdf(max(0, rainfall_series_30day_sum), a=alpha, scale=scale)
-    gamma_cdf = max(1e-15, min(1 - 1e-15, gamma_cdf))
-    spi = float(scipy_stats.norm.ppf(gamma_cdf))
-    return round(max(-3.29, min(3.29, spi)), 2)
+def _calc_prob_zero(samples):
+    samples = np.sort(samples[~np.isnan(samples)])
+    n = len(samples)
+    prob_zero = float(np.sum(samples == 0.0)) / n if n > 0 else 0
+    return prob_zero, samples
+
+
+def _fit_monthly_gamma(monthly_values):
+    """Fit gamma per month with zero-precip correction. Returns dict of month->(alpha, loc, beta, prob_zero)."""
+    params = {}
+    for month in range(1, 13):
+        vals = monthly_values.get(month, [])
+        vals = np.array([v for v in vals if not np.isnan(v)])
+        if len(vals) < 3:
+            params[month] = (1.0, 0.0, 1.0, 0.0)
+            continue
+        prob_zero, non_zero = _calc_prob_zero(vals)
+        non_zero = non_zero[non_zero > 0]
+        if len(non_zero) < 2:
+            params[month] = (1.0, 0.0, 1.0, prob_zero)
+            continue
+        s_u = np.log(non_zero.mean()) - np.log(non_zero).mean()
+        alpha = (1 / (4 * s_u)) * (1 + np.sqrt(1 + 4 * s_u / 3)) if s_u > 0 else 1.0
+        beta = non_zero.mean() / alpha if alpha > 0 else 1.0
+        loc = 0.0
+        try:
+            a = scipy_stats.gamma.fit(non_zero, floc=0, a=alpha, scale=beta)
+            alpha, beta = a[0], a[2]
+        except Exception:
+            pass
+        params[month] = (alpha, loc, beta, prob_zero)
+    return params
+
+
+def calculate_spi(rainfall_series, nmonth=1):
+    """
+    Standardized Precipitation Index using per-month gamma distributions
+    on CALENDAR-MONTH rainfall totals (the standard SPI methodology).
+
+    rainfall_series: pd.Series of daily rainfall with DatetimeIndex.
+    nmonth: accumulation period in months (1, 3, 6, 12, etc.).
+
+    The daily series is aggregated to calendar-month totals, the gamma
+    distribution is fitted per calendar month, and SPI is computed for each
+    month from its accumulated total. The result is broadcast back to the
+    original daily index (every day of a month carries that month's SPI),
+    so callers can look values up by measurement date.
+    """
+    if not isinstance(rainfall_series, pd.Series) or len(rainfall_series) < 30:
+        return pd.Series(dtype=float)
+
+    # 1) Aggregate daily rainfall to true calendar-month totals
+    monthly = rainfall_series.resample('ME').sum()
+
+    # 2) Accumulate over the last nmonth calendar months
+    roll = monthly.rolling(window=nmonth, min_periods=nmonth).sum()
+
+    # 3) Fit gamma per calendar month on the ACCUMULATED totals, grouped by
+    #    the month the accumulation window ends in (standard SPI-n method).
+    acc_monthly_vals = {}
+    for date, val in roll.items():
+        if pd.notna(val):
+            acc_monthly_vals.setdefault(date.month, []).append(float(val))
+    month_params = _fit_monthly_gamma(acc_monthly_vals)
+
+    # 4) SPI for each month
+    month_spi = {}
+    for date, val in roll.items():
+        if pd.isna(val):
+            continue
+        alpha, loc, beta, prob_zero = month_params[date.month]
+        if alpha <= 0 or beta <= 0:
+            continue
+        if val <= 0:
+            cdf = prob_zero
+        else:
+            gamma_cdf = scipy_stats.gamma.cdf(val, a=alpha, loc=loc, scale=beta)
+            cdf = prob_zero + (1 - prob_zero) * gamma_cdf
+        cdf = max(1e-15, min(1 - 1e-15, cdf))
+        month_spi[(date.year, date.month)] = round(
+            max(-3.29, min(3.29, float(scipy_stats.norm.ppf(cdf)))), 2
+        )
+
+    # 5) Broadcast each month's SPI to every day of that month
+    values = [month_spi.get((d.year, d.month), np.nan) for d in rainfall_series.index]
+    result = pd.Series(values, index=rainfall_series.index, dtype='float64')
+    result.name = f'SPI-{nmonth}'
+    return result
 
 
 def calculate_vci(current_ndvi, historical_ndvi_list):

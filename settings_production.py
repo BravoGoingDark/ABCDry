@@ -170,6 +170,14 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'dashboard.tasks.generate_daily_risk_assessments',
         'schedule': 86400.0,  # Daily at midnight
     },
+    'pull-satellite-and-retrain': {
+        'task': 'dashboard.tasks.pull_satellite_and_retrain',
+        'schedule': 86400.0,  # Daily at midnight
+    },
+    'validate-spi-forecast': {
+        'task': 'dashboard.tasks.validate_spi_forecast',
+        'schedule': 604800.0,  # Weekly (keeps warning confidence fresh)
+    },
 }
 
 # ============================================================================

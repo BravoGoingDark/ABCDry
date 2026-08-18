@@ -156,6 +156,7 @@ class ClimateMetrics(models.Model):
     
     # Rainfall
     rainfall_mm = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, help_text="Rainfall amount (mm)")
+    rainfall_source = models.CharField(max_length=10, null=True, blank=True, help_text="Rainfall source: CHIRPS or IMERG")
     seasonal_rainfall_variability = models.CharField(max_length=50, blank=True, help_text="Seasonal variability classification")
     
     # Temperature
@@ -315,6 +316,7 @@ class RemoteSensingMetrics(models.Model):
         choices=[
             ('SMAP', 'SMAP'),
             ('Sentinel-1', 'Sentinel-1'),
+            ('Sentinel-2', 'Sentinel-2'),
             ('MODIS', 'MODIS'),
             ('Landsat', 'Landsat'),
         ]
@@ -430,6 +432,11 @@ class DroughtPrediction(models.Model):
     drivers = models.JSONField(default=dict, blank=True)
     explanation = models.TextField(blank=True)
     source_window_days = models.IntegerField(default=30)
+    model_trained_at = models.DateTimeField(null=True, blank=True)
+    validation_metrics = models.JSONField(default=dict, blank=True)
+    forecast_rain_7d_mm = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    forecast_rain_30d_mm = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    rainfall_forecast = models.JSONField(default=dict, blank=True)
 
     class Meta:
         db_table = 'drought_predictions'

@@ -762,12 +762,15 @@ function updateDashboard(data) {
     setDriver('driver-vegetation', dr.vegetation_stress);
     setDriver('driver-evapotranspiration', dr.high_evapotranspiration);
 
-    // Forecast table
+    // Forecast table (confidence/status comes from the trained model's validation)
+    const warn = p.warning || {};
+    const wc = function(h) { return h ? h.confidence_pct : null; };
+    const ws = function(h) { return h ? h.status : null; };
     const forecasts = [
-        { days: 'Today', score: rs.today },
-        { days: '+7 Days', score: rs.day_7 },
-        { days: '+14 Days', score: rs.day_7 !== undefined && rs.today !== undefined ? Math.min(100, Math.round((rs.today + rs.day_7) / 2 + 8)) : null },
-        { days: '+30 Days', score: rs.day_30 },
+        { days: 'Today', score: rs.today, conf: wc(warn.today), status: ws(warn.today) },
+        { days: '+7 Days', score: rs.day_7, conf: wc(warn.day_7), status: ws(warn.day_7) },
+        { days: '+14 Days', score: rs.day_7 !== undefined && rs.today !== undefined ? Math.min(100, Math.round((rs.today + rs.day_7) / 2 + 8)) : null, conf: null, status: null },
+        { days: '+30 Days', score: rs.day_30, conf: wc(warn.day_30), status: ws(warn.day_30) },
     ];
     const tbody = document.getElementById('forecast-table-body');
     if (tbody) {
@@ -782,7 +785,11 @@ function updateDashboard(data) {
             if (badgeEl) badgeEl.outerHTML = riskBadgeHTML(f.score);
             if (predEl) predEl.textContent = predictionText(f.score);
             if (actionEl) actionEl.textContent = recommendationFor(f.score);
-            if (confEl) confEl.textContent = confidenceFor(i * 7);
+            if (confEl) {
+                confEl.textContent = f.status === 'trend_only'
+                    ? 'trend only'
+                    : (f.conf !== null && f.conf !== undefined ? f.conf + '%' : confidenceFor(i * 7));
+            }
         });
     }
 
