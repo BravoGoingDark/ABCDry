@@ -253,11 +253,37 @@ class Command(BaseCommand):
             'solar_radiation_mjm2day': solar,
         }
 
-    # Radius used to sample vegetation around the sample point. Regions such as
-    # Ichkeul are wetland basins where the point itself may sit on open water
-    # (NDVI ~ -0.1) while the surrounding marsh is green. Taking the MAX NDVI
-    # within the basin captures the vegetation signal drought actually affects.
+    # Radius used to sample vegetation around each land point. When
+    # sample_points is configured on the Region, each point is a known
+    # land location; the buffer captures nearby vegetation without crossing
+    # into the lake. When no sample_points are set, the buffer compensates
+    # for the original center point possibly sitting on water.
     NDVI_SAMPLE_RADIUS_M = 3000
+
+    @staticmethod
+    def _median(values):
+        """Return the median of a list of floats, ignoring None."""
+        clean = [v for v in values if v is not None]
+        if not clean:
+            return None
+        clean.sort()
+        n = len(clean)
+        if n % 2 == 1:
+            return clean[n // 2]
+        return round((clean[n // 2 - 1] + clean[n // 2]) / 2, 4)
+
+    def _get_sample_points(self, region):
+        """Return list of ee.Geometry.Point for NDVI/LST sampling.
+
+        If region.sample_points is set, use those land coordinates.
+        Otherwise fall back to the region center (lat/lon).
+        """
+        if region.sample_points:
+            pts = []
+            for sp in region.sample_points:
+                pts.append(ee.Geometry.Point(float(sp['lon']), float(sp['lat'])))
+            return pts
+        return [ee.Geometry.Point(float(region.longitude), float(region.latitude))]
 
     def _modis_ndvi(self, point, day):
         img = (ee.ImageCollection('MODIS/061/MOD13Q1')
@@ -303,7 +329,8 @@ class Command(BaseCommand):
         Resolution is coarser (300 m vs 10 m) but for basin-scale drought
         monitoring the max-NDVI-over-3km sampler makes this irrelevant.
 
-        Bands: OLCI B8 (NIR, 708.5 nm) and B6 (Red, 620.6 nm).
+        Bands: OLCI B17 (NIR, 865.5 nm) and B6 (Red, 620.6 nm).
+        B8 (708 nm) is red-edge, NOT true NIR — using it gives near-zero NDVI.
         Cloud mask uses the OLCI quality flags band (quality_flags).
         """
         img = (ee.ImageCollection('COPERNICUS/S3/OLCI')
@@ -313,13 +340,72 @@ class Command(BaseCommand):
                .first())
         if img is None:
             return None
-        ndvi = img.normalizedDifference(['Oa08_radiance', 'Oa06_radiance']).rename('ndvi')
+        ndvi = img.normalizedDifference(['Oa17_radiance', 'Oa06_radiance']).rename('ndvi')
         val = self._fetch(ndvi, point, 'ndvi', 300,
                           reducer=ee.Reducer.max(),
                           geometry=point.buffer(self.NDVI_SAMPLE_RADIUS_M))
-        if val is not None and -0.2 <= val <= 1.0:
+        if val is not None and 0.05 <= val <= 1.0:
             return round(val, 3)
         return None
+
+    def _multi_point_ndvi(self, points, day):
+        """Query NDVI at each land point using the S2→S3→MODIS chain, return median.
+        Uses concurrent threads to avoid 3× serial GEE latency."""
+        import threading
+
+        results = [None] * len(points)
+        sources = [None] * len(points)
+
+        def _fetch_one(idx, pt):
+            val = self._sentinel2_ndvi(pt, day)
+            src = 'Sentinel-2'
+            if val is None:
+                val = self._sentinel3_ndvi(pt, day)
+                src = 'Sentinel-3'
+            if val is None:
+                val = self._modis_ndvi(pt, day)
+                src = 'MODIS'
+            results[idx] = val
+            sources[idx] = src
+
+        threads = []
+        for i, pt in enumerate(points):
+            t = threading.Thread(target=_fetch_one, args=(i, pt), daemon=True)
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join(120)
+
+        values = [v for v in results if v is not None]
+        src_used = [s for s, v in zip(sources, results) if v is not None]
+        if not values:
+            return None, None
+        median_val = self._median(values)
+        best_source = max(set(src_used), key=src_used.count) if src_used else None
+        return median_val, best_source
+
+    def _multi_point_lst(self, points, day):
+        """Query MODIS LST at each land point, return median.
+        Uses concurrent threads to avoid 3× serial GEE latency."""
+        import threading
+
+        results = [None] * len(points)
+
+        def _fetch_one(idx, pt):
+            results[idx] = self._modis_lst(pt, day)
+
+        threads = []
+        for i, pt in enumerate(points):
+            t = threading.Thread(target=_fetch_one, args=(i, pt), daemon=True)
+            threads.append(t)
+            t.start()
+        for t in threads:
+            t.join(60)
+
+        values = [v for v in results if v is not None]
+        if not values:
+            return None
+        return self._median(values)
 
     def _sentinel1_sm(self, point, day):
         """All-weather surface soil moisture proxy from Sentinel-1 SAR (VV, dB).
@@ -499,39 +585,49 @@ class Command(BaseCommand):
 
         for region in regions:
             self.stdout.write(f'\n== {region.name} ({region.latitude}, {region.longitude}) ==')
-            point = ee.Geometry.Point(float(region.longitude), float(region.latitude))
+            center = ee.Geometry.Point(float(region.longitude), float(region.latitude))
+            sample_pts = self._get_sample_points(region)
+            multi = len(sample_pts) > 1
+            if multi:
+                self.stdout.write(f'  Multi-point sampling: {len(sample_pts)} land points')
             day = start
             ingested = 0
             last_ndvi = None
             last_ndvi_source = None
             while day <= end:
-                rain, rain_source = self._rainfall(point, day)
-                era = self._era5_daily(point, day)
+                rain, rain_source = self._rainfall(center, day)
+                era = self._era5_daily(center, day)
                 ndvi = None
                 ndvi_source = None
                 if day.day % 16 in (1, 5, 9, 13) or day == end:
-                    ndvi = self._sentinel2_ndvi(point, day)
-                    if ndvi is not None:
-                        ndvi_source = 'Sentinel-2'
+                    if multi:
+                        ndvi, ndvi_source = self._multi_point_ndvi(sample_pts, day)
                     else:
-                        ndvi = self._sentinel3_ndvi(point, day)
+                        ndvi = self._sentinel2_ndvi(center, day)
                         if ndvi is not None:
-                            ndvi_source = 'Sentinel-3'
+                            ndvi_source = 'Sentinel-2'
                         else:
-                            ndvi = self._modis_ndvi(point, day)
+                            ndvi = self._sentinel3_ndvi(center, day)
                             if ndvi is not None:
-                                ndvi_source = 'MODIS'
+                                ndvi_source = 'Sentinel-3'
+                            else:
+                                ndvi = self._modis_ndvi(center, day)
+                                if ndvi is not None:
+                                    ndvi_source = 'MODIS'
                 else:
                     ndvi = last_ndvi
                     ndvi_source = last_ndvi_source
                 if ndvi is not None:
                     last_ndvi = ndvi
                     last_ndvi_source = ndvi_source
-                lst = self._modis_lst(point, day)
-                sm = self._smap_sm(point, day)
+                if multi:
+                    lst = self._multi_point_lst(sample_pts, day)
+                else:
+                    lst = self._modis_lst(center, day)
+                sm = self._smap_sm(center, day)
                 sm_source = 'SMAP' if sm is not None else None
                 if sm is None:
-                    sm = self._sentinel1_sm(point, day)
+                    sm = self._sentinel1_sm(center, day)
                     sm_source = 'Sentinel-1' if sm is not None else None
 
                 if options['verbose']:

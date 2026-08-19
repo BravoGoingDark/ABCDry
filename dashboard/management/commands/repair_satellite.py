@@ -143,6 +143,23 @@ class Command(BaseCommand):
             pass
         return None, None
 
+    def _multi_point_ndvi(self, points, day):
+        """Query NDVI at each land point, return (median, source)."""
+        values = []
+        sources = []
+        for pt in points:
+            val, src = self._basin_ndvi(pt, day)
+            if val is not None:
+                values.append(val)
+                sources.append(src)
+        if not values:
+            return None, None
+        values.sort()
+        n = len(values)
+        median_val = values[n // 2] if n % 2 else round((values[n // 2 - 1] + values[n // 2]) / 2, 4)
+        best_source = max(set(sources), key=sources.count) if sources else None
+        return median_val, best_source
+
     def _recompute_vci(self, region):
         rows = list(RemoteSensingMetrics.objects.filter(
             region=region, ndvi__isnull=False,
@@ -212,11 +229,20 @@ class Command(BaseCommand):
             self._init_ee()
             if region.latitude is None or region.longitude is None:
                 raise CommandError('Region has no coordinates.')
-            point = ee.Geometry.Point(float(region.longitude), float(region.latitude))
+            sample_pts = []
+            if region.sample_points:
+                for sp in region.sample_points:
+                    sample_pts.append(ee.Geometry.Point(float(sp['lon']), float(sp['lat'])))
+                self.stdout.write(f'  Multi-point NDVI re-pull: {len(sample_pts)} land points')
+            else:
+                sample_pts = [ee.Geometry.Point(float(region.longitude), float(region.latitude))]
             day = start
             updated = 0
             while day <= end:
-                ndvi, source = self._basin_ndvi(point, day)
+                if len(sample_pts) > 1:
+                    ndvi, source = self._multi_point_ndvi(sample_pts, day)
+                else:
+                    ndvi, source = self._basin_ndvi(sample_pts[0], day)
                 if ndvi is not None:
                     year, _ = ObservationYear.objects.get_or_create(label=str(day.year))
                     if not options['dry_run']:

@@ -15,12 +15,24 @@ class Region(models.Model):
     area_km2 = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     radius_km = models.DecimalField(max_digits=8, decimal_places=2, default=100.0)
+    sample_points = models.JSONField(
+        blank=True, null=True,
+        help_text='List of [lat, lon] land points for multi-point satellite sampling. '
+                  'NDVI and LST are sampled at each point and median is stored.',
+    )
 
     class Meta:
         db_table = 'regions'
 
     def __str__(self):
         return self.name
+
+    @property
+    def sample_geometries(self):
+        """Return ee.Geometry.Point list for each sample point, or [center point]."""
+        if self.sample_points:
+            return self.sample_points
+        return [[float(self.latitude), float(self.longitude)]]
 
 
 class ObservationYear(models.Model):
