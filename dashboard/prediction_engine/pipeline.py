@@ -238,7 +238,7 @@ class DroughtPredictionPipeline:
                     cn = 70.0
                     s_mm = 254 * (100 / cn - 1)
                     runoff = ((rain - 0.2 * s_mm) ** 2) / (rain + 0.8 * s_mm) if rain > 0.2 * s_mm else 0.0
-                    df.loc[df.index[i], 'soil_water_mm'] = update_soil_water(prev, rain, irrigation, etc, runoff)
+                    df.loc[df.index[i], 'soil_water_mm'] = update_soil_water(prev, rain, irrigation, etc, runoff, awc_mm=self.available_water_capacity_mm)
 
         # Convert water-balance soil_water_mm to a soil moisture percentage.
         # This replaces unreliable satellite point readings (e.g. SMAP over a lake)
@@ -501,7 +501,7 @@ class DroughtPredictionPipeline:
                 'climatology': clim,
                 'forecast7_plus_clim': actual_rain.iloc[:7].combine_first(
                     clim.iloc[7:]
-                ) if horizon_days > 7 else actual_rain,
+                ) if horizon_days >= 7 else actual_rain,
                 'perfect': actual_rain,
             }
             if horizon_days > 3:
@@ -758,7 +758,7 @@ class DroughtPredictionPipeline:
         self.set_soil_properties_from_metrics(region, year)
         prepared_df = self.prepare_daily_data(self.build_prediction_frame(region, year, lookback_days=lookback_days))
         model_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
-        if os.path.exists(self._artifact_path('xgboost_risk_model.pkl')):
+        if not self.is_trained and os.path.exists(self._artifact_path('xgboost_risk_model.pkl')):
             try:
                 self.load(model_dir=model_dir)
                 logger.info('Loaded ML models from %s', model_dir)

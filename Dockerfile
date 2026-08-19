@@ -12,7 +12,7 @@ WORKDIR /app
 # Upgrade pip and install project requirements (may include non-PyTorch deps)
 COPY requirements.txt ./
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r requirements.txt || true
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Install CPU-only PyTorch wheels (recommended for CI/dev without GPU)
 # For GPU/CUDA builds, change index-url to the appropriate CUDA wheel index from pytorch.org

@@ -94,6 +94,9 @@ class RiskAssessment(models.Model):
 
     class Meta:
         db_table = 'risk_assessments'
+        indexes = [
+            models.Index(fields=['-created_at']),
+        ]
 
     def __str__(self):
         return f"{self.crop} - {self.risk_level}"
@@ -233,6 +236,9 @@ class DroughtIndices(models.Model):
         db_table = 'drought_indices'
         unique_together = ("region", "year", "measurement_date")
         ordering = ['-measurement_date']
+        indexes = [
+            models.Index(fields=['region', 'measurement_date']),
+        ]
     
     def __str__(self):
         return f"Drought - {self.region} - {self.drought_severity_class}"
@@ -335,6 +341,9 @@ class RemoteSensingMetrics(models.Model):
         db_table = 'remote_sensing_metrics'
         unique_together = ("region", "year", "measurement_date")
         ordering = ['-measurement_date']
+        indexes = [
+            models.Index(fields=['region', 'measurement_date']),
+        ]
     
     def __str__(self):
         return f"Remote Sensing - {self.region} - {self.measurement_date}"
@@ -376,6 +385,9 @@ class HydrologyMetrics(models.Model):
         db_table = 'hydrology_metrics'
         unique_together = ("region", "year", "measurement_date")
         ordering = ['-measurement_date']
+        indexes = [
+            models.Index(fields=['region', 'measurement_date']),
+        ]
     
     def __str__(self):
         return f"Hydrology - {self.region} - {self.measurement_date}"
@@ -407,6 +419,9 @@ class DataImportLog(models.Model):
     class Meta:
         db_table = 'data_import_logs'
         ordering = ['-import_date']
+        indexes = [
+            models.Index(fields=['-import_date']),
+        ]
     
     def __str__(self):
         return f"{self.metric_type} - {self.source} - {self.import_date}"

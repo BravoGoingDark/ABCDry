@@ -2599,6 +2599,8 @@ def login_view(request):
     """Display login page and handle authentication"""
     if request.user.is_authenticated:
         next_url = request.GET.get('next') or request.POST.get('next') or 'dashboard:dashboard'
+        if not next_url.startswith('/') or '//' in next_url:
+            next_url = 'dashboard:dashboard'
         return redirect(next_url)
 
     if request.method == 'POST':
@@ -2608,6 +2610,8 @@ def login_view(request):
         if user is not None:
             auth_login(request, user)
             next_url = request.POST.get('next') or request.GET.get('next') or 'dashboard:dashboard'
+            if not next_url.startswith('/') or '//' in next_url:
+                next_url = 'dashboard:dashboard'
             return redirect(next_url)
         messages.error(request, _('Invalid username or password.'))
 
@@ -2700,7 +2704,7 @@ def drought_prediction_api(request):
                 },
                 'current': {
                     'soil_moisture_pct': sm_today,
-                    'soil_water_percent_of_capacity': round(min(100, (sm_today / 35) * 100), 1) if sm_today else 0,
+                    'soil_water_percent_of_capacity': round(min(100, (sm_today / _fc) * 100), 1) if sm_today and _fc > 0 else 0,
                 },
                 'forecasts': {
                     'soil_moisture_7day_pct': sm_7,
@@ -2746,12 +2750,14 @@ def drought_prediction_api(request):
             },
         })
     except Exception as exc:
+        import logging
+        logging.getLogger('django').warning('Prediction generation failed: %s', exc)
         if latest_prediction is not None:
             sm_today = float(latest_prediction.soil_moisture_today_pct or 0)
             return JsonResponse({
                 'success': True,
                 'source': 'database',
-                'warning': str(exc),
+                'warning': 'Fresh prediction unavailable, showing cached results.',
                 'prediction': {
                     'region': region.name,
                     'year': year.label,

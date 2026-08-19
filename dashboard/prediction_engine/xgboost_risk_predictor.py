@@ -86,7 +86,7 @@ class XGBoostDroughtRiskPredictor:
 
         features['soil_moisture_pct'] = df_30days['soil_moisture_pct'].iloc[-1]
         features['ndvi'] = df_30days['ndvi'].iloc[-1]
-        features['lst_c'] = df_30days['lst_c'].iloc[-1]
+        features['lst_c'] = df_30days['lst_c'].iloc[-1] if 'lst_c' in df_30days.columns else 0.0
 
         features['rainfall_30d_mm'] = df_30days['rainfall_mm'].sum()
         features['rainfall_7d_mm'] = df_30days['rainfall_mm'].tail(7).sum()
@@ -106,6 +106,7 @@ class XGBoostDroughtRiskPredictor:
 
         soil_last_7 = df_30days['soil_moisture_pct'].tail(7).values
         if len(soil_last_7) >= 2:
+            soil_last_7 = np.nan_to_num(soil_last_7, nan=np.nanmean(soil_last_7))
             x = np.arange(len(soil_last_7))
             features['soil_moisture_trend'] = np.polyfit(x, soil_last_7, 1)[0]
         else:
@@ -113,6 +114,7 @@ class XGBoostDroughtRiskPredictor:
 
         ndvi_last_14 = df_30days['ndvi'].tail(14).values
         if len(ndvi_last_14) >= 2:
+            ndvi_last_14 = np.nan_to_num(ndvi_last_14, nan=np.nanmean(ndvi_last_14))
             x = np.arange(len(ndvi_last_14))
             features['ndvi_trend'] = np.polyfit(x, ndvi_last_14, 1)[0]
         else:
@@ -121,12 +123,14 @@ class XGBoostDroughtRiskPredictor:
         if len(df_context) >= 60:
             features['rainfall_60d_mm'] = float(df_context['rainfall_60d_mm'].iloc[-1])
         else:
-            features['rainfall_60d_mm'] = float(df_context['rainfall_mm'].sum())
+            n = len(df_context)
+            features['rainfall_60d_mm'] = float(df_context['rainfall_mm'].sum()) * (60.0 / n) if n > 0 else 0.0
 
         if len(df_context) >= 90:
             features['rainfall_90d_mm'] = float(df_context['rainfall_90d_mm'].iloc[-1])
         else:
-            features['rainfall_90d_mm'] = float(df_context['rainfall_mm'].sum())
+            n = len(df_context)
+            features['rainfall_90d_mm'] = float(df_context['rainfall_mm'].sum()) * (90.0 / n) if n > 0 else 0.0
 
         features['rainfall_anomaly_90d'] = float(df_context['rainfall_anomaly_90d'].iloc[-1])
         features['dry_days_90d'] = float(df_context['dry_days_90d'].iloc[-1])
@@ -271,7 +275,6 @@ class XGBoostDroughtRiskPredictor:
             X_train_scaled,
             y_train,
             sample_weight=sample_weight,
-            sample_weight_eval_set=[eval_weight],
             eval_set=[(X_val_scaled, y_val)],
             verbose=False,
         )

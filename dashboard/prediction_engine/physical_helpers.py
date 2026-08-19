@@ -53,10 +53,14 @@ def calculate_etc(et0, kc):
     return et0 * kc
 
 
-def update_soil_water(previous_mm, rainfall_mm, irrigation_mm, etc_mm, runoff_mm=0):
-    """Daily water balance. Returns new soil water in mm, cannot go below 0."""
+def update_soil_water(previous_mm, rainfall_mm, irrigation_mm, etc_mm, runoff_mm=0, awc_mm=None):
+    """Daily water balance. Returns new soil water in mm, cannot go below 0
+    or above available_water_capacity_mm (excess becomes deep percolation)."""
     new = previous_mm + rainfall_mm + irrigation_mm - etc_mm - runoff_mm
-    return max(0, new)
+    new = max(0, new)
+    if awc_mm is not None:
+        new = min(new, awc_mm)
+    return new
 
 
 def _calc_prob_zero(samples):

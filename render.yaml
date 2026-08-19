@@ -21,4 +21,4 @@ services:
       - key: DJANGO_SUPERUSER_EMAIL
         value: "admin@abcdry.com"
       - key: DJANGO_SUPERUSER_PASSWORD
-        value: "admin"
+        generateValue: true

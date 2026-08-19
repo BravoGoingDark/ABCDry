@@ -126,8 +126,8 @@ class Command(BaseCommand):
             def runner():
                 try:
                     box['value'] = func()
-                except Exception:
-                    box['error'] = True
+                except Exception as exc:
+                    box['error'] = exc
 
             t = threading.Thread(target=runner, daemon=True)
             t.start()
@@ -442,6 +442,10 @@ class Command(BaseCommand):
                     'spi_12month': round(s12, 2) if s12 is not None else None,
                 },
             )
+            if vci is not None:
+                RemoteSensingMetrics.objects.filter(
+                    region=region, measurement_date=day,
+                ).update(vegetation_condition_index=round(vci, 1))
 
     # ------------------------------------------------------------------ #
     # Main
