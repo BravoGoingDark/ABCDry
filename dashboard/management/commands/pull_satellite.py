@@ -295,6 +295,32 @@ class Command(BaseCommand):
             return round(val, 3)
         return None
 
+    def _sentinel3_ndvi(self, point, day):
+        """Gap-filling NDVI from Sentinel-3 OLCI (300 m, 10-day global revisit).
+
+        Sentinel-3 uses an off-grid orbit that guarantees global coverage every
+        10 days, unlike Sentinel-2's fixed 5-day repeat that can leave gaps.
+        Resolution is coarser (300 m vs 10 m) but for basin-scale drought
+        monitoring the max-NDVI-over-3km sampler makes this irrelevant.
+
+        Bands: OLCI B8 (NIR, 708.5 nm) and B6 (Red, 620.6 nm).
+        Cloud mask uses the OLCI quality flags band (quality_flags).
+        """
+        img = (ee.ImageCollection('COPERNICUS/S3/OLCI')
+               .filterBounds(point)
+               .filterDate((day - timedelta(days=10)).isoformat(), (day + timedelta(days=1)).isoformat())
+               .sort('system:time_start', False)
+               .first())
+        if img is None:
+            return None
+        ndvi = img.normalizedDifference(['Oa08_radiance', 'Oa06_radiance']).rename('ndvi')
+        val = self._fetch(ndvi, point, 'ndvi', 300,
+                          reducer=ee.Reducer.max(),
+                          geometry=point.buffer(self.NDVI_SAMPLE_RADIUS_M))
+        if val is not None and -0.2 <= val <= 1.0:
+            return round(val, 3)
+        return None
+
     def _sentinel1_sm(self, point, day):
         """All-weather surface soil moisture proxy from Sentinel-1 SAR (VV, dB).
 
@@ -488,9 +514,13 @@ class Command(BaseCommand):
                     if ndvi is not None:
                         ndvi_source = 'Sentinel-2'
                     else:
-                        ndvi = self._modis_ndvi(point, day)
+                        ndvi = self._sentinel3_ndvi(point, day)
                         if ndvi is not None:
-                            ndvi_source = 'MODIS'
+                            ndvi_source = 'Sentinel-3'
+                        else:
+                            ndvi = self._modis_ndvi(point, day)
+                            if ndvi is not None:
+                                ndvi_source = 'MODIS'
                 else:
                     ndvi = last_ndvi
                     ndvi_source = last_ndvi_source

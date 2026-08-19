@@ -323,6 +323,7 @@ class RemoteSensingMetrics(models.Model):
             ('SMAP', 'SMAP'),
             ('Sentinel-1', 'Sentinel-1'),
             ('Sentinel-2', 'Sentinel-2'),
+            ('Sentinel-3', 'Sentinel-3'),
             ('MODIS', 'MODIS'),
             ('Landsat', 'Landsat'),
         ]
