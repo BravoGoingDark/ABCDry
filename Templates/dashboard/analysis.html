@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% load i18n %}
+{% load static i18n %}
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -88,14 +88,93 @@
         .map-gradient {
             background: radial-gradient(circle at center, rgba(186, 26, 26, 0.15) 0%, rgba(255, 184, 0, 0.1) 40%, rgba(0, 103, 125, 0.05) 100%);
         }
-            /* Leaflet map sits behind overlays inside the map container */
-            #ichkeul-heatmap { z-index: 0; }
-            .map-overlay-panel { z-index: 20; }
+        /* Leaflet map sits behind overlays inside the map container */
+        #ichkeul-heatmap { z-index: 0; }
+        .map-overlay-panel { z-index: 20; }
 
-
+        .custom-station-icon {
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer;
+        }
+        .station-marker-container {
+            position: relative;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .station-marker-badge {
+            position: relative;
+            z-index: 10;
+            width: 22px;
+            height: 22px;
+            border-radius: 9999px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+        .custom-station-icon:hover .station-marker-badge {
+            transform: scale(1.22);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+        }
+        .station-radar-ripple {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 9999px;
+            border: 1.5px solid;
+            animation: stationPulse 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        @keyframes stationPulse {
+            0% { transform: scale(0.5); opacity: 0.9; }
+            100% { transform: scale(2.0); opacity: 0; }
+        }
+        /* Smooth, elegant hover tooltips */
+        .leaflet-tooltip.station-tooltip-smooth {
+            background: rgba(15, 23, 42, 0.92) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #f8fafc !important;
+            border-radius: 8px !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+            pointer-events: none !important;
+        }
+        .leaflet-tooltip.station-tooltip-smooth:before {
+            border-top-color: rgba(15, 23, 42, 0.92) !important;
+        }
+        /* Refined zoom controls */
+        .leaflet-control-zoom {
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+            margin-bottom: 14px !important;
+            margin-left: 14px !important;
+        }
+        .leaflet-control-zoom a {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            transition: background-color 0.18s ease, color 0.18s ease !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background-color: #f1f5f9 !important;
+            color: #0284c7 !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+        <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
 </head>
 <body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
 <!-- Main Content Wrapper -->
@@ -241,64 +320,129 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
 <div class="lg:col-span-8 space-y-8">
 <!-- Risk Zone Heatmap -->
-<div class="bg-surface border border-outline-variant h-[500px] flex flex-col overflow-hidden relative">
-<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-<h3 class="font-headline font-bold text-sm uppercase tracking-wider">Spatial Risk Distribution (Ichkeul Basin)</h3>
-<div class="flex gap-2">
-<button id="satellite-btn" class="px-3 py-1 bg-primary text-white text-xs font-bold uppercase">Satellite</button>
-<button id="topography-btn" class="px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-bold uppercase">Topography</button>
-</div>
-</div>
-<!-- Map Canvas Placeholder -->
-<div class="flex-grow relative map-gradient bg-[#E2E8F0]" data-location="Lake Ichkeul National Park">
-    <!-- Leaflet map canvas (absolute, fills the panel behind overlays) -->
+<div class="bg-surface border border-outline-variant flex flex-col overflow-hidden" style="height:520px">
+  <!-- Card Header -->
+  <div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+    <div class="flex items-center gap-2.5">
+      <h3 class="font-headline font-bold text-sm uppercase tracking-wider">Spatial Risk Distribution (Ichkeul Basin)</h3>
+      <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-sm" title="Heat colors originate from the 2 monitoring ground stations">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="material-symbols-outlined text-[13px]">sensors</span>
+        2 Station Origin
+      </span>
+    </div>
+    <div class="flex gap-2">
+      <button id="satellite-btn" class="layer-btn px-3 py-1 bg-primary text-on-primary text-xs font-bold uppercase">Satellite</button>
+      <button id="topography-btn" class="layer-btn px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-bold uppercase">Topography</button>
+    </div>
+  </div>
+
+  <!-- Map canvas -->
+  <div class="flex-grow relative bg-[#E2E8F0]">
+    <!-- Leaflet map fills this div -->
     <div id="ichkeul-heatmap" class="absolute inset-0 z-0"></div>
-    <div class="absolute top-4 left-4 z-10 space-y-2">
-<div class="bg-white/90 backdrop-blur-md p-3 border border-outline-variant shadow-sm w-48">
-<p class="font-label text-[10px] uppercase font-bold text-on-surface-variant mb-2">Legend</p>
-<div class="space-y-1.5">
-<div class="flex items-center justify-between text-[11px]">
-<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-red-600 rounded-sm"></span> Danger</span>
-<span class="font-label">&gt; 75</span>
-</div>
-<div class="flex items-center justify-between text-[11px]">
-<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-orange-500 rounded-sm"></span> Warning</span>
-<span class="font-label">50-75</span>
-</div>
-<div class="flex items-center justify-between text-[11px]">
-<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-yellow-400 rounded-sm"></span> Watch</span>
-<span class="font-label">25-50</span>
-</div>
-<div class="flex items-center justify-between text-[11px]">
-<span class="flex items-center gap-2"><span class="w-2.5 h-2.5 bg-green-500 rounded-sm"></span> Safe</span>
-<span class="font-label">&lt; 25</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Detailed Summary Overlay -->
-<div class="absolute bottom-4 right-4 z-10 bg-primary-container text-white p-4 w-64 shadow-lg border border-primary">
-<h4 class="font-label text-[10px] uppercase font-bold mb-3 opacity-80 border-b border-white/20 pb-2">Risk Zone Summary</h4>
-<div class="space-y-2">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="opacity-70">Extreme Zone:</span>
-                        <span class="font-bold">{{ heatmap_zones.extreme_km2 }} km²</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="opacity-70">Severe Zone:</span>
-                        <span class="font-bold">{{ heatmap_zones.severe_km2 }} km²</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="opacity-70">Moderate Zone:</span>
-                        <span class="font-bold">{{ heatmap_zones.moderate_km2 }} km²</span>
-                    </div>
-                    <div class="flex justify-between items-center text-xs pt-1 border-t border-white/10 mt-1">
-                        <span class="opacity-70">Total Basin Area:</span>
-                        <span class="font-bold">{{ heatmap_zones.total_km2 }} km²</span>
-                    </div>
-</div>
-</div>
-</div>
+
+    <!-- Tile-unavailable toast -->
+    <div id="heatmap-tile-warning"
+      class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-surface-container-high text-on-surface-variant text-[11px] font-bold px-3 py-1.5 rounded-full border border-outline-variant flex items-center gap-1.5 shadow-md">
+      <span class="material-symbols-outlined text-sm">map</span>
+      Basemap unavailable — retrying.
+    </div>
+
+    <!-- Legend (top-left) -->
+    <div class="absolute top-3 left-3 z-10">
+      <div class="bg-surface/90 backdrop-blur-md rounded-xl border border-outline-variant shadow-lg p-3 w-44">
+        <p class="font-label text-[10px] uppercase font-bold text-on-surface-variant mb-2 tracking-widest">Risk Legend</p>
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-sm bg-red-600 shadow-sm"></span>
+              <span class="font-medium">Danger</span>
+            </span>
+            <span class="font-mono text-[10px] text-on-surface-variant">&gt; 75</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-sm bg-orange-500 shadow-sm"></span>
+              <span class="font-medium">Warning</span>
+            </span>
+            <span class="font-mono text-[10px] text-on-surface-variant">50–75</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-sm bg-yellow-400 shadow-sm"></span>
+              <span class="font-medium">Watch</span>
+            </span>
+            <span class="font-mono text-[10px] text-on-surface-variant">25–50</span>
+          </div>
+          <div class="flex items-center justify-between text-[11px]">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-sm bg-green-500 shadow-sm"></span>
+              <span class="font-medium">Safe</span>
+            </span>
+            <span class="font-mono text-[10px] text-on-surface-variant">&lt; 25</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Zone Summary (bottom-right) -->
+    <div class="absolute bottom-3 right-3 z-10 w-60">
+      <div class="bg-surface/90 backdrop-blur-md rounded-xl border border-outline-variant shadow-lg p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-label text-[10px] uppercase font-bold text-on-surface-variant tracking-widest">Zone Summary</p>
+          <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="layers">layers</span>
+        </div>
+        <div class="space-y-2.5">
+          <!-- Extreme -->
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-red-600 inline-block"></span> Extreme</span>
+              <span class="font-bold font-mono">{{ heatmap_zones.extreme_km2 }} km²</span>
+            </div>
+            <div class="h-1 rounded-full bg-surface-variant overflow-hidden">
+              <div class="h-full bg-red-500 rounded-full" style="width:{% widthratio heatmap_zones.extreme_km2 heatmap_zones.total_km2 100 %}%"></div>
+            </div>
+          </div>
+          <!-- Severe -->
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-orange-500 inline-block"></span> Severe</span>
+              <span class="font-bold font-mono">{{ heatmap_zones.severe_km2 }} km²</span>
+            </div>
+            <div class="h-1 rounded-full bg-surface-variant overflow-hidden">
+              <div class="h-full bg-orange-400 rounded-full" style="width:{% widthratio heatmap_zones.severe_km2 heatmap_zones.total_km2 100 %}%"></div>
+            </div>
+          </div>
+          <!-- Moderate -->
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-yellow-400 inline-block"></span> Moderate</span>
+              <span class="font-bold font-mono">{{ heatmap_zones.moderate_km2 }} km²</span>
+            </div>
+            <div class="h-1 rounded-full bg-surface-variant overflow-hidden">
+              <div class="h-full bg-yellow-400 rounded-full" style="width:{% widthratio heatmap_zones.moderate_km2 heatmap_zones.total_km2 100 %}%"></div>
+            </div>
+          </div>
+          <!-- Total -->
+          <div class="pt-2 border-t border-outline-variant/50 flex justify-between text-[11px]">
+            <span class="text-on-surface-variant">Total Basin</span>
+            <span class="font-bold font-mono">{{ heatmap_zones.total_km2 }} km²</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="flex items-center justify-between px-5 py-2 border-t border-outline-variant bg-surface-container-low text-[11px]">
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+      <span class="text-on-surface-variant font-medium">Heat Source:</span>
+      <span class="font-mono text-primary font-semibold">St. 1 Humide Inf (37.117°N, 9.318°E) &bull; St. 2 Sub-Humide (37.010°N, 9.731°E)</span>
+    </div>
+    <span id="heatmap-last-updated" class="font-mono text-on-surface-variant">—</span>
+  </div>
 </div>
 </div>
 <!-- SECTION 7: Active Alerts -->
@@ -514,52 +658,7 @@
 </div>
 </div>
 <!-- SECTION 6: Prediction Table -->
-<div class="mb-12">
-<h3 class="font-headline font-black text-lg uppercase tracking-widest mb-6 border-b-2 border-primary-container inline-block pb-1">Actionable Forecasts</h3>
-<div class="overflow-x-auto">
-<table class="w-full border-collapse bg-surface border border-outline-variant">
-<thead>
-<tr class="bg-surface-container font-label text-[10px] text-on-surface-variant uppercase tracking-tighter">
-<th class="p-4 text-left border-b border-outline-variant">Time Frame</th>
-<th class="p-4 text-left border-b border-outline-variant">Risk Level</th>
-<th class="p-4 text-left border-b border-outline-variant">Prediction</th>
-<th class="p-4 text-left border-b border-outline-variant">Recommended Action</th>
-<th class="p-4 text-right border-b border-outline-variant">Confidence</th>
-</tr>
-</thead>
-<tbody id="forecast-table-body" class="text-sm">
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-4 font-bold border-b border-outline-variant/30">Today</td>
-<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
-<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
-<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
-<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
-</tr>
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-4 font-bold border-b border-outline-variant/30">+7 Days</td>
-<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
-<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
-<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
-<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
-</tr>
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-4 font-bold border-b border-outline-variant/30">+14 Days</td>
-<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
-<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
-<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
-<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
-</tr>
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-4 font-bold border-b border-outline-variant/30">+30 Days</td>
-<td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded">—</span></td>
-<td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30">—</td>
-<td class="forecast-action p-4 border-b border-outline-variant/30 font-medium">—</td>
-<td class="forecast-conf p-4 text-right font-label text-xs font-bold border-b border-outline-variant/30">—</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<div class="mb-12"><div class="flex flex-wrap items-center justify-between gap-4 mb-4"><div class="flex items-center gap-3"><h3 class="font-headline font-black text-lg uppercase tracking-widest border-b-2 border-primary-container inline-block pb-1">Prévisions Actionnables &amp; Protocole de Réponse</h3><span class="text-xs font-label text-on-surface-variant px-2 py-0.5 bg-surface-container rounded border border-outline-variant">Scénario Standard Météo-Tunisie</span></div><div class="flex items-center gap-2"><button id="btn-export-analysis-report" class="px-3 py-1.5 bg-surface border border-outline-variant text-on-surface text-xs font-medium rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">sim_card_download</span> Exporter GeoJSON / CSV</button><button onclick="alert('Protocole activé : Message SMS de vigilance transmis aux exploitants et au CRDA.')" class="px-3 py-1.5 bg-primary text-white text-xs font-bold rounded hover:bg-primary-container transition-colors flex items-center gap-1.5 shadow-sm"><span class="material-symbols-outlined text-sm">send</span> Déclencher Alerte SMS Agriculteurs</button></div></div><div class="overflow-x-auto shadow-sm rounded border border-outline-variant"><table class="w-full border-collapse bg-surface text-left"><thead><tr class="bg-surface-container font-label text-[10px] text-on-surface-variant uppercase tracking-tighter"><th class="p-4 border-b border-outline-variant">Horizon Temporel</th><th class="p-4 border-b border-outline-variant">Niveau de Risque DRI</th><th class="p-4 border-b border-outline-variant">Impact Hydro-Agricole Modélisé</th><th class="p-4 border-b border-outline-variant">Mesure Opérationnelle Recommandée</th><th class="p-4 text-center border-b border-outline-variant">Fiabilité</th><th class="p-4 text-right border-b border-outline-variant">Action Immédiate</th></tr></thead><tbody id="forecast-table-body" class="text-sm"><tr class="hover:bg-surface-container-low transition-colors"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Aujourd'hui (J+0)</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase border border-yellow-200 rounded">Vigilance (34)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Stress mineur des couches racinaires superficielles (0-20 cm). Nappe stable.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-medium text-xs">Maintien du calendrier d'arrosage standard et calibration des sondes tensiométriques.</td><td class="forecast-conf p-4 text-center font-label text-xs text-secondary font-bold border-b border-outline-variant/30">98%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="text-[11px] font-label uppercase font-bold text-outline hover:text-primary transition-colors">Surveiller</button></td></tr><tr class="hover:bg-surface-container-low transition-colors bg-orange-50/20"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-500"></span> À +7 Jours</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-bold uppercase border border-orange-200 rounded">Sévère (52)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Déficit hydrique généralisé sur Tinja &amp; Mateur. Assèchement du lit mineur des oueds.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-medium text-xs text-orange-900">Restriction immédiate de l'irrigation pour les cultures secondaires non vivrières.</td><td class="forecast-conf p-4 text-center font-label text-xs text-secondary font-bold border-b border-outline-variant/30">85%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="px-2.5 py-1 bg-orange-100 text-orange-900 hover:bg-orange-200 rounded text-[10px] font-bold uppercase font-label transition-colors">Simuler Quotas</button></td></tr><tr class="hover:bg-surface-container-low transition-colors"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-600"></span> À +14 Jours</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-orange-200 text-orange-900 text-[10px] font-bold uppercase border border-orange-300 rounded">Sévère Élevé (68)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Point de flétrissement permanent atteint pour les céréales d'hiver non irriguées.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-medium text-xs text-orange-900">Activation de la réserve auxiliaire des barrages Joumine &amp; Ghezala.</td><td class="forecast-conf p-4 text-center font-label text-xs text-secondary font-bold border-b border-outline-variant/30">72%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="px-2.5 py-1 bg-surface border border-outline-variant text-on-surface hover:bg-surface-variant rounded text-[10px] font-bold uppercase font-label transition-colors">Pré-Alerte CRDA</button></td></tr><tr class="hover:bg-surface-container-low transition-colors bg-red-50/30"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-error"></span> À +30 Jours</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-bold uppercase border border-red-200 rounded font-bold">Extrême (78)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Risque élevé de sur-salinisation du lac Ichkeul et rupture d'approvisionnement agro-pastoral.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-bold text-xs text-error">Déclaration officielle de l'état de calamité sécheresse &amp; moratoire sur les forages illicites.</td><td class="forecast-conf p-4 text-center font-label text-xs text-on-surface-variant font-bold border-b border-outline-variant/30">60%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="px-2.5 py-1 bg-error text-white hover:bg-red-700 rounded text-[10px] font-bold uppercase font-label transition-colors shadow-sm">Plan de Crise</button></td></tr></tbody></table></div></div>
 
 <!-- Full-width Bottom Panel: Strategic Partners -->
 <div class="col-span-12 bg-surface-container-low border border-outline-variant rounded-lg p-6 shadow-sm mt-2">
@@ -584,8 +683,9 @@
 </div>
 </main>
 </div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'dashboard/vendor/leaflet-heat/leaflet-heat.js' %}"></script>
+<script src="{% static 'dashboard/js/map-tiles.js' %}"></script>
 <script>
 // ── Helpers ──────────────────────────────────────────────────────
 function riskLabel(score) {
@@ -604,93 +704,363 @@ function riskColor(score) {
 }
 function riskBadgeHTML(score) {
     const info = riskLabel(score);
-    return '<span class="px-2 py-0.5 text-[10px] font-bold uppercase border rounded '+info.cls+'">'+info.text+'</span>';
+    return '<span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded '+info.cls+'">'+info.text+'</span>';
 }
 function recommendationFor(score) {
-    if (score === null) return 'No data.';
-    if (score < 25) return 'Maintain standard monitoring.';
-    if (score < 50) return 'Increase irrigation monitoring.';
-    if (score < 75) return 'Prioritize irrigation and reduce plant stress.';
-    return 'Activate emergency water management protocols.';
+    if (score === null) return 'Données non disponibles.';
+    if (score < 25) return "Maintien du calendrier d'arrosage standard et calibration des sondes tensiométriques.";
+    if (score < 50) return "Maintien du calendrier d'arrosage standard et calibration des sondes tensiométriques.";
+    if (score < 75) return "Restriction immédiate de l'irrigation pour les cultures secondaires non vivrières.";
+    return "Déclaration officielle de l'état de calamité sécheresse & moratoire sur les forages illicites.";
 }
 function predictionText(score) {
-    if (score === null) return 'No data.';
-    if (score < 25) return 'Minor stress in shallow root systems.';
-    if (score < 50) return 'Water balance deficit expected to widen.';
-    if (score < 75) return 'Extreme wilting point reached for cereals.';
-    return 'Widespread ecosystem desiccation risks.';
+    if (score === null) return 'Données non disponibles.';
+    if (score < 25) return 'Stress mineur des couches racinaires superficielles (0-20 cm). Nappe stable.';
+    if (score < 50) return 'Stress mineur des couches racinaires superficielles (0-20 cm). Nappe stable.';
+    if (score < 75) return 'Déficit hydrique généralisé sur Tinja & Mateur. Assèchement du lit mineur des oueds.';
+    return "Risque élevé de sur-salinisation du lac Ichkeul et rupture d'approvisionnement agro-pastoral.";
 }
 function confidenceFor(days) {
     return Math.round(100 - days * 1.2) + '%';
 }
 
 // ── Build heatmap ────────────────────────────────────────────────
-function buildHeatmap(riskToday) {
+function buildHeatmap(riskToday, stationsData) {
     const container = document.getElementById('ichkeul-heatmap');
     if (!container || typeof L === 'undefined') return;
     // Destroy existing map instance if any
     if (window._heatmap) { window._heatmap.remove(); window._heatmap = null; }
 
-    const map = L.map(container, { zoomControl: false, scrollWheelZoom: false, attributionControl: false }).setView([37.17, 9.62], 11);
+    const stations = (stationsData && stationsData.length)
+        ? stationsData
+        : (window._stationsData && window._stationsData.length ? window._stationsData : [
+            {
+                name: 'v8 st humide inf',
+                label: 'Station Humide Inférieure',
+                lat: 37.117,
+                lon: 9.318,
+                rain_mm: 28.0,
+                temp_c: 11.1,
+                humidity: 90,
+                spei: -0.12,
+                severity: 'Normal / Mild',
+                risk_score: 52
+            },
+            {
+                name: 'v8 st sub humide',
+                label: 'Station Sub-Humide',
+                lat: 37.010,
+                lon: 9.731,
+                rain_mm: 31.6,
+                temp_c: 11.1,
+                humidity: 86,
+                spei: -0.55,
+                severity: 'Abnormally Dry',
+                risk_score: 61
+            }
+        ]);
+
+    let centerLat = 37.0635, centerLon = 9.5245;
+    if (stations.length >= 2) {
+        centerLat = (stations[0].lat + stations[1].lat) / 2;
+        centerLon = (stations[0].lon + stations[1].lon) / 2;
+    } else if (stations.length === 1) {
+        centerLat = stations[0].lat;
+        centerLon = stations[0].lon;
+    }
+
+    const map = L.map(container, {
+        zoomControl: false,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
+        touchZoom: true,
+        attributionControl: false
+    }).setView([centerLat, centerLon], 11);
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
     window._heatmap = map;
     map.createPane('heatPane'); map.getPane('heatPane').style.zIndex = '300';
     map.createPane('outlinePane'); map.getPane('outlinePane').style.zIndex = '400';
-    var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ maxZoom: 18 }).addTo(map);
+    map.createPane('stationPane'); map.getPane('stationPane').style.zIndex = '450';
+
+    var tileWarning = document.getElementById('heatmap-tile-warning');
+    var currentVariant = 'satellite';
+
+    function makeTileLayer(variant) {
+        if (!window.MapTiles) {
+            return L.tileLayer('/api/tiles/{z}/{x}/{y}.png?layer=' + (variant || 'map'), {
+                maxZoom: 18,
+                attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+            });
+        }
+        return window.MapTiles.createTileLayer(L, map, {
+            variant: variant,
+            maxZoom: 18,
+            onSourceChange: function (state) {
+                if (!tileWarning) return;
+                tileWarning.classList.toggle('hidden', state !== 'retrying');
+            }
+        });
+    }
+
+    var tileLayer = makeTileLayer('satellite').addTo(map);
     window._heatmapTileLayer = tileLayer;
 
-    const basinBounds = L.latLngBounds([[37.06, 9.44], [37.28, 9.80]]);
-
-    // Build a risk matrix that reflects the actual score
-    const rows = 6, cols = 8;
-    const base = riskToday || 50;
-    const matrix = [];
-    for (let r = 0; r < rows; r++) {
-        const row = [];
-        for (let c = 0; c < cols; c++) {
-            let val = base + (rows - r) * 3 + c * 2 + (Math.random() - 0.5) * 20;
-            row.push(Math.max(5, Math.min(100, Math.round(val))));
+    // ── Layer toggle buttons ──────────────────────────────────────
+    function setActiveLayer(variant) {
+        if (currentVariant === variant) return;
+        currentVariant = variant;
+        if (window._heatmapTileLayer) {
+            map.removeLayer(window._heatmapTileLayer);
         }
-        matrix.push(row);
+        window._heatmapTileLayer = makeTileLayer(variant).addTo(map);
+        ['satellite-btn', 'topography-btn'].forEach(function(id) {
+            var btn = document.getElementById(id);
+            if (!btn) return;
+            var isActive = (id === variant + '-btn');
+            btn.className = 'layer-btn px-3 py-1 text-xs font-bold uppercase '
+                + (isActive
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-variant text-on-surface-variant');
+        });
     }
 
-    const latStep = (basinBounds.getNorth() - basinBounds.getSouth()) / rows;
-    const lngStep = (basinBounds.getEast() - basinBounds.getWest()) / cols;
+    var satBtn = document.getElementById('satellite-btn');
+    var topoBtn = document.getElementById('topography-btn');
+    if (satBtn) satBtn.onclick = function() { setActiveLayer('satellite'); };
+    if (topoBtn) topoBtn.onclick = function() { setActiveLayer('topo'); };
+
+    // ── Generate Heat Points Originating from Station Coordinates ──
     const heatPoints = [];
-    const block = 2;
-    for (let r = 0; r < rows; r += block) {
-        for (let c = 0; c < cols; c += block) {
-            let sumLat = 0, sumLng = 0, sumRisk = 0, count = 0;
-            for (let br = 0; br < block; br++) {
-                for (let bc = 0; bc < block; bc++) {
-                    const rr = r + br, cc = c + bc;
-                    if (rr >= rows || cc >= cols) continue;
-                    const south = basinBounds.getSouth() + (rows - rr - 1) * latStep;
-                    const north = south + latStep;
-                    const west = basinBounds.getWest() + cc * lngStep;
-                    const east = west + lngStep;
-                    sumLat += (south + north) / 2;
-                    sumLng += (west + east) / 2;
-                    sumRisk += matrix[rr][cc];
-                    count++;
+
+    stations.forEach(st => {
+        const stRisk = (st.risk_score !== undefined && st.risk_score !== null) ? st.risk_score : (riskToday || 50);
+        const coreIntensity = Math.max(0.20, Math.min(1.0, stRisk / 100));
+
+        // Concentric emitter rings radiating outward from the exact station coordinates
+        const rings = [
+            { r: 0.000, count: 1, mult: 1.0 },
+            { r: 0.007, count: 6, mult: 0.95 },
+            { r: 0.015, count: 10, mult: 0.88 },
+            { r: 0.026, count: 14, mult: 0.78 },
+            { r: 0.040, count: 18, mult: 0.65 },
+            { r: 0.058, count: 22, mult: 0.50 },
+            { r: 0.078, count: 26, mult: 0.35 },
+            { r: 0.105, count: 30, mult: 0.22 },
+            { r: 0.135, count: 32, mult: 0.12 },
+        ];
+
+        rings.forEach(ring => {
+            if (ring.r === 0) {
+                heatPoints.push([st.lat, st.lon, coreIntensity]);
+            } else {
+                for (let i = 0; i < ring.count; i++) {
+                    const angle = (i / ring.count) * Math.PI * 2;
+                    const pLat = st.lat + Math.sin(angle) * ring.r * 0.82;
+                    const pLon = st.lon + Math.cos(angle) * ring.r;
+                    heatPoints.push([pLat, pLon, Math.max(0.04, coreIntensity * ring.mult)]);
                 }
             }
-            if (!count) continue;
-            const avgLat = sumLat / count, avgLng = sumLng / count, avgRisk = sumRisk / count;
-            const norm = Math.max(0.02, Math.min(1.0, avgRisk / 100));
-            heatPoints.push([avgLat, avgLng, norm]);
-            heatPoints.push([avgLat + (Math.random() - 0.5) * latStep * 0.7, avgLng + (Math.random() - 0.5) * lngStep * 0.7, Math.max(0.08, norm * 0.78)]);
-            if (avgRisk > 60) heatPoints.push([avgLat + (Math.random() - 0.5) * latStep * 1.4, avgLng + (Math.random() - 0.5) * lngStep * 1.4, Math.max(0.1, norm * 0.9)]);
+        });
+    });
+
+    // Inverse Distance Weighting (IDW) interpolation between the station origins across the basin
+    if (stations.length >= 2) {
+        const s1 = stations[0];
+        const s2 = stations[1];
+        const r1 = ((s1.risk_score !== undefined ? s1.risk_score : riskToday) || 50) / 100;
+        const r2 = ((s2.risk_score !== undefined ? s2.risk_score : riskToday) || 50) / 100;
+
+        const minLat = Math.min(s1.lat, s2.lat) - 0.08;
+        const maxLat = Math.max(s1.lat, s2.lat) + 0.08;
+        const minLon = Math.min(s1.lon, s2.lon) - 0.08;
+        const maxLon = Math.max(s1.lon, s2.lon) + 0.08;
+
+        const gridSteps = 26;
+        const latDelta = (maxLat - minLat) / gridSteps;
+        const lonDelta = (maxLon - minLon) / gridSteps;
+
+        for (let i = 0; i <= gridSteps; i++) {
+            const gLat = minLat + i * latDelta;
+            for (let j = 0; j <= gridSteps; j++) {
+                const gLon = minLon + j * lonDelta;
+
+                const d1 = Math.hypot((gLat - s1.lat) * 1.15, gLon - s1.lon);
+                const d2 = Math.hypot((gLat - s2.lat) * 1.15, gLon - s2.lon);
+
+                const w1 = 1 / (Math.pow(d1, 2) + 0.0008);
+                const w2 = 1 / (Math.pow(d2, 2) + 0.0008);
+                const interpRisk = (w1 * r1 + w2 * r2) / (w1 + w2);
+
+                const minDist = Math.min(d1, d2);
+                if (minDist < 0.22) {
+                    const falloff = Math.exp(-Math.pow(minDist / 0.12, 2));
+                    const val = interpRisk * (0.35 + 0.65 * falloff);
+                    heatPoints.push([gLat, gLon, Math.max(0.05, Math.min(1.0, val))]);
+                }
+            }
         }
     }
 
+    // Add Heat Layer to map
     L.heatLayer(heatPoints, {
-        pane: 'heatPane', radius: 64, blur: 48, maxZoom: 13, minOpacity: 0.28,
-        gradient: { 0.00: '#22c55e', 0.249: '#22c55e', 0.25: '#f59e0b', 0.499: '#f59e0b', 0.50: '#f97316', 0.749: '#f97316', 0.75: '#dc2626', 1.00: '#7f1d1d' }
+        pane: 'heatPane',
+        radius: 52,
+        blur: 38,
+        maxZoom: 14,
+        minOpacity: 0.25,
+        gradient: {
+            0.00: '#10b981', // Safe / Optimal
+            0.25: '#10b981',
+            0.26: '#eab308', // Watch / Marginal
+            0.50: '#eab308',
+            0.51: '#f97316', // Warning / Severe
+            0.75: '#f97316',
+            0.76: '#ef4444', // Danger / Extreme
+            1.00: '#991b1b'
+        }
     }).addTo(map);
 
-    L.polygon([[37.08,9.50],[37.12,9.68],[37.22,9.75],[37.26,9.61],[37.20,9.46]], { pane:'outlinePane', color:'#0f766e', weight:0, fill:false }).addTo(map);
-    L.circleMarker([37.17,9.60],{ pane:'outlinePane', radius:7, color:'#ffffff', weight:0, fillColor:'#1b4332', fillOpacity:1 }).addTo(map);
-    setTimeout(() => map.invalidateSize(), 0);
+    // ── Station Markers & Visual Badges ──
+    const stationGroup = L.featureGroup();
+    stations.forEach(st => {
+        const riskVal = (st.risk_score !== undefined && st.risk_score !== null) ? st.risk_score : (riskToday || 50);
+        let badgeColor = '#10b981';
+        let badgeBg = 'rgba(16, 185, 129, 0.2)';
+        let badgeText = 'Safe';
+        if (riskVal >= 75) { badgeColor = '#ef4444'; badgeBg = 'rgba(239, 68, 68, 0.25)'; badgeText = 'Danger'; }
+        else if (riskVal >= 50) { badgeColor = '#f97316'; badgeBg = 'rgba(249, 115, 22, 0.25)'; badgeText = 'Warning'; }
+        else if (riskVal >= 25) { badgeColor = '#eab308'; badgeBg = 'rgba(234, 179, 8, 0.25)'; badgeText = 'Watch'; }
+
+        const iconHtml = `
+            <div class="station-marker-container">
+                <span class="station-radar-ripple" style="border-color:${badgeColor};"></span>
+                <div class="station-marker-badge" style="background:${badgeColor};" title="${st.label}">
+                    <span class="material-symbols-outlined" style="font-size:13px; line-height:1;">sensors</span>
+                </div>
+            </div>
+        `;
+
+        const stIcon = L.divIcon({
+            html: iconHtml,
+            className: 'custom-station-icon',
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+            popupAnchor: [0, -15]
+        });
+
+        const popupContent = `
+            <div style="min-width:245px; font-family:Inter,sans-serif; color:#0f172a;" class="p-1.5">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                    <div>
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full" style="background:${badgeColor}"></span>
+                            Database Station Origin
+                        </div>
+                        <div class="font-bold text-sm text-slate-900">${st.label}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold" style="background:${badgeBg}; color:${badgeColor};">
+                        Risk ${riskVal}
+                    </span>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between py-0.5 border-b border-slate-100">
+                        <span class="text-slate-500 font-medium">📍 Coordinates:</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.lat).toFixed(4)}°N, ${Number(st.lon).toFixed(4)}°E</span>
+                    </div>
+                    ${st.rain_mm !== null && st.rain_mm !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">🌧️ Precipitation:</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.rain_mm).toFixed(1)} mm</span>
+                    </div>` : ''}
+                    ${st.temp_c !== null && st.temp_c !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">🌡️ Temperature:</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.temp_c).toFixed(1)} °C</span>
+                    </div>` : ''}
+                    ${st.humidity !== null && st.humidity !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">💧 Humidity:</span>
+                        <span class="font-mono font-bold text-slate-800">${st.humidity}%</span>
+                    </div>` : ''}
+                    ${st.spei !== null && st.spei !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">📊 SPEI-3:</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.spei).toFixed(2)}</span>
+                    </div>` : ''}
+                    ${st.date ? `
+                    <div class="flex justify-between pt-1 border-t border-slate-100 text-[10px] text-slate-400">
+                        <span>Database Reading:</span>
+                        <span class="font-mono">${st.date}</span>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        const tooltipHtml = `
+            <div style="font-family:Inter,sans-serif;">
+                <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${badgeColor};"></span>
+                    <b style="font-size:11px; color:#f8fafc;">${st.label}</b>
+                </div>
+                <div style="font-family:monospace; font-size:10px; color:#94a3b8;">${Number(st.lat).toFixed(4)}°N, ${Number(st.lon).toFixed(4)}°E</div>
+                <div style="font-size:10px; margin-top:2px; font-weight:600; color:${badgeColor};">Heat Origin &bull; Risk: ${riskVal}</div>
+            </div>
+        `;
+
+        const marker = L.marker([st.lat, st.lon], { icon: stIcon, pane: 'stationPane' })
+            .bindTooltip(tooltipHtml, {
+                direction: 'top',
+                offset: [0, -15],
+                className: 'station-tooltip-smooth',
+                opacity: 0.95
+            })
+            .bindPopup(popupContent, { maxWidth: 300 })
+            .addTo(map);
+
+        stationGroup.addLayer(marker);
+    });
+
+    // Baseline connecting the two stations showing monitoring corridor
+    if (stations.length >= 2) {
+        L.polyline([[stations[0].lat, stations[0].lon], [stations[1].lat, stations[1].lon]], {
+            pane: 'outlinePane',
+            color: '#0284c7',
+            weight: 2,
+            dashArray: '6, 8',
+            opacity: 0.85
+        }).bindTooltip('Monitoring Baseline · Heat radiates from these station coordinates', { direction: 'center', permanent: false }).addTo(map);
+    }
+
+    // Ichkeul Lake boundary for geographic context
+    L.polygon([[37.08,9.50],[37.12,9.68],[37.22,9.75],[37.26,9.61],[37.20,9.46]], {
+        pane: 'outlinePane',
+        color: '#0f766e',
+        weight: 1.5,
+        fill: false,
+        dashArray: '4, 4',
+        opacity: 0.7
+    }).addTo(map);
+
+    L.circleMarker([37.17, 9.60], { pane: 'outlinePane', radius: 6, color: '#ffffff', weight: 2, fillColor: '#0f766e', fillOpacity: 0.9 })
+      .bindTooltip('Ichkeul Lake', { permanent: false, direction: 'top', className: 'leaflet-tooltip-custom' })
+      .addTo(map);
+
+    // Fit map bounds comfortably
+    if (stations.length >= 2) {
+        const b = L.latLngBounds([
+            [Math.min(stations[0].lat, stations[1].lat, 37.06) - 0.04, Math.min(stations[0].lon, stations[1].lon, 9.30) - 0.04],
+            [Math.max(stations[0].lat, stations[1].lat, 37.26) + 0.04, Math.max(stations[0].lon, stations[1].lon, 9.75) + 0.04]
+        ]);
+        map.fitBounds(b, { padding: [25, 25] });
+    }
+
+    setTimeout(() => map.invalidateSize(), 150);
+
+    var tsEl = document.getElementById('heatmap-last-updated');
+    if (tsEl) {
+        var now = new Date();
+        tsEl.textContent = 'Updated ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + stations.length + ' Stations)';
+    }
 }
 
 // ── Main update function ─────────────────────────────────────────
@@ -828,8 +1198,11 @@ function updateDashboard(data) {
         trendEl.textContent = dir + ' risk (' + (delta >= 0 ? '+' : '') + delta + ' points in 7 days)';
     }
 
-    // Heatmap
-    buildHeatmap(rs.today);
+    // Heatmap (originating from station coordinates)
+    if (p.stations && p.stations.length) {
+        window._stationsData = p.stations;
+    }
+    buildHeatmap(rs.today, window._stationsData);
 
     // Log source
     console.log('Prediction source:', data.source, data.prediction_id || '');
@@ -868,6 +1241,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var yearMap = {{ year_map_json|safe }};
     var defaultRegionId = {{ default_region_id }};
     var defaultYearId = {{ default_year_id }};
+    window._stationsData = {{ stations_json|safe }};
 
     // Default fetch
     fetchPrediction(defaultRegionId, defaultYearId, false);
@@ -893,23 +1267,28 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.className = btn.className.replace(/bg-surface-variant/g, 'bg-primary'); btn.className = btn.className.replace(/text-on-surface-variant/g, 'text-white');
         }
         function getTiles() { return window._heatmapTileLayer; }
-        satBtn.addEventListener('click', function() {
+        function setStyle(variant) {
             var t = getTiles(); if (!t) return;
-            t.setUrl('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+            /* setVariant keeps the proxy + its own fallback chain; the URL form
+               is only used when the helper is unavailable, and stays
+               same-origin there too. */
+            if (typeof t.setVariant === 'function') t.setVariant(variant);
+            else t.setUrl('/api/tiles/{z}/{x}/{y}.png?layer=' + variant);
+        }
+        satBtn.addEventListener('click', function() {
+            setStyle('satellite');
             setActive(satBtn);
         });
         topoBtn.addEventListener('click', function() {
-            var t = getTiles(); if (!t) return;
-            t.setUrl('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png');
+            setStyle('terrain');
             setActive(topoBtn);
         });
-        // Reset to OSM on region/year change (heatmap rebuild)
+        // Reset to the satellite view on region/year change (heatmap rebuild)
         var origBuild = window.buildHeatmap;
-        window.buildHeatmap = function(risk) {
-            var t = getTiles();
-            if (t) t.setUrl('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        window.buildHeatmap = function(risk, st) {
+            setStyle('satellite');
             setActive(satBtn);
-            origBuild(risk);
+            origBuild(risk, st || window._stationsData);
         };
     }
 
@@ -1008,5 +1387,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
-</script>
-</body></html>
+  </script>
+  {% include "dashboard/_agroai_chat.html" %}
+  </body></html>
+

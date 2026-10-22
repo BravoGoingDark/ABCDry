@@ -1,0 +1,156 @@
+{
+  "region_id": 4,
+  "region_name": "Ichkeul",
+  "mode": "quantile_p25",
+  "nmonth": 3,
+  "trained_at": "2026-09-17T09:03:49.274185Z",
+  "rows": 720,
+  "date_range": [
+    "1996-01",
+    "2025-12"
+  ],
+  "targets": {
+    "spei_t1": {
+      "mae": 0.5269,
+      "rmse": 0.723,
+      "r2": 0.5616,
+      "n_train": 521,
+      "n_test": 131,
+      "top_features": [
+        [
+          "spei_current",
+          0.1001460924744606
+        ],
+        [
+          "temperature_mean_c_t1",
+          0.058333221822977066
+        ],
+        [
+          "rainfall_mm_t2",
+          0.05656888708472252
+        ],
+        [
+          "season",
+          0.056516487151384354
+        ],
+        [
+          "et0_mm_day_t2",
+          0.05368029326200485
+        ],
+        [
+          "relative_humidity_percent",
+          0.05217202380299568
+        ],
+        [
+          "rainfall_mm_t1",
+          0.05198424682021141
+        ],
+        [
+          "temperature_max_c",
+          0.051769573241472244
+        ],
+        [
+          "temperature_mean_c_t3",
+          0.051060955971479416
+        ],
+        [
+          "rainfall_mm",
+          0.04752745106816292
+        ]
+      ],
+      "feature_cols": [
+        "rainfall_mm",
+        "et0_mm_day",
+        "temperature_mean_c",
+        "temperature_max_c",
+        "temperature_min_c",
+        "relative_humidity_percent",
+        "wind_speed_ms",
+        "solar_radiation_mjm2day",
+        "month",
+        "season",
+        "spei_current",
+        "rainfall_mm_t1",
+        "rainfall_mm_t2",
+        "rainfall_mm_t3",
+        "et0_mm_day_t1",
+        "et0_mm_day_t2",
+        "et0_mm_day_t3",
+        "temperature_mean_c_t1",
+        "temperature_mean_c_t2",
+        "temperature_mean_c_t3"
+      ]
+    },
+    "spei_t3": {
+      "mae": 0.7686,
+      "rmse": 0.9903,
+      "r2": 0.0998,
+      "n_train": 519,
+      "n_test": 130,
+      "top_features": [
+        [
+          "season",
+          0.06157686933875084
+        ],
+        [
+          "temperature_mean_c_t1",
+          0.05673206225037575
+        ],
+        [
+          "et0_mm_day_t1",
+          0.05501769855618477
+        ],
+        [
+          "temperature_min_c",
+          0.05326332151889801
+        ],
+        [
+          "temperature_mean_c_t2",
+          0.05299510061740875
+        ],
+        [
+          "temperature_mean_c",
+          0.052549246698617935
+        ],
+        [
+          "temperature_max_c",
+          0.05204620212316513
+        ],
+        [
+          "et0_mm_day_t2",
+          0.051672082394361496
+        ],
+        [
+          "spei_current",
+          0.05155434459447861
+        ],
+        [
+          "solar_radiation_mjm2day",
+          0.05152183771133423
+        ]
+      ],
+      "feature_cols": [
+        "rainfall_mm",
+        "et0_mm_day",
+        "temperature_mean_c",
+        "temperature_max_c",
+        "temperature_min_c",
+        "relative_humidity_percent",
+        "wind_speed_ms",
+        "solar_radiation_mjm2day",
+        "month",
+        "season",
+        "spei_current",
+        "rainfall_mm_t1",
+        "rainfall_mm_t2",
+        "rainfall_mm_t3",
+        "et0_mm_day_t1",
+        "et0_mm_day_t2",
+        "et0_mm_day_t3",
+        "temperature_mean_c_t1",
+        "temperature_mean_c_t2",
+        "temperature_mean_c_t3"
+      ]
+    }
+  }
+}

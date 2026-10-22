@@ -34,10 +34,23 @@ class RiskSimulationForm(forms.Form):
         self.fields["crop"].queryset = CropType.objects.order_by("name")
         self.fields["irrigation"].queryset = IrrigationMethod.objects.order_by("name")
         if not self.is_bound:
-            default_region = Region.objects.filter(name="Bizerte").first()
+            default_region = (
+                Region.objects.filter(name__iexact="Ichkeul").first()
+                or Region.objects.filter(name__iexact="Bizerte").first()
+                or Region.objects.filter(climate_metrics__isnull=False).first()
+                or Region.objects.filter(drought_indices__isnull=False).first()
+                or Region.objects.filter(remote_sensing__isnull=False).first()
+                or Region.objects.order_by("name").first()
+            )
             if default_region:
                 self.fields["region"].initial = default_region.pk
-            current_year = ObservationYear.objects.filter(label=str(date.today().year)).first()
+            current_year = (
+                ObservationYear.objects.filter(label=str(date.today().year)).first()
+                or ObservationYear.objects.filter(climatemetrics__isnull=False).order_by('-label').first()
+                or ObservationYear.objects.filter(droughtindices__isnull=False).order_by('-label').first()
+                or ObservationYear.objects.filter(remotesensingmetrics__isnull=False).order_by('-label').first()
+                or ObservationYear.objects.order_by('-label').first()
+            )
             if current_year:
                 self.fields["year"].initial = current_year.pk
 
@@ -213,6 +226,18 @@ class ExcelImportForm(forms.Form):
         label='Metric Type',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    region = forms.ModelChoiceField(
+        queryset=None,
+        required=False,
+        label='Region',
+        help_text='Optional. If the file has no "region" column, this region is used for all rows.',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from .models import Region
+        self.fields['region'].queryset = Region.objects.all()
     
     def clean_excel_file(self):
         excel_file = self.cleaned_data['excel_file']

@@ -8,8 +8,8 @@
     
     <!-- Styling Frameworks & Leaflet Stylesheets -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css"/>
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet-draw/leaflet.draw.css' %}"/>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
@@ -17,6 +17,69 @@
     
     <!-- Custom Style Sheet (Organized CSS Separated from HTML) -->
     <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}"/>
+    <style>
+        .custom-station-icon {
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer;
+        }
+        .station-marker-container {
+            position: relative;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .station-marker-badge {
+            position: relative;
+            z-index: 10;
+            width: 22px;
+            height: 22px;
+            border-radius: 9999px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+        .custom-station-icon:hover .station-marker-badge {
+            transform: scale(1.22);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+        }
+        .station-radar-ripple {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 9999px;
+            border: 1.5px solid;
+            animation: stationPulse 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        @keyframes stationPulse {
+            0% { transform: scale(0.5); opacity: 0.9; }
+            100% { transform: scale(2.0); opacity: 0; }
+        }
+        .leaflet-tooltip.station-tooltip-smooth {
+            background: rgba(15, 23, 42, 0.92) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #f8fafc !important;
+            border-radius: 8px !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+            pointer-events: none !important;
+        }
+        .leaflet-tooltip.station-tooltip-smooth:before {
+            border-top-color: rgba(15, 23, 42, 0.92) !important;
+        }
+    </style>
 
     <!-- Tailwind Styling Settings -->
     <script id="tailwind-config">
@@ -124,6 +187,7 @@
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:data_ingestion' %}">{% trans "Data" %}</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:analysis' %}">{% trans "Analysis" %}</a>
                 <a class="text-on-surface-variant dark:text-surface-variant hover:text-primary hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70 font-medium" href="{% url 'dashboard:historical' %}">{% trans "Historical" %}</a>
+
 
             </nav>
         </div>
@@ -358,7 +422,7 @@
                 <div class="absolute top-4 right-4 z-[1200] bg-surface-container-lowest p-2 rounded-DEFAULT border border-outline-variant shadow-sm flex items-center gap-3 map-overlay-panel">
                     <span class="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">{% trans "Water Heat Map" %}</span>
                     <label class="relative inline-flex items-center cursor-pointer">
-                        <input checked="" class="sr-only peer" type="checkbox" value=""/>
+                        <input id="toggle-water-heatmap" checked="" class="sr-only peer" type="checkbox" value=""/>
                         <div class="w-9 h-5 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-secondary"></div>
                     </label>
                 </div>
@@ -382,6 +446,12 @@
                             {% trans "Clear ruler" %}
                         </button>
                     </div>
+                </div>
+                
+                <!-- Quiet notice shown while the map is retrying its tiles -->
+                <div id="map-tile-warning" class="hidden absolute bottom-14 left-1/2 -translate-x-1/2 z-[1300] bg-surface-container-high text-on-surface-variant text-[11px] font-semibold px-3 py-1.5 rounded-DEFAULT border border-outline-variant flex items-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-sm">map</span>
+                    {% trans "Basemap unavailable — retrying." %}
                 </div>
                 
                 <!-- Map DOM element placeholder for Leaflet initialize -->
@@ -420,15 +490,18 @@
                             
                             <!-- Dynamic Indicator Needle -->
                             {% if result %}
-                                {% if "High" in result.risk_level or "élevé" in result.risk_level %}
-                                    <!-- High Risk (Points Red / Right) -->
+                                {% if result.risk_band == "high" %}
+                                    <!-- Severe / Extreme (Points Red / Right) -->
                                     <line stroke="#151c27" stroke-linecap="round" stroke-width="3" x1="50" x2="75" y1="50" y2="25"></line>
-                                {% elif "Moderate" in result.risk_level or "Modéré" in result.risk_level %}
-                                    <!-- Moderate Risk (Points Orange / Up-Right) -->
+                                {% elif result.risk_band == "moderate" %}
+                                    <!-- Moderate (Points Orange / Up-Right) -->
                                     <line stroke="#151c27" stroke-linecap="round" stroke-width="3" x1="50" x2="60" y1="50" y2="12"></line>
-                                {% else %}
-                                    <!-- Low Risk (Points Green / Left) -->
+                                {% elif result.risk_band == "low" %}
+                                    <!-- Normal / Mild (Points Green / Left) -->
                                     <line stroke="#151c27" stroke-linecap="round" stroke-width="3" x1="50" x2="25" y1="50" y2="25"></line>
+                                {% else %}
+                                    <!-- Unknown / stale data: needle straight down, no reassurance -->
+                                    <line stroke="#6b7280" stroke-linecap="round" stroke-width="3" x1="50" x2="50" y1="50" y2="18"></line>
                                 {% endif %}
                             {% else %}
                                 <!-- Default needle pointing High Risk -->
@@ -436,17 +509,36 @@
                             {% endif %}
                         </svg>
                     </div>
-                    
+
                     <div class="flex flex-col">
-                        <span class="text-2xl font-bold font-headline {% if result %}{% if 'High' in result.risk_level or 'élevé' in result.risk_level %}text-error{% elif 'Moderate' in result.risk_level or 'Modéré' in result.risk_level %}text-orange-500{% else %}text-green-500{% endif %}{% else %}text-error{% endif %} tracking-tight">
+                        <span class="text-2xl font-bold font-headline {% if result %}{% if result.risk_band == "high" %}text-error{% elif result.risk_band == "moderate" %}text-orange-500{% elif result.risk_band == "low" %}text-green-500{% else %}text-on-surface-variant{% endif %}{% else %}text-error{% endif %} tracking-tight">
                             {{ result.risk_level|default:demo_risk_banner.level }}
                         </span>
                         <span class="text-xs text-on-surface-variant font-medium">{% trans "Drought Risk" %}</span>
+                        {% if result.risk_score is not None %}
+                        <span class="inline-flex items-center gap-1 mt-1.5">
+                            <span class="text-[11px] font-label font-bold px-2 py-0.5 rounded-full {% if result.risk_band == "high" %}bg-error/10 text-error{% elif result.risk_band == "moderate" %}bg-orange-500/10 text-orange-500{% elif result.risk_band == "low" %}bg-green-500/10 text-green-600{% else %}bg-surface-container-high text-on-surface-variant{% endif %}">
+                                {% trans "Score" %}: {{ result.risk_score }}/100
+                            </span>
+                        </span>
+                        {% endif %}
+                        {% if result.spei is not None %}
+                        <span class="text-xs text-on-surface-variant mt-1 font-mono" title="{% trans "Measured SPEI-3 driving this level" %}">
+                            {% trans "SPEI-3" %}: {{ result.spei }}{% if result.measured_on %} &middot; {{ result.measured_on|date:"Y-m" }}{% endif %}
+                        </span>
+                        {% endif %}
                         <a class="text-secondary text-xs font-semibold mt-2 flex items-center gap-1 hover:underline" href="#">
                             {% trans "See map" %} <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </a>
                     </div>
                 </div>
+
+                {% if result.stale %}
+                <p class="mt-3 text-xs leading-relaxed border border-orange-500/40 bg-orange-500/10 text-orange-600 rounded px-2 py-1.5 dark:text-orange-400">
+                    <span class="material-symbols-outlined text-[14px] align-middle">warning</span>
+                    {% trans "This region has no recent SPEI-3 reading, so the level above is not current. Re-run the drought-index import." %}
+                </p>
+                {% endif %}
                 
                 <!-- Dynamic recommendation card matching custom layout -->
                 <p class="text-xs text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/50 leading-relaxed">
@@ -772,12 +864,17 @@
 <script id="region-map-json" type="application/json">{{ region_map_config_json|safe }}</script>
 <script id="lakes-by-region-json" type="application/json">{{ lakes_by_region_json|safe }}</script>
 <script id="dashboard-i18n-json" type="application/json">{{ dashboard_js_i18n_json|safe }}</script>
+<script id="stations-json" type="application/json">{{ stations_json|safe }}</script>
 
 <!-- Scripts -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-<script src="{% static 'dashboard/js/dashboard.js' %}"></script>
+<!-- Map libraries are served from ./static/dashboard/vendor/ instead of a CDN:
+     a stalled CDN response blocks parsing and leaves the whole map panel dead. -->
+<script defer src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+<script defer src="{% static 'dashboard/vendor/leaflet-draw/leaflet.draw.js' %}"></script>
+<script defer src="{% static 'dashboard/vendor/leaflet-heat/leaflet-heat.js' %}"></script>
+<script defer src="{% static 'dashboard/vendor/turf/turf.min.js' %}"></script>
+<script defer src="{% static 'dashboard/js/map-tiles.js' %}"></script>
+<script defer src="{% static 'dashboard/js/dashboard.js' %}"></script>
 
 <script>
 // Location Ping Modal Handler
@@ -828,12 +925,14 @@ function renderSensorList(sensors) {
         return;
     }
     var TYPE_COLORS = { aws: '#0ea5e9', soil: '#22c55e', water: '#a855f7', custom: '#f59e0b' };
+    var TYPE_ICONS = { aws: 'sensors', soil: 'grass', water: 'water_drop', custom: 'sensors' };
     var html = '';
     sensors.forEach(function(s) {
         var color = TYPE_COLORS[s.sensor_type] || TYPE_COLORS.custom;
+        var iconName = TYPE_ICONS[s.sensor_type] || 'sensors';
         html += '<div class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-surface-container-high transition-colors group/item">' +
             '<div class="flex items-center gap-2 min-w-0 cursor-pointer" onclick="flyToSensor(' + s.latitude + ', ' + s.longitude + ')">' +
-                '<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:' + color + '"></span>' +
+                '<span class="w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0 shadow-xs" style="background:' + color + '"><span class="material-symbols-outlined text-[11px]">' + iconName + '</span></span>' +
                 '<span class="text-xs font-medium text-on-surface truncate hover:text-secondary transition-colors">' + s.name + '</span>' +
             '</div>' +
             '<div class="flex items-center gap-1 opacity-0 group-hover/item:opacity-100 transition-opacity">' +
@@ -961,5 +1060,7 @@ function flyToSensor(lat, lng) {
     }
 }
 </script>
+<!-- AgroAI Floating Chat Widget -->
+{% include "dashboard/_agroai_chat.html" %}
 </body>
 </html>

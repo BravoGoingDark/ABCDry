@@ -1,0 +1,279 @@
+{
+  "mode": "delta",
+  "nmonth": 3,
+  "pool": true,
+  "region_ids": [
+    4
+  ],
+  "region_names": [
+    "Ichkeul"
+  ],
+  "rows": 360,
+  "trained_at": "2026-10-01T11:35:54.748839Z",
+  "targets": {
+    "spei_t1": {
+      "mode": "delta",
+      "mae": 0.5924,
+      "rmse": 0.8088,
+      "r2": 0.2756,
+      "n_train": 284,
+      "n_test": 72,
+      "n_purged": 1,
+      "eval": "purged chronological holdout (purge = target horizon)",
+      "benchmarks": {
+        "persistence": {
+          "mae": 0.6369,
+          "r2": 0.2146,
+          "n": 72
+        },
+        "climatology": {
+          "mae": 1.1513,
+          "r2": -1.0865,
+          "n": 72
+        }
+      },
+      "top_features": [
+        [
+          "rainfall_mm_t2",
+          0.10227826982736588
+        ],
+        [
+          "spei_current",
+          0.0556572824716568
+        ],
+        [
+          "spei_lag1",
+          0.053067635744810104
+        ],
+        [
+          "relative_humidity_percent",
+          0.0342637337744236
+        ],
+        [
+          "spei_lag2",
+          0.029122047126293182
+        ],
+        [
+          "temperature_mean_c_t2",
+          0.029015999287366867
+        ],
+        [
+          "land_surface_temperature_c",
+          0.028958484530448914
+        ],
+        [
+          "et0_clim_n1",
+          0.0278724804520607
+        ],
+        [
+          "et0_mm_day_t3",
+          0.025818102061748505
+        ],
+        [
+          "rainfall_mm_t1",
+          0.02492566779255867
+        ]
+      ],
+      "feature_cols": [
+        "rainfall_mm",
+        "et0_mm_day",
+        "temperature_mean_c",
+        "temperature_max_c",
+        "temperature_min_c",
+        "relative_humidity_percent",
+        "wind_speed_ms",
+        "solar_radiation_mjm2day",
+        "ndvi",
+        "ndwi",
+        "land_surface_temperature_c",
+        "satellite_soil_moisture_percent",
+        "vegetation_condition_index",
+        "month",
+        "season",
+        "spei_current",
+        "rain_6m",
+        "rain_12m",
+        "et0_6m",
+        "et0_12m",
+        "bal_6m",
+        "bal_3m",
+        "bal_12m",
+        "spei_lag1",
+        "spei_lag2",
+        "spei_lag3",
+        "spei_lag6",
+        "rain_clim_n1",
+        "rain_clim_n3",
+        "et0_clim_n1",
+        "et0_clim_n3",
+        "month_sin",
+        "month_cos",
+        "latitude",
+        "longitude",
+        "rainfall_mm_t1",
+        "rainfall_mm_t2",
+        "rainfall_mm_t3",
+        "et0_mm_day_t1",
+        "et0_mm_day_t2",
+        "et0_mm_day_t3",
+        "ndvi_t1",
+        "ndvi_t2",
+        "ndvi_t3",
+        "satellite_soil_moisture_percent_t1",
+        "satellite_soil_moisture_percent_t2",
+        "satellite_soil_moisture_percent_t3",
+        "temperature_mean_c_t1",
+        "temperature_mean_c_t2",
+        "temperature_mean_c_t3",
+        "ndwi_t1",
+        "ndwi_t2",
+        "ndwi_t3",
+        "nao_index",
+        "nao_lag1",
+        "nao_lag2",
+        "nao_3m"
+      ]
+    },
+    "clf_t1": {
+      "recall": 0.6976744186046512,
+      "precision": 0.75,
+      "accuracy": 0.676056338028169,
+      "auc": 0.7516611295681064,
+      "n_test": 71,
+      "n_purged": 6,
+      "test_years": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ]
+    }
+  },
+  "side_models": {
+    "spei_t1_p25": {
+      "mode": "quantile_p25",
+      "mae": 0.5589,
+      "rmse": 0.7361,
+      "r2": 0.4,
+      "n_train": 285,
+      "n_test": 72,
+      "n_purged": 1,
+      "eval": "purged chronological holdout (purge = target horizon)",
+      "benchmarks": {
+        "persistence": {
+          "mae": 0.6369,
+          "r2": 0.2146,
+          "n": 72
+        },
+        "climatology": {
+          "mae": 1.1513,
+          "r2": -1.0865,
+          "n": 72
+        }
+      },
+      "top_features": [
+        [
+          "spei_current",
+          0.036931805312633514
+        ],
+        [
+          "satellite_soil_moisture_percent_t3",
+          0.02918115258216858
+        ],
+        [
+          "nao_lag1",
+          0.025754859670996666
+        ],
+        [
+          "rainfall_mm_t2",
+          0.025500459596514702
+        ],
+        [
+          "bal_6m",
+          0.025436757132411003
+        ],
+        [
+          "et0_mm_day_t3",
+          0.02510455623269081
+        ],
+        [
+          "rainfall_mm_t1",
+          0.024802275002002716
+        ],
+        [
+          "et0_6m",
+          0.024653583765029907
+        ],
+        [
+          "nao_3m",
+          0.024454478174448013
+        ],
+        [
+          "et0_mm_day_t2",
+          0.024438830092549324
+        ]
+      ],
+      "feature_cols": [
+        "rainfall_mm",
+        "et0_mm_day",
+        "temperature_mean_c",
+        "temperature_max_c",
+        "temperature_min_c",
+        "relative_humidity_percent",
+        "wind_speed_ms",
+        "solar_radiation_mjm2day",
+        "ndvi",
+        "ndwi",
+        "land_surface_temperature_c",
+        "satellite_soil_moisture_percent",
+        "vegetation_condition_index",
+        "month",
+        "season",
+        "spei_current",
+        "rain_6m",
+        "rain_12m",
+        "et0_6m",
+        "et0_12m",
+        "bal_6m",
+        "bal_3m",
+        "bal_12m",
+        "spei_lag1",
+        "spei_lag2",
+        "spei_lag3",
+        "spei_lag6",
+        "rain_clim_n1",
+        "rain_clim_n3",
+        "et0_clim_n1",
+        "et0_clim_n3",
+        "month_sin",
+        "month_cos",
+        "latitude",
+        "longitude",
+        "rainfall_mm_t1",
+        "rainfall_mm_t2",
+        "rainfall_mm_t3",
+        "et0_mm_day_t1",
+        "et0_mm_day_t2",
+        "et0_mm_day_t3",
+        "ndvi_t1",
+        "ndvi_t2",
+        "ndvi_t3",
+        "satellite_soil_moisture_percent_t1",
+        "satellite_soil_moisture_percent_t2",
+        "satellite_soil_moisture_percent_t3",
+        "temperature_mean_c_t1",
+        "temperature_mean_c_t2",
+        "temperature_mean_c_t3",
+        "ndwi_t1",
+        "ndwi_t2",
+        "ndwi_t3",
+        "nao_index",
+        "nao_lag1",
+        "nao_lag2",
+        "nao_3m"
+      ]
+    }
+  }
+}

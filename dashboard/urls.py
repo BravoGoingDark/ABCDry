@@ -24,6 +24,10 @@ from .views import (
     login_view,
     logout_view,
     drought_prediction_api,
+    spei_forecast_api,
+    spei_outlook_view,
+    assistant_page_view,
+    assistant_chat_api,
     soil_metrics_view,
     climate_metrics_view,
     drought_indices_view,
@@ -49,6 +53,7 @@ from .views import (
     admin_panel,
     admin_edit_user,
     admin_delete_user,
+    map_tile_proxy,
 )
 
 app_name = "dashboard"
@@ -80,6 +85,10 @@ urlpatterns = [
     # Compatibility: Django's default login redirect
     path("accounts/login/", login_view, name="accounts_login"),
     path("api/drought-prediction/", drought_prediction_api, name="drought_prediction_api"),
+    path("api/spei-forecast/", spei_forecast_api, name="spei_forecast_api"),
+    path("analysis/spei-outlook/", spei_outlook_view, name="spei_outlook"),
+    path("assistant/", assistant_page_view, name="assistant_page"),
+    path("assistant/chat/", assistant_chat_api, name="assistant_chat"),
     path("api/analysis-export/", analysis_export_csv, name="analysis_export_csv"),
     path("api/historical-export/", historical_export_excel, name="historical_export_excel"),
     
@@ -112,6 +121,10 @@ urlpatterns = [
     
     # AJAX File Upload
     path("api/upload-file/", ajax_upload_file, name="ajax_upload_file"),
+
+    # Map tiles, proxied server-side: the public tile hosts answer 403 to
+    # direct browser requests on some networks
+    path("api/tiles/<int:z>/<int:x>/<int:y>.png", map_tile_proxy, name="map_tile"),
 
     # Admin / RBAC (prefix must not clash with django.contrib.admin at /admin/)
     path("manage/users/", admin_panel, name="admin_panel"),

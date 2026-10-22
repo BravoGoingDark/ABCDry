@@ -104,6 +104,56 @@
         .metric-row:hover {
             background: rgba(165, 208, 185, 0.08);
         }
+        .table-scroll-shell {
+            position: relative;
+            overflow: auto;
+            max-height: min(72vh, 820px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(113, 121, 115, 0.2);
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(1, 45, 29, 0.4) rgba(240, 243, 255, 0.65);
+        }
+        .table-scroll-shell::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        .table-scroll-shell::-webkit-scrollbar-track {
+            background: rgba(240, 243, 255, 0.75);
+        }
+        .table-scroll-shell::-webkit-scrollbar-thumb {
+            background: rgba(1, 45, 29, 0.38);
+            border-radius: 999px;
+        }
+        .table-scroll-shell:hover .table-scroll-hint {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .table-scroll-hint {
+            position: sticky;
+            left: 0;
+            top: 0;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-left: 0.75rem;
+            margin-top: 0.5rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(1, 45, 29, 0.12);
+            background: rgba(255, 255, 255, 0.88);
+            color: #012d1d;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
         .themed-modal-backdrop {
             position: fixed;
             inset: 0;
@@ -228,7 +278,7 @@
                     {% if user.is_authenticated and user.profile.role != 'viewer' %}
                     <form id="delete-all-form" method="post" action="{% url 'dashboard:delete_all_metrics' %}">
                         {% csrf_token %}
-                        <button type="button" onclick="confirmDeleteAll(this.form)" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error font-bold text-sm hover:bg-error-container/40 transition-colors">
+                        <button type="button" data-confirm-action="all" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error font-bold text-sm hover:bg-error-container/40 transition-colors">
                             <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
                             Delete All Data
                         </button>
@@ -281,6 +331,20 @@
                     {% endfor %}
                 </select>
             </div>
+            <div id="subregion-filter" style="display: none;">
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Sub-Region</label>
+                <select id="subregion-filter-select" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Sub-Regions</option>
+                    <option value="v8_st_humide_inf">V8 St Humide Inf</option>
+                    <option value="v8_st_sub_humide">V8 St Sub Humide</option>
+                </select>
+            </div>
+            <div id="point-filter" style="display: none;">
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Point</label>
+                <select id="point-filter-select" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Points</option>
+                </select>
+            </div>
             <div>
                 <label class="block text-[10px] font-bold text-outline uppercase mb-1">Year</label>
                 <select id="year-filter" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
@@ -321,7 +385,7 @@
                     {% if user.is_authenticated and user.profile.role != 'viewer' %}
                     <form method="post" action="{% url 'dashboard:delete_metric_table' section.key %}">
                         {% csrf_token %}
-                        <button type="button" onclick="confirmDeleteTable(this.form, '{{ section.title|escapejs }}')" class="px-3 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container/40 transition-colors">
+                        <button type="button" data-confirm-action="table" data-section="{{ section.title|escapejs }}" class="px-3 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container/40 transition-colors">
                             <span class="material-symbols-outlined text-[16px]">delete</span>
                             Delete Table
                         </button>
@@ -329,7 +393,11 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="p-4 overflow-x-auto hide-scrollbar">
+            <div class="table-scroll-shell p-4" id="metric-table-scroll">
+                <div class="table-scroll-hint">
+                    <span class="material-symbols-outlined" style="font-size: 12px;">open_with</span>
+                    hover &amp; scroll
+                </div>
                 <table class="metric-table min-w-full border-collapse text-sm">
                     <thead>
                         <tr class="text-left text-[10px] uppercase tracking-widest text-outline bg-surface-container-low/80">
@@ -341,7 +409,7 @@
                     </thead>
                     <tbody>
                         {% for row in section.rows %}
-                        <tr class="metric-row border-b border-outline-variant/40" data-metric-type="{{ section.key }}" data-region-id="{{ row.filters.region_id }}" data-year-id="{{ row.filters.year_id }}" data-crop-id="{{ row.filters.crop_id }}" data-search="{{ row.search_text|escape }}">
+                        <tr class="metric-row border-b border-outline-variant/40" data-metric-type="{{ section.key }}" data-region-id="{{ row.filters.region_id }}" data-year-id="{{ row.filters.year_id }}" data-crop-id="{{ row.filters.crop_id }}" data-subregion-id="{{ row.filters.subregion_id }}" data-point-key="{{ row.filters.point_key|default:''|escape }}" data-search="{{ row.search_text|escape }}">
                             {% for value in row.values %}
                             <td class="px-3 py-3 align-top text-on-surface-variant whitespace-nowrap">{{ value }}</td>
                             {% endfor %}
@@ -353,7 +421,7 @@
                                     </a>
                                     <form method="post" action="{% url 'dashboard:delete_metric_entry' section.key row.pk %}">
                                         {% csrf_token %}
-                                        <button type="button" onclick="confirmDelete(this.form, '{{ section.title|escapejs }}', '{{ row.values.0|escapejs }}')" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-error-container/70 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container transition-colors">
+                                        <button type="button" data-confirm-action="entry" data-section="{{ section.title|escapejs }}" data-label="{{ row.values.0|escapejs }}" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-error-container/70 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container transition-colors">
                                             <span class="material-symbols-outlined text-[16px]">delete</span>
                                             Delete
                                         </button>
@@ -399,6 +467,9 @@
     const browserConfirmCancel = document.getElementById('browser-confirm-cancel');
 
     function showBrowserConfirm({ title, message, confirmLabel = 'Delete', cancelLabel = 'Cancel' }) {
+        if (!browserConfirmModal || !browserConfirmTitle || !browserConfirmMessage || !browserConfirmAccept || !browserConfirmCancel) {
+            return new Promise(function (resolve) { resolve(window.confirm(message)); });
+        }
         return new Promise(resolve => {
             browserConfirmTitle.textContent = title;
             browserConfirmMessage.textContent = message;
@@ -431,39 +502,61 @@
         });
     }
 
+    async function requestDelete(form, { title, message, confirmLabel }) {
+        let allow = false;
+        try {
+            allow = await showBrowserConfirm({ title, message, confirmLabel });
+        } catch (err) {
+            allow = window.confirm(message);
+        }
+        if (allow) {
+            form.submit();
+        }
+    }
+
     async function confirmDelete(form, sectionTitle, itemLabel) {
-        const allow = await showBrowserConfirm({
+        await requestDelete(form, {
             title: `Delete ${sectionTitle}?`,
             message: `This will permanently delete the record ${itemLabel}.`,
             confirmLabel: 'Delete',
-            cancelLabel: 'Keep it',
         });
-        if (allow) {
-            form.submit();
-        }
     }
 
     async function confirmDeleteTable(form, sectionTitle) {
-        const allow = await showBrowserConfirm({
+        await requestDelete(form, {
             title: `Delete entire ${sectionTitle} table?`,
             message: `This will permanently delete ALL records in the ${sectionTitle} table. This action cannot be undone.`,
             confirmLabel: 'Delete All',
-            cancelLabel: 'Cancel',
         });
-        if (allow) {
-            form.submit();
-        }
     }
 
     async function confirmDeleteAll(form) {
-        const allow = await showBrowserConfirm({
+        await requestDelete(form, {
             title: 'Delete ALL metric data?',
             message: 'This will permanently delete ALL records across every metrics table. This action cannot be undone.',
             confirmLabel: 'Delete Everything',
-            cancelLabel: 'Cancel',
         });
-        if (allow) {
-            form.submit();
+    }
+
+    function updatePointFilterOptions() {
+        const region = document.getElementById('region-filter').value;
+        const pointSelect = document.getElementById('point-filter-select');
+        const pointContainer = document.getElementById('point-filter');
+        const points = new Set();
+
+        document.querySelectorAll('.metric-row').forEach(row => {
+            if (!region || row.dataset.regionId === region) {
+                const key = (row.dataset.pointKey || '').trim();
+                if (key) points.add(key);
+            }
+        });
+
+        const values = Array.from(points).sort();
+        pointSelect.innerHTML = '<option value="">All Points</option>' + values.map(value => '<option value="' + value + '">' + value.replace(',', ', ') + '</option>').join('');
+        const showPointFilter = Boolean(values.length && (!region || region === document.getElementById('region-filter').value));
+        pointContainer.style.display = showPointFilter ? 'block' : 'none';
+        if (!values.length) {
+            pointSelect.value = '';
         }
     }
 
@@ -473,6 +566,19 @@
         const year = document.getElementById('year-filter').value;
         const crop = document.getElementById('crop-filter').value;
         const search = document.getElementById('search-filter').value.trim().toLowerCase();
+        const subregion = document.getElementById('subregion-filter-select').value;
+        const point = document.getElementById('point-filter-select').value;
+
+        const subregionFilterDiv = document.getElementById('subregion-filter');
+        if (region) {
+            const activeRows = Array.from(document.querySelectorAll('.metric-row')).filter(row => row.dataset.regionId === region);
+            const hasSubregionData = activeRows.some(row => (row.dataset.subregionId || '').trim());
+            subregionFilterDiv.style.display = hasSubregionData ? 'block' : 'none';
+        } else {
+            subregionFilterDiv.style.display = 'none';
+        }
+
+        updatePointFilterOptions();
 
         document.querySelectorAll('.metric-section').forEach(section => {
             const sectionKey = section.dataset.sectionKey;
@@ -485,7 +591,9 @@
                 const matchesYear = !year || row.dataset.yearId === year;
                 const matchesCrop = !crop || row.dataset.cropId === crop;
                 const matchesSearch = !search || row.dataset.search.includes(search);
-                const showRow = sectionMatchesType && matchesType && matchesRegion && matchesYear && matchesCrop && matchesSearch;
+                const matchesSubRegion = !subregion || row.dataset.subregionId === subregion || row.dataset.subregionId === '';
+                const matchesPoint = !point || row.dataset.pointKey === point;
+                const showRow = sectionMatchesType && matchesType && matchesRegion && matchesYear && matchesCrop && matchesSearch && matchesSubRegion && matchesPoint;
 
                 row.classList.toggle('hidden', !showRow);
                 if (showRow) visibleRows += 1;
@@ -501,16 +609,64 @@
         document.getElementById('year-filter').value = '';
         document.getElementById('crop-filter').value = '';
         document.getElementById('search-filter').value = '';
+        document.getElementById('subregion-filter-select').value = '';
+        document.getElementById('point-filter-select').value = '';
         applyFilters();
     }
 
-    document.getElementById('metric-filter').addEventListener('change', applyFilters);
-    document.getElementById('region-filter').addEventListener('change', applyFilters);
-    document.getElementById('year-filter').addEventListener('change', applyFilters);
-    document.getElementById('crop-filter').addEventListener('change', applyFilters);
-    document.getElementById('search-filter').addEventListener('input', applyFilters);
+    const bindIf = (id, evt, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(evt, fn);
+    };
+    // ---- Delegated delete confirmations (independent of inline JS handlers) ----
+    function handleDeleteClick(button) {
+        const form = button.closest('form');
+        if (!form) return;
+        const action = button.getAttribute('data-confirm-action');
+        const sectionTitle = button.getAttribute('data-section') || 'record';
+        const label = button.getAttribute('data-label') || '';
+        let opts;
+        if (action === 'entry') {
+            opts = { title: 'Delete ' + sectionTitle + '?', message: 'This will permanently delete the record ' + label + '.', confirmLabel: 'Delete' };
+        } else if (action === 'table') {
+            opts = { title: 'Delete entire ' + sectionTitle + ' table?', message: 'This will permanently delete ALL records in the ' + sectionTitle + ' table. This action cannot be undone.', confirmLabel: 'Delete All' };
+        } else {
+            opts = { title: 'Delete ALL metric data?', message: 'This will permanently delete ALL records across every metrics table. This action cannot be undone.', confirmLabel: 'Delete Everything' };
+        }
+        requestDelete(form, opts);
+    }
 
-    applyFilters();
-</script>
-</body>
-</html>
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest ? event.target.closest('[data-confirm-action]') : null;
+        if (!button) return;
+        event.preventDefault();
+        try {
+            handleDeleteClick(button);
+        } catch (err) {
+            console.error('Delete confirmation failed:', err);
+            const form = button.closest('form');
+            if (form) {
+                form.removeAttribute('onsubmit');
+                if (window.confirm('Delete this data? This cannot be undone.')) form.submit();
+            }
+        }
+    });
+
+    bindIf('metric-filter', 'change', applyFilters);
+    bindIf('region-filter', 'change', applyFilters);
+    bindIf('year-filter', 'change', applyFilters);
+    bindIf('crop-filter', 'change', applyFilters);
+    bindIf('search-filter', 'input', applyFilters);
+    bindIf('subregion-filter-select', 'change', applyFilters);
+    bindIf('point-filter-select', 'change', applyFilters);
+
+    try {
+        applyFilters();
+    } catch (e) {
+        console.warn('applyFilters failed:', e);
+    }
+  </script>
+  {% include "dashboard/_agroai_chat.html" %}
+  </body>
+  </html>
+

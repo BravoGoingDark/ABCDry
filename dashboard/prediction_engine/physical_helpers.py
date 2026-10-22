@@ -161,3 +161,162 @@ def calculate_vci(current_ndvi, historical_ndvi_list):
         return 100
     vci = (current_ndvi - ndvi_min) / (ndvi_max - ndvi_min) * 100
     return round(max(0, min(100, vci)), 1)
+
+
+# ------------------------------------------------------------------ #
+# SPEI – Standardized Precipitation Evapotranspiration Index
+# Vicente-Serrano et al. (2010) – log-logistic on water balance
+# ------------------------------------------------------------------ #
+
+def _fit_monthly_loglogistic(monthly_values):
+    """Fit 3-parameter log-logistic per calendar month using probability
+    weighted moments (PWM), following Vicente-Serrano et al. (2010).
+
+    NOTE: a scipy ``fisk.fit(vals, floc=0)`` fit is WRONG here because it
+    constrains the distribution to positive support, while the water
+    balance D = P - ET0 is negative in most months of semi-arid climates.
+    The PWM estimator below handles negative values natively.
+
+    Returns dict of month -> {'alpha', 'beta', 'gamma'} parameters,
+    or None if the month has too few observations or the fit degenerates.
+    """
+    from scipy.special import gamma as _gamma
+    params = {}
+    for month in range(1, 13):
+        vals = monthly_values.get(month, [])
+        vals = np.array([v for v in vals if not np.isnan(v)], dtype=float)
+        if len(vals) < 5:
+            params[month] = None
+            continue
+        try:
+            vals_sorted = np.sort(vals)
+            n = len(vals_sorted)
+            F = (np.arange(1, n + 1) - 0.35) / n  # Hosking plotting positions
+            w0 = float(np.mean(vals_sorted))
+            w1 = float(np.mean((1.0 - F) * vals_sorted))
+            w2 = float(np.mean((1.0 - F) ** 2 * vals_sorted))
+            denom = 3.0 * w2 - w0
+            if abs(denom) < 1e-12:
+                params[month] = None
+                continue
+            # L-moment ratio -> shape: r = 2*beta / (3*beta - 1)
+            r = (2.0 * w1 - w0) / denom
+            if abs(3.0 * r - 2.0) < 1e-12:
+                params[month] = None
+                continue
+            beta = r / (3.0 * r - 2.0)
+            if not np.isfinite(beta) or beta <= 1.0:
+                params[month] = None
+                continue
+            g1 = _gamma(1.0 + 1.0 / beta)
+            g2 = _gamma(1.0 - 1.0 / beta)
+            if g2 == 0 or not np.isfinite(g1 * g2):
+                params[month] = None
+                continue
+            l2 = w0 - 2.0 * w1  # second L-moment (always > 0)
+            if l2 <= 0:
+                params[month] = None
+                continue
+            alpha = beta * l2 / (g1 * g2)
+            if alpha <= 0 or not np.isfinite(alpha):
+                params[month] = None
+                continue
+            gamma_p = w0 - beta * l2
+            params[month] = {'alpha': float(alpha), 'beta': float(beta),
+                             'gamma': float(gamma_p)}
+        except Exception:
+            params[month] = None
+    return params
+
+
+def _spei_from_cdf(cdf_val):
+    """Transform log-logistic CDF to standard normal (SPEI).
+
+    Uses the Abramowitz & Stegun rational approximation (Eq. 26.2.23)
+    from Vicente-Serrano et al. (2010).
+    """
+    if cdf_val <= 1e-15:
+        return -3.29
+    if cdf_val >= 1 - 1e-15:
+        return 3.29
+    if cdf_val <= 0.5:
+        w = np.sqrt(-2.0 * np.log(cdf_val))
+        c0, c1, c2 = 2.515517, 0.802853, 0.010328
+        d1, d2, d3 = 1.432788, 0.189269, 0.001308
+        spei = -(w - (c0 + c1 * w + c2 * w**2) /
+                 (1.0 + d1 * w + d2 * w**2 + d3 * w**3))
+    else:
+        w = np.sqrt(-2.0 * np.log(1.0 - cdf_val))
+        c0, c1, c2 = 2.515517, 0.802853, 0.010328
+        d1, d2, d3 = 1.432788, 0.189269, 0.001308
+        spei = w - (c0 + c1 * w + c2 * w**2) / \
+            (1.0 + d1 * w + d2 * w**2 + d3 * w**3)
+    return round(max(-3.29, min(3.29, float(spei))), 2)
+
+
+def calculate_spei(precipitation_series, et0_series, nmonth=3):
+    """Standardized Precipitation Evapotranspiration Index.
+
+    Uses the log-logistic distribution on accumulated water balance
+    (Precipitation − ET0), following Vicente-Serrano et al. (2010).
+
+    Parameters
+    ----------
+    precipitation_series : pd.Series
+        Daily rainfall (mm/day) with DatetimeIndex.
+    et0_series : pd.Series
+        Daily reference evapotranspiration (mm/day) with DatetimeIndex.
+        Series must share the same DatetimeIndex.
+    nmonth : int
+        Accumulation period in months (3, 6, or 12).  Default 3.
+
+    Returns
+    -------
+    pd.Series
+        Daily-indexed SPEI values (each day carries its month's SPEI).
+    """
+    if not isinstance(precipitation_series, pd.Series) or len(precipitation_series) < 60:
+        return pd.Series(dtype=float)
+    if et0_series is None or et0_series.empty:
+        return pd.Series(dtype=float)
+
+    # Ensure both series are float
+    precip = precipitation_series.astype(float).copy()
+    et0 = et0_series.astype(float).reindex(precip.index, fill_value=0.0).copy()
+
+    # Monthly water balance: P_month − ET0_month
+    monthly_p = precip.resample('ME').sum()
+    monthly_e = et0.resample('ME').sum()
+    monthly_d = monthly_p - monthly_e
+
+    # Accumulate over nmonth calendar months
+    roll_d = monthly_d.rolling(window=nmonth, min_periods=nmonth).sum()
+
+    # Group accumulated values by calendar month and fit log-logistic
+    acc_monthly_vals = {}
+    for date, val in roll_d.items():
+        if pd.notna(val):
+            acc_monthly_vals.setdefault(date.month, []).append(float(val))
+    month_params = _fit_monthly_loglogistic(acc_monthly_vals)
+
+    # SPEI for each month
+    month_spei = {}
+    for date, val in roll_d.items():
+        if pd.isna(val):
+            continue
+        params = month_params.get(date.month)
+        if params is None:
+            continue
+        # Analytic log-logistic CDF: F(x) = 1 / (1 + (alpha / (x - gamma))^beta)
+        x = float(val) - params['gamma']
+        if x <= 0:
+            cdf = 0.0
+        else:
+            cdf = 1.0 / (1.0 + (params['alpha'] / x) ** params['beta'])
+        month_spei[(date.year, date.month)] = _spei_from_cdf(cdf)
+
+    # Broadcast back to daily index
+    values = [month_spei.get((d.year, d.month), np.nan) for d in precip.index]
+    result = pd.Series(values, index=precip.index, dtype='float64')
+    result.name = f'SPEI-{nmonth}'
+    return result

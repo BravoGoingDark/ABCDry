@@ -348,64 +348,22 @@ class Command(BaseCommand):
             return round(val, 3)
         return None
 
-    def _multi_point_ndvi(self, points, day):
-        """Query NDVI at each land point using the S2→S3→MODIS chain, return median.
-        Uses concurrent threads to avoid 3× serial GEE latency."""
-        import threading
+    def _point_ndvi(self, point, day):
+        """NDVI at a single point via the S2→S3→MODIS chain.
+        Priority is by data quality: Sentinel-2 (10 m) → Sentinel-3 (300 m) → MODIS (250 m)."""
+        val = self._sentinel2_ndvi(point, day)
+        src = 'Sentinel-2'
+        if val is None:
+            val = self._sentinel3_ndvi(point, day)
+            src = 'Sentinel-3'
+        if val is None:
+            val = self._modis_ndvi(point, day)
+            src = 'MODIS'
+        return val, src
 
-        results = [None] * len(points)
-        sources = [None] * len(points)
-
-        def _fetch_one(idx, pt):
-            val = self._sentinel2_ndvi(pt, day)
-            src = 'Sentinel-2'
-            if val is None:
-                val = self._sentinel3_ndvi(pt, day)
-                src = 'Sentinel-3'
-            if val is None:
-                val = self._modis_ndvi(pt, day)
-                src = 'MODIS'
-            results[idx] = val
-            sources[idx] = src
-
-        threads = []
-        for i, pt in enumerate(points):
-            t = threading.Thread(target=_fetch_one, args=(i, pt), daemon=True)
-            threads.append(t)
-            t.start()
-        for t in threads:
-            t.join(120)
-
-        values = [v for v in results if v is not None]
-        src_used = [s for s, v in zip(sources, results) if v is not None]
-        if not values:
-            return None, None
-        median_val = self._median(values)
-        best_source = max(set(src_used), key=src_used.count) if src_used else None
-        return median_val, best_source
-
-    def _multi_point_lst(self, points, day):
-        """Query MODIS LST at each land point, return median.
-        Uses concurrent threads to avoid 3× serial GEE latency."""
-        import threading
-
-        results = [None] * len(points)
-
-        def _fetch_one(idx, pt):
-            results[idx] = self._modis_lst(pt, day)
-
-        threads = []
-        for i, pt in enumerate(points):
-            t = threading.Thread(target=_fetch_one, args=(i, pt), daemon=True)
-            threads.append(t)
-            t.start()
-        for t in threads:
-            t.join(60)
-
-        values = [v for v in results if v is not None]
-        if not values:
-            return None
-        return self._median(values)
+    def _point_lst(self, point, day):
+        """MODIS LST at a single point."""
+        return self._modis_lst(point, day)
 
     def _sentinel1_sm(self, point, day):
         """All-weather surface soil moisture proxy from Sentinel-1 SAR (VV, dB).
@@ -463,17 +421,20 @@ class Command(BaseCommand):
         obj, _ = ObservationYear.objects.get_or_create(label=str(year_label))
         return obj
 
-    def _write_climate(self, region, day, rain, era, rain_source=None):
+    def _write_climate(self, region, day, rain, era, rain_source=None, latitude=None, longitude=None, subregion=None, et0=None):
         if era is None:
             return
         year = self._get_year(day.year)
+        latitude = latitude if latitude is not None else region.latitude
+        longitude = longitude if longitude is not None else region.longitude
         ClimateMetrics.objects.update_or_create(
             region=region,
             year=year,
             measurement_date=day,
+            latitude=latitude,
+            longitude=longitude,
             defaults={
-                'latitude': region.latitude,
-                'longitude': region.longitude,
+                'subregion': subregion,
                 'rainfall_mm': rain,
                 'rainfall_source': rain_source,
                 'temperature_max_c': era.get('temperature_max_c'),
@@ -482,14 +443,18 @@ class Command(BaseCommand):
                 'relative_humidity_percent': era.get('relative_humidity_percent'),
                 'wind_speed_ms': era.get('wind_speed_ms'),
                 'solar_radiation_mjm2day': era.get('solar_radiation_mjm2day'),
+                'evapotranspiration_et0_mmday': et0,
             },
         )
 
-    def _write_remote(self, region, day, ndvi, lst, sm, ndvi_source=None, sm_source=None):
+    def _write_remote(self, region, day, ndvi, lst, sm, ndvi_source=None, sm_source=None, latitude=None, longitude=None, subregion=None):
         year = self._get_year(day.year)
+        latitude = latitude if latitude is not None else region.latitude
+        longitude = longitude if longitude is not None else region.longitude
         defaults = {
-            'latitude': region.latitude,
-            'longitude': region.longitude,
+            'subregion': subregion,
+            'latitude': latitude,
+            'longitude': longitude,
             'land_surface_temperature_c': lst,
             'satellite_soil_moisture_percent': sm,
         }
@@ -502,6 +467,8 @@ class Command(BaseCommand):
             region=region,
             year=year,
             measurement_date=day,
+            latitude=latitude,
+            longitude=longitude,
             defaults=defaults,
         )
 
@@ -546,9 +513,9 @@ class Command(BaseCommand):
                 region=region,
                 year=year,
                 measurement_date=day,
+                latitude=region.latitude,
+                longitude=region.longitude,
                 defaults={
-                    'latitude': region.latitude,
-                    'longitude': region.longitude,
                     'spi_1month': round(float(val), 2),
                     'spi_3month': round(s3, 2) if s3 is not None else None,
                     'spi_12month': round(s12, 2) if s12 is not None else None,
@@ -557,6 +524,8 @@ class Command(BaseCommand):
             if vci is not None:
                 RemoteSensingMetrics.objects.filter(
                     region=region, measurement_date=day,
+                    latitude=region.latitude,
+                    longitude=region.longitude,
                 ).update(vegetation_condition_index=round(vci, 1))
 
     # ------------------------------------------------------------------ #
@@ -587,64 +556,62 @@ class Command(BaseCommand):
             self.stdout.write(f'\n== {region.name} ({region.latitude}, {region.longitude}) ==')
             center = ee.Geometry.Point(float(region.longitude), float(region.latitude))
             sample_pts = self._get_sample_points(region)
+            if region.sample_points:
+                point_rows = [
+                    {'lat': float(sp['lat']), 'lon': float(sp['lon']), 'name': sp.get('name', f'point-{idx + 1}')}
+                    for idx, sp in enumerate(region.sample_points)
+                ]
+            else:
+                point_rows = [{'lat': float(region.latitude), 'lon': float(region.longitude), 'name': 'center'}]
             multi = len(sample_pts) > 1
             if multi:
                 self.stdout.write(f'  Multi-point sampling: {len(sample_pts)} land points')
             day = start
             ingested = 0
-            last_ndvi = None
-            last_ndvi_source = None
             while day <= end:
-                rain, rain_source = self._rainfall(center, day)
-                era = self._era5_daily(center, day)
-                ndvi = None
-                ndvi_source = None
-                if day.day % 16 in (1, 5, 9, 13) or day == end:
-                    if multi:
-                        ndvi, ndvi_source = self._multi_point_ndvi(sample_pts, day)
+                for point_row in point_rows:
+                    lat = point_row['lat']
+                    lon = point_row['lon']
+                    subregion = point_row['name'].strip().lower().replace(' ', '_')
+                    point = ee.Geometry.Point(float(lon), float(lat))
+                    rain, rain_source = self._rainfall(point, day)
+                    era = self._era5_daily(point, day)
+                    # Compute ET0 from ERA5 fields
+                    et0 = None
+                    if era and era.get('temperature_mean_c') is not None and era.get('relative_humidity_percent') is not None:
+                        try:
+                            from dashboard.prediction_engine.physical_helpers import calculate_et0
+                            t_c = era['temperature_mean_c']
+                            rh = era['relative_humidity_percent']
+                            wind = era.get('wind_speed_ms', 0)
+                            solar_mj = era.get('solar_radiation_mjm2day', 0)
+                            solar_wm2 = float(solar_mj) / 0.0864 if solar_mj and solar_mj > 0 else 0
+                            et0 = round(calculate_et0(float(t_c), float(wind) if wind else 0, solar_wm2, float(rh)), 2)
+                        except Exception:
+                            et0 = None
+                    ndvi, ndvi_source = self._point_ndvi(point, day)
+                    lst = self._point_lst(point, day)
+                    sm = self._smap_sm(point, day)
+                    sm_source = 'SMAP' if sm is not None else None
+                    if sm is None:
+                        sm = self._sentinel1_sm(point, day)
+                        sm_source = 'Sentinel-1' if sm is not None else None
+
+                    if options['verbose']:
+                        self.stdout.write(
+                            f'  {day} {point_row["name"]} ({subregion}): rain={rain}{f"({rain_source})" if rain_source else ""} '
+                            f'Tmax={era.get("temperature_max_c") if era else None} '
+                            f'ndvi={ndvi}{f"({ndvi_source})" if ndvi_source else ""} '
+                            f'lst={lst} sm={sm}{f"({sm_source})" if sm_source else ""}'
+                        )
+
+                    if options['dry_run']:
+                        ingested += 1
                     else:
-                        ndvi = self._sentinel2_ndvi(center, day)
-                        if ndvi is not None:
-                            ndvi_source = 'Sentinel-2'
-                        else:
-                            ndvi = self._sentinel3_ndvi(center, day)
-                            if ndvi is not None:
-                                ndvi_source = 'Sentinel-3'
-                            else:
-                                ndvi = self._modis_ndvi(center, day)
-                                if ndvi is not None:
-                                    ndvi_source = 'MODIS'
-                else:
-                    ndvi = last_ndvi
-                    ndvi_source = last_ndvi_source
-                if ndvi is not None:
-                    last_ndvi = ndvi
-                    last_ndvi_source = ndvi_source
-                if multi:
-                    lst = self._multi_point_lst(sample_pts, day)
-                else:
-                    lst = self._modis_lst(center, day)
-                sm = self._smap_sm(center, day)
-                sm_source = 'SMAP' if sm is not None else None
-                if sm is None:
-                    sm = self._sentinel1_sm(center, day)
-                    sm_source = 'Sentinel-1' if sm is not None else None
-
-                if options['verbose']:
-                    self.stdout.write(
-                        f'  {day}: rain={rain}{f"({rain_source})" if rain_source else ""} '
-                        f'Tmax={era.get("temperature_max_c") if era else None} '
-                        f'ndvi={ndvi}{f"({ndvi_source})" if ndvi_source else ""} '
-                        f'lst={lst} sm={sm}{f"({sm_source})" if sm_source else ""}'
-                    )
-
-                if options['dry_run']:
-                    ingested += 1
-                else:
-                    with transaction.atomic():
-                        self._write_climate(region, day, rain, era, rain_source)
-                        self._write_remote(region, day, ndvi, lst, sm, ndvi_source, sm_source)
-                    ingested += 1
+                        with transaction.atomic():
+                            self._write_climate(region, day, rain, era, rain_source, latitude=lat, longitude=lon, subregion=subregion, et0=et0)
+                            self._write_remote(region, day, ndvi, lst, sm, ndvi_source, sm_source, latitude=lat, longitude=lon, subregion=subregion)
+                        ingested += 1
 
                 day += timedelta(days=options['every'])
 

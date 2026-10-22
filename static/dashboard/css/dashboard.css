@@ -193,3 +193,75 @@ svg.overflow-visible line {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
+/* ── Heatmap Station Markers ── */
+.custom-station-icon {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer;
+}
+
+.station-marker-container {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.station-marker-badge {
+    position: relative;
+    z-index: 10;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+}
+
+.custom-station-icon:hover .station-marker-badge {
+    transform: scale(1.22);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+}
+
+.station-radar-ripple {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border-radius: 9999px;
+    border: 1.5px solid;
+    animation: stationPulse 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+@keyframes stationPulse {
+    0% { transform: scale(0.5); opacity: 0.9; }
+    100% { transform: scale(2.0); opacity: 0; }
+}
+
+/* Smooth, elegant tooltips */
+.leaflet-tooltip.station-tooltip-smooth {
+    background: rgba(15, 23, 42, 0.92) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    color: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+    pointer-events: none !important;
+}
+.leaflet-tooltip.station-tooltip-smooth:before {
+    border-top-color: rgba(15, 23, 42, 0.92) !important;
+}
+
+

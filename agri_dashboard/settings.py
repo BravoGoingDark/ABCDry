@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'import_export',
+    'django_celery_beat',
     'dashboard',
 ]
 
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'agri_dashboard.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'agri_dashboard.middleware.NoCacheHTMLMiddleware',
 ]
 
 ROOT_URLCONF = 'agri_dashboard.urls'
@@ -67,7 +69,7 @@ ROOT_URLCONF = 'agri_dashboard.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'Templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -222,6 +224,46 @@ CACHES = {
 
 # ============== FILE UPLOAD ==============
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
+
+
+# ── AgroAI assistant (local Ollama LLM) ──────────────────────────────
+# The assistant never invents data: these settings only control how the
+# model *explains* facts already computed from the database.
+ASSISTANT_LLM_URL = os.getenv('ASSISTANT_LLM_URL', 'http://localhost:11434')
+# empty string = auto-detect the best installed Ollama model
+ASSISTANT_LLM_MODEL = os.getenv('ASSISTANT_LLM_MODEL', '')
+ASSISTANT_LLM_TIMEOUT = int(os.getenv('ASSISTANT_LLM_TIMEOUT', '60'))
+ASSISTANT_LLM_KEEP_ALIVE = os.getenv('ASSISTANT_LLM_KEEP_ALIVE', '30m')
+ASSISTANT_LLM_NUM_CTX = int(os.getenv('ASSISTANT_LLM_NUM_CTX', '4096'))
+ASSISTANT_LLM_TEMPERATURE = float(os.getenv('ASSISTANT_LLM_TEMPERATURE', '0.2'))
+ASSISTANT_LLM_ENABLED = os.getenv('ASSISTANT_LLM_ENABLED', '1') not in ('0', 'false', 'False')
+# Ask one short question instead of guessing when the region or the topic of a
+# question is missing (ambiguous questions get one clickable follow-up list).
+ASSISTANT_CLARIFY = os.getenv('ASSISTANT_CLARIFY', '1') not in ('0', 'false', 'False')
+
+# ============== AgroAI assistant RAG (docs + live data) ==============
+# Retrieval augments the assistant with chunks of docs/*.md, the crop knowledge
+# base and short digests computed from the live tables. The deterministic rules
+# stay in charge of the advice; retrieval only supplies supporting excerpts.
+# The dense channel uses a local Ollama embedding model, the lexical channel
+# (TF-IDF) always works, so answers never depend on a model being installed.
+RAG_ENABLED = os.getenv('RAG_ENABLED', '1') not in ('0', 'false', 'False')
+RAG_OLLAMA_URL = os.getenv('RAG_OLLAMA_URL', ASSISTANT_LLM_URL)
+RAG_EMBED_MODEL = os.getenv('RAG_EMBED_MODEL', 'bge-m3')
+RAG_EMBED_TIMEOUT = int(os.getenv('RAG_EMBED_TIMEOUT', '300'))
+RAG_TOP_K = int(os.getenv('RAG_TOP_K', '4'))
+RAG_LEXICAL_DEPTH = int(os.getenv('RAG_LEXICAL_DEPTH', '12'))
+RAG_MAX_CONTEXT_CHARS = int(os.getenv('RAG_MAX_CONTEXT_CHARS', '2600'))
+RAG_MIN_SCORE = float(os.getenv('RAG_MIN_SCORE', '0.01'))
+RAG_DATA_WINDOW_DAYS = int(os.getenv('RAG_DATA_WINDOW_DAYS', '400'))
+RAG_AUTO_EMBED = os.getenv('RAG_AUTO_EMBED', '1') not in ('0', 'false', 'False')
+
+# T+3 forecast horizon is withheld everywhere until it proves out of sample.
+# Purged walk-forward: regressor R2 -0.298, classifier AUC 0.463 (below chance),
+# MAE 1.147 - worse than climatology. Publishing it would lend false confidence
+# to irrigation decisions, so only T+1 is exposed to users and to the assistant.
+SPEI_T3_ENABLED = os.getenv('SPEI_T3_ENABLED', '0') not in ('0', 'false', 'False')
+
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 
 # ============== LOGGING ==============
@@ -252,3 +294,54 @@ LOGGING = {
 
 # Create logs directory if it doesn't exist
 os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
+# ============== CELERY CONFIGURATION ==============
+# Celery broker: Use Redis if available, otherwise use in-memory fallback
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'memory://')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'cache+locmem://')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes hard limit
+
+# ============== CELERY BEAT SCHEDULE ==============
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # Daily satellite data pull (3 AM UTC)
+    'pull-satellite-daily': {
+        'task': 'dashboard.tasks.pull_satellite_and_retrain',
+        'schedule': crontab(hour=3, minute=0),
+        'options': {'expires': 3600}  # Task expires after 1 hour
+    },
+    
+    # Daily drought risk assessments (4 AM UTC, after satellite pull)
+    'generate-daily-risk': {
+        'task': 'dashboard.tasks.generate_daily_risk_assessments',
+        'schedule': crontab(hour=4, minute=0),
+        'options': {'expires': 3600}
+    },
+    
+    # Refresh materialized views (2 AM UTC, before satellite pull)
+    'refresh-views-daily': {
+        'task': 'dashboard.tasks.refresh_materialized_views',
+        'schedule': crontab(hour=2, minute=0),
+        'options': {'expires': 3600}
+    },
+    
+    # Validate SPI forecasts weekly (Sunday 5 AM UTC)
+    'validate-spi-weekly': {
+        'task': 'dashboard.tasks.validate_spi_forecast',
+        'schedule': crontab(day_of_week=0, hour=5, minute=0),
+        'options': {'expires': 7200}
+    },
+
+    # Monthly SPEI forecast refresh + verification (3rd of month, after CHIRPS data lands)
+    'monthly-spei-forecast': {
+        'task': 'dashboard.tasks.monthly_spei_forecast',
+        'schedule': crontab(day_of_month=3, hour=4, minute=0),
+        'options': {'expires': 6 * 3600}
+    },
+}

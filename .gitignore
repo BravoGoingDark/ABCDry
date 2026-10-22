@@ -1,6 +1,60 @@
+# Environment files
 .env
-keys/
+.env.production
+!.env.example
+
+# Virtual environments
+.venv*
+venv/
+ENV/
+
+# Python bytecode & cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Data & Database
 db.sqlite3
+*.sqlite3
+fixture.json
 fixture.json.tmp
+backups/
+.freebuff/
+
+# Machine Learning Artifacts & Models
+models/*.pkl
+models/*.pth
+models/*.npz
+*.pkl
+*.pth
+*.npz
+
+# Logs & Runtime
+logs/
+*.log
+
+# Static & Media outputs
+staticfiles/
+media/
+*.tmp
+tilecache/
+
+# Generated Reports & Charts
+*.pdf
+*.png
+!static/**/*.png
+
+# Keys & Secrets
+keys/
+*.pem
+*.key
+
+# Generated retrieval index (rebuild: python manage.py build_assistant_index)
+assistant_index/
+
+# IDE & OS
+.vscode/
+.idea/
+.ds_store
+Thumbs.db

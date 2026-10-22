@@ -114,6 +114,7 @@ class DroughtPredictionPipeline:
             scoped(ClimateMetrics.objects.filter(region=region).order_by('-measurement_date')),
             {
                 'rainfall_mm': 'rainfall_mm',
+                'rainfall_source': 'rainfall_source',
                 'temperature_max_c': 'temp_max_c',
                 'temperature_min_c': 'temp_min_c',
                 'temperature_mean_c': 'temp_mean_c',
@@ -131,6 +132,7 @@ class DroughtPredictionPipeline:
                 'spi_1month': 'spi',
                 'spi_3month': 'spi3',
                 'spei_1month': 'spei',
+                'spei_3month': 'spei3',
                 'pdsi_value': 'pdsi',
             },
         )
@@ -176,6 +178,13 @@ class DroughtPredictionPipeline:
         if not frames:
             raise ValueError('No metric data found for the selected region/year.')
 
+        # Collapse the multiple gauges / satellite overpasses that share a date
+        # into a single regional row BEFORE merging. Merging first produced a
+        # cross product (2 gauges x N overpasses per day), so the history frame
+        # held ~9 rows per day for gauge regions and ~1 row per 15 days for the
+        # monthly CHIRPS regions, which silently broke every row-count window.
+        frames = [self._collapse_to_daily(frame) for frame in frames]
+
         merged = frames[0]
         for frame in frames[1:]:
             merged = merged.merge(frame, on='measurement_date', how='outer')
@@ -183,15 +192,51 @@ class DroughtPredictionPipeline:
         merged = merged.sort_values('measurement_date').reset_index(drop=True)
         merged = merged.ffill().bfill()
 
+        # A CHIRPS row holds a whole-month total, not a daily one. Tag it so
+        # window features can treat periods of unequal length correctly
+        # instead of assuming one row == one day.
+        if 'rainfall_source' in merged.columns:
+            is_monthly = merged['rainfall_source'].astype(str).str.upper() == 'CHIRPS'
+        else:
+            is_monthly = pd.Series(False, index=merged.index)
+        merged['temporal_resolution_days'] = np.where(is_monthly, 30.4, 1.0)
+
         if 'soil_moisture_pct' not in merged.columns and 'satellite_soil_moisture_pct' in merged.columns:
             merged['soil_moisture_pct'] = merged['satellite_soil_moisture_pct']
 
         if 'soil_water_mm' not in merged.columns:
             merged['soil_water_mm'] = np.nan
 
-        if lookback_days is not None:
-            merged = merged.tail(lookback_days)
+        if lookback_days is not None and not merged.empty:
+            cutoff = merged['measurement_date'].max() - pd.Timedelta(days=int(lookback_days))
+            merged = merged[merged['measurement_date'] >= cutoff]
         return merged.reset_index(drop=True)
+
+    @staticmethod
+    def _collapse_to_daily(frame):
+        """Reduce a source frame to one row per measurement_date.
+
+        Depths, rates and states (rainfall mm, temperatures, moisture) describe
+        one place, so several gauges on the same day are averaged rather than
+        summed -- summing two gauges would double the regional depth. Only
+        genuinely additive accumulators are summed, and none of the climate
+        columns in this frame are."""
+        frame = frame.dropna(subset=['measurement_date'])
+        if frame.empty:
+            return frame
+        if frame['measurement_date'].duplicated().any():
+            keys = frame['measurement_date']
+            numeric = frame.select_dtypes(include='number')
+            other = frame[[c for c in frame.columns
+                           if c not in numeric.columns and c != 'measurement_date']]
+            collapsed = numeric.groupby(keys).mean()
+            collapsed.index.name = 'measurement_date'
+            if not other.empty:
+                other = other.groupby(keys).first()
+                other.index.name = 'measurement_date'
+                collapsed = collapsed.join(other, how='left')
+            return collapsed.reset_index()
+        return frame.reset_index(drop=True)
 
     def prepare_daily_data(self, raw_df):
         df = raw_df.copy()
@@ -584,7 +629,12 @@ class DroughtPredictionPipeline:
     def build_history_frame(self, region, lookback_days=None):
         return self.build_prediction_frame(region, year=None, lookback_days=lookback_days)
 
-    def load(self, model_dir='./'):
+    def load(self, model_dir=None):
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        if model_dir is None or model_dir == './':
+            models_dir = os.path.join(root_dir, 'models')
+            model_dir = models_dir if os.path.exists(models_dir) else root_dir
+
         self.xgb_predictor = XGBoostDroughtRiskPredictor(horizon_days=0).load(
             model_path=f'{model_dir}/xgboost_risk_model.pkl',
             scaler_path=f'{model_dir}/xgboost_scaler.pkl',
@@ -636,7 +686,12 @@ class DroughtPredictionPipeline:
             raise ValueError('Models not trained or loaded. Call train() or load() first.')
 
     def _artifact_path(self, filename):
-        return os.path.join(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')), filename)
+        root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        models_dir = os.path.join(root_dir, 'models')
+        models_path = os.path.join(models_dir, filename)
+        if os.path.exists(models_path):
+            return models_path
+        return os.path.join(root_dir, filename)
 
     def _heuristic_forecast(self, prepared_df, horizon_days):
         current_soil_moisture = float(prepared_df['soil_moisture_pct'].iloc[-1]) if 'soil_moisture_pct' in prepared_df.columns else 0

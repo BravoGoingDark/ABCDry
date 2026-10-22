@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPEI Drought Outlook — APWRS</title>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f6f8; color: #1c2430; margin: 0; padding: 24px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 10px; border-bottom: 2px solid #2e7d5b; padding-bottom: 4px; }
+  .sub { color: #5b6773; font-size: .9rem; margin-bottom: 18px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+  .card { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .region { font-weight: 700; font-size: 1.05rem; margin-bottom: 6px; }
+  .badges { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+  .badge { padding: 4px 10px; border-radius: 999px; font-size: .78rem; font-weight: 600; color: #fff; }
+  .b-Low { background: #2e7d5b; } .b-Moderate { background: #f0a92e; color: #333; }
+  .b-High { background: #e8702a; } .b-Severe { background: #d63f2f; } .b-Extreme { background: #8e1f1f; }
+  .warn { background: #d63f2f; } .nowarn { background: #2e7d5b; }
+  .stale { background: #fff4d6; border-left: 4px solid #f0a92e; padding: 8px 12px; border-radius: 6px; font-size: .85rem; margin-bottom: 14px; }
+  .probbar { background: #e7ecef; border-radius: 6px; height: 10px; overflow: hidden; margin: 4px 0 2px; }
+  .probfill { background: #d63f2f; height: 100%; }
+  .k { color: #5b6773; font-size: .8rem; }
+  .rec { margin-top: 8px; font-size: .83rem; color: #37414c; }
+  .rec li { margin: 2px 0; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; }
+  th, td { padding: 8px 10px; text-align: left; font-size: .85rem; border-bottom: 1px solid #e7ecef; }
+  th { background: #eef3f0; }
+  .ok { color: #2e7d5b; font-weight: 700; } .miss { color: #d63f2f; font-weight: 700; }
+  .stats { display: flex; gap: 18px; flex-wrap: wrap; margin: 10px 0 4px; }
+  .stat { background: #fff; border-radius: 10px; padding: 14px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.08); text-align: center; }
+  .stat .n { font-size: 1.6rem; font-weight: 800; color: #2e7d5b; }
+  .note { font-size: .8rem; color: #5b6773; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>SPEI Drought Outlook</h1>
+<div class="sub">Monthly SPEI-3 forecasts (XGBoost regression for severity + classifier for drought probability) — warning fires when either is confident, and every past forecast is verified against observed conditions.</div>
+
+<h2>Current Outlook — Next Month (T+1)</h2>
+{% if stale_months %}
+<div class="stale">Live data feed is {{ stale_months }} months behind. The outlook below is not current — it reflects the latest available observations, not today.</div>
+{% endif %}
+<div class="cards">
+{% for f in forecasts %}
+  <div class="card">
+    <div class="region">{{ f.region.name }}</div>
+    <div class="badges">
+      <span class="badge b-{{ f.level_t1 }}">{{ f.level_t1 }} ({{ f.score_t1 }}/100)</span>
+      {% if f.warning_t1 %}<span class="badge warn">Drought warning{% if f.warning_source %} · {{ f.warning_source }}{% endif %}</span>
+      {% else %}<span class="badge nowarn">No active warning</span>{% endif %}
+    </div>
+    <div class="k">Target month: {{ f.target_month_t1 }}</div>
+    <div class="k">SPEI-3 predicted: {{ f.spei_t1 }}</div>
+    <div class="k">Probability of drought: {{ f.prob_drought_t1|floatformat:2|default:"n/a" }}
+      {% if f.band_label_t1 %}— {{ f.band_label_t1 }}{% endif %}</div>
+    <div class="probbar"><div class="probfill" style="width:{% widthratio f.prob_drought_t1 1 100 %}%"></div></div>
+    {% if f.stale %}<div class="k">⚠ Based on data {{ f.months_behind }} months old</div>{% endif %}
+    <div class="k">3 months ahead (T+3): <span class="badge b-{{ f.level_t3 }}">{{ f.level_t3 }}</span>
+      {% if f.prob_drought_t3 is not None %} — P(drought) {{ f.prob_drought_t3 }}{% endif %}
+      <em>(directional only)</em></div>
+    <div class="rec"><strong>Actions:</strong>
+      <ul>{% for r in f.recommendations_t1 %}<li>{{ r }}</li>{% endfor %}</ul>
+    </div>
+  </div>
+{% empty %}
+  <div class="card">No forecasts yet — run: python manage.py train_spei_pooled</div>
+{% endfor %}
+</div>
+
+<h2>Live Reliability Scoreboard</h2>
+<div class="stats">
+  <div class="stat"><div class="n">{{ stats.total }}</div><div class="k">verified forecasts</div></div>
+  <div class="stat"><div class="n">{% if stats.recall_pct is not None %}{{ stats.recall_pct }}%{% else %}—{% endif %}</div><div class="k">drought events caught</div></div>
+  <div class="stat"><div class="n">{% if stats.exact_pct is not None %}{{ stats.exact_pct }}%{% else %}—{% endif %}</div><div class="k">exact severity level</div></div>
+</div>
+<div class="note">Every month, past predictions are compared to what actually happened (observed SPEI-3 from CHIRPS/ERA5). This table updates itself — the reliability claim keeps proving itself.</div>
+
+{% if verifications %}
+<table>
+  <tr><th>Region</th><th>Horizon</th><th>Month</th><th>Predicted</th><th>Actual</th><th>Flag</th><th>Verdict</th></tr>
+  {% for v in verifications %}
+  <tr>
+    <td>{{ v.region.name }}</td><td>T+{{ v.horizon }}</td><td>{{ v.target_month|date:"Y-m" }}</td>
+    <td>{{ v.predicted_level }}{% if v.predicted_prob is not None %} ({{ v.predicted_prob }}){% endif %}</td>
+    <td>{{ v.actual_level }} ({{ v.actual_spei }})</td>
+    <td>{% if v.flag_correct %}<span class="ok">✔</span>{% else %}<span class="miss">✘</span>{% endif %}</td>
+    <td>{% if v.flag_correct %}correct flag{% else %}missed{% endif %}{% if v.level_exact %} · exact level{% endif %}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<div class="note">No verifications yet — the first entries appear once a forecast's target month completes and its observed SPEI is computed (automatic with the monthly cycle).</div>
+{% endif %}
+
+</body>
+</html>

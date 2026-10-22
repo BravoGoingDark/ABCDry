@@ -70,3 +70,28 @@ def validate_spi_forecast():
     call_command('validate_spi_forecast', '--horizon', '7')
     call_command('validate_spi_forecast', '--horizon', '30')
     return 'SPI forecast backtests complete.'
+
+
+@shared_task
+def monthly_spei_forecast():
+    """Monthly: refresh climate + satellite data for all regions, retrain
+    pooled SPEI models, refresh per-region forecasts, then verify mature
+    predictions against observed SPEI (live scoreboard)."""
+    from django.core.management import call_command
+
+    # 1) Data refresh: monthly CHIRPS + ERA5-Land climate rows and monthly
+    #    MODIS/SMAP remote-sensing rows for every region (complete months
+    #    only; ECMWF/CHIRPS embargo handled inside the commands).
+    call_command('backfill_climate_monthly')
+    call_command('backfill_rs_monthly')
+    # 2) Model refresh + forecasts + verification
+    call_command('train_spei_pooled')
+    call_command('verify_spei_forecasts')
+    # 3) Pre-warm assistant answers (all regions x intents x languages)
+    try:
+        from dashboard.services.farmer_assistant import prewarm_answers
+        n = prewarm_answers()
+        logger.info('Assistant pre-warm: %s answers cached', n)
+    except Exception:
+        logger.warning('Assistant pre-warm failed', exc_info=True)
+    return 'Monthly SPEI forecast + verification complete.'

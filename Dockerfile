@@ -9,16 +9,15 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Upgrade pip and install project requirements (may include non-PyTorch deps)
 COPY requirements.txt ./
 RUN pip install --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies using CPU index url for light-weight PyTorch build
+RUN pip install --no-cache-dir -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cpu
 
-# Install CPU-only PyTorch wheels (recommended for CI/dev without GPU)
-# For GPU/CUDA builds, change index-url to the appropriate CUDA wheel index from pytorch.org
-RUN pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-
-# Copy project
 COPY . /app
 
-CMD ["/bin/bash"]
+# Whitenoise serves the compiled/manifest static files, so collect them at build
+# time (without this the app ships with no CSS, JS or map assets).
+RUN python manage.py collectstatic --noinput
+
+CMD ["gunicorn", "agri_dashboard.wsgi:application", "--bind", "0.0.0.0:8000"]

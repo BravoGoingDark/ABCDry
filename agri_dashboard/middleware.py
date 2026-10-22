@@ -1,5 +1,23 @@
 from django.conf import settings
 from django.shortcuts import redirect
+from django.utils.deprecation import MiddlewareMixin
+
+
+class NoCacheHTMLMiddleware(MiddlewareMixin):
+    """Mark HTML responses no-cache so browsers never serve stale pages.
+
+    A page cached on disk keeps referencing whatever hashed JS it was rendered
+    with. When the tile architecture changes (or any JS changes), an old cached
+    page keeps loading the old script — which is how a fixed map can still show
+    "Access blocked" tiles days later. Marking HTML responses no-cache makes
+    the browser revalidate every page load, while hashed static assets (unique
+    URLs per content) stay aggressively cacheable.
+    """
+
+    def process_response(self, request, response):
+        if response.get('Content-Type', '').startswith('text/html'):
+            response['Cache-Control'] = 'no-cache'
+        return response
 
 
 class LoginRequiredMiddleware:
@@ -15,6 +33,10 @@ class LoginRequiredMiddleware:
             '/admin/',
             '/i18n/',
             '/favicon.ico',
+            # Public basemap tiles: Leaflet requests them as plain <img> and
+            # cannot follow a login redirect, so an expired session would
+            # otherwise blank the map.
+            '/api/tiles/',
         ]
         # exact paths that should be exempt (no prefix matching)
         self.exact_exempt = {'/'}

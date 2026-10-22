@@ -122,6 +122,11 @@ class SoilMetrics(models.Model):
     measurement_date = models.DateField(db_column='time')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    SUBREGION_CHOICES = [
+        ('v8_st_humide_inf', 'V8 St Humide Inf'),
+        ('v8_st_sub_humide', 'V8 St Sub Humide'),
+    ]
+    subregion = models.CharField(max_length=20, choices=SUBREGION_CHOICES, blank=True, null=True, help_text='Sampling point station within the region')
     
     # Moisture Content
     moisture_content_percent = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Volumetric water content (%)")
@@ -153,7 +158,9 @@ class SoilMetrics(models.Model):
     
     class Meta:
         db_table = 'soil_metrics'
-        unique_together = ("region", "year", "measurement_date")
+        constraints = [
+            models.UniqueConstraint(fields=('region', 'year', 'measurement_date', 'latitude', 'longitude'), name='uniq_soil_region_year_date_point'),
+        ]
         ordering = ['-measurement_date']
     
     def __str__(self):
@@ -168,6 +175,11 @@ class ClimateMetrics(models.Model):
     measurement_date = models.DateField(db_column='time')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    SUBREGION_CHOICES = [
+        ('v8_st_humide_inf', 'V8 St Humide Inf'),
+        ('v8_st_sub_humide', 'V8 St Sub Humide'),
+    ]
+    subregion = models.CharField(max_length=20, choices=SUBREGION_CHOICES, blank=True, null=True, help_text='Sampling point station within the region')
     
     # Rainfall
     rainfall_mm = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, help_text="Rainfall amount (mm)")
@@ -197,7 +209,9 @@ class ClimateMetrics(models.Model):
     
     class Meta:
         db_table = 'climate_metrics'
-        unique_together = ("region", "year", "measurement_date")
+        constraints = [
+            models.UniqueConstraint(fields=('region', 'year', 'measurement_date', 'latitude', 'longitude'), name='uniq_climate_region_year_date_point'),
+        ]
         ordering = ['-measurement_date']
         indexes = [
             models.Index(fields=['region', 'measurement_date']),
@@ -215,6 +229,11 @@ class DroughtIndices(models.Model):
     measurement_date = models.DateField(db_column='time')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    SUBREGION_CHOICES = [
+        ('v8_st_humide_inf', 'V8 St Humide Inf'),
+        ('v8_st_sub_humide', 'V8 St Sub Humide'),
+    ]
+    subregion = models.CharField(max_length=20, choices=SUBREGION_CHOICES, blank=True, null=True, help_text='Sampling point station within the region')
     
     # SPI - Standardized Precipitation Index
     spi_1month = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="SPI 1-month")
@@ -246,7 +265,9 @@ class DroughtIndices(models.Model):
     
     class Meta:
         db_table = 'drought_indices'
-        unique_together = ("region", "year", "measurement_date")
+        constraints = [
+            models.UniqueConstraint(fields=('region', 'year', 'measurement_date', 'latitude', 'longitude'), name='uniq_drought_region_year_date_point'),
+        ]
         ordering = ['-measurement_date']
         indexes = [
             models.Index(fields=['region', 'measurement_date']),
@@ -265,6 +286,11 @@ class AgriculturalMetrics(models.Model):
     measurement_date = models.DateField(db_column='time')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    SUBREGION_CHOICES = [
+        ('v8_st_humide_inf', 'V8 St Humide Inf'),
+        ('v8_st_sub_humide', 'V8 St Sub Humide'),
+    ]
+    subregion = models.CharField(max_length=20, choices=SUBREGION_CHOICES, blank=True, null=True, help_text='Sampling point station within the region')
     
     # Crop Stage
     GROWTH_STAGES = [
@@ -316,6 +342,11 @@ class RemoteSensingMetrics(models.Model):
     measurement_date = models.DateField(db_column='time')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    SUBREGION_CHOICES = [
+        ('v8_st_humide_inf', 'V8 St Humide Inf'),
+        ('v8_st_sub_humide', 'V8 St Sub Humide'),
+    ]
+    subregion = models.CharField(max_length=20, choices=SUBREGION_CHOICES, blank=True, null=True, help_text='Sampling point station within the region')
     
     # NDVI - Vegetation Index
     ndvi = models.DecimalField(max_digits=4, decimal_places=3, null=True, blank=True, help_text="NDVI (-1 to 1, vegetation health)")
@@ -352,7 +383,9 @@ class RemoteSensingMetrics(models.Model):
     
     class Meta:
         db_table = 'remote_sensing_metrics'
-        unique_together = ("region", "year", "measurement_date")
+        constraints = [
+            models.UniqueConstraint(fields=('region', 'year', 'measurement_date', 'latitude', 'longitude'), name='uniq_remote_region_year_date_point'),
+        ]
         ordering = ['-measurement_date']
         indexes = [
             models.Index(fields=['region', 'measurement_date']),
@@ -370,6 +403,11 @@ class HydrologyMetrics(models.Model):
     measurement_date = models.DateField(db_column='time')
     latitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
     longitude = models.DecimalField(max_digits=10, decimal_places=6, blank=True, null=True)
+    SUBREGION_CHOICES = [
+        ('v8_st_humide_inf', 'V8 St Humide Inf'),
+        ('v8_st_sub_humide', 'V8 St Sub Humide'),
+    ]
+    subregion = models.CharField(max_length=20, choices=SUBREGION_CHOICES, blank=True, null=True, help_text='Sampling point station within the region')
     
     # Precipitation vs Evapotranspiration
     precipitation_mm = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True, help_text="Precipitation (mm)")
@@ -396,7 +434,9 @@ class HydrologyMetrics(models.Model):
     
     class Meta:
         db_table = 'hydrology_metrics'
-        unique_together = ("region", "year", "measurement_date")
+        constraints = [
+            models.UniqueConstraint(fields=('region', 'year', 'measurement_date', 'latitude', 'longitude'), name='uniq_hydro_region_year_date_point'),
+        ]
         ordering = ['-measurement_date']
         indexes = [
             models.Index(fields=['region', 'measurement_date']),
@@ -475,6 +515,90 @@ class DroughtPrediction(models.Model):
 
     def __str__(self):
         return f"Prediction - {self.region} - {self.prediction_date}"
+
+
+# ============== SPEI FORECAST (monthly drought outlook) ==============
+class SpeiForecast(models.Model):
+    """Monthly SPEI-based drought outlook from the SPEI + XGBoost pipeline.
+
+    One row per region per run: predictions of SPEI-3 one month (T+1) and
+    three months (T+3) ahead, converted to risk scores/levels/recommendations.
+    """
+    id = models.BigAutoField(primary_key=True, db_column='forecast_id')
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='spei_forecasts')
+    year = models.ForeignKey(ObservationYear, on_delete=models.SET_NULL, null=True, blank=True, related_name='spei_forecasts')
+    generated_at = models.DateTimeField(auto_now_add=True)
+    feature_month = models.DateField(help_text='First day of the month whose data was used as model input')
+    target_month_t1 = models.DateField(help_text='First day of the month covered by the T+1 forecast')
+    target_month_t3 = models.DateField(help_text='First day of the month covered by the T+3 forecast')
+    spei_t1 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text='Predicted SPEI-3 at T+1')
+    spei_t3 = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text='Predicted SPEI-3 at T+3')
+    score_t1 = models.IntegerField(null=True, blank=True, help_text='Risk score 0-100 for T+1')
+    score_t3 = models.IntegerField(null=True, blank=True, help_text='Risk score 0-100 for T+3')
+    level_t1 = models.CharField(max_length=20, blank=True)
+    level_t3 = models.CharField(max_length=20, blank=True)
+    recommendations_t1 = models.JSONField(default=list, blank=True)
+    recommendations_t3 = models.JSONField(default=list, blank=True)
+    top_drivers = models.JSONField(default=dict, blank=True)
+    validation_metrics = models.JSONField(default=dict, blank=True)
+    model_version = models.CharField(max_length=50, default='spei-xgb-v1')
+    prob_drought_t1 = models.FloatField(null=True, blank=True, help_text='Classifier probability of any drought at T+1 (0-1)')
+    prob_drought_t3 = models.FloatField(null=True, blank=True, help_text='Classifier probability of any drought at T+3 (0-1)')
+
+    class Meta:
+        db_table = 'spei_forecasts'
+        ordering = ['-generated_at']
+        indexes = [
+            models.Index(fields=['region', '-generated_at']),
+        ]
+        constraints = [
+            # One published T+1 forecast per region per feature month. Re-issues
+            # must go to a separate run archive, never overwrite the forecast
+            # that users actually saw and that verification scores.
+            models.UniqueConstraint(
+                fields=['region', 'feature_month', 'target_month_t1'],
+                name='uniq_speiforecast_region_feature_target_t1',
+            ),
+        ]
+
+    def __str__(self):
+        return f'SPEI forecast - {self.region} - {self.feature_month}'
+
+
+# ============== FORECAST VERIFICATION (live scoreboard) ==============
+class SpeiVerification(models.Model):
+    """Monthly verification of a stored SPEI forecast against observed SPEI.
+
+    One row per (region, horizon, target month) once the target month has
+    completed and its observed SPEI-3 exists. Feeds the live reliability
+    scoreboard: % of drought flags that were correct, level exactness, etc.
+    """
+    id = models.BigAutoField(primary_key=True, db_column='verification_id')
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, related_name='spei_verifications')
+    forecast = models.ForeignKey(SpeiForecast, on_delete=models.SET_NULL, null=True, blank=True, related_name='verifications')
+    horizon = models.SmallIntegerField(help_text='1 or 3 (months ahead)')
+    target_month = models.DateField(help_text='First day of the verified month')
+    predicted_level = models.CharField(max_length=20, blank=True)
+    predicted_spei = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    predicted_prob = models.FloatField(null=True, blank=True)
+    drought_predicted = models.BooleanField(default=False)
+    drought_actual = models.BooleanField(default=False)
+    flag_correct = models.BooleanField(help_text='Drought flag matched reality')
+    level_exact = models.BooleanField(default=False)
+    actual_spei = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    actual_level = models.CharField(max_length=20, blank=True)
+    verified_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'spei_verifications'
+        ordering = ['-verified_at']
+        unique_together = ('region', 'horizon', 'target_month')
+        indexes = [
+            models.Index(fields=['region', 'horizon', '-target_month']),
+        ]
+
+    def __str__(self):
+        return f'{self.region} T+{self.horizon} {self.target_month}: {"OK" if self.flag_correct else "MISS"}'
 
 
 # ============== USER PROFILE & RBAC ==============
