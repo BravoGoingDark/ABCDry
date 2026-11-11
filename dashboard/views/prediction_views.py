@@ -717,6 +717,8 @@ def drought_prediction_api(request):
         'stale': bool(_drought_risk.get('stale')),
         'band': _drought_risk.get('band') or 'unknown',
         'days_old': _drought_risk.get('days_old'),
+        'source': _drought_risk.get('source'),
+        'source_label': str(_drought_risk.get('source_label') or ''),
         'recommendation': str(_drought_risk.get('recommendation') or ''),
     }
     # A saved prediction is reused only on the day it was made; from the next
@@ -1031,8 +1033,18 @@ def spei_outlook_view(request):
         fc.warning_source = warn_source
         fc.band_t1 = band_key
         fc.band_label_t1 = band_label
-        fc.months_behind = vm.get('months_behind_today')
+        # Lag is measured against today, not against the day the forecast was
+        # generated: a card must not keep reading "next month" as it ages.
+        today = timezone.now().date()
+        if fc.target_month_t1:
+            fc.months_behind = ((today.year * 12 + today.month)
+                                - (fc.target_month_t1.year * 12 + fc.target_month_t1.month))
+        else:
+            fc.months_behind = vm.get('months_behind_today')
         fc.stale = (fc.months_behind or 0) > MAX_FORECAST_LAG_MONTHS
+        # Stored as a fraction (0-1); the card shows a percentage.
+        prob = fc.prob_drought_t1
+        fc.prob_pct_t1 = None if prob is None else round(float(prob) * 100 if float(prob) <= 1 else float(prob))
         forecasts.append(fc)
 
     verifications = list(SpeiVerification.objects.select_related('region')

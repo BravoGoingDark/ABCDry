@@ -492,9 +492,9 @@
     "semantic_hash": ""
   },
   "dashboard/tests.py": {
-    "mtime": 1794389036.8035142,
-    "seen": 1794389127.1377897,
-    "ast_hash": "cfca6f40cb3355da002e8a84b5a9b11b",
+    "mtime": 1794393390.1526124,
+    "seen": 1794393504.228548,
+    "ast_hash": "0fcc1924e45dd849e50c7f46f4ee8f4a",
     "semantic_hash": ""
   },
   "dashboard/urls.py": {
@@ -540,9 +540,9 @@
     "semantic_hash": ""
   },
   "dashboard/views/prediction_views.py": {
-    "mtime": 1794319021.0775905,
-    "seen": 1794319674.8081238,
-    "ast_hash": "cab5c19c2665846ee32724aae0925473",
+    "mtime": 1794393294.6237652,
+    "seen": 1794393504.228548,
+    "ast_hash": "df006330c988b8c3eadc2b659ff84e17",
     "semantic_hash": ""
   },
   "dashboard/views/sensor_views.py": {
@@ -552,9 +552,9 @@
     "semantic_hash": ""
   },
   "dashboard/views/utils.py": {
-    "mtime": 1794233630.1580026,
-    "seen": 1794233849.0964642,
-    "ast_hash": "c5893d6d6d05175f5dc777e3a7ec5f5e",
+    "mtime": 1794393262.1473935,
+    "seen": 1794393504.228548,
+    "ast_hash": "105443b22358d8744fbb8ea54d1da236",
     "semantic_hash": ""
   },
   "locale/build_fr_mo.py": {
@@ -1218,9 +1218,9 @@
     "semantic_hash": ""
   },
   "templates/dashboard/analysis.html": {
-    "mtime": 1794306999.9581072,
-    "seen": 1794316860.2045183,
-    "ast_hash": "395fe61f139d6c42efa5c39da93c28cf",
+    "mtime": 1794393294.6247647,
+    "seen": 1794393504.2295563,
+    "ast_hash": "810119de0b3cb5a306c873e03f9ff6f8",
     "semantic_hash": ""
   },
   "templates/dashboard/assistant.html": {
@@ -1290,9 +1290,9 @@
     "semantic_hash": ""
   },
   "templates/dashboard/spei_outlook.html": {
-    "mtime": 1794388680.2535956,
-    "seen": 1794389127.1537907,
-    "ast_hash": "8021c2a2f10a015a15df33b4e45ac353",
+    "mtime": 1794393322.5679288,
+    "seen": 1794393504.2295563,
+    "ast_hash": "b9b446a16212468dfdfb75d5bc3239b4",
     "semantic_hash": ""
   },
   "static/dashboard/img/apwrs-logo.png": {

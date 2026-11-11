@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from datetime import datetime, timezone as dt_timezone
 import json
 from unittest import mock
 
@@ -2029,3 +2030,68 @@ class DroughtGridTests(TestCase):
         r = self.client.get('/api/drought-grid/')
         self.assertEqual(r.status_code, 200)
         self.assertIn('months_behind_today', r.json())
+
+
+class PageConsistencyTests(TestCase):
+    """The analysis gauge and the forecast cards must say what they are based on."""
+
+    def setUp(self):
+        from .models import ObservationYear, Region
+        # Migrations seed some regions and years, so use names of our own.
+        self.region = Region.objects.create(name='Consistency Test Basin', latitude=37.06, longitude=9.52)
+        self.year = ObservationYear.objects.get_or_create(label='2026')[0]
+
+    def _reading(self, when, spei, subregion=''):
+        from .models import DroughtIndices
+        return DroughtIndices.objects.create(region=self.region, year=self.year, measurement_date=when,
+                                             spei_3month=spei, subregion=subregion)
+
+    def test_gauge_prefers_the_merged_series_whatever_the_row_order(self):
+        from .views.utils import assess_drought_risk
+        self._reading(date(2026, 9, 30), -1.47, 'v8_st_sub_humide')
+        self._reading(date(2026, 10, 31), 0.23, 'merged')
+        self._reading(date(2026, 10, 31), -0.52, 'v8_st_sub_humide')
+        self._reading(date(2026, 10, 31), 0.98, 'v8_st_humide_inf')
+        risk = assess_drought_risk(self.region, '', '', as_of=date(2026, 11, 11))
+        self.assertEqual((risk['spei'], risk['source'], risk['n_readings']), (0.23, 'merged', 3))
+        self.assertEqual(risk['measured_on'], date(2026, 10, 31))
+        self.assertTrue(risk['source_label'])
+
+    def test_gauge_averages_station_rows_when_no_merged_series_exists(self):
+        from .views.utils import assess_drought_risk
+        self._reading(date(2026, 10, 31), -0.52, 'v8_st_sub_humide')
+        self._reading(date(2026, 10, 31), 0.98, 'v8_st_humide_inf')
+        risk = assess_drought_risk(self.region, '', '', as_of=date(2026, 11, 11))
+        self.assertEqual((risk['spei'], risk['source']), (0.23, 'mean'))
+
+    def test_gauge_single_reading_and_no_reading(self):
+        from .views.utils import assess_drought_risk
+        self.assertIsNone(assess_drought_risk(self.region, '', '')['source'])
+        self._reading(date(2026, 10, 31), -1.2)
+        risk = assess_drought_risk(self.region, '', '', as_of=date(2026, 11, 11))
+        self.assertEqual((risk['spei'], risk['source']), (-1.2, 'single'))
+
+    # Plain static storage: the manifest one needs a collectstatic run first.
+    @override_settings(STATICFILES_STORAGE='django.contrib.staticfiles.storage.StaticFilesStorage')
+    def test_forecast_card_is_marked_outdated_and_shows_a_percentage(self):
+        from .models import SpeiForecast
+        SpeiForecast.objects.create(
+            region=self.region, feature_month=date(2025, 12, 1), target_month_t1=date(2026, 1, 1),
+            target_month_t3=date(2026, 3, 1), spei_t1=0.30, score_t1=20, level_t1='Low',
+            prob_drought_t1=0.141, validation_metrics={'months_behind_today': 0})
+        user = get_user_model().objects.create_user('pc', password='pw')
+        self.client.force_login(user)
+        with mock.patch('dashboard.views.prediction_views.get_region_forecast', return_value=None), \
+                mock.patch('dashboard.views.prediction_views.timezone.now',
+                           return_value=datetime(2026, 11, 11, tzinfo=dt_timezone.utc)):
+            response = self.client.get('/analysis/spei-outlook/')
+        self.assertEqual(response.status_code, 200)
+        card = response.context['forecasts'][0]
+        # Lag is measured against today, not the value frozen at generation time.
+        self.assertEqual(card.months_behind, 10)
+        self.assertTrue(card.stale)
+        self.assertEqual(card.prob_pct_t1, 14)
+        html = response.content.decode()
+        self.assertIn('OUTDATED', html)
+        self.assertIn('14%', html)
+        self.assertNotIn('0.141%', html)

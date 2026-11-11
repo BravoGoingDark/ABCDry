@@ -346,16 +346,23 @@
             <div>
                 <h2 class="font-headline font-bold text-lg text-on-surface mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-xl">event_upcoming</span>
-                    {% trans "Current Outlook — Next Month (T+1 Drought Risk)" %}
+                    {% trans "Regional SPEI-3 Outlook — One Month Ahead (monthly model)" %}
                 </h2>
+                <p class="-mt-2 mb-4 text-xs text-on-surface-variant">
+                    {% trans "A separate monthly model built on each region's own climate records. It is not the map above: the map uses satellite rainfall on a 29-cell grid and a 1981–2010 baseline, so the two can differ." %}
+                </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {% for f in forecasts %}
-                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm hover:border-primary transition-colors flex flex-col justify-between space-y-4">
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm hover:border-primary transition-colors flex flex-col justify-between space-y-4{% if f.stale %} opacity-70{% endif %}">
                         <div>
                             <div class="flex items-start justify-between">
                                 <h3 class="font-headline font-bold text-base text-primary">{{ f.region.name }}</h3>
-                                {% if f.warning_t1 %}
+                                {% if f.stale %}
+                                <span class="text-[10px] font-label font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                                    {% trans "OUTDATED" %}
+                                </span>
+                                {% elif f.warning_t1 %}
                                 <span class="text-[10px] font-label font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
                                     {% trans "WARNING" %}
                                 </span>
@@ -367,7 +374,13 @@
                             </div>
                             <div class="text-xs text-on-surface-variant mt-1">
                                 {% trans "Target" %}: <span class="font-semibold text-on-surface">{{ f.target_month_t1|date:"F Y" }}</span>
+                                &middot; {% trans "data up to" %} <span class="font-semibold text-on-surface">{{ f.feature_month|date:"F Y" }}</span>
                             </div>
+                            {% if f.stale %}
+                            <div class="mt-2 rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-800">
+                                {% blocktrans with n=f.months_behind %}This target month is {{ n }} months in the past. It is not a current outlook: refresh the monthly climate data and retrain to update it.{% endblocktrans %}
+                            </div>
+                            {% endif %}
 
                             <div class="flex items-center gap-2 mt-3">
                                 <span class="text-xs font-semibold px-2 py-0.5 rounded {{ f.level_t1_css }}">
@@ -381,11 +394,11 @@
                             <div class="mt-4">
                                 <div class="flex justify-between text-xs mb-1">
                                     <span class="text-on-surface-variant">{% trans "Drought Probability" %}</span>
-                                    <span class="font-bold text-on-surface">{{ f.prob_drought_t1|default:0 }}%</span>
+                                    <span class="font-bold text-on-surface">{{ f.prob_pct_t1|default:0 }}%</span>
                                 </div>
                                 <div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
-                                    <div class="h-2 rounded-full transition-all {% if f.prob_drought_t1 >= 50 %}bg-red-500{% elif f.prob_drought_t1 >= 25 %}bg-amber-500{% else %}bg-emerald-500{% endif %}" 
-                                         style="width: {{ f.prob_drought_t1|default:0 }}%;"></div>
+                                    <div class="h-2 rounded-full transition-all {% if f.prob_pct_t1 >= 50 %}bg-red-500{% elif f.prob_pct_t1 >= 25 %}bg-amber-500{% else %}bg-emerald-500{% endif %}" 
+                                         style="width: {{ f.prob_pct_t1|default:0 }}%;"></div>
                                 </div>
                             </div>
 

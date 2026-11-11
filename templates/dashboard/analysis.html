@@ -433,6 +433,10 @@
             <p id="risk-overview-spei" class="mt-2 text-[11px] text-on-surface-variant font-mono {% if risk.spei is None %}hidden{% endif %}" title="{% trans "Measured SPEI-3 driving this level" %}">
                 {% trans "SPEI-3" %}: <span id="risk-overview-spei-value">{{ risk.spei|default:"—" }}</span><span id="risk-overview-spei-date">{% if risk.measured_on %} &middot; {{ risk.measured_on|date:"Y-m" }}{% endif %}</span>
             </p>
+            <p class="mt-1 text-[10px] leading-snug text-on-surface-variant">
+                {% trans "Measured, not forecast." %} {% trans "Source" %}: <span id="risk-overview-source">{{ risk.source_label|default:"—" }}</span>.
+                {% trans "The Forecast page map uses satellite rainfall and a 1981–2010 baseline, and its data arrives 3–6 weeks later, so its SPEI can differ." %}
+            </p>
         </div>
     </div>
 
@@ -581,7 +585,8 @@
 </div>
 <!-- Drought Risk Trend -->
 <div>
-    <div class="text-[10px] font-bold font-mono uppercase tracking-wider text-on-surface-variant mb-3">Drought Risk Trend (0–100)</div>
+    <div class="text-[10px] font-bold font-mono uppercase tracking-wider text-on-surface-variant">Drought Risk Trend (0–100)</div>
+    <div class="text-[10px] text-on-surface-variant mb-3">{% trans "Daily model score, not SPEI. Verified useful to about 7 days ahead; the 30-day value is indicative only." %}</div>
     <div class="h-48"><canvas id="risk-chart"></canvas></div>
 </div>
 </div>
@@ -1317,6 +1322,8 @@ function updateDashboard(data) {
         if (speiWrap) speiWrap.classList.toggle('hidden', !hasSpei);
         if (speiValueEl) speiValueEl.textContent = hasSpei ? gauge.spei : '—';
         if (speiDateEl) speiDateEl.textContent = gauge.measured_on ? ' · ' + gauge.measured_on : '';
+        const sourceEl = document.getElementById('risk-overview-source');
+        if (sourceEl) sourceEl.textContent = gauge.source_label || '—';
         const regionMeta = document.getElementById('risk-overview-region');
         if (regionMeta && p.region) regionMeta.textContent = p.region;
         const readingMeta = document.getElementById('risk-overview-reading');

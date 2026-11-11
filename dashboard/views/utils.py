@@ -501,6 +501,10 @@ def assess_drought_risk(region, crop_name, irrigation_name, as_of=None):
         "assessed": False,
         "crop_sensitivity": _crop_sensitivity(crop_name),
         "irrigation_buffer": _irrigation_buffer(irrigation_name),
+        # Which SPEI-3 record the assessment rests on: merged | mean | single.
+        "source": None,
+        "source_label": "",
+        "n_readings": 0,
         "risk_level": _("Unknown"),
         "recommendation": "",
     }
@@ -511,12 +515,24 @@ def assess_drought_risk(region, crop_name, irrigation_name, as_of=None):
         )
         return result
 
-    reading = (
-        DroughtIndices.objects.filter(region=region)
-        .exclude(spei_3month=None)
-        .order_by("-measurement_date")
-        .first()
-    )
+    # A region can hold several SPEI-3 rows for the same month: one per weather
+    # station plus a "merged" regional series. Taking "the newest row" would pick
+    # one of them at random, so the rule is explicit: newest month, then the
+    # merged series if it exists, otherwise the mean of that month's rows.
+    readings = DroughtIndices.objects.filter(region=region).exclude(spei_3month=None)
+    reading = readings.order_by("-measurement_date", "-id").first()
+    same_month = []
+    if reading is not None:
+        same_month = list(readings.filter(measurement_date=reading.measurement_date).order_by("id"))
+        merged = [row for row in same_month if (row.subregion or "") == "merged"]
+        if merged:
+            reading = merged[-1]
+            result["source"] = "merged"
+        elif len(same_month) > 1:
+            result["source"] = "mean"
+        else:
+            result["source"] = "single"
+        result["n_readings"] = len(same_month)
     if reading is None:
         result["recommendation"] = _(
             "No SPEI-3 reading exists for this region, so the drought risk cannot be "
@@ -524,7 +540,15 @@ def assess_drought_risk(region, crop_name, irrigation_name, as_of=None):
         )
         return result
 
-    spei = float(reading.spei_3month)
+    if result["source"] == "mean":
+        spei = sum(float(row.spei_3month) for row in same_month) / len(same_month)
+    else:
+        spei = float(reading.spei_3month)
+    result["source_label"] = {
+        "merged": _("Weather stations, merged regional series"),
+        "mean": _("Weather stations, mean of %(n)s readings") % {"n": len(same_month)},
+        "single": _("Regional drought-index record"),
+    }[result["source"]]
     # measurement_date is declared a DateField but the column is a timestamp,
     # so the value can come back as a datetime. Normalise before arithmetic.
     measured_on = reading.measurement_date
