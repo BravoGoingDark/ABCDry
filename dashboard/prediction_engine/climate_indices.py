@@ -4,13 +4,10 @@ Ingests monthly NOAA Climate Prediction Center (CPC) standardized NAO indices,
 which govern seasonal storm tracks and rainfall variability across the Western
 Mediterranean and North Africa (including Tunisia).
 """
-import io
 import logging
-import os
 import urllib.request
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from django.conf import settings
 

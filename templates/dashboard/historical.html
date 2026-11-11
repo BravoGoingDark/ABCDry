@@ -1,0 +1,1057 @@
+{% load i18n static %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{% trans "Historical Observations" %} | APWRS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#b2ebff",
+                        "on-tertiary-fixed-variant": "#554338",
+                        "inverse-on-surface": "#ebf1ff",
+                        "on-surface-variant": "#414844",
+                        "primary-fixed-dim": "#a5d0b9",
+                        "surface-variant": "#dce2f3",
+                        "tertiary-fixed": "#f9ddce",
+                        "secondary": "#00677d",
+                        "on-primary-fixed-variant": "#274e3d",
+                        "surface-dim": "#d3daea",
+                        "secondary-container": "#72ddfd",
+                        "primary": "#012d1d",
+                        "on-tertiary-fixed": "#27180f",
+                        "primary-fixed": "#c1ecd4",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#1b4332",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#dcc1b2",
+                        "surface-tint": "#3f6653",
+                        "surface-container": "#e7eefe",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#a5d0b9",
+                        "tertiary-container": "#4a382d",
+                        "surface-container-highest": "#dce2f3",
+                        "on-surface": "#151c27",
+                        "outline": "#717973",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-container": "#baa193",
+                        "surface-bright": "#f9f9ff",
+                        "surface": "#f9f9ff",
+                        "on-primary-container": "#86af99",
+                        "surface-container-high": "#e2e8f8",
+                        "on-secondary-container": "#006075",
+                        "inverse-surface": "#2a313d",
+                        "outline-variant": "#c1c8c2",
+                        "on-primary-fixed": "#002114",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "background": "#f9f9ff",
+                        "on-background": "#151c27",
+                        "tertiary": "#322319",
+                        "surface-container-low": "#f0f3ff",
+                        "secondary-fixed-dim": "#69d4f4",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001f27",
+                        "on-secondary-fixed-variant": "#004e5f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "2xl": "0.75rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline": ["Hanken Grotesk"],
+                        "display": ["Hanken Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Hanken Grotesk', sans-serif; }
+        .font-label { font-family: 'JetBrains Mono', monospace; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f0f3ff;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c8c2;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #717973;
+        }
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-surface text-on-surface overflow-x-hidden min-h-screen">
+<!-- Top Navigation Header -->
+{% include "dashboard/_header.html" %}
+
+<!-- APWRS Global Navigation Sidebar -->
+{% include "dashboard/_sidebar.html" with active_page="history" %}
+
+<!-- MAIN CONTENT -->
+<main id="main-content" class="pt-16 min-h-screen bg-background pb-12 overflow-x-hidden transition-all duration-300 ease-in-out lg:ml-60">
+<div class="max-w-7xl mx-auto p-6 md:p-10 space-y-8">
+    {% include "dashboard/_page_toolbar.html" with page_actions="dashboard/_page_actions_historical.html" %}
+
+    <!-- PAGE TITLE & HEADER -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-outline-variant/60">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-label font-bold mb-3">
+                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                {% trans "TEMPORAL INTELLIGENCE & OBSERVATION ARCHIVE" %}
+            </div>
+            <h1 class="text-3xl md:text-5xl font-headline font-black text-primary tracking-tight">
+                {% trans "HISTORICAL" %} <span class="text-secondary">{% trans "OBSERVATIONS" %}</span>
+            </h1>
+            <p class="text-on-surface-variant text-sm mt-2 max-w-2xl leading-relaxed">
+                {% trans "Query, compare, and analyze previous environmental observations across specific time intervals, biometric sensors, and satellite records." %}
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span id="active-station-badge" class="font-label text-xs font-bold px-3 py-1.5 rounded-lg bg-surface-container-high border border-outline-variant text-on-surface flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-secondary">location_on</span>
+                <span id="active-region-name">{% if regions %}{{ regions.0.name }}{% else %}Ichkeul{% endif %}</span>
+            </span>
+            <button onclick="fetchHistoricalData()" class="px-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant hover:border-primary text-xs font-label font-bold flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors" title="{% trans 'Refresh Data' %}">
+                <span id="refresh-icon" class="material-symbols-outlined text-sm">sync</span>
+                <span>{% trans "Refresh" %}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- FILTER CONSOLE: REGION, CATEGORY, METRIC & INTERVAL -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm space-y-6">
+        
+        <!-- ROW 1: Region & Metric Categories -->
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <!-- Region Selector -->
+            <div class="w-full lg:w-72 shrink-0">
+                <label class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest mb-1.5">
+                    {% trans "Target Region / Basin" %}
+                </label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-sm pointer-events-none">pin_drop</span>
+                    <select id="region-select" onchange="onRegionChange()" class="w-full pl-9 pr-8 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm font-headline font-bold text-on-surface focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none transition-all cursor-pointer">
+                        {% for r in regions %}
+                        <option value="{{ r.id }}" {% if r.name|lower == 'ichkeul' %}selected{% endif %}>{{ r.name }}{% if r.name|lower == 'ichkeul' %} ({% trans "Primary Database - 125k+ Records" %}){% endif %}</option>
+                        {% empty %}
+                        <option value="4" selected>Ichkeul ({% trans "Primary Database" %})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Category Pills -->
+            <div class="flex-1 w-full">
+                <label class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest mb-1.5">
+                    {% trans "Metric Domain / Category" %}
+                </label>
+                <div class="flex flex-wrap gap-2" id="category-pills">
+                    <!-- Populated dynamically via JS or pre-rendered -->
+                    {% for cat in categories_catalog %}
+                    <button type="button" 
+                            onclick="selectCategory('{{ cat.id }}')"
+                            data-cat-id="{{ cat.id }}"
+                            class="category-pill flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-headline font-bold transition-all border {% if forloop.first %}bg-primary text-on-primary border-primary shadow-sm{% else %}bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-secondary hover:text-primary{% endif %}">
+                        <span class="material-symbols-outlined text-sm">{{ cat.icon }}</span>
+                        <span>{{ cat.name }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="h-px bg-outline-variant/50"></div>
+
+        <!-- ROW 2: Specific Metric & Temporal Interval Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            
+            <!-- Metric Dropdown -->
+            <div class="md:col-span-5">
+                <label class="block text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest mb-1.5">
+                    {% trans "Observed Metric" %}
+                </label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-secondary text-sm pointer-events-none">query_stats</span>
+                    <select id="metric-select" onchange="onMetricChange()" class="w-full pl-9 pr-8 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-sm font-headline font-semibold text-on-surface focus:ring-2 focus:ring-secondary/20 focus:border-secondary focus:outline-none transition-all cursor-pointer">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Time Interval Selector -->
+            <div class="md:col-span-7">
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="text-[10px] font-label font-bold text-on-surface-variant uppercase tracking-widest">
+                        {% trans "Temporal Interval" %}
+                    </label>
+                    <span id="interval-date-range-display" class="font-label text-[11px] font-semibold text-secondary"></span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5" id="interval-pills">
+                    <button type="button" onclick="selectInterval('7d')" data-interval="7d" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">7D</button>
+                    <button type="button" onclick="selectInterval('30d')" data-interval="30d" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">30D</button>
+                    <button type="button" onclick="selectInterval('90d')" data-interval="90d" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">90D</button>
+                    <button type="button" onclick="selectInterval('6m')" data-interval="6m" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">6M</button>
+                    <button type="button" onclick="selectInterval('1y')" data-interval="1y" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-primary text-on-primary border-primary shadow-sm">1Y</button>
+                    <button type="button" onclick="selectInterval('5y')" data-interval="5y" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">5Y</button>
+                    <button type="button" onclick="selectInterval('all')" data-interval="all" class="interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">{% trans "ALL" %}</button>
+                    <button type="button" onclick="toggleCustomRange()" data-interval="custom" class="interval-pill flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary">
+                        <span class="material-symbols-outlined text-xs">date_range</span>
+                        <span>{% trans "Custom" %}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Date Range Sub-Bar (Expandable) -->
+        <div id="custom-range-box" class="hidden pt-4 border-t border-outline-variant/40 flex flex-wrap items-center gap-4 bg-surface-container-low/60 p-4 rounded-xl">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-label font-bold text-on-surface-variant">{% trans "From:" %}</label>
+                <input type="date" id="custom-date-from" class="px-3 py-1.5 rounded-lg border border-outline-variant text-xs font-label bg-surface focus:outline-none focus:border-secondary text-on-surface"/>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-label font-bold text-on-surface-variant">{% trans "To:" %}</label>
+                <input type="date" id="custom-date-to" class="px-3 py-1.5 rounded-lg border border-outline-variant text-xs font-label bg-surface focus:outline-none focus:border-secondary text-on-surface"/>
+            </div>
+            <button type="button" onclick="applyCustomDateRange()" class="px-4 py-1.5 bg-secondary text-on-secondary rounded-lg text-xs font-headline font-bold hover:opacity-90 transition-opacity">
+                {% trans "Apply Date Window" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI OBSERVATION SUMMARY CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        
+        <!-- Card 1: Latest Observation -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:border-secondary transition-all">
+            <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider">{% trans "Latest Observation" %}</span>
+                <span class="material-symbols-outlined text-secondary text-base">sensors</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span id="kpi-latest-val" class="text-3xl font-headline font-black text-primary">--</span>
+                <span id="kpi-latest-unit" class="text-xs font-label font-bold text-on-surface-variant"></span>
+            </div>
+            <div class="mt-2 flex items-center justify-between text-[11px] font-label">
+                <span id="kpi-latest-date" class="text-on-surface-variant/70">--</span>
+                <span id="kpi-latest-dev-badge" class="px-1.5 py-0.5 rounded font-bold"></span>
+            </div>
+        </div>
+
+        <!-- Card 2: Interval Mean Baseline -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:border-secondary transition-all">
+            <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider">{% trans "Interval Mean" %}</span>
+                <span class="material-symbols-outlined text-secondary text-base">functions</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span id="kpi-mean-val" class="text-3xl font-headline font-black text-on-surface">--</span>
+                <span id="kpi-mean-unit" class="text-xs font-label font-bold text-on-surface-variant"></span>
+            </div>
+            <p id="kpi-count-desc" class="mt-2 text-[11px] font-label text-on-surface-variant/70 truncate">
+                {% trans "Over -- observations" %}
+            </p>
+        </div>
+
+        <!-- Card 3: Interval Peak (Max) -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:border-error transition-all group">
+            <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider text-error">{% trans "Interval Max (Peak)" %}</span>
+                <span class="material-symbols-outlined text-error text-base">arrow_upward</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span id="kpi-max-val" class="text-3xl font-headline font-black text-error">--</span>
+                <span id="kpi-max-unit" class="text-xs font-label font-bold text-on-surface-variant"></span>
+            </div>
+            <p id="kpi-max-date" class="mt-2 text-[11px] font-label text-on-surface-variant/70 truncate">
+                --
+            </p>
+        </div>
+
+        <!-- Card 4: Interval Trough (Min) -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:border-primary-fixed-dim transition-all">
+            <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider text-primary-fixed-dim">{% trans "Interval Min (Low)" %}</span>
+                <span class="material-symbols-outlined text-primary text-base">arrow_downward</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span id="kpi-min-val" class="text-3xl font-headline font-black text-primary">--</span>
+                <span id="kpi-min-unit" class="text-xs font-label font-bold text-on-surface-variant"></span>
+            </div>
+            <p id="kpi-min-date" class="mt-2 text-[11px] font-label text-on-surface-variant/70 truncate">
+                --
+            </p>
+        </div>
+
+        <!-- Card 5: Trend & Anomaly -->
+        <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 hover:border-secondary transition-all col-span-2 md:col-span-1">
+            <div class="flex items-center justify-between text-on-surface-variant mb-2">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider">{% trans "Interval Trend" %}</span>
+                <span id="kpi-trend-icon" class="material-symbols-outlined text-base text-secondary">trending_flat</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+                <span id="kpi-trend-val" class="text-3xl font-headline font-black text-secondary">0.0%</span>
+            </div>
+            <div class="mt-2 flex items-center gap-1.5">
+                <span id="kpi-status-badge" class="px-2 py-0.5 rounded text-[10px] font-label font-bold bg-secondary-container/30 text-secondary">
+                    {% trans "Calculating" %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIME-SERIES VISUALIZATION: INTERACTIVE CHART -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span id="chart-metric-icon" class="material-symbols-outlined text-secondary text-2xl">timeline</span>
+                    <h3 id="chart-metric-title" class="text-xl md:text-2xl font-headline font-black text-primary">
+                        {% trans "Temporal Metric Observations" %}
+                    </h3>
+                </div>
+                <p id="chart-metric-description" class="text-xs text-on-surface-variant mt-1 max-w-2xl">
+                    {% trans "Recorded observation points over the requested interval with baseline threshold and anomaly deviation." %}
+                </p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <!-- Toggle Bar / Line -->
+                <div class="inline-flex rounded-lg border border-outline-variant bg-surface-container-low p-0.5">
+                    <button type="button" onclick="setChartType('line')" id="chart-btn-line" class="px-3 py-1 text-xs font-label font-bold rounded-md bg-surface text-primary shadow-xs">
+                        {% trans "Line" %}
+                    </button>
+                    <button type="button" onclick="setChartType('bar')" id="chart-btn-bar" class="px-3 py-1 text-xs font-label font-bold rounded-md text-on-surface-variant hover:text-primary">
+                        {% trans "Bar" %}
+                    </button>
+                </div>
+
+                <!-- Export Series Button -->
+                <button type="button" onclick="downloadCurrentSeriesExcel()" class="px-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant hover:border-secondary text-xs font-label font-bold text-on-surface-variant hover:text-secondary flex items-center gap-1 transition-colors">
+                    <span class="material-symbols-outlined text-sm">file_download</span>
+                    <span>{% trans "Export Series" %}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full h-[360px] md:h-[420px]">
+            <canvas id="historicalChart"></canvas>
+            <div id="chart-loader" class="hidden absolute inset-0 bg-surface/80 backdrop-blur-xs flex items-center justify-center z-10">
+                <div class="flex flex-col items-center gap-2 text-secondary font-label text-xs font-bold">
+                    <span class="material-symbols-outlined text-3xl animate-spin">progress_activity</span>
+                    <span>{% trans "Loading observation series..." %}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-outline-variant/40 text-xs font-label text-on-surface-variant">
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-3 h-3 rounded-full bg-secondary inline-block"></span>
+                    <span>{% trans "Observed Value" %}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-4 h-0.5 border-t-2 border-dashed border-outline inline-block"></span>
+                    <span>{% trans "Interval Baseline Mean" %}</span>
+                </div>
+            </div>
+            <div class="text-[11px] text-on-surface-variant/70">
+                {% trans "Data Frequency: Chronological observation records" %}
+            </div>
+        </div>
+    </div>
+
+    <!-- PREVIOUS OBSERVATIONS LOG TABLE -->
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 md:p-8 shadow-sm space-y-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h3 class="text-xl font-headline font-black text-primary flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">table_rows</span>
+                    {% trans "PREVIOUS OBSERVATIONS LOG" %}
+                </h3>
+                <p class="text-xs text-on-surface-variant mt-0.5">
+                    {% trans "Granular chronological list of recorded observations for this metric in the selected interval." %}
+                </p>
+            </div>
+
+            <!-- Table Filters & Search -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-2.5 top-2 text-on-surface-variant text-sm pointer-events-none">search</span>
+                    <input type="text" id="table-search" oninput="filterObservationsTable()" placeholder="{% trans 'Search date or station...' %}" class="pl-8 pr-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg text-xs font-label focus:outline-none focus:border-secondary w-48 text-on-surface"/>
+                </div>
+                
+                <select id="table-status-filter" onchange="filterObservationsTable()" class="px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg text-xs font-label focus:outline-none focus:border-secondary text-on-surface cursor-pointer">
+                    <option value="all">{% trans "All Statuses" %}</option>
+                    <option value="normal">{% trans "Normal" %}</option>
+                    <option value="high">{% trans "Elevated / Surplus" %}</option>
+                    <option value="low">{% trans "Deficit / Low" %}</option>
+                </select>
+
+                <button onclick="downloadCurrentSeriesExcel()" class="px-3 py-1.5 bg-surface-container-low border border-outline-variant hover:border-primary rounded-lg text-xs font-label font-bold text-on-surface hover:text-primary transition-colors flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    <span>{% trans "Excel" %}</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Table Element -->
+        <div class="overflow-x-auto custom-scrollbar border border-outline-variant/60 rounded-xl">
+            <table class="w-full text-left text-sm" id="observations-table">
+                <thead class="bg-surface-container-low text-[11px] font-label font-bold text-on-surface-variant uppercase tracking-wider border-b border-outline-variant">
+                    <tr>
+                        <th class="py-3 px-4">{% trans "Observation Date" %}</th>
+                        <th class="py-3 px-4">{% trans "Station / Subregion" %}</th>
+                        <th class="py-3 px-4">{% trans "Observed Value" %}</th>
+                        <th class="py-3 px-4">{% trans "Baseline Mean" %}</th>
+                        <th class="py-3 px-4">{% trans "Deviation (Anomaly)" %}</th>
+                        <th class="py-3 px-4">{% trans "Condition Flag" %}</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant/30 font-body text-xs" id="observations-tbody">
+                    <!-- Populated dynamically via JS -->
+                    <tr>
+                        <td colspan="6" class="py-8 text-center text-on-surface-variant font-label">
+                            {% trans "Loading previous observations..." %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Pagination -->
+        <div class="flex items-center justify-between text-xs font-label text-on-surface-variant pt-2">
+            <span id="table-page-info">{% trans "Showing 0 to 0 of 0 observations" %}</span>
+            <div class="flex items-center gap-2">
+                <button type="button" id="table-prev-btn" onclick="changeTablePage(-1)" class="px-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed">
+                    {% trans "Previous" %}
+                </button>
+                <span id="table-current-page" class="font-bold px-2">1</span>
+                <button type="button" id="table-next-btn" onclick="changeTablePage(1)" class="px-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant hover:bg-surface-container disabled:opacity-40 disabled:cursor-not-allowed">
+                    {% trans "Next" %}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- METADATA & METHODOLOGY FOOTNOTE -->
+    <div class="p-5 bg-surface-container-low border-l-4 border-secondary rounded-r-xl flex items-start gap-4">
+        <span class="material-symbols-outlined text-secondary mt-0.5">verified</span>
+        <div>
+            <h4 class="text-xs font-bold font-headline text-on-surface uppercase tracking-wider mb-1">
+                {% trans "Data Provenance & Calculation Methodology" %}
+            </h4>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+                {% trans "Historical records reflect combined field station telemetries, CHIRPS 0.05° satellite precipitation estimates, MODIS/Sentinel-2 vegetation products, and FAO-56 Penman-Monteith agro-hydrological models. Deviations are calculated against the empirical baseline mean for the active interval window." %}
+            </p>
+        </div>
+    </div>
+
+    {% include 'dashboard/_partners.html' %}
+</div>
+</main>
+
+<!-- Historical Export Modal -->
+<div id="historicalExportModal" class="hidden fixed inset-0 bg-[rgba(21,28,39,0.58)] backdrop-blur-[10px] flex items-center justify-center z-[9999] p-4">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-xl max-w-md w-full mx-4 overflow-hidden">
+        <div class="flex justify-between items-center mb-5 border-b border-outline-variant/50 pb-3">
+            <h2 class="font-headline font-semibold text-on-surface text-lg flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">download</span>
+                {% trans "Export Observation Data" %}
+            </h2>
+            <button onclick="document.getElementById('historicalExportModal').classList.add('hidden')" class="text-on-surface-variant hover:text-on-surface">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="historicalExportForm" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Region" %}</label>
+                <select id="export-region" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none">
+                    {% for r in regions %}
+                    <option value="{{ r.id }}">{{ r.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Observation Scope" %}</label>
+                <select id="export-scope" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none">
+                    <option value="current">{% trans "Current Active Metric Series" %}</option>
+                    <option value="all">{% trans "All Metrics Combined (Standard Audit)" %}</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Date From" %}</label>
+                <input id="export-date-from" type="date" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none text-on-surface" required/>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider mb-2">{% trans "Date To" %}</label>
+                <input id="export-date-to" type="date" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none text-on-surface" required/>
+            </div>
+            <div class="flex gap-3 pt-4 border-t border-outline-variant/50">
+                <button type="button" onclick="document.getElementById('historicalExportModal').classList.add('hidden')" class="flex-1 bg-surface-container-high text-on-surface font-semibold py-2 rounded-lg transition-colors hover:bg-surface-container text-xs">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="submit" class="flex-1 bg-secondary text-on-secondary font-semibold py-2 rounded-lg transition-colors hover:opacity-90 text-xs flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    <span>{% trans "Export to Excel" %}</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="bg-surface border-t border-outline-variant p-6 z-20">
+    <div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto gap-4">
+        <div class="flex items-center gap-4">
+            <p class="font-label text-[10px] uppercase font-black tracking-tight text-on-surface-variant">
+                © 2024-2026 {% trans "APWRS Environmental Intelligence System" %}
+            </p>
+            <span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+            <p class="font-label text-[10px] uppercase font-bold text-on-surface-variant/60">
+                {% trans "Ichkeul & Medjerda Agricultural Observatories" %}
+            </p>
+        </div>
+        <div class="flex gap-6">
+            <a class="font-label text-[10px] uppercase font-black tracking-tighter text-outline hover:text-primary transition-colors" href="{% url 'dashboard:calendar' %}">{% trans "Planting Calendar" %}</a>
+            <a class="font-label text-[10px] uppercase font-black tracking-tighter text-outline hover:text-primary transition-colors" href="{% url 'dashboard:spei_outlook' %}">{% trans "Predictions" %}</a>
+            <a class="font-label text-[10px] uppercase font-black tracking-tighter text-outline hover:text-primary transition-colors" href="{% url 'dashboard:sensors' %}">{% trans "IoT Sensors" %}</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Embedded Catalog Data -->
+<script id="catalog-data" type="application/json">{{ categories_catalog_json|safe }}</script>
+
+<!-- JAVASCRIPT APP LOGIC -->
+<script>
+    // State
+    var catalog = JSON.parse(document.getElementById('catalog-data').textContent || '[]');
+    var currentRegionId = document.getElementById('region-select').value || '1';
+    var currentCategory = 'climate';
+    var currentMetric = 'rainfall_mm';
+    var currentInterval = '1y';
+    var customDateFrom = '';
+    var customDateTo = '';
+    var chartInstance = null;
+    var currentChartType = 'line';
+    var currentData = null;
+    var filteredObservations = [];
+    var currentPage = 1;
+    var pageSize = 12;
+
+    // Initialize UI on DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', function() {
+        populateMetricDropdown();
+        initDefaultDates();
+        fetchHistoricalData();
+
+        // Export modal wireup
+        var exportBtn = document.getElementById('historical-export-btn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+                document.getElementById('export-region').value = currentRegionId;
+                if (currentData) {
+                    document.getElementById('export-date-from').value = currentData.start_date || '';
+                    document.getElementById('export-date-to').value = currentData.end_date || '';
+                }
+                document.getElementById('historicalExportModal').classList.remove('hidden');
+            });
+        }
+
+        var exportForm = document.getElementById('historicalExportForm');
+        if (exportForm) {
+            exportForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var regionId = document.getElementById('export-region').value;
+                var scope = document.getElementById('export-scope').value;
+                var dateFrom = document.getElementById('export-date-from').value;
+                var dateTo = document.getElementById('export-date-to').value;
+                
+                var url = '/api/historical-export/?region_id=' + encodeURIComponent(regionId)
+                        + '&date_from=' + encodeURIComponent(dateFrom)
+                        + '&date_to=' + encodeURIComponent(dateTo);
+                
+                if (scope === 'current') {
+                    url += '&category=' + encodeURIComponent(currentCategory)
+                         + '&metric=' + encodeURIComponent(currentMetric);
+                }
+                
+                window.location.href = url;
+                document.getElementById('historicalExportModal').classList.add('hidden');
+            });
+        }
+    });
+
+    function initDefaultDates() {
+        var today = new Date();
+        var yyyy = today.getFullYear();
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var dd = String(today.getDate()).padStart(2, '0');
+        var todayStr = yyyy + '-' + mm + '-' + dd;
+        
+        var yearAgo = new Date();
+        yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+        var y_yyyy = yearAgo.getFullYear();
+        var y_mm = String(yearAgo.getMonth() + 1).padStart(2, '0');
+        var y_dd = String(yearAgo.getDate()).padStart(2, '0');
+        var yearAgoStr = y_yyyy + '-' + y_mm + '-' + y_dd;
+
+        document.getElementById('custom-date-from').value = yearAgoStr;
+        document.getElementById('custom-date-to').value = todayStr;
+        document.getElementById('export-date-from').value = yearAgoStr;
+        document.getElementById('export-date-to').value = todayStr;
+    }
+
+    function populateMetricDropdown() {
+        var select = document.getElementById('metric-select');
+        select.innerHTML = '';
+
+        var catObj = catalog.find(function(c) { return c.id === currentCategory; });
+        if (!catObj || !catObj.metrics.length) return;
+
+        catObj.metrics.forEach(function(m, idx) {
+            var opt = document.createElement('option');
+            opt.value = m.id;
+            opt.textContent = m.label + ' (' + m.unit + ')';
+            if (m.id === currentMetric || (!currentMetric && idx === 0)) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+
+        currentMetric = select.value;
+    }
+
+    function selectCategory(catId) {
+        if (currentCategory === catId) return;
+        currentCategory = catId;
+
+        // Update Category Pills highlight
+        document.querySelectorAll('.category-pill').forEach(function(pill) {
+            if (pill.getAttribute('data-cat-id') === catId) {
+                pill.className = 'category-pill flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-headline font-bold transition-all border bg-primary text-on-primary border-primary shadow-sm';
+            } else {
+                pill.className = 'category-pill flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-headline font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-secondary hover:text-primary';
+            }
+        });
+
+        // Repopulate Metric Dropdown
+        currentMetric = '';
+        populateMetricDropdown();
+        fetchHistoricalData();
+    }
+
+    function onMetricChange() {
+        currentMetric = document.getElementById('metric-select').value;
+        fetchHistoricalData();
+    }
+
+    function onRegionChange() {
+        currentRegionId = document.getElementById('region-select').value;
+        var regText = document.getElementById('region-select').options[document.getElementById('region-select').selectedIndex].text;
+        document.getElementById('active-region-name').textContent = regText;
+        fetchHistoricalData();
+    }
+
+    function selectInterval(interval) {
+        currentInterval = interval;
+        document.getElementById('custom-range-box').classList.add('hidden');
+
+        document.querySelectorAll('.interval-pill').forEach(function(pill) {
+            if (pill.getAttribute('data-interval') === interval) {
+                pill.className = 'interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-primary text-on-primary border-primary shadow-sm';
+            } else {
+                pill.className = 'interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary';
+            }
+        });
+
+        fetchHistoricalData();
+    }
+
+    function toggleCustomRange() {
+        var box = document.getElementById('custom-range-box');
+        if (box.classList.contains('hidden')) {
+            box.classList.remove('hidden');
+            currentInterval = 'custom';
+            document.querySelectorAll('.interval-pill').forEach(function(pill) {
+                if (pill.getAttribute('data-interval') === 'custom') {
+                    pill.className = 'interval-pill flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-primary text-on-primary border-primary shadow-sm';
+                } else {
+                    pill.className = 'interval-pill px-3 py-1.5 rounded-lg text-xs font-label font-bold transition-all border bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary';
+                }
+            });
+        } else {
+            box.classList.add('hidden');
+            selectInterval('1y');
+        }
+    }
+
+    function applyCustomDateRange() {
+        customDateFrom = document.getElementById('custom-date-from').value;
+        customDateTo = document.getElementById('custom-date-to').value;
+        if (!customDateFrom || !customDateTo) {
+            alert('Please select both start and end dates.');
+            return;
+        }
+        fetchHistoricalData();
+    }
+
+    function setChartType(type) {
+        currentChartType = type;
+        var btnLine = document.getElementById('chart-btn-line');
+        var btnBar = document.getElementById('chart-btn-bar');
+        if (type === 'line') {
+            btnLine.className = 'px-3 py-1 text-xs font-label font-bold rounded-md bg-surface text-primary shadow-xs';
+            btnBar.className = 'px-3 py-1 text-xs font-label font-bold rounded-md text-on-surface-variant hover:text-primary';
+        } else {
+            btnBar.className = 'px-3 py-1 text-xs font-label font-bold rounded-md bg-surface text-primary shadow-xs';
+            btnLine.className = 'px-3 py-1 text-xs font-label font-bold rounded-md text-on-surface-variant hover:text-primary';
+        }
+        if (currentData) {
+            renderChart(currentData);
+        }
+    }
+
+    function fetchHistoricalData() {
+        var loader = document.getElementById('chart-loader');
+        var refreshIcon = document.getElementById('refresh-icon');
+        if (loader) loader.classList.remove('hidden');
+        if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+        var params = new URLSearchParams({
+            region_id: currentRegionId,
+            category: currentCategory,
+            metric: currentMetric,
+            interval: currentInterval,
+        });
+
+        if (currentInterval === 'custom') {
+            if (customDateFrom) params.append('date_from', customDateFrom);
+            if (customDateTo) params.append('date_to', customDateTo);
+        }
+
+        fetch('/api/historical/observations/?' + params.toString())
+            .then(function(res) {
+                if (!res.ok) throw new Error('Network error: ' + res.status);
+                return res.json();
+            })
+            .then(function(data) {
+                currentData = data;
+                updateKPICards(data);
+                renderChart(data);
+                initObservationsTable(data);
+                document.getElementById('interval-date-range-display').textContent = data.start_date + ' — ' + data.end_date;
+            })
+            .catch(function(err) {
+                console.error('Historical fetch error:', err);
+            })
+            .finally(function() {
+                if (loader) loader.classList.add('hidden');
+                if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+            });
+    }
+
+    function updateKPICards(data) {
+        var stats = data.stats || {};
+        var unit = data.unit || '';
+
+        // Latest
+        document.getElementById('kpi-latest-val').textContent = stats.latest !== undefined ? stats.latest : '--';
+        document.getElementById('kpi-latest-unit').textContent = unit;
+        document.getElementById('kpi-latest-date').textContent = stats.latest_date ? ('Observed: ' + stats.latest_date) : '--';
+
+        // Mean
+        document.getElementById('kpi-mean-val').textContent = stats.mean !== undefined ? stats.mean : '--';
+        document.getElementById('kpi-mean-unit').textContent = unit;
+        document.getElementById('kpi-count-desc').textContent = 'Over ' + (stats.count || 0) + ' recorded observations';
+
+        // Max
+        document.getElementById('kpi-max-val').textContent = stats.max !== undefined ? stats.max : '--';
+        document.getElementById('kpi-max-unit').textContent = unit;
+        document.getElementById('kpi-max-date').textContent = stats.max_date ? ('Peak: ' + stats.max_date) : '--';
+
+        // Min
+        document.getElementById('kpi-min-val').textContent = stats.min !== undefined ? stats.min : '--';
+        document.getElementById('kpi-min-unit').textContent = unit;
+        document.getElementById('kpi-min-date').textContent = stats.min_date ? ('Low: ' + stats.min_date) : '--';
+
+        // Trend
+        var trend = stats.trend_pct || 0;
+        var trendEl = document.getElementById('kpi-trend-val');
+        var trendIcon = document.getElementById('kpi-trend-icon');
+        var statusBadge = document.getElementById('kpi-status-badge');
+
+        trendEl.textContent = (trend > 0 ? '+' : '') + trend + '%';
+        if (trend > 5) {
+            trendEl.className = 'text-3xl font-headline font-black text-secondary';
+            trendIcon.textContent = 'trending_up';
+            trendIcon.className = 'material-symbols-outlined text-base text-secondary';
+            statusBadge.textContent = 'Elevated Activity';
+            statusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-label font-bold bg-secondary-container/40 text-on-secondary-container';
+        } else if (trend < -5) {
+            trendEl.className = 'text-3xl font-headline font-black text-error';
+            trendIcon.textContent = 'trending_down';
+            trendIcon.className = 'material-symbols-outlined text-base text-error';
+            statusBadge.textContent = 'Declining Trend';
+            statusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-label font-bold bg-error-container/40 text-error';
+        } else {
+            trendEl.className = 'text-3xl font-headline font-black text-on-surface-variant';
+            trendIcon.textContent = 'trending_flat';
+            trendIcon.className = 'material-symbols-outlined text-base text-on-surface-variant';
+            statusBadge.textContent = 'Stable Baseline';
+            statusBadge.className = 'px-2 py-0.5 rounded text-[10px] font-label font-bold bg-surface-container-high text-on-surface-variant';
+        }
+
+        // Chart Header text
+        document.getElementById('chart-metric-title').textContent = data.metric_label + ' (' + unit + ')';
+        document.getElementById('chart-metric-description').textContent = data.description || '';
+    }
+
+    function renderChart(data) {
+        var ctx = document.getElementById('historicalChart');
+        if (!ctx) return;
+
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        var labels = data.labels || [];
+        var values = data.values || [];
+        var mean = (data.stats && data.stats.mean !== undefined) ? data.stats.mean : 0;
+        var color = data.color || '#00677d';
+        var unit = data.unit || '';
+
+        // Baseline horizontal line dataset
+        var meanLine = labels.map(function() { return mean; });
+
+        // Gradients
+        var gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 380);
+        gradient.addColorStop(0, color + '55');
+        gradient.addColorStop(1, color + '00');
+
+        var isBar = currentChartType === 'bar';
+
+        chartInstance = new Chart(ctx, {
+            type: isBar ? 'bar' : 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: data.metric_label,
+                        data: values,
+                        borderColor: color,
+                        backgroundColor: isBar ? color + 'bb' : gradient,
+                        fill: !isBar,
+                        tension: 0.35,
+                        borderWidth: isBar ? 1 : 2.5,
+                        pointBackgroundColor: color,
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 1.5,
+                        pointRadius: labels.length > 50 ? 2 : 4,
+                        pointHoverRadius: 6,
+                        borderRadius: isBar ? 4 : 0,
+                    },
+                    {
+                        label: 'Mean Baseline (' + mean + ' ' + unit + ')',
+                        data: meanLine,
+                        borderColor: '#717973',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        fill: false,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        backgroundColor: '#151c27',
+                        titleColor: '#f9f9ff',
+                        bodyColor: '#e2e8f8',
+                        titleFont: { family: 'JetBrains Mono', size: 11 },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        padding: 12,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                var val = context.parsed.y;
+                                if (context.datasetIndex === 1) {
+                                    return 'Baseline: ' + val + ' ' + unit;
+                                }
+                                var dev = (val - mean).toFixed(1);
+                                var devPct = mean !== 0 ? (((val - mean) / Math.abs(mean)) * 100).toFixed(1) : 0;
+                                var sign = dev >= 0 ? '+' : '';
+                                return data.metric_label + ': ' + val + ' ' + unit + ' (' + sign + dev + ' ' + unit + ' / ' + sign + devPct + '%)';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(193, 200, 194, 0.15)',
+                        },
+                        ticks: {
+                            font: { family: 'JetBrains Mono', size: 10 },
+                            color: '#717973',
+                            maxTicksLimit: 12,
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(193, 200, 194, 0.25)',
+                        },
+                        ticks: {
+                            font: { family: 'JetBrains Mono', size: 10 },
+                            color: '#717973',
+                            callback: function(v) { return v + ' ' + unit; }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function initObservationsTable(data) {
+        filteredObservations = (data.observations || []).slice();
+        currentPage = 1;
+        document.getElementById('table-search').value = '';
+        document.getElementById('table-status-filter').value = 'all';
+        renderObservationsTablePage();
+    }
+
+    function filterObservationsTable() {
+        if (!currentData || !currentData.observations) return;
+        var query = (document.getElementById('table-search').value || '').toLowerCase().trim();
+        var statusFilter = document.getElementById('table-status-filter').value;
+
+        filteredObservations = currentData.observations.filter(function(r) {
+            var matchQuery = !query || r.date.toLowerCase().includes(query) || (r.subregion && r.subregion.toLowerCase().includes(query));
+            var matchStatus = true;
+            if (statusFilter !== 'all') {
+                matchStatus = (r.status_type === statusFilter);
+            }
+            return matchQuery && matchStatus;
+        });
+
+        currentPage = 1;
+        renderObservationsTablePage();
+    }
+
+    function renderObservationsTablePage() {
+        var tbody = document.getElementById('observations-tbody');
+        tbody.innerHTML = '';
+
+        var total = filteredObservations.length;
+        if (total === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-on-surface-variant font-label">No observations matched the active criteria.</td></tr>';
+            document.getElementById('table-page-info').textContent = 'Showing 0 to 0 of 0 observations';
+            document.getElementById('table-prev-btn').disabled = true;
+            document.getElementById('table-next-btn').disabled = true;
+            return;
+        }
+
+        var maxPages = Math.ceil(total / pageSize);
+        if (currentPage > maxPages) currentPage = maxPages;
+        if (currentPage < 1) currentPage = 1;
+
+        var startIdx = (currentPage - 1) * pageSize;
+        var endIdx = Math.min(startIdx + pageSize, total);
+        var pageItems = filteredObservations.slice(startIdx, endIdx);
+
+        var unit = currentData ? currentData.unit : '';
+        var mean = (currentData && currentData.stats) ? currentData.stats.mean : 0;
+
+        pageItems.forEach(function(r) {
+            var tr = document.createElement('tr');
+            tr.className = 'hover:bg-surface-container-low/50 transition-colors';
+
+            var devSign = r.deviation >= 0 ? '+' : '';
+            var devClass = r.status_type === 'high' ? 'bg-secondary-container/40 text-on-secondary-container' 
+                         : r.status_type === 'low' ? 'bg-error-container/40 text-error' 
+                         : 'bg-primary-fixed/20 text-on-primary-fixed-variant';
+
+            var flagBadge = r.status_type === 'high' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-secondary-container text-on-secondary-container">Elevated</span>'
+                          : r.status_type === 'low' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-error-container text-error">Deficit</span>'
+                          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-fixed text-on-primary-fixed">Normal</span>';
+
+            tr.innerHTML = `
+                <td class="py-3 px-4 font-label text-xs font-semibold text-on-surface flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-xs text-on-surface-variant">calendar_today</span>
+                    <span>${r.date}</span>
+                </td>
+                <td class="py-3 px-4 font-body text-xs text-on-surface-variant">${r.subregion || '--'}</td>
+                <td class="py-3 px-4 font-label text-xs font-bold text-primary">${r.value} <span class="font-normal text-[10px] text-on-surface-variant">${unit}</span></td>
+                <td class="py-3 px-4 font-label text-xs text-on-surface-variant">${mean} <span class="font-normal text-[10px]">${unit}</span></td>
+                <td class="py-3 px-4 font-label text-xs">
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold ${devClass}">
+                        ${devSign}${r.deviation} ${unit} (${devSign}${r.deviation_pct}%)
+                    </span>
+                </td>
+                <td class="py-3 px-4">${flagBadge}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.getElementById('table-page-info').textContent = 'Showing ' + (startIdx + 1) + ' to ' + endIdx + ' of ' + total + ' observations';
+        document.getElementById('table-current-page').textContent = currentPage + ' / ' + maxPages;
+        document.getElementById('table-prev-btn').disabled = (currentPage === 1);
+        document.getElementById('table-next-btn').disabled = (currentPage >= maxPages);
+    }
+
+    function changeTablePage(delta) {
+        currentPage += delta;
+        renderObservationsTablePage();
+    }
+
+    function downloadCurrentSeriesExcel() {
+        if (!currentData) return;
+        var url = '/api/historical-export/?region_id=' + encodeURIComponent(currentRegionId)
+                + '&category=' + encodeURIComponent(currentCategory)
+                + '&metric=' + encodeURIComponent(currentMetric)
+                + '&date_from=' + encodeURIComponent(currentData.start_date || '')
+                + '&date_to=' + encodeURIComponent(currentData.end_date || '');
+        window.location.href = url;
+    }
+</script>
+{% include "dashboard/_agroai_chat.html" %}
+</body>
+</html>

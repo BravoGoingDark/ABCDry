@@ -89,12 +89,3 @@ LOW_WATER_CROPS = ['olive', 'barley']
 ALTERNATE_CROPS = {'en': 'barley or olive trees', 'fr': 'l orge ou l olivier',
                    'ar': 'الشعير أو أشجار الزيتون'}
 
-
-def find_crop(text):
-    """Detect a crop key mentioned in the question (any language).
-
-    Matching is delegated to the NLU layer so accents, Arabic marks and small
-    typos ("tomatos", "oliv") are tolerated.
-    """
-    from .assistant_nlu import match_crop
-    return match_crop(text)

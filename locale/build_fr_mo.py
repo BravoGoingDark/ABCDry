@@ -3,7 +3,12 @@ from __future__ import annotations
 
 import pathlib
 
+import sys
+
 import polib
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from farmer_fr import FARMER_PAIRS  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PO_PATH = ROOT / "locale" / "fr" / "LC_MESSAGES" / "django.po"
@@ -104,6 +109,7 @@ PAIRS: list[tuple[str, str]] = [
     ("Microclimate", "Micro-climat"),
     ("Temperature", "Température"),
     ("Humidity", "Humidité"),
+    ("ABCDryBASIN — drought risk assessment tool", "ABCDryBASIN — outil d'évaluation du risque de sécheresse"),
     ("Sponsors and partners", "Sponsors et partenaires"),
     ("Ministry of Agriculture", "Ministère de l'Agriculture"),
     ("LIVE", "EN DIRECT"),
@@ -127,7 +133,11 @@ def main() -> None:
         "Content-Type": "text/plain; charset=UTF-8",
         "Content-Transfer-Encoding": "8bit",
     }
-    for msgid, msgstr in PAIRS:
+    seen = set()
+    for msgid, msgstr in PAIRS + FARMER_PAIRS:
+        if msgid in seen:  # first translation wins (shared words like "Humidity")
+            continue
+        seen.add(msgid)
         po.append(polib.POEntry(msgid=msgid, msgstr=msgstr))
     po.save(str(PO_PATH))
     po.save_as_mofile(str(MO_PATH))

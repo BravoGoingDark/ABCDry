@@ -1,0 +1,687 @@
+{% load static i18n %}
+
+<!DOCTYPE html>
+
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+
+<head>
+
+    <meta charset="utf-8"/>
+
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+
+    <title>{% trans "APWRS — Adaptive Planting Window Recommendation System" %}</title>
+
+    
+
+    <!-- Styling Frameworks & Leaflet Stylesheets -->
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet-draw/leaflet.draw.css' %}"/>
+    
+
+    <!-- Fonts -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+    
+
+    <!-- Custom Style Sheet (Organized CSS Separated from HTML) -->
+
+    <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}"/>
+
+    <style>
+
+        .custom-station-icon {
+
+            background: transparent !important;
+
+            border: none !important;
+
+            cursor: pointer;
+
+        }
+
+        .station-marker-container {
+
+            position: relative;
+
+            width: 26px;
+
+            height: 26px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+        .station-marker-badge {
+
+            position: relative;
+
+            z-index: 10;
+
+            width: 22px;
+
+            height: 22px;
+
+            border-radius: 9999px;
+
+            border: 1.5px solid #ffffff;
+
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #ffffff;
+
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+
+        }
+
+        .custom-station-icon:hover .station-marker-badge {
+
+            transform: scale(1.22);
+
+            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+
+        }
+
+        .station-radar-ripple {
+
+            position: absolute;
+
+            width: 26px;
+
+            height: 26px;
+
+            border-radius: 9999px;
+
+            border: 1.5px solid;
+
+            animation: stationPulse 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+            pointer-events: none;
+
+            opacity: 0.8;
+
+        }
+
+        @keyframes stationPulse {
+
+            0% { transform: scale(0.5); opacity: 0.9; }
+
+            100% { transform: scale(2.0); opacity: 0; }
+
+        }
+
+        .leaflet-tooltip.station-tooltip-smooth {
+
+            background: rgba(15, 23, 42, 0.92) !important;
+
+            backdrop-filter: blur(8px);
+
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+
+            color: #f8fafc !important;
+
+            border-radius: 8px !important;
+
+            padding: 6px 10px !important;
+
+            font-size: 11px !important;
+
+            line-height: 1.4 !important;
+
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+
+            pointer-events: none !important;
+
+        }
+
+        .leaflet-tooltip.station-tooltip-smooth:before {
+
+            border-top-color: rgba(15, 23, 42, 0.92) !important;
+
+        }
+
+    </style>
+
+
+
+    <!-- Tailwind Styling Settings -->
+
+    <script id="tailwind-config">
+
+        tailwind.config = {
+
+          darkMode: "class",
+
+          theme: {
+
+            extend: {
+
+              "colors": {
+
+                      "on-secondary": "#ffffff",
+
+                      "primary-container": "#1b4332",
+
+                      "on-tertiary": "#ffffff",
+
+                      "error-container": "#ffdad6",
+
+                      "tertiary": "#322319",
+
+                      "tertiary-container": "#4a382d",
+
+                      "surface": "#f9f9ff",
+
+                      "on-error": "#ffffff",
+
+                      "on-tertiary-fixed-variant": "#554338",
+
+                      "secondary-fixed-dim": "#69d4f4",
+
+                      "on-secondary-container": "#006075",
+
+                      "on-secondary-fixed-variant": "#004e5f",
+
+                      "inverse-on-surface": "#ebf1ff",
+
+                      "secondary": "#00677d",
+
+                      "primary": "#012d1d",
+
+                      "surface-variant": "#dce2f3",
+
+                      "outline-variant": "#c1c8c2",
+
+                      "surface-container-low": "#f0f3ff",
+
+                      "surface-container": "#e7eefe",
+
+                      "surface-tint": "#3f6653",
+
+                      "on-secondary-fixed": "#001f27",
+
+                      "primary-fixed": "#c1ecd4",
+
+                      "inverse-surface": "#2a313d",
+
+                      "surface-container-lowest": "#ffffff",
+
+                      "on-primary-fixed": "#002114",
+
+                      "inverse-primary": "#a5d0b9",
+
+                      "surface-container-high": "#e2e8f8",
+
+                      "surface-bright": "#f9f9ff",
+
+                      "secondary-container": "#72ddfd",
+
+                      "on-primary": "#ffffff",
+
+                      "on-primary-fixed-variant": "#274e3d",
+
+                      "tertiary-fixed": "#f9ddce",
+
+                      "on-primary-container": "#86af99",
+
+                      "on-surface-variant": "#414844",
+
+                      "surface-container-highest": "#dce2f3",
+
+                      "secondary-fixed": "#b2ebff",
+
+                      "background": "#f9f9ff",
+
+                      "primary-fixed-dim": "#a5d0b9",
+
+                      "surface-dim": "#d3daea",
+
+                      "tertiary-fixed-dim": "#dcc1b2",
+
+                      "error": "#ba1a1a",
+
+                      "on-tertiary-container": "#baa193",
+
+                      "on-surface": "#151c27",
+
+                      "on-error-container": "#93000a",
+
+                      "on-tertiary-fixed": "#27180f",
+
+                      "on-background": "#151c27",
+
+                      "outline": "#717973"
+
+              },
+
+              "borderRadius": {
+
+                      "DEFAULT": "0.125rem",
+
+                      "lg": "0.25rem",
+
+                      "xl": "0.5rem",
+
+                      "full": "0.75rem"
+
+              },
+
+              "spacing": {},
+
+              "fontFamily": {
+
+                      "headline": [
+
+                              "Hanken Grotesk"
+
+                      ],
+
+                      "display": [
+
+                              "Hanken Grotesk"
+
+                      ],
+
+                      "body": [
+
+                              "Inter"
+
+                      ],
+
+                      "label": [
+
+                              "Jetbrains Mono"
+
+                      ]
+
+              },
+
+              "fontSize": {}
+
+            },
+
+          },
+
+        }
+
+    </script>
+
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+
+
+
+<!-- Main Content Wrapper -->
+
+<div class="flex-1 min-w-0 flex flex-col bg-surface h-screen">
+
+    
+
+    <!-- Top Navigation Header -->
+
+    {% include "dashboard/_header.html" with header_controls="dashboard/_header_controls_dashboard.html" %}
+
+    
+
+    <!-- APWRS Global Navigation Sidebar -->
+
+    {% include "dashboard/_sidebar.html" with active_page="overview" %}
+
+
+
+    <!-- Main Redesigned Layout (Three-Column 3:6:3 Structure) -->
+
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 grid grid-cols-12 gap-6 transition-all duration-300 ease-in-out lg:ml-60">
+
+        
+
+        <!-- Left Sidebar: Climate Live Metrics, Soil Health, Input Simulation -->
+
+        <div class="col-span-12 lg:col-span-3 space-y-4">
+
+            
+
+            <!-- Wind Card -->
+
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 shadow-sm hover:border-primary transition-colors group">
+
+                <div class="flex justify-between items-start mb-4 border-b border-outline-variant/50 pb-3">
+
+                    <h3 class="font-headline font-semibold text-on-surface flex items-center gap-2">
+
+                        <span class="material-symbols-outlined text-secondary text-xl">air</span>
+
+                        {% trans "Wind Dynamics" %}
+
+                    </h3>
+
+                    <span class="text-[10px] font-label bg-surface-container-high px-2 py-1 rounded text-on-surface-variant">LIVE</span>
+
+                </div>
+
+                <div class="flex items-end justify-between">
+
+                    <div>
+
+                        <div class="text-3xl font-bold font-headline text-primary tracking-tight">
+
+                            <span id="live-wind-speed">{{ snapshot.wind_speed_kmh|default:"24" }}</span> 
+
+                            <span class="text-sm font-normal text-on-surface-variant">km/h</span>
+
+                        </div>
+
+                        <div class="text-xs text-on-surface-variant mt-1">{% trans "Gusts up to" %} <span id="live-wind-gust">{{ snapshot.wind_gust_kmh|default:"32" }}</span> km/h</div>
+
+                    </div>
+
+                    <div class="flex flex-col items-center">
+
+                        <span class="material-symbols-outlined text-3xl text-secondary" style="transform: rotate(45deg);">navigation</span>
+
+                        <span class="text-xs font-bold mt-1" id="live-wind-direction">{{ snapshot.wind_direction|default:"NE" }}</span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            
+
+            <!-- Precipitation Card -->
+
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 shadow-sm hover:border-primary transition-colors group">
+
+                <div class="flex justify-between items-start mb-4 border-b border-outline-variant/50 pb-3">
+
+                    <h3 class="font-headline font-semibold text-on-surface flex items-center gap-2">
+
+                        <span class="material-symbols-outlined text-secondary text-xl">water_drop</span>
+
+                        {% trans "Precipitation" %}
+
+                    </h3>
+
+                    <span class="text-[10px] font-label bg-surface-container-high px-2 py-1 rounded text-on-surface-variant">MONTHLY</span>
+
+                </div>
+
+                <div class="flex items-end justify-between">
+
+                    <div>
+
+                        <div class="text-3xl font-bold font-headline text-primary tracking-tight">
+
+                            <span id="live-rainfall">{{ snapshot.rainfall_mm|default:"18.5" }}</span> 
+
+                            <span class="text-sm font-normal text-on-surface-variant">mm</span>
+
+                        </div>
+
+                        <div class="text-xs text-error mt-1 flex items-center gap-1">
+
+                            <span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+
+                            <span id="live-rainfall-delta">{{ snapshot.rainfall_delta_percent|default:"-12" }}</span>% vs avg
+
+                        </div>
+
+                    </div>
+
+                    <div class="w-24 h-12 flex items-end gap-1">
+
+                        <div class="w-1/4 bg-surface-container-highest h-full rounded-t-sm"></div>
+
+                        <div class="w-1/4 bg-surface-container-highest h-3/4 rounded-t-sm"></div>
+
+                        <div class="w-1/4 bg-surface-container-highest h-1/2 rounded-t-sm"></div>
+
+                        <div class="w-1/4 bg-secondary h-1/4 rounded-t-sm"></div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            
+
+            <!-- Micro-climate Card -->
+
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-5 shadow-sm hover:border-primary transition-colors group">
+
+                <div class="flex justify-between items-start mb-4 border-b border-outline-variant/50 pb-3">
+
+                    <h3 class="font-headline font-semibold text-on-surface flex items-center gap-2">
+
+                        <span class="material-symbols-outlined text-secondary text-xl">thermostat</span>
+
+                        {% trans "Micro-climate" %}
+
+                    </h3>
+
+                    <span class="text-[10px] font-label bg-surface-container-high px-2 py-1 rounded text-on-surface-variant">LIVE</span>
+
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+
+                    <div>
+
+                        <div class="text-sm text-on-surface-variant mb-1">{% trans "Temperature" %}</div>
+
+                        <div class="text-2xl font-bold font-headline text-primary tracking-tight">
+
+                            <span id="live-temperature">{{ snapshot.temperature_c|default:"28" }}</span>°<span class="text-sm font-normal text-on-surface-variant">C</span>
+
+                        </div>
+
+                    </div>
+
+                    <div>
+
+                        <div class="text-sm text-on-surface-variant mb-1">{% trans "Humidity" %}</div>
+
+                        <div class="text-2xl font-bold font-headline text-primary tracking-tight">
+
+                            <span id="live-humidity">{{ snapshot.humidity_percent|default:"64" }}</span><span class="text-sm font-normal text-on-surface-variant">%</span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            
+
+
+            
+
+        </div>
+
+        
+
+        <!-- Center Panel: Leaflet Interactive Map -->
+
+        <div class="col-span-12 lg:col-span-9 flex flex-col gap-4">
+
+            <div id="map-card" class="bg-surface-container-lowest border border-outline-variant rounded-lg p-2 relative isolate shadow-sm h-[650px] lg:h-auto lg:flex-1 lg:min-h-[720px]">
+
+                
+
+                <!-- Map Controls Overlays (Connected to dashboard.js tools) -->
+
+                <div class="absolute top-4 left-4 z-[1200] flex flex-col gap-2 bg-surface-container-lowest p-2 rounded-DEFAULT border border-outline-variant shadow-sm map-overlay-tools">
+
+                    <button class="p-1.5 w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container rounded transition-colors border border-outline-variant/60" id="draw-tool-btn" title="{% trans 'Drawing Tool' %}" type="button">
+
+                        <span class="material-symbols-outlined text-lg">edit</span>
+
+                    </button>
+
+                    <button class="p-1.5 w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container rounded transition-colors border border-outline-variant/60" id="measure-tool-btn" title="{% trans 'Measure Area' %}" type="button">
+
+                        <span class="material-symbols-outlined text-lg">square_foot</span>
+
+                    </button>
+
+                    <button class="p-1.5 w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container rounded transition-colors border border-outline-variant/60" id="select-tool-btn" title="{% trans 'Select Region' %}" type="button">
+
+                        <span class="material-symbols-outlined text-lg">highlight_alt</span>
+
+                    </button>
+
+                    <button class="p-1.5 w-9 h-9 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container rounded transition-colors border border-outline-variant/60" id="ping-tool-btn" title="{% trans 'Ping Point' %}" type="button">
+
+                        <span class="material-symbols-outlined text-lg">place</span>
+
+                    </button>
+
+                </div>
+
+                
+
+                <!-- Overlay: Legend indicators -->
+
+                <div class="absolute bottom-4 left-4 z-[1200] bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-2 rounded-DEFAULT border border-outline-variant shadow-sm flex items-center gap-4 text-xs font-label map-overlay-panel">
+
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-green-500 rounded-sm"></div> {% trans "Optimal" %}</div>
+
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-yellow-400 rounded-sm"></div> {% trans "Marginal" %}</div>
+
+                    <div class="flex items-center gap-1"><div class="w-3 h-3 bg-red-500 rounded-sm"></div> {% trans "Critical Risk" %}</div>
+
+                </div>
+
+                
+
+                <!-- Semicircle dynamic map info (Connected to dashboard.js) -->
+
+                <div class="absolute bottom-4 right-4 z-[1200] bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-2 rounded-DEFAULT border border-outline-variant shadow-sm text-xs font-label max-w-[280px] map-overlay-panel">
+
+                    <div class="font-semibold text-on-surface">{% trans "Measure" %}</div>
+
+                    <div id="map-info" class="text-on-surface-variant mt-1">{% trans "Choose a tool to begin." %}</div>
+
+                    <div class="mt-2 flex gap-2">
+
+                        <button id="clear-drawings-btn" type="button" class="px-2 py-1 text-[11px] rounded border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-colors">
+
+                            {% trans "Clear drawings" %}
+
+                        </button>
+
+                        <button id="clear-ruler-btn" type="button" class="px-2 py-1 text-[11px] rounded border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-colors">
+
+                            {% trans "Clear ruler" %}
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+                
+
+                <!-- Quiet notice shown while the map is retrying its tiles -->
+
+                <div id="map-tile-warning" class="hidden absolute bottom-14 left-1/2 -translate-x-1/2 z-[1300] bg-surface-container-high text-on-surface-variant text-[11px] font-semibold px-3 py-1.5 rounded-DEFAULT border border-outline-variant flex items-center gap-1.5 shadow-sm">
+
+                    <span class="material-symbols-outlined text-sm">map</span>
+
+                    {% trans "Basemap unavailable — retrying." %}
+
+                </div>
+
+                
+
+                <!-- Map DOM element placeholder for Leaflet initialize -->
+                <div id="country-map" class="w-full h-full rounded-DEFAULT" data-basin-url="{% static 'dashboard/data/ichkeul_basin.geojson' %}"></div>
+
+                
+
+            </div>
+
+        </div>
+
+        
+
+
+        
+
+        {% include 'dashboard/_partners.html' %}
+
+
+        
+
+
+        
+
+
+        
+
+    </main>
+
+</div>
+
+
+
+<!-- Essential JS Config Datasets (Loaded for dashboard.js initialize execution) -->
+
+<script id="region-map-json" type="application/json">{{ region_map_config_json|safe }}</script>
+
+<script id="lakes-by-region-json" type="application/json">{{ lakes_by_region_json|safe }}</script>
+
+<script id="dashboard-i18n-json" type="application/json">{{ dashboard_js_i18n_json|safe }}</script>
+
+<script id="stations-json" type="application/json">{{ stations_json|safe }}</script>
+
+
+
+<!-- Scripts -->
+
+<!-- Map libraries are served from ./static/dashboard/vendor/ instead of a CDN:
+
+     a stalled CDN response blocks parsing and leaves the whole map panel dead. -->
+
+<script defer src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+
+<script defer src="{% static 'dashboard/vendor/leaflet-draw/leaflet.draw.js' %}"></script>
+
+<script defer src="{% static 'dashboard/vendor/turf/turf.min.js' %}"></script>
+
+<script defer src="{% static 'dashboard/js/map-tiles.js' %}"></script>
+
+<script defer src="{% static 'dashboard/js/dashboard.js' %}"></script>
+
+
+
+<!-- AgroAI Floating Chat Widget -->
+{% include "dashboard/_agroai_chat.html" %}
+</body>
+</html>

@@ -29,7 +29,6 @@ Credentials (set on Render or local .env):
   or GOOGLE_APPLICATION_CREDENTIALS (ADC default)
 """
 import os
-import sys
 import threading
 from datetime import date, datetime, timedelta
 
@@ -44,7 +43,6 @@ from dashboard.models import (
     RemoteSensingMetrics,
 )
 from dashboard.prediction_engine.physical_helpers import (
-    calculate_et0,
     calculate_spi,
     calculate_vci,
 )
@@ -554,7 +552,6 @@ class Command(BaseCommand):
 
         for region in regions:
             self.stdout.write(f'\n== {region.name} ({region.latitude}, {region.longitude}) ==')
-            center = ee.Geometry.Point(float(region.longitude), float(region.latitude))
             sample_pts = self._get_sample_points(region)
             if region.sample_points:
                 point_rows = [

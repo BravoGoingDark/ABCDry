@@ -15,7 +15,6 @@ database hiccup only reduces the retrieved context, it never breaks an answer.
 import hashlib
 import json
 import logging
-import os
 import re
 import threading
 from datetime import date, timedelta
@@ -41,7 +40,7 @@ def rag_config():
     return {
         'enabled': bool(getattr(settings, 'RAG_ENABLED', True)),
         'url': getattr(settings, 'RAG_OLLAMA_URL',
-                       getattr(settings, 'ASSISTANT_LLM_URL', 'http://localhost:11434')),
+                       getattr(settings, 'ASSISTANT_LLM_URL', 'http://127.0.0.1:11434')),
         'model': getattr(settings, 'RAG_EMBED_MODEL', 'bge-m3'),
         'embed_timeout': int(getattr(settings, 'RAG_EMBED_TIMEOUT', 300)),
         'top_k': int(getattr(settings, 'RAG_TOP_K', 4)),
@@ -495,7 +494,6 @@ def _month_label(when):
 
 
 def _digest_cache_key(region):
-    from django.core.cache import cache
     from ..models import ClimateMetrics, DroughtIndices, RemoteSensingMetrics
     try:
         signature = '|'.join(str(model.objects.count()) for model in

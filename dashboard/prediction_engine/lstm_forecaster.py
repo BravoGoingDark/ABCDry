@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 try:
     import torch
@@ -193,21 +192,4 @@ class LSTMDroughtForecaster:
     def predict_risk(self, last_30_days_df, field_capacity_pct):
         predicted_soil = self.predict_soil_moisture(last_30_days_df)
         risk = (1 - min(1, predicted_soil / field_capacity_pct)) * 100
-        return round(max(0, min(100, risk)), 1)
-
-    def predict_30day_trend(self, last_30_days_df, field_capacity_pct):
-        soil_values = self._normalize_columns(last_30_days_df)['soil_moisture_pct'].values
-        if len(soil_values) >= 14:
-            recent_trend = (soil_values[-1] - soil_values[-14]) / 14
-        else:
-            recent_trend = -0.2
-
-        predicted_7d = self.predict_soil_moisture(last_30_days_df)
-        current = soil_values[-1]
-        decline_factor = 1.5 if predicted_7d < current else 1.0
-
-        predicted_30d = current + (recent_trend * 30 * decline_factor)
-        predicted_30d = max(0, min(100, predicted_30d))
-
-        risk = (1 - min(1, predicted_30d / field_capacity_pct)) * 100
         return round(max(0, min(100, risk)), 1)

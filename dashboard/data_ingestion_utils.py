@@ -2,12 +2,9 @@
 # Utility functions for data ingestion and import handling
 
 import json
-import numpy as np
 import pandas as pd
 from datetime import datetime
-from django.contrib.auth.models import User
 from django.db import transaction
-from django.utils.translation import gettext as _
 
 from .models import (
     Region, ObservationYear, CropType, IrrigationMethod,
@@ -19,7 +16,6 @@ from .models import (
 
 class DataIngestionError(Exception):
     """Custom exception for data ingestion errors"""
-    pass
 
 
 class DataImporter:

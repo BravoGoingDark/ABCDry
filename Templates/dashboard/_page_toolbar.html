@@ -1,0 +1,8 @@
+{% comment %}
+Page-level actions shown at the top of the content (the navbar is identical on
+every page, so filters, export and back links live here instead).
+Usage: include "dashboard/_page_toolbar.html" with page_actions="dashboard/_page_actions_x.html"
+{% endcomment %}
+<div class="flex flex-wrap items-center justify-end gap-3 mb-6">
+    {% include page_actions %}
+</div>

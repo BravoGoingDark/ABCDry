@@ -14,7 +14,6 @@ from django.utils.translation import gettext as _
 from ..forms import ExcelImportForm
 from ..models import (
     CropType,
-    EnvironmentalSnapshot,
     IrrigationMethod,
     ObservationYear,
     Region,
@@ -345,7 +344,7 @@ def api_submit_metrics(request):
             data['measurement_date'] = data.get('timestamp')
 
         importer = DataImporter(source='Manual', username=username)
-        result = importer.submit_form_data(metric_type, data)
+        importer.submit_form_data(metric_type, data)
         import_log = importer.log_import(metric_type, notes='Manual entry via web form')
         action = getattr(importer, 'last_action', None)
         return JsonResponse({
@@ -1075,7 +1074,7 @@ def download_metric_template(request, metric_type):
     r = 2
     for a, b in rows:
         cell_a = ins.cell(row=r, column=1, value=a)
-        cell_b = ins.cell(row=r, column=2, value=b)
+        ins.cell(row=r, column=2, value=b)
         if b == '' and a != '' and (a.isupper() or a == ', '.join(region_names)):
             cell_a.font = section_font
         r += 1

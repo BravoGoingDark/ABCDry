@@ -246,6 +246,38 @@ svg.overflow-visible line {
     100% { transform: scale(2.0); opacity: 0; }
 }
 
+/* The map panel fixes its own height, but the map element used height:100%.
+   A percentage height does not resolve when the card's height comes from
+   min-height, so the map stopped ~100px short — leaving a white strip and
+   letting the legend / measure overlays float below the map. Anchoring the
+   map to the card's padding box always fills it exactly. */
+#map-card {
+    position: relative;
+    height: 650px;
+    overflow: hidden;
+}
+@media (min-width: 1024px) {
+    #map-card { height: 720px; }
+}
+#map-card > #country-map {
+    position: absolute !important;
+    top: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    width: auto;
+    height: auto;
+    min-height: 0;
+}
+
+/* Leaflet fades basemap tiles in with requestAnimationFrame. When the window is
+   occluded or backgrounded that animation never advances, so every tile stays
+   at inline opacity:0 — a fully downloaded but blank map. Show tiles at once:
+   the basemap needs no entrance effect. */
+.leaflet-container .leaflet-tile {
+    opacity: 1 !important;
+}
+
 /* Smooth, elegant tooltips */
 .leaflet-tooltip.station-tooltip-smooth {
     background: rgba(15, 23, 42, 0.92) !important;

@@ -1,0 +1,482 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light scroll-smooth">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "APWRS — Adaptive Planting Window Recommendation System" %}</title>
+    <meta name="description" content="{% trans 'Drought monitoring, SPEI forecasting and planting-window recommendations for the Ichkeul basin and Tunisian agriculture.' %}"/>
+    <!-- Styling Frameworks & Leaflet Stylesheets (same stack as the dashboard) -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary": "#ffffff",
+                      "primary-container": "#1b4332",
+                      "on-tertiary": "#ffffff",
+                      "error-container": "#ffdad6",
+                      "tertiary": "#322319",
+                      "tertiary-container": "#4a382d",
+                      "surface": "#f9f9ff",
+                      "on-error": "#ffffff",
+                      "on-tertiary-fixed-variant": "#554338",
+                      "secondary-fixed-dim": "#69d4f4",
+                      "on-secondary-container": "#006075",
+                      "on-secondary-fixed-variant": "#004e5f",
+                      "inverse-on-surface": "#ebf1ff",
+                      "secondary": "#00677d",
+                      "primary": "#012d1d",
+                      "surface-variant": "#dce2f3",
+                      "outline-variant": "#c1c8c2",
+                      "surface-container-low": "#f0f3ff",
+                      "surface-container": "#e7eefe",
+                      "surface-tint": "#3f6653",
+                      "on-secondary-fixed": "#001f27",
+                      "primary-fixed": "#c1ecd4",
+                      "inverse-surface": "#2a313d",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#002114",
+                      "inverse-primary": "#a5d0b9",
+                      "surface-container-high": "#e2e8f8",
+                      "surface-bright": "#f9f9ff",
+                      "secondary-container": "#72ddfd",
+                      "on-primary": "#ffffff",
+                      "on-primary-fixed-variant": "#274e3d",
+                      "tertiary-fixed": "#f9ddce",
+                      "on-primary-container": "#86af99",
+                      "on-surface-variant": "#414844",
+                      "surface-container-highest": "#dce2f3",
+                      "secondary-fixed": "#b2ebff",
+                      "background": "#f9f9ff",
+                      "primary-fixed-dim": "#a5d0b9",
+                      "surface-dim": "#d3daea",
+                      "tertiary-fixed-dim": "#dcc1b2",
+                      "error": "#ba1a1a",
+                      "on-tertiary-container": "#baa193",
+                      "on-surface": "#151c27",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#27180f",
+                      "on-background": "#151c27",
+                      "outline": "#717973"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "fontFamily": {
+                      "headline": ["Hanken Grotesk"],
+                      "display": ["Hanken Grotesk"],
+                      "body": ["Inter"],
+                      "label": ["Jetbrains Mono"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Light hero: a faint cool wash so the dark satellite map carries the colour */
+        .hero-bg {
+            background:
+                radial-gradient(1100px 520px at 80% 0%, rgba(105, 212, 244, 0.12), transparent 65%),
+                linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+        }
+        /* Closing band: light panel with the same cool wash as the hero */
+        .cta-bg {
+            background:
+                radial-gradient(800px 400px at 90% 0%, rgba(105, 212, 244, 0.14), transparent 60%),
+                linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+        }
+        #landing-map { background: #0b1a22; }
+        #landing-map .leaflet-control-attribution {
+            background: rgba(1, 45, 29, 0.7);
+            color: #c1ecd4;
+            font-size: 10px;
+        }
+        #landing-map .leaflet-control-attribution a { color: #69d4f4; }
+        #landing-map .leaflet-bar a {
+            background: rgba(1, 45, 29, 0.85);
+            color: #c1ecd4;
+            border-color: rgba(165, 208, 185, 0.2);
+        }
+        #landing-map .leaflet-bar a:hover { background: #1b4332; color: #ffffff; }
+        #landing-map .leaflet-bar { border: 1px solid rgba(165, 208, 185, 0.2); box-shadow: none; }
+        /* Header gains a frosted background and a rule once the page scrolls */
+        #site-header.is-scrolled {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: #c1c8c2;
+            backdrop-filter: blur(12px);
+        }
+    </style>
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background font-body text-on-surface antialiased overflow-x-hidden">
+
+<!-- ========================================================================= -->
+<!-- Header — transparent over the hero, solid once scrolled                   -->
+<!-- ========================================================================= -->
+<header id="site-header" class="fixed top-0 inset-x-0 z-50 h-16 border-b border-transparent text-on-surface transition-colors duration-300">
+    <div class="max-w-7xl mx-auto h-full px-4 sm:px-8 flex items-center justify-between gap-4">
+        <a class="flex items-center gap-3 min-w-0" href="{% url 'dashboard:home' %}">
+            <img alt="APWRS Logo" class="h-9 w-9 shrink-0 rounded-full object-contain ring-1 ring-outline-variant shadow-sm" src="{% static 'dashboard/img/apwrs-logo.png' %}" width="36" height="36"/>
+            <span class="flex flex-col min-w-0 leading-tight">
+                <span class="font-headline text-base font-extrabold tracking-tight text-primary">APWRS</span>
+                <span class="hidden sm:block text-[10px] text-on-surface-variant truncate">{% trans "Adaptive Planting Window Recommendation System" %}</span>
+            </span>
+        </a>
+        <nav class="hidden md:flex items-center gap-9 text-[13px] font-medium text-on-surface-variant" aria-label="{% trans 'Sections' %}">
+            <a class="hover:text-on-surface transition-colors" href="#problem">{% trans "Problem" %}</a>
+            <a class="hover:text-on-surface transition-colors" href="#concept">{% trans "Concept" %}</a>
+            <a class="hover:text-on-surface transition-colors" href="#goals">{% trans "Goals" %}</a>
+            <a class="hover:text-on-surface transition-colors" href="#basin">{% trans "Study Basin" %}</a>
+        </nav>
+        <div class="shrink-0 flex items-center gap-2">
+        <a href="{% url 'dashboard:signup' %}" class="shrink-0 hidden sm:inline-flex items-center px-3 py-2 font-headline font-bold text-[13px] text-on-surface-variant hover:text-primary transition-colors">
+            {% trans "Sign up" %}
+        </a>
+        <a href="{% url 'dashboard:login' %}" class="shrink-0 inline-flex items-center gap-1.5 bg-white text-primary border border-outline-variant px-4 py-2 rounded-lg font-headline font-bold text-[13px] shadow-sm hover:border-primary hover:bg-surface-container-low transition-colors">
+            {% trans "Sign in" %}
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </a>
+        {% include "dashboard/_lang_switch.html" with lang_inline=True %}
+        </div>
+    </div>
+</header>
+
+<main>
+
+    <!-- ===================================================================== -->
+    <!-- Hero                                                                  -->
+    <!-- ===================================================================== -->
+    <section class="hero-bg relative text-on-surface pt-16 border-b border-outline-variant/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 pt-16 pb-20 lg:pt-24 lg:pb-28 grid lg:grid-cols-12 gap-14 items-center">
+            <div class="lg:col-span-5">
+                <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                    <span class="w-8 h-px bg-secondary"></span>
+                    {% trans "Drought intelligence · Tunisia" %}
+                </p>
+                <h1 class="mt-7 font-display font-extrabold text-[2.6rem] sm:text-5xl lg:text-[3.5rem] leading-[1.04] tracking-[-0.025em] text-on-surface">
+                    {% trans "Plant at the right time, with the water you actually have." %}
+                </h1>
+                <p class="mt-7 text-[17px] text-on-surface-variant max-w-lg leading-relaxed">
+                    {% trans "APWRS combines satellite observation, ground sensors and drought forecasting to tell farmers and basin managers when to sow and how much water stress the season will bring." %}
+                </p>
+                <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-4">
+                    <a href="{% url 'dashboard:login' %}" class="inline-flex items-center gap-2 bg-primary-container text-white px-6 py-3.5 rounded-lg font-headline font-bold text-sm shadow-lg shadow-primary/15 hover:bg-primary transition-colors group">
+                        {% trans "Access the platform" %}
+                        <span class="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                    </a>
+                    <a href="{% url 'dashboard:signup' %}" class="inline-flex items-center gap-2 bg-white text-primary border border-outline-variant px-6 py-3.5 rounded-lg font-headline font-bold text-sm shadow-sm hover:border-primary transition-colors">
+                        {% trans "Sign up as a farmer" %}
+                    </a>
+                    <a href="#concept" class="inline-flex items-center gap-1.5 font-headline font-semibold text-sm text-on-surface-variant hover:text-on-surface transition-colors">
+                        {% trans "See how it works" %}
+                        <span class="material-symbols-outlined text-[18px]">south</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Satellite map of the pilot basin -->
+            <figure class="lg:col-span-7">
+                <div class="relative rounded-xl overflow-hidden ring-1 ring-black/5 shadow-[0_30px_70px_-25px_rgba(21,28,39,0.45)]">
+                    <div id="landing-map" class="w-full h-[380px] sm:h-[480px]" data-basin-url="{% static 'dashboard/data/ichkeul_basin.geojson' %}" role="img" aria-label="{% trans 'Satellite map of the Ichkeul catchment with its boundary and grid sections' %}"></div>
+                    <div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/45 to-transparent z-[450]"></div>
+                    <div class="absolute top-4 left-4 z-[500]">
+                        <div class="font-label text-[10px] uppercase tracking-[0.2em] text-primary-fixed-dim">{% trans "Pilot basin" %}</div>
+                        <div class="font-headline font-bold text-on-primary">{% trans "Ichkeul Catchment, Bizerte" %}</div>
+                    </div>
+                </div>
+                <figcaption class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 font-label text-[11px] text-on-surface-variant">
+                    <span class="flex items-center gap-2"><span class="w-5 h-[2px] bg-on-surface"></span>{% trans "Catchment boundary" %}</span>
+                    <span class="flex items-center gap-2"><span class="w-5 h-px bg-outline"></span>{% trans "29 ERA5-Land grid sections" %}</span>
+                    <span class="sm:ml-auto">{% trans "Imagery © Esri, Maxar" %}</span>
+                </figcaption>
+            </figure>
+        </div>
+
+        <!-- Key figures -->
+        <div class="border-t border-outline-variant/70">
+            <dl class="max-w-7xl mx-auto px-4 sm:px-8 grid grid-cols-2 lg:grid-cols-4 divide-x divide-outline-variant/70">
+                <div class="py-8 pr-6">
+                    <dt class="text-xs text-on-surface-variant">{% trans "Climate record" %}</dt>
+                    <dd class="mt-1.5 font-display font-bold text-3xl tracking-tight text-on-surface">30 <span class="text-base font-medium text-outline">{% trans "years" %}</span></dd>
+                </div>
+                <div class="py-8 px-6">
+                    <dt class="text-xs text-on-surface-variant">{% trans "Drought forecast" %}</dt>
+                    <dd class="mt-1.5 font-display font-bold text-3xl tracking-tight text-on-surface">6 <span class="text-base font-medium text-outline">{% trans "months ahead" %}</span></dd>
+                </div>
+                <div class="py-8 px-6 border-t border-outline-variant/70 lg:border-t-0">
+                    <dt class="text-xs text-on-surface-variant">{% trans "Staple crops" %}</dt>
+                    <dd class="mt-1.5 font-display font-bold text-3xl tracking-tight text-on-surface">9</dd>
+                </div>
+                <div class="py-8 pl-6 border-t border-outline-variant/70 lg:border-t-0">
+                    <dt class="text-xs text-on-surface-variant">{% trans "Languages" %}</dt>
+                    <dd class="mt-1.5 font-display font-bold text-3xl tracking-tight text-on-surface">EN · FR · AR</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- The problem                                                           -->
+    <!-- ===================================================================== -->
+    <section id="problem" class="scroll-mt-16 py-24 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 grid lg:grid-cols-12 gap-12 lg:gap-16">
+            <div class="lg:col-span-5 lg:sticky lg:top-28 self-start">
+                <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                    <span class="w-8 h-px bg-secondary"></span>{% trans "The problem" %}
+                </p>
+                <h2 class="mt-5 font-headline font-extrabold text-3xl sm:text-[2.5rem] leading-[1.1] text-primary tracking-tight">
+                    {% trans "Drought arrives quietly. Planting decisions are made blind." %}
+                </h2>
+                <p class="mt-6 text-on-surface-variant text-[17px] leading-relaxed">
+                    {% trans "Northern Tunisia's rain-fed agriculture depends on a short, irregular wet season. When sowing is timed on habit rather than evidence, a dry autumn or a hot spring can cost a whole harvest — and the Ichkeul wetland downstream pays for every litre over-drawn upstream." %}
+                </p>
+            </div>
+
+            <ol class="lg:col-span-7 divide-y divide-outline-variant/70 border-y border-outline-variant/70">
+                <li class="py-8 grid grid-cols-[3rem_1fr] gap-4">
+                    <span class="font-label text-sm text-outline pt-1">01</span>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">{% trans "Erratic rainfall" %}</h3>
+                        <p class="mt-2 text-on-surface-variant leading-relaxed">{% trans "Rain arrives late, early or all at once. Calendar dates inherited from wetter decades no longer match the season farmers actually get." %}</p>
+                    </div>
+                </li>
+                <li class="py-8 grid grid-cols-[3rem_1fr] gap-4">
+                    <span class="font-label text-sm text-outline pt-1">02</span>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">{% trans "Rising water demand" %}</h3>
+                        <p class="mt-2 text-on-surface-variant leading-relaxed">{% trans "Warmer temperatures raise evapotranspiration, so even a normal rainfall year can leave soils in deficit. Rainfall alone hides the real stress." %}</p>
+                    </div>
+                </li>
+                <li class="py-8 grid grid-cols-[3rem_1fr] gap-4">
+                    <span class="font-label text-sm text-outline pt-1">03</span>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">{% trans "Scattered data" %}</h3>
+                        <p class="mt-2 text-on-surface-variant leading-relaxed">{% trans "Satellite products, station records and field sensors live in separate systems and formats. Few people on the ground can combine them in time to act." %}</p>
+                    </div>
+                </li>
+                <li class="py-8 grid grid-cols-[3rem_1fr] gap-4">
+                    <span class="font-label text-sm text-outline pt-1">04</span>
+                    <div>
+                        <h3 class="font-headline font-bold text-xl text-on-surface">{% trans "Late warnings" %}</h3>
+                        <p class="mt-2 text-on-surface-variant leading-relaxed">{% trans "Drought is usually recognised once crops are already stressed. By then, the sowing date and the irrigation plan can no longer be changed." %}</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- Concept — from observation to recommendation                          -->
+    <!-- ===================================================================== -->
+    <section id="concept" class="scroll-mt-16 py-24 lg:py-32 bg-surface-container-lowest border-y border-outline-variant/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <div class="max-w-3xl">
+                <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                    <span class="w-8 h-px bg-secondary"></span>{% trans "The concept" %}
+                </p>
+                <h2 class="mt-5 font-headline font-extrabold text-3xl sm:text-[2.5rem] leading-[1.1] text-primary tracking-tight">
+                    {% trans "One pipeline, from the satellite to the sowing date." %}
+                </h2>
+                <p class="mt-6 text-on-surface-variant text-[17px] leading-relaxed">
+                    {% trans "APWRS measures both sides of the water balance — what falls as rain and what the atmosphere takes back — then turns it into a drought index, a forecast and a concrete planting window for each crop." %}
+                </p>
+            </div>
+
+            <ol class="mt-16 relative grid sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-12">
+                <!-- connector line behind the step markers -->
+                <span aria-hidden="true" class="hidden lg:block absolute top-6 left-6 right-6 h-px bg-outline-variant"></span>
+                <li class="relative">
+                    <span class="relative z-10 w-12 h-12 rounded-full bg-surface-container-lowest border border-outline-variant text-secondary flex items-center justify-center"><span class="material-symbols-outlined">satellite_alt</span></span>
+                    <p class="mt-6 font-label text-[11px] uppercase tracking-[0.2em] text-outline">{% trans "Step 1" %}</p>
+                    <h3 class="mt-1 font-headline font-bold text-xl text-on-surface">{% trans "Observe" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "CHIRPS rainfall, ERA5 climate reanalysis, MODIS and Sentinel vegetation indices, ground stations and IoT soil-moisture probes." %}</p>
+                </li>
+                <li class="relative">
+                    <span class="relative z-10 w-12 h-12 rounded-full bg-surface-container-lowest border border-outline-variant text-secondary flex items-center justify-center"><span class="material-symbols-outlined">water_drop</span></span>
+                    <p class="mt-6 font-label text-[11px] uppercase tracking-[0.2em] text-outline">{% trans "Step 2" %}</p>
+                    <h3 class="mt-1 font-headline font-bold text-xl text-on-surface">{% trans "Measure" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Reference evapotranspiration (FAO-56, Hargreaves) and the water balance P − ET₀, standardised into SPEI from 1 to 24 months." %}</p>
+                </li>
+                <li class="relative">
+                    <span class="relative z-10 w-12 h-12 rounded-full bg-surface-container-lowest border border-outline-variant text-secondary flex items-center justify-center"><span class="material-symbols-outlined">query_stats</span></span>
+                    <p class="mt-6 font-label text-[11px] uppercase tracking-[0.2em] text-outline">{% trans "Step 3" %}</p>
+                    <h3 class="mt-1 font-headline font-bold text-xl text-on-surface">{% trans "Forecast" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Machine-learning SPEI forecasts one to six months ahead, with drought probabilities and a live record of forecast accuracy." %}</p>
+                </li>
+                <li class="relative">
+                    <span class="relative z-10 w-12 h-12 rounded-full bg-primary text-secondary-fixed-dim flex items-center justify-center shadow-md"><span class="material-symbols-outlined">event_available</span></span>
+                    <p class="mt-6 font-label text-[11px] uppercase tracking-[0.2em] text-outline">{% trans "Step 4" %}</p>
+                    <h3 class="mt-1 font-headline font-bold text-xl text-primary">{% trans "Recommend" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "A 0–100 drought risk score and a planting calendar that matches sowing windows to crop, soil, irrigation and risk tolerance." %}</p>
+                </li>
+            </ol>
+
+            <!-- Drought risk scale used across the platform -->
+            <div class="mt-20 pt-10 border-t border-outline-variant/70 grid lg:grid-cols-12 gap-8 items-start">
+                <div class="lg:col-span-4">
+                    <h3 class="font-headline font-bold text-xl text-on-surface">{% trans "Drought Risk Score" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Every region is read on the same 0–100 scale, with a clear action attached to each band." %}</p>
+                </div>
+                <div class="lg:col-span-8">
+                    <div class="grid grid-cols-4 gap-1 h-1.5">
+                        <span class="rounded-l-full bg-green-500"></span><span class="bg-yellow-400"></span><span class="bg-orange-500"></span><span class="rounded-r-full bg-red-500"></span>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-5">
+                        <div><div class="flex items-baseline justify-between"><span class="font-semibold text-sm text-on-surface">{% trans "Normal" %}</span><span class="font-label text-[11px] text-outline">0–25</span></div><p class="mt-1 text-xs text-on-surface-variant leading-relaxed">{% trans "Normal irrigation schedules." %}</p></div>
+                        <div><div class="flex items-baseline justify-between"><span class="font-semibold text-sm text-on-surface">{% trans "Moderate" %}</span><span class="font-label text-[11px] text-outline">26–50</span></div><p class="mt-1 text-xs text-on-surface-variant leading-relaxed">{% trans "Monitor soils, trim non-critical irrigation." %}</p></div>
+                        <div><div class="flex items-baseline justify-between"><span class="font-semibold text-sm text-on-surface">{% trans "Severe" %}</span><span class="font-label text-[11px] text-outline">51–75</span></div><p class="mt-1 text-xs text-on-surface-variant leading-relaxed">{% trans "Deficit irrigation, protect sensitive crops." %}</p></div>
+                        <div><div class="flex items-baseline justify-between"><span class="font-semibold text-sm text-on-surface">{% trans "Extreme" %}</span><span class="font-label text-[11px] text-outline">76–100</span></div><p class="mt-1 text-xs text-on-surface-variant leading-relaxed">{% trans "Strict water rationing." %}</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- Goals                                                                 -->
+    <!-- ===================================================================== -->
+    <section id="goals" class="scroll-mt-16 py-24 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8">
+            <div class="grid lg:grid-cols-12 gap-8 items-end">
+                <div class="lg:col-span-7">
+                    <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                        <span class="w-8 h-px bg-secondary"></span>{% trans "Goals" %}
+                    </p>
+                    <h2 class="mt-5 font-headline font-extrabold text-3xl sm:text-[2.5rem] leading-[1.1] text-primary tracking-tight">
+                        {% trans "What the project sets out to achieve." %}
+                    </h2>
+                </div>
+                <p class="lg:col-span-5 text-on-surface-variant leading-relaxed">
+                    {% trans "Built for farmers, agronomists, basin managers and decision-makers, with role-based access for each." %}
+                </p>
+            </div>
+
+            <ul class="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 border-t border-l border-outline-variant/70">
+                <li class="p-8 border-r border-b border-outline-variant/70">
+                    <span class="material-symbols-outlined text-secondary text-[28px]">schedule</span>
+                    <h3 class="mt-5 font-headline font-bold text-lg text-on-surface">{% trans "Time sowing to the season" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Replace fixed calendar dates with planting windows driven by current soil water and the coming months' outlook." %}</p>
+                </li>
+                <li class="p-8 border-r border-b border-outline-variant/70">
+                    <span class="material-symbols-outlined text-secondary text-[28px]">crisis_alert</span>
+                    <h3 class="mt-5 font-headline font-bold text-lg text-on-surface">{% trans "Warn before the damage" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Flag developing drought months ahead, while irrigation plans and crop choices can still change." %}</p>
+                </li>
+                <li class="p-8 border-r border-b border-outline-variant/70">
+                    <span class="material-symbols-outlined text-secondary text-[28px]">water</span>
+                    <h3 class="mt-5 font-headline font-bold text-lg text-on-surface">{% trans "Use water more efficiently" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Match irrigation to real crop demand and protect the flows that sustain the Ichkeul wetland." %}</p>
+                </li>
+                <li class="p-8 border-r border-b border-outline-variant/70">
+                    <span class="material-symbols-outlined text-secondary text-[28px]">hub</span>
+                    <h3 class="mt-5 font-headline font-bold text-lg text-on-surface">{% trans "Unify the evidence" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Bring satellite, reanalysis, station and sensor data into one validated, exportable record." %}</p>
+                </li>
+                <li class="p-8 border-r border-b border-outline-variant/70">
+                    <span class="material-symbols-outlined text-secondary text-[28px]">verified</span>
+                    <h3 class="mt-5 font-headline font-bold text-lg text-on-surface">{% trans "Stay transparent" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "Publish every formula and track forecast accuracy openly, so recommendations can be trusted and audited." %}</p>
+                </li>
+                <li class="p-8 border-r border-b border-outline-variant/70">
+                    <span class="material-symbols-outlined text-secondary text-[28px]">translate</span>
+                    <h3 class="mt-5 font-headline font-bold text-lg text-on-surface">{% trans "Reach people in their language" %}</h3>
+                    <p class="mt-2 text-sm text-on-surface-variant leading-relaxed">{% trans "An AgroAI assistant answers questions in English, French and Arabic, by text or voice." %}</p>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- Study basin                                                           -->
+    <!-- ===================================================================== -->
+    <section id="basin" class="scroll-mt-16 pb-24 lg:pb-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-8 grid lg:grid-cols-12 gap-12 lg:gap-16">
+            <div class="lg:col-span-6">
+                <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                    <span class="w-8 h-px bg-secondary"></span>{% trans "Study basin" %}
+                </p>
+                <h2 class="mt-5 font-headline font-extrabold text-3xl sm:text-[2.5rem] leading-[1.1] text-primary tracking-tight">{% trans "Starting where the stakes are highest." %}</h2>
+                <p class="mt-6 text-on-surface-variant text-[17px] leading-relaxed">
+                    {% trans "The Ichkeul catchment drains farmland around Mateur and Bizerte into Lake Ichkeul, a UNESCO World Heritage wetland whose balance of fresh and salt water depends on what agriculture leaves in the rivers. The basin is divided into 29 grid sections so soil water, rain and temperature can be followed section by section." %}
+                </p>
+                <p class="mt-4 text-on-surface-variant leading-relaxed">
+                    {% trans "The platform also monitors other agricultural regions across Tunisia, including Medjerda, Siliana, Kairouan, Cap Bon, Zaghouan, Jendouba and Beja." %}
+                </p>
+            </div>
+            <div class="lg:col-span-6">
+                <h3 class="font-label text-[11px] uppercase tracking-[0.2em] text-outline">{% trans "Inside the platform" %}</h3>
+                <ul class="mt-4 divide-y divide-outline-variant/70 border-y border-outline-variant/70">
+                    <li class="py-4 flex items-start gap-4"><span class="material-symbols-outlined text-secondary">map</span><div><div class="font-semibold text-on-surface">{% trans "Interactive drought map" %}</div><div class="text-sm text-on-surface-variant">{% trans "Risk by region, with drawing and measuring tools." %}</div></div></li>
+                    <li class="py-4 flex items-start gap-4"><span class="material-symbols-outlined text-secondary">monitoring</span><div><div class="font-semibold text-on-surface">{% trans "SPEI outlook" %}</div><div class="text-sm text-on-surface-variant">{% trans "7-day weather and 12-month rain and temperature forecasts." %}</div></div></li>
+                    <li class="py-4 flex items-start gap-4"><span class="material-symbols-outlined text-secondary">calendar_month</span><div><div class="font-semibold text-on-surface">{% trans "Planting calendar" %}</div><div class="text-sm text-on-surface-variant">{% trans "Crop phenology and a smart sowing recommender." %}</div></div></li>
+                    <li class="py-4 flex items-start gap-4"><span class="material-symbols-outlined text-secondary">sensors</span><div><div class="font-semibold text-on-surface">{% trans "Sensor network" %}</div><div class="text-sm text-on-surface-variant">{% trans "Multi-depth soil moisture and weather telemetry." %}</div></div></li>
+                    <li class="py-4 flex items-start gap-4"><span class="material-symbols-outlined text-secondary">history</span><div><div class="font-semibold text-on-surface">{% trans "Historical trends" %}</div><div class="text-sm text-on-surface-variant">{% trans "30 years of climate baselines and drought chronology." %}</div></div></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- Closing call to action                                                -->
+    <!-- ===================================================================== -->
+    <section class="px-4 sm:px-8 pb-24">
+        <div class="cta-bg max-w-7xl mx-auto rounded-xl text-on-surface border border-outline-variant/70 px-8 py-14 sm:px-14 sm:py-16 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 shadow-sm">
+            <div class="max-w-2xl">
+                <h2 class="font-headline font-extrabold text-3xl sm:text-4xl tracking-tight leading-tight text-primary">{% trans "Read the season before it reads you." %}</h2>
+                <p class="mt-3 text-on-surface-variant leading-relaxed">{% trans "Sign in to see live drought risk, forecasts and planting windows for your region." %}</p>
+            </div>
+            <a href="{% url 'dashboard:login' %}" class="shrink-0 self-start lg:self-auto inline-flex items-center gap-2 bg-primary-container text-white px-7 py-4 rounded-lg font-headline font-bold text-sm shadow-lg shadow-primary/15 hover:bg-primary transition-colors group">
+                {% trans "Sign in to APWRS" %}
+                <span class="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="max-w-7xl mx-auto">
+            {% include 'dashboard/_partners.html' %}
+        </div>
+    </section>
+</main>
+
+<footer class="border-t border-outline-variant/70 bg-surface-container-lowest">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-on-surface-variant">
+        <span class="flex items-center gap-2">
+            <img alt="" class="h-6 w-6 rounded-full object-contain" src="{% static 'dashboard/img/apwrs-logo.png' %}" width="24" height="24"/>
+            <span><span class="font-headline font-extrabold text-primary">APWRS</span> · {% trans "Adaptive Planting Window Recommendation System" %}</span>
+        </span>
+        <span class="font-label text-outline">{% trans "Data: CHIRPS · ERA5 · MODIS · Sentinel" %}</span>
+    </div>
+</footer>
+
+<script src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'dashboard/js/map-tiles.js' %}"></script>
+<script src="{% static 'dashboard/js/basin-map.js' %}"></script>
+<script>
+    // Header: transparent over the dark hero, solid once the page scrolls.
+    (function () {
+        var header = document.getElementById("site-header");
+        var update = function () {
+            header.classList.toggle("is-scrolled", window.scrollY > 40);
+        };
+        update();
+        window.addEventListener("scroll", update, { passive: true });
+    })();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        window.BasinMap.init(document.getElementById("landing-map"));
+    });
+</script>
+</body>
+</html>

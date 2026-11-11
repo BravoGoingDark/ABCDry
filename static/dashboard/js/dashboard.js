@@ -49,54 +49,78 @@ document.addEventListener("DOMContentLoaded", () => {
         return s;
     };
 
-    // Leaflet is required for everything map related. If it is unavailable,
-    // say so in the panel instead of leaving a silent blank rectangle.
-    if (typeof window.L === "undefined") {
-        const container = document.getElementById("country-map");
-        if (container) {
-            container.innerHTML =
-                '<div class="flex h-full w-full items-center justify-center p-6 text-center text-sm text-on-surface-variant">' +
-                (tr("map_unavailable") || "Map could not be loaded. Please reload the page.") +
-                "</div>";
-        }
-        return;
-    }
+    // Satellite map of the Ichkeul catchment with the study shapefile borders.
+    // Free navigation: wheel/pinch/double-click zoom, drag to pan, +/- control.
+    const mapContainer = document.getElementById("country-map");
+    if (!mapContainer) return;
 
     const tunisiaView = regionConfig.tunisia || { center: [37.13, 9.67], zoom: 8 };
-    const map = L.map("country-map", { scrollWheelZoom: true, zoomControl: true }).setView(tunisiaView.center, tunisiaView.zoom);
-    if (!map.getPane("stationPane")) {
-        map.createPane("stationPane");
-        map.getPane("stationPane").style.zIndex = "650";
-    }
-    // Tiles go through the Django proxy (/api/tiles/<z>/<x>/<y>.png), which
-    // serves cached Esri basemaps from disk. map-tiles.js keeps asking the
-    // proxy until it answers again, and both branches below are same-origin so
-    // the browser never requests a third-party tile host.
+    const ichkeulView = { center: [37.06, 9.48], zoom: 9 };
+    const map = L.map("country-map", {
+        center: ichkeulView.center,
+        zoom: ichkeulView.zoom,
+        minZoom: 5,
+        maxZoom: 18,
+        zoomControl: false,
+        attributionControl: false,
+        // Leaflet fades tiles in with requestAnimationFrame. When the window is
+        // occluded or backgrounded that never runs and every tile stays at
+        // opacity:0 — the map looks blank although the tiles downloaded fine.
+        fadeAnimation: false,
+    });
+
+    // Expose map instance for other pages (e.g. admin farms overlay)
+    window._dashboardMap = map;
+
+    L.control.zoom({ position: "bottomright" }).addTo(map);
+
+    // Satellite tile layer (ESRI World Imagery) via same-origin Django proxy
     const tileLayer = window.MapTiles
         ? window.MapTiles.createTileLayer(L, map, {
-              variant: "map",
+              variant: "satellite",
               maxZoom: 19,
-              onSourceChange: (state) => {
-                  const notice = document.getElementById("map-tile-warning");
-                  if (!notice) {
-                      return;
-                  }
-                  if (state === "retrying") {
-                      notice.classList.remove("hidden");
-                  } else {
-                      notice.classList.add("hidden");
-                  }
-              }
           })
-        : L.tileLayer("/api/tiles/{z}/{x}/{y}.png?layer=map", {
+        : L.tileLayer("/api/tiles/{z}/{x}/{y}.png?layer=satellite", {
               maxZoom: 19,
-              attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+              attribution: '',
           });
 
     tileLayer.addTo(map);
 
-    // Re-measure once layout settles (Tailwind CDN/web fonts load asynchronously)
-    // and on window resize, so tiles always cover the container.
+    // Ichkeul catchment: outline + 29 sections from the study shapefile
+    const basinUrl = mapContainer.dataset.basinUrl;
+    if (basinUrl) {
+        fetch(basinUrl)
+            .then((response) => {
+                if (!response.ok) throw new Error("HTTP " + response.status);
+                return response.json();
+            })
+            .then((data) => {
+                const outline = { type: "FeatureCollection", features: data.features.filter((f) => f.properties.kind === "outline") };
+                const sections = { type: "FeatureCollection", features: data.features.filter((f) => f.properties.kind === "section") };
+                L.geoJSON(sections, {
+                    interactive: false,
+                    style: { color: "#ffffff", weight: 0.8, opacity: 0.6, fill: false }
+                }).addTo(map);
+                L.geoJSON(outline, {
+                    interactive: false,
+                    style: { color: "#0b1a22", weight: 5, opacity: 0.75, fillColor: "#ffffff", fillOpacity: 0.05 }
+                }).addTo(map);
+                const outlineLayer = L.geoJSON(outline, {
+                    interactive: false,
+                    style: { color: "#ffffff", weight: 2, fill: false }
+                }).addTo(map);
+                // Pages that draw their own overlay (e.g. the admin farmer lands
+                // page) opt out with data-auto-fit="false" so this background fit
+                // does not override their view.
+                if (mapContainer.dataset.autoFit !== "false") {
+                    map.fitBounds(outlineLayer.getBounds(), { padding: [36, 36] });
+                }
+            })
+            .catch((error) => console.error("Ichkeul basin outline failed to load:", error));
+    }
+
+    // Re-measure once layout settles
     window.addEventListener("load", () => map.invalidateSize());
     window.addEventListener("resize", () => map.invalidateSize());
     window.setTimeout(() => map.invalidateSize(), 300);
@@ -316,9 +340,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (regionSelector) {
+        // The navbar on other pages links here with ?region=<pk>&lake=<key>.
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedRegion = urlParams.get("region");
+        if (requestedRegion && Array.from(regionSelector.options).some((o) => o.value === requestedRegion)) {
+            regionSelector.value = requestedRegion;
+        }
         const initialRegion = getSelectedRegionKey();
         updateMapForRegion(initialRegion);
         updateLakeOptions(initialRegion);
+        const requestedLake = urlParams.get("lake");
+        if (lakeSelector && requestedLake && Array.from(lakeSelector.options).some((o) => o.value === requestedLake)) {
+            lakeSelector.value = requestedLake;
+        }
         flyToSelectedLake(initialRegion);
         regionSelector.addEventListener("change", () => {
             const selectedRegion = getSelectedRegionKey();
@@ -505,6 +539,11 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const fetchChartData = async (regionId, yearId) => {
+        // The overview no longer shows the climate/drought/NDVI charts; skip
+        // the request on pages that have none of their targets.
+        if (!document.getElementById("climate-months") && !document.getElementById("drought-months") && !document.getElementById("ndvi-months")) {
+            return;
+        }
         try {
             let url = `/api/chart-data/?region_id=${encodeURIComponent(regionId)}`;
             if (yearId) url += `&year_id=${encodeURIComponent(yearId)}`;
@@ -617,440 +656,6 @@ document.addEventListener("DOMContentLoaded", () => {
             fetchChartData(regionSelector.value, getYearId());
         }
     })();
-
-    // ── Sensor Network ────────────────────────────────────────────────
-    const sensorLayer = new L.FeatureGroup();
-    map.addLayer(sensorLayer);
-    window._dashboardMap = map; // expose for inline script
-
-    const TYPE_COLORS = {
-        aws: "#0ea5e9",
-        soil: "#22c55e",
-        water: "#a855f7",
-        custom: "#f59e0b",
-    };
-
-    const TYPE_LABELS = {
-        aws: "Weather Station",
-        soil: "Soil Moisture",
-        water: "Water Level",
-        custom: "Custom",
-    };
-
-    const TYPE_ICONS = {
-        aws: "sensors",
-        soil: "grass",
-        water: "water_drop",
-        custom: "sensors",
-    };
-
-    const getSensorColor = (type) => TYPE_COLORS[type] || TYPE_COLORS.custom;
-    const getSensorIcon = (type) => TYPE_ICONS[type] || "sensors";
-
-    const addSensorPin = (sensor) => {
-        const color = getSensorColor(sensor.sensor_type);
-        const iconName = getSensorIcon(sensor.sensor_type);
-        const typeLabel = TYPE_LABELS[sensor.sensor_type] || sensor.sensor_type;
-        const lat = Number(sensor.latitude);
-        const lon = Number(sensor.longitude);
-        if (isNaN(lat) || isNaN(lon)) return;
-        const latlng = L.latLng(lat, lon);
-
-        // Coverage circle
-        const radiusKm = Number(sensor.coverage_radius_km) || 10;
-        const circle = L.circle(latlng, {
-            radius: radiusKm * 1000,
-            color: color,
-            weight: 1.5,
-            opacity: 0.45,
-            fillColor: color,
-            fillOpacity: 0.08,
-            className: "sensor-circle",
-        });
-        sensorLayer.addLayer(circle);
-
-        // Station-style icon matching analysis
-        const iconHtml = `
-            <div class="station-marker-container">
-                <span class="station-radar-ripple" style="border-color:${color};"></span>
-                <div class="station-marker-badge" style="background:${color};" title="${sensor.name || typeLabel}">
-                    <span class="material-symbols-outlined" style="font-size:13px; line-height:1;">${iconName}</span>
-                </div>
-            </div>
-        `;
-
-        const sensorIcon = L.divIcon({
-            html: iconHtml,
-            className: "custom-station-icon",
-            iconSize: [26, 26],
-            iconAnchor: [13, 13],
-            popupAnchor: [0, -15],
-        });
-
-        const popupHtml = `
-            <div style="min-width:245px; font-family:Inter,sans-serif; color:#0f172a;" class="p-1.5">
-                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
-                    <div>
-                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full" style="background:${color}"></span>
-                            ${typeLabel}
-                        </div>
-                        <div class="font-bold text-sm text-slate-900">${sensor.name}</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[11px] font-bold" style="background:${color}22; color:${color};">
-                        Active
-                    </span>
-                </div>
-                <div class="space-y-1.5 text-xs">
-                    <div class="flex justify-between py-0.5 border-b border-slate-100">
-                        <span class="text-slate-500 font-medium">📍 Coordinates:</span>
-                        <span class="font-mono font-bold text-slate-800">${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E</span>
-                    </div>
-                    <div class="flex justify-between py-0.5 border-b border-slate-100">
-                        <span class="text-slate-500 font-medium">📡 Coverage Radius:</span>
-                        <span class="font-mono font-bold text-slate-800">${radiusKm} km</span>
-                    </div>
-                    ${sensor.region_name ? `
-                    <div class="flex justify-between py-0.5 border-b border-slate-100">
-                        <span class="text-slate-500 font-medium">🗺️ Region:</span>
-                        <span class="font-bold text-slate-800">${sensor.region_name}</span>
-                    </div>` : ''}
-                    ${sensor.description ? `
-                    <div class="pt-1 text-[11px] text-slate-600 italic">
-                        "${sensor.description}"
-                    </div>` : ''}
-                </div>
-            </div>
-        `;
-
-        const tooltipHtml = `
-            <div style="font-family:Inter,sans-serif;">
-                <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
-                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${color};"></span>
-                    <b style="font-size:11px; color:#f8fafc;">${sensor.name}</b>
-                </div>
-                <div style="font-family:monospace; font-size:10px; color:#94a3b8;">${lat.toFixed(4)}°N, ${lon.toFixed(4)}°E</div>
-                <div style="font-size:10px; margin-top:2px; font-weight:600; color:${color};">${typeLabel} &bull; ${radiusKm} km</div>
-            </div>
-        `;
-
-        const marker = L.marker(latlng, { icon: sensorIcon, pane: "stationPane" })
-            .bindTooltip(tooltipHtml, {
-                direction: "top",
-                offset: [0, -15],
-                className: "station-tooltip-smooth",
-                opacity: 0.95
-            })
-            .bindPopup(popupHtml, { maxWidth: 300 });
-
-        sensorLayer.addLayer(marker);
-    };
-
-    const updateSensorCounts = (sensors) => {
-        let counts = { aws: 0, soil: 0, water: 0, custom: 0 };
-        sensors.forEach(function(s) {
-            if (counts[s.sensor_type] !== undefined) counts[s.sensor_type]++;
-        });
-        const setText = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = val;
-        };
-        setText("sensor-count-aws", counts.aws);
-        setText("sensor-count-soil", counts.soil);
-        setText("sensor-count-water", counts.water);
-        setText("sensor-count-custom", counts.custom);
-        const total = counts.aws + counts.soil + counts.water + counts.custom;
-        const badge = document.getElementById("sensor-count-badge");
-        if (badge) badge.textContent = total;
-    };
-
-    const fetchSensors = async () => {
-        try {
-            const resp = await fetch("/api/sensors/");
-            if (!resp.ok) return;
-            const data = await resp.json();
-            window._sensorData = data.sensors || [];
-            sensorLayer.clearLayers();
-            window._sensorData.forEach(addSensorPin);
-            updateSensorCounts(window._sensorData);
-            // Re-render sensor list if open
-            if (window._sensorListOpen && typeof renderSensorList === 'function') {
-                renderSensorList(window._sensorData);
-            }
-        } catch (e) {
-            // non-critical
-        }
-    };
-
-    // Handle "Pick from Map" — fill coordinates and reopen modal
-    map.on("click", (e) => {
-        if (window._sensorPickCallback) {
-            window._sensorPickCallback = false;
-            map.getContainer().style.cursor = "";
-            openSensorModal(e.latlng.lat, e.latlng.lng);
-        }
-    });
-
-    // Expose to global scope so inline script can call these
-    window.addSensorPinToMap = (sensor) => {
-        addSensorPin(sensor);
-    };
-    window.refreshSensorList = () => {
-        fetchSensors();
-    };
-
-    // Load existing sensors on init
-    fetchSensors();
-
-    // ── Station-originated Heatmap on country-map ──
-    const stationsJson = readJsonScript("stations-json", window._dashboardStations || []);
-    const defaultStations = [
-        {
-            label: "Station Humide Inférieure",
-            lat: 37.1265,
-            lon: 9.6842,
-            temp_c: 24.2,
-            rain_mm: 18.5,
-            humidity: 68,
-            spei: -0.42,
-            risk_score: 48,
-            date: "2024-10-15"
-        },
-        {
-            label: "Station Sub-Humide",
-            lat: 37.1680,
-            lon: 9.6420,
-            temp_c: 26.8,
-            rain_mm: 8.2,
-            humidity: 54,
-            spei: -1.15,
-            risk_score: 72,
-            date: "2024-10-15"
-        }
-    ];
-    const stations = (stationsJson && stationsJson.length) ? stationsJson : defaultStations;
-    let heatLayer = null;
-    const stationHeatmapGroup = L.featureGroup();
-
-    const renderStationHeatmap = () => {
-        if (!stations || !stations.length) {
-            return;
-        }
-
-        // Generate heatmap if leaflet-heat is present
-        if (typeof L.heatLayer !== "undefined") {
-            const heatPoints = [];
-            stations.forEach((st) => {
-                const stRisk = (st.risk_score !== undefined && st.risk_score !== null) ? st.risk_score : 55;
-                const coreIntensity = Math.max(0.20, Math.min(1.0, stRisk / 100));
-
-                const rings = [
-                    { r: 0.000, count: 1, mult: 1.0 },
-                    { r: 0.007, count: 6, mult: 0.95 },
-                    { r: 0.015, count: 10, mult: 0.88 },
-                    { r: 0.026, count: 14, mult: 0.78 },
-                    { r: 0.040, count: 18, mult: 0.65 },
-                    { r: 0.058, count: 22, mult: 0.50 },
-                    { r: 0.078, count: 26, mult: 0.35 },
-                    { r: 0.105, count: 30, mult: 0.22 },
-                    { r: 0.135, count: 32, mult: 0.12 },
-                ];
-
-                rings.forEach((ring) => {
-                    if (ring.r === 0) {
-                        heatPoints.push([st.lat, st.lon, coreIntensity]);
-                    } else {
-                        for (let i = 0; i < ring.count; i++) {
-                            const angle = (i / ring.count) * Math.PI * 2;
-                            const pLat = st.lat + Math.sin(angle) * ring.r * 0.82;
-                            const pLon = st.lon + Math.cos(angle) * ring.r;
-                            heatPoints.push([pLat, pLon, Math.max(0.04, coreIntensity * ring.mult)]);
-                        }
-                    }
-                });
-            });
-
-            if (stations.length >= 2) {
-                const s1 = stations[0];
-                const s2 = stations[1];
-                const r1 = (s1.risk_score || 55) / 100;
-                const r2 = (s2.risk_score || 55) / 100;
-
-                const minLat = Math.min(s1.lat, s2.lat) - 0.08;
-                const maxLat = Math.max(s1.lat, s2.lat) + 0.08;
-                const minLon = Math.min(s1.lon, s2.lon) - 0.08;
-                const maxLon = Math.max(s1.lon, s2.lon) + 0.08;
-
-                const gridSteps = 26;
-                const latDelta = (maxLat - minLat) / gridSteps;
-                const lonDelta = (maxLon - minLon) / gridSteps;
-
-                for (let i = 0; i <= gridSteps; i++) {
-                    const gLat = minLat + i * latDelta;
-                    for (let j = 0; j <= gridSteps; j++) {
-                        const gLon = minLon + j * lonDelta;
-                        const d1 = Math.hypot((gLat - s1.lat) * 1.15, gLon - s1.lon);
-                        const d2 = Math.hypot((gLat - s2.lat) * 1.15, gLon - s2.lon);
-
-                        const w1 = 1 / (Math.pow(d1, 2) + 0.0008);
-                        const w2 = 1 / (Math.pow(d2, 2) + 0.0008);
-                        const interpRisk = (w1 * r1 + w2 * r2) / (w1 + w2);
-
-                        const minDist = Math.min(d1, d2);
-                        if (minDist < 0.22) {
-                            const falloff = Math.exp(-Math.pow(minDist / 0.12, 2));
-                            const val = interpRisk * (0.35 + 0.65 * falloff);
-                            heatPoints.push([gLat, gLon, Math.max(0.05, Math.min(1.0, val))]);
-                        }
-                    }
-                }
-            }
-
-            if (heatLayer) {
-                map.removeLayer(heatLayer);
-            }
-
-            heatLayer = L.heatLayer(heatPoints, {
-                radius: 52,
-                blur: 38,
-                maxZoom: 14,
-                minOpacity: 0.25,
-                gradient: {
-                    0.00: "#10b981",
-                    0.25: "#10b981",
-                    0.26: "#eab308",
-                    0.50: "#eab308",
-                    0.51: "#f97316",
-                    0.75: "#f97316",
-                    0.76: "#ef4444",
-                    1.00: "#991b1b",
-                },
-            });
-            heatLayer.addTo(map);
-        }
-
-        stationHeatmapGroup.clearLayers();
-        stations.forEach((st) => {
-            const riskVal = (st.risk_score !== undefined && st.risk_score !== null) ? st.risk_score : 55;
-            let badgeColor = "#10b981";
-            let badgeBg = "rgba(16, 185, 129, 0.2)";
-            if (riskVal >= 75) { badgeColor = "#ef4444"; badgeBg = "rgba(239, 68, 68, 0.25)"; }
-            else if (riskVal >= 50) { badgeColor = "#f97316"; badgeBg = "rgba(249, 115, 22, 0.25)"; }
-            else if (riskVal >= 25) { badgeColor = "#eab308"; badgeBg = "rgba(234, 179, 8, 0.25)"; }
-
-            const iconHtml = `
-                <div class="station-marker-container">
-                    <span class="station-radar-ripple" style="border-color:${badgeColor};"></span>
-                    <div class="station-marker-badge" style="background:${badgeColor};" title="${st.label}">
-                        <span class="material-symbols-outlined" style="font-size:13px; line-height:1;">sensors</span>
-                    </div>
-                </div>
-            `;
-            const stIcon = L.divIcon({
-                html: iconHtml,
-                className: "custom-station-icon",
-                iconSize: [26, 26],
-                iconAnchor: [13, 13],
-                popupAnchor: [0, -15],
-            });
-
-            const popupContent = `
-                <div style="min-width:245px; font-family:Inter,sans-serif; color:#0f172a;" class="p-1.5">
-                    <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
-                        <div>
-                            <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full" style="background:${badgeColor}"></span>
-                                Database Station Origin
-                            </div>
-                            <div class="font-bold text-sm text-slate-900">${st.label}</div>
-                        </div>
-                        <span class="px-2 py-0.5 rounded text-[11px] font-bold" style="background:${badgeBg}; color:${badgeColor};">
-                            Risk ${riskVal}
-                        </span>
-                    </div>
-                    <div class="space-y-1.5 text-xs">
-                        <div class="flex justify-between py-0.5 border-b border-slate-100">
-                            <span class="text-slate-500 font-medium">📍 Coordinates:</span>
-                            <span class="font-mono font-bold text-slate-800">${Number(st.lat).toFixed(4)}°N, ${Number(st.lon).toFixed(4)}°E</span>
-                        </div>
-                        ${st.rain_mm !== null && st.rain_mm !== undefined ? `
-                        <div class="flex justify-between py-0.5">
-                            <span class="text-slate-500 font-medium">🌧️ Precipitation:</span>
-                            <span class="font-mono font-bold text-slate-800">${Number(st.rain_mm).toFixed(1)} mm</span>
-                        </div>` : ''}
-                        ${st.temp_c !== null && st.temp_c !== undefined ? `
-                        <div class="flex justify-between py-0.5">
-                            <span class="text-slate-500 font-medium">🌡️ Temperature:</span>
-                            <span class="font-mono font-bold text-slate-800">${Number(st.temp_c).toFixed(1)} °C</span>
-                        </div>` : ''}
-                        ${st.humidity !== null && st.humidity !== undefined ? `
-                        <div class="flex justify-between py-0.5">
-                            <span class="text-slate-500 font-medium">💧 Humidity:</span>
-                            <span class="font-mono font-bold text-slate-800">${st.humidity}%</span>
-                        </div>` : ''}
-                        ${st.spei !== null && st.spei !== undefined ? `
-                        <div class="flex justify-between py-0.5">
-                            <span class="text-slate-500 font-medium">📊 SPEI-3:</span>
-                            <span class="font-mono font-bold text-slate-800">${Number(st.spei).toFixed(2)}</span>
-                        </div>` : ''}
-                        ${st.date ? `
-                        <div class="flex justify-between pt-1 border-t border-slate-100 text-[10px] text-slate-400">
-                            <span>Database Reading:</span>
-                            <span class="font-mono">${st.date}</span>
-                        </div>` : ''}
-                    </div>
-                </div>
-            `;
-
-            const tooltipHtml = `
-                <div style="font-family:Inter,sans-serif;">
-                    <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
-                        <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${badgeColor};"></span>
-                        <b style="font-size:11px; color:#f8fafc;">${st.label}</b>
-                    </div>
-                    <div style="font-family:monospace; font-size:10px; color:#94a3b8;">${Number(st.lat).toFixed(4)}°N, ${Number(st.lon).toFixed(4)}°E</div>
-                    <div style="font-size:10px; margin-top:2px; font-weight:600; color:${badgeColor};">Heat Origin &bull; Risk: ${riskVal}</div>
-                </div>
-            `;
-
-            const marker = L.marker([st.lat, st.lon], { icon: stIcon, pane: "stationPane" })
-                .bindTooltip(tooltipHtml, {
-                    direction: "top",
-                    offset: [0, -15],
-                    className: "station-tooltip-smooth",
-                    opacity: 0.95
-                })
-                .bindPopup(popupContent, { maxWidth: 300 });
-            stationHeatmapGroup.addLayer(marker);
-        });
-
-        if (stations.length >= 2) {
-            const baseline = L.polyline([[stations[0].lat, stations[0].lon], [stations[1].lat, stations[1].lon]], {
-                color: "#0284c7",
-                weight: 2,
-                dashArray: "6, 8",
-                opacity: 0.85,
-                pane: "stationPane"
-            }).bindTooltip("Monitoring Baseline · Heat Origin", { direction: "center" });
-            stationHeatmapGroup.addLayer(baseline);
-        }
-        stationHeatmapGroup.addTo(map);
-    };
-
-    renderStationHeatmap();
-
-    const heatToggle = document.getElementById("toggle-water-heatmap");
-    if (heatToggle) {
-        heatToggle.addEventListener("change", (e) => {
-            if (e.target.checked) {
-                if (heatLayer) map.addLayer(heatLayer);
-                map.addLayer(stationHeatmapGroup);
-            } else {
-                if (heatLayer) map.removeLayer(heatLayer);
-                map.removeLayer(stationHeatmapGroup);
-            }
-        });
-    }
 
     activateSelectMode();
     scheduleLiveMetricsRefresh();

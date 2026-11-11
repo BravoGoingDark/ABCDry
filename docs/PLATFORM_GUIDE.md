@@ -27,16 +27,23 @@ The platform bridges satellite remote sensing, ground weather stations, machine 
   4. **Region Selector**: Allows instant switching between different agricultural regions.
   5. **Floating AgroAI Assistant**: Available in the bottom-right corner across all pages for conversational answers in English, French, or Arabic.
 
-### 2.3 SPEI Outlook & ML Drought Forecasting (`/analysis/spei-outlook/`)
+### 2.3 Prediction & Climate Forecasting Engine (`/analysis/spei-outlook/`)
 * **URL**: `/analysis/spei-outlook/`
 * **Core Features**:
-  1. **Multi-Month Forecast Horizon**: Provides forward-looking predictions from T+1 up to T+6 months.
-  2. **Multi-Scale SPEI Curves**: Compares SPEI-1 (meteorological drought), SPEI-3 (agricultural drought), SPEI-6, SPEI-12 (hydrological drought), and SPEI-24 (deep groundwater drought).
-  3. **Next-Month Drought Probability**: Machine learning estimated probability of entering or remaining in drought next month.
-  4. **Driver Importance Analysis**: Highlights top predictive factors driving risk (e.g., rainfall deficit, 30-day temperature anomalies, SPEI lag-1/lag-2, relative humidity).
-  5. **Machine Learning Algorithms**: Combines Random Forest, LightGBM, and XGBoost ensemble regressors trained on 30 years of historical climate and hydrological data.
+  1. **7-Day Weather & Immediate Risk Outlook**: Daily weather condition cards, precipitation probabilities, peak temperatures, and humidity.
+  2. **12-Month Precipitation Forecast (Rain)**: Monthly rainfall distribution curves vs. 10-year historical baselines, uncertainty bands, and the 20 mm drought threshold line.
+  3. **12-Month Temperature Forecast & Thermal Stress**: Max/Min/Avg thermal trajectories and an interactive 12-month thermal intensity heatmap.
+  4. **Multi-Horizon SPEI Drought Risk (Risk)**: Forward-looking predictions (T+1 to T+6), drought probabilities, warning flags, and driver importance analysis.
+  5. **Reliability Scoreboard**: Live empirical verification metrics tracking predicted vs. actual drought occurrences.
 
-### 2.4 Historical Climate Trends (`/historical/`)
+### 2.4 Adaptive Planting Window Calendar (`/calendar/`)
+* **URL**: `/calendar/`
+* **Core Features**:
+  1. **Interactive Crop Phenology & Lifecycle Timeline**: Sowing, vegetative, critical water stress, and harvest windows for 9 Tunisian staple crops (wheat, barley, olive, citrus, tomato, pepper, potato, chickpea, alfalfa).
+  2. **Crop Agronomic Directives**: Temperature ranges, water requirements, rainfall thresholds, and actionable management guidelines.
+  3. **Smart Sowing Recommender**: Interactive questionnaire computing optimal sowing date ranges and match suitability scores based on crop, soil texture, irrigation system, and drought risk tolerance.
+
+### 2.5 Historical Climate Trends (`/historical/`)
 * **URL**: `/historical/`
 * **Core Features**:
   1. **30-Year Climatological Baselines**: Continuous records from 1996 to the present day.
@@ -85,12 +92,14 @@ The platform bridges satellite remote sensing, ground weather stations, machine 
   - **Delete Entry**: Click the `Delete` button to remove invalid records.
   - **Bulk Export**: Click `Export to Excel` on any metric table to download the full table.
 
-### 2.9 IoT Sensor Network (`/api/sensors/`)
-* **URL**: `/api/sensors/`
+### 2.9 Dedicated IoT Sensor Network (`/sensors/`)
+* **URL**: `/sensors/` (and API endpoints at `/api/sensors/`, `/api/sensors/<id>/telemetry/`, `/api/sensors/ingest/`)
 * **Core Features**:
-  1. **Sensor Inventory**: View active ground sensors, coordinates, status, and battery levels.
-  2. **Telemetry Ingestion API (`/api/ingest/`)**: Automated REST endpoint for IoT telemetry loggers (LoRaWAN, 4G, Campbell Scientific).
-  3. **Sensor History**: View time-series plots of temperature, soil moisture, and rainfall recorded by individual sensors.
+  1. **Interactive Sensor Fleet Map**: Live Leaflet map displaying deployed IoT telemetry nodes across Tunisian basins, with interactive pins, coverage radii, and status indicators (Active, Offline, Low Battery).
+  2. **Multi-Depth Soil Moisture Telemetry**: Visualizes Volumetric Water Content (VWC %) at 10cm, 30cm, and 60cm depths alongside soil temperature, complete with Field Capacity (32%) and Permanent Wilting Point (14%) thresholds.
+  3. **Weather & Microclimate Station Curves**: Automated AWS charts for air temperature, relative humidity, precipitation bars, and wind speed.
+  4. **Hydrological & Node Health Monitoring**: Stream water levels, salinity (EC/TDS), solar charging battery voltage curves, and LoRaWAN/cellular RSSI signal reception.
+  5. **Sensor Registration & Fleet Management**: Modal dialog for registering new telemetry nodes with auto-associated nearest regions, coverage radii, and coordinates.
 
 ### 2.10 AgroAI Assistant (`/assistant/` & Floating Widget)
 * **URL**: `/assistant/` (full page) or the floating chat bubble on any page.

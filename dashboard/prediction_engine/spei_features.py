@@ -15,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 from dashboard.models import ClimateMetrics, RemoteSensingMetrics, Region
-from dashboard.prediction_engine.physical_helpers import calculate_spei, calculate_vci
+from dashboard.prediction_engine.physical_helpers import calculate_spei
 
 logger = logging.getLogger(__name__)
 
@@ -599,7 +599,6 @@ def train_spei_models(df, target_t1='spei_target_t1', target_t3='spei_target_t3'
     Returns dict with model objects, metrics, benchmarks (persistence and
     climatology on the same holdout), and feature importances.
     """
-    from sklearn.model_selection import TimeSeriesSplit
     from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
     from xgboost import XGBRegressor
 
@@ -678,7 +677,7 @@ def train_spei_models(df, target_t1='spei_target_t1', target_t3='spei_target_t3'
                 'n': int(len(y_test)),
             }
 
-        base_train = base_test = None
+        base_test = None
         if mode == 'delta':
             if 'spei_current' not in train_df.columns:
                 results[target_name] = {'error': "mode 'delta' needs the 'spei_current' column"}

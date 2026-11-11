@@ -1,0 +1,1454 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "Planting Calendar & Land Suitability Evaluator" %} — APWRS</title>
+    
+    <!-- Framework & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#012d1d",
+                "primary-container": "#1b4332",
+                "on-primary": "#ffffff",
+                "secondary": "#00677d",
+                "secondary-container": "#72ddfd",
+                "on-secondary": "#ffffff",
+                "surface": "#f9f9ff",
+                "surface-dim": "#d3daea",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-low": "#f0f4f8",
+                "surface-container-high": "#e2e8f0",
+                "surface-container-highest": "#cbd5e1",
+                "on-surface": "#151c27",
+                "on-surface-variant": "#414844",
+                "outline": "#717973",
+                "outline-variant": "#c1c8c2",
+                "error": "#ba1a1a",
+              },
+              fontFamily: {
+                headline: ["'Hanken Grotesk'", "sans-serif"],
+                body: ["'Inter'", "sans-serif"],
+                label: ["'Inter'", "sans-serif"],
+                mono: ["'JetBrains Mono'", "monospace"],
+              }
+            }
+          }
+        };
+    </script>
+    <style>
+        .stage-plant    { background-color: #16a34a; color: #fff; }
+        .stage-grow     { background-color: #2563eb; color: #fff; }
+        .stage-harvest  { background-color: #d97706; color: #fff; }
+        .stage-crit     { background-color: #dc2626; color: #fff; }
+        .stage-rest     { background-color: #f1f5f9; color: #94a3b8; }
+        .crop-card-btn.active {
+            border-color: #012d1d !important;
+            background-color: #e6f4ea !important;
+            box-shadow: 0 0 0 2px #012d1d;
+        }
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen">
+
+<div class="flex-1 flex flex-col bg-surface min-h-screen overflow-hidden">
+    <!-- Top Navigation Header -->
+    {% include "dashboard/_header.html" %}
+
+    <!-- Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="calander" %}
+
+    <!-- Main Content Container -->
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 transition-all duration-300 ease-in-out lg:ml-60">
+        <div class="max-w-7xl mx-auto space-y-6">
+
+            <!-- ── NAVIGATION TABS BAR ── -->
+            <div class="flex flex-wrap items-center justify-between gap-3 bg-surface-container-lowest border border-outline-variant rounded-xl p-2 shadow-sm">
+                <div class="flex items-center gap-1.5 overflow-x-auto">
+                    <button id="tab-btn-crop" onclick="switchMainTab('crop')" class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm cursor-pointer">
+                        <span class="material-symbols-outlined text-base">eco</span>
+                        {% trans "Crop Lifecycle & Sowing Timelines" %}
+                    </button>
+                    <button id="tab-btn-evaluator" onclick="switchMainTab('evaluator')" class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all text-on-surface-variant hover:text-primary hover:bg-surface-container-low cursor-pointer">
+                        <span class="material-symbols-outlined text-base">terrain</span>
+                        {% trans "Land Evaluator (What Works & What Doesn't)" %}
+                    </button>
+                    <button id="tab-btn-matrix" onclick="switchMainTab('matrix')" class="shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all text-on-surface-variant hover:text-primary hover:bg-surface-container-low cursor-pointer">
+                        <span class="material-symbols-outlined text-base">table_chart</span>
+                        {% trans "Comparative Agricultural Matrix" %}
+                    </button>
+                </div>
+                <div class="text-[11px] text-on-surface-variant font-mono px-3 py-1 bg-surface-container-low rounded-lg border border-outline-variant/60 hidden sm:block">
+                    {% trans "12 Tunisian Agricultural Basins Supported" %}
+                </div>
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- TAB 1: CROP TIMELINES (WHEN TO PLANT, GROW, HARVEST)            -->
+            <!-- =============================================================== -->
+            <div id="section-crop-timeline" class="space-y-6">
+
+                <!-- Crop Selector Category Filter & Grid -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/60 pb-3">
+                        <div>
+                            <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-xl">potted_plant</span>
+                                {% trans "Choose Crop Type" %}
+                            </h2>
+                            <p class="text-xs text-on-surface-variant">
+                                {% trans "Select a crop to inspect its phenological calendar, critical growth stages, and field recommendations." %}
+                            </p>
+                        </div>
+
+                        <!-- Category Filter Pills -->
+                        <div class="flex items-center gap-1 overflow-x-auto text-xs" id="crop-category-filter">
+                            <button onclick="filterCropCategory('all')" class="cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-bold bg-primary text-white" data-cat="all">All (12)</button>
+                            <button onclick="filterCropCategory('Cereal')" class="cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-medium bg-surface-container-low text-on-surface-variant hover:text-primary" data-cat="Cereal">Cereals</button>
+                            <button onclick="filterCropCategory('Orchard')" class="cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-medium bg-surface-container-low text-on-surface-variant hover:text-primary" data-cat="Orchard">Orchards</button>
+                            <button onclick="filterCropCategory('Horticulture')" class="cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-medium bg-surface-container-low text-on-surface-variant hover:text-primary" data-cat="Horticulture">Vegetables</button>
+                            <button onclick="filterCropCategory('Legume')" class="cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-medium bg-surface-container-low text-on-surface-variant hover:text-primary" data-cat="Legume">Legumes</button>
+                            <button onclick="filterCropCategory('Forage')" class="cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-medium bg-surface-container-low text-on-surface-variant hover:text-primary" data-cat="Forage">Forage</button>
+                        </div>
+                    </div>
+
+                    <!-- Grid of 12 Crops -->
+                    <div id="crop-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+                </div>
+
+                <!-- Deep-Dive Active Crop Card -->
+                <div id="active-crop-display" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-6">
+                    <!-- Crop Title Header -->
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-outline-variant/60 pb-5">
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-4xl shadow-sm shrink-0">
+                                <span id="crop-hero-icon">🌾</span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h3 id="crop-hero-name" class="font-headline font-black text-2xl text-primary">Wheat (Durum & Bread)</h3>
+                                    <span id="crop-hero-cat" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 uppercase">Cereal</span>
+                                </div>
+                                <p id="crop-hero-subtitle" class="text-xs text-on-surface-variant mt-0.5 font-medium">
+                                    Triticum durum · Cycle: 120–150 days · Season: Winter / Spring
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Agronomic Attribute Badges -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="px-3 py-1.5 rounded-xl bg-surface-container-low border border-outline-variant/60 text-xs">
+                                <span class="text-on-surface-variant block text-[10px] uppercase font-bold">{% trans "Water Demand" %}</span>
+                                <span id="badge-water-demand" class="font-bold text-blue-700">💧 Medium (300–450 mm)</span>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-xl bg-surface-container-low border border-outline-variant/60 text-xs">
+                                <span class="text-on-surface-variant block text-[10px] uppercase font-bold">{% trans "Thermal Range" %}</span>
+                                <span id="badge-temp-range" class="font-bold text-orange-700">🌡️ 5°C to 25°C</span>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-xl bg-surface-container-low border border-outline-variant/60 text-xs">
+                                <span class="text-on-surface-variant block text-[10px] uppercase font-bold">{% trans "Preferred Soil" %}</span>
+                                <span id="badge-soil-type" class="font-bold text-emerald-800">🌱 Loam, Clay-Loam</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4-Stage Phenological Milestones -->
+                    <div>
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-3 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base text-primary">timeline</span>
+                            {% trans "Key Milestones: When to Plant, Grow, and Harvest" %}
+                        </h4>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- 1. PLANT / SOW -->
+                            <div class="bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200 rounded-xl p-4 relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono font-bold uppercase text-emerald-800 bg-emerald-200/70 px-2 py-0.5 rounded">
+                                        {% trans "Stage 1" %}
+                                    </span>
+                                    <span class="material-symbols-outlined text-emerald-700 text-xl">psychiatry</span>
+                                </div>
+                                <h5 class="font-headline font-bold text-sm text-emerald-950">{% trans "When to Plant (Sowing)" %}</h5>
+                                <div id="milestone-plant-dates" class="text-sm font-black text-emerald-800 my-1 font-mono">15 Nov – 15 Dec</div>
+                                <p id="milestone-plant-desc" class="text-xs text-emerald-900/80 leading-relaxed">
+                                    Sow after the first consistent autumn rains (cumulative >25mm). Ensure soil temperature >10°C at 5cm depth.
+                                </p>
+                            </div>
+
+                            <!-- 2. GROW -->
+                            <div class="bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200 rounded-xl p-4 relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono font-bold uppercase text-blue-800 bg-blue-200/70 px-2 py-0.5 rounded">
+                                        {% trans "Stage 2" %}
+                                    </span>
+                                    <span class="material-symbols-outlined text-blue-700 text-xl">grass</span>
+                                </div>
+                                <h5 class="font-headline font-bold text-sm text-blue-950">{% trans "When to Grow (Vegetative)" %}</h5>
+                                <div id="milestone-grow-dates" class="text-sm font-black text-blue-800 my-1 font-mono">January – April</div>
+                                <p id="milestone-grow-desc" class="text-xs text-blue-900/80 leading-relaxed">
+                                    Tillering and stem elongation phases. Apply split nitrogen applications (e.g. ammonium nitrate) during active tillering.
+                                </p>
+                            </div>
+
+                            <!-- 3. CRITICAL CARE -->
+                            <div class="bg-gradient-to-br from-red-50 to-red-100/60 border border-red-200 rounded-xl p-4 relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono font-bold uppercase text-red-800 bg-red-200/70 px-2 py-0.5 rounded">
+                                        {% trans "Critical Risk" %}
+                                    </span>
+                                    <span class="material-symbols-outlined text-red-700 text-xl">warning</span>
+                                </div>
+                                <h5 class="font-headline font-bold text-sm text-red-950">{% trans "Critical Care Window" %}</h5>
+                                <div id="milestone-crit-dates" class="text-sm font-black text-red-800 my-1 font-mono">March – April</div>
+                                <p id="milestone-crit-desc" class="text-xs text-red-900/80 leading-relaxed">
+                                    Heading and grain filling. Water deficit or heat waves (Sirocco) during this window causes severe yield collapse.
+                                </p>
+                            </div>
+
+                            <!-- 4. HARVEST -->
+                            <div class="bg-gradient-to-br from-amber-50 to-amber-100/60 border border-amber-200 rounded-xl p-4 relative overflow-hidden">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-[10px] font-mono font-bold uppercase text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded">
+                                        {% trans "Stage 4" %}
+                                    </span>
+                                    <span class="material-symbols-outlined text-amber-700 text-xl">agriculture</span>
+                                </div>
+                                <h5 class="font-headline font-bold text-sm text-amber-950">{% trans "When to Harvest" %}</h5>
+                                <div id="milestone-harvest-dates" class="text-sm font-black text-amber-800 my-1 font-mono">25 May – 20 June</div>
+                                <p id="milestone-harvest-desc" class="text-xs text-amber-900/80 leading-relaxed">
+                                    Harvest when grain moisture drops to 12–14%. Avoid harvesting during extreme noon heat to minimize shatter loss.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 12-Month Gantt Lifecycle Visualization -->
+                    <div class="bg-surface-container-low/70 border border-outline-variant/60 rounded-xl p-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                            <span class="text-xs font-headline font-bold text-on-surface">{% trans "12-Month Annual Gantt Timeline" %}</span>
+                            <div class="flex flex-wrap items-center gap-3 text-[11px] font-semibold">
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded stage-plant inline-block"></span> {% trans "Sowing" %}</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded stage-grow inline-block"></span> {% trans "Vegetative" %}</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded stage-crit inline-block"></span> {% trans "Critical Period" %}</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded stage-harvest inline-block"></span> {% trans "Harvest" %}</span>
+                                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded stage-rest inline-block"></span> {% trans "Dormant / Off" %}</span>
+                            </div>
+                        </div>
+                        <div id="crop-gantt-strip" class="grid grid-cols-12 gap-1.5"></div>
+                    </div>
+
+                    <!-- Field Directives & Agronomic Management -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-surface-container-low/50 border border-outline-variant/50 rounded-xl p-4">
+                            <h5 class="text-xs font-bold text-primary flex items-center gap-1.5 mb-2">
+                                <span class="material-symbols-outlined text-base">task_alt</span>
+                                {% trans "Actionable Field Management Directives" %}
+                            </h5>
+                            <ul id="crop-directives-list" class="text-xs text-on-surface-variant space-y-1.5 list-disc list-inside"></ul>
+                        </div>
+                        <div class="bg-surface-container-low/50 border border-outline-variant/50 rounded-xl p-4">
+                            <h5 class="text-xs font-bold text-secondary flex items-center gap-1.5 mb-2">
+                                <span class="material-symbols-outlined text-base">water_drop</span>
+                                {% trans "Irrigation & Water Stress Guidance" %}
+                            </h5>
+                            <p id="crop-water-guidance" class="text-xs text-on-surface-variant leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- TAB 2: LAND SUITABILITY EVALUATOR (WHAT WORKS & WHAT DOESN'T)   -->
+            <!-- =============================================================== -->
+            <div id="section-land-evaluator" class="hidden space-y-6">
+
+                <!-- Input Questionnaire Panel -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/60 pb-3">
+                        <div>
+                            <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-secondary text-2xl">edit_document</span>
+                                {% trans "Land Diagnostic: Enter Your Field Parameters" %}
+                            </h2>
+                            <p class="text-xs text-on-surface-variant">
+                                {% trans "Provide your soil, weather, climate, and water infrastructure info to evaluate what crops will thrive and what will fail on your parcel." %}
+                            </p>
+                        </div>
+                        <!-- Quick Preset Loader -->
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-semibold text-on-surface-variant">{% trans "Load Basin Preset:" %}</label>
+                            <select id="preset-basin" onchange="loadBasinPreset(this.value)" class="text-xs bg-surface-container-low border border-outline-variant rounded-lg px-2.5 py-1.5 font-semibold text-primary focus:ring-2 focus:ring-secondary">
+                                <option value="custom">-- {% trans "Custom Field Data" %} --</option>
+                                <option value="ichkeul">Ichkeul / Mateur (Sub-humid, Heavy Clay-Loam)</option>
+                                <option value="medjerda">Medjerda Basin (Sub-humid / Semi-arid, Loam)</option>
+                                <option value="capbon">Cap Bon (Mediterranean, Sandy-Loam, Citrus)</option>
+                                <option value="kairouan">Kairouan (Semi-arid, High Salinity Risk)</option>
+                                <option value="siliana">Siliana (Upper Semi-arid, Cereals/Olive)</option>
+                                <option value="beja">Béja / Medjez (Cereal Heartlands, Deep Loam)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 3-Column Input Form: Soil, Climate/Weather, Water -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                        <!-- Column 1: Soil Properties -->
+                        <div class="bg-surface-container-low/60 rounded-xl p-4 border border-outline-variant/50 space-y-3">
+                            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary border-b border-outline-variant/40 pb-2">
+                                <span class="material-symbols-outlined text-base text-primary">grain</span>
+                                {% trans "1. Soil Characteristics" %}
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Soil Texture" %}</label>
+                                <select id="field-soil-texture" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="loam" selected>Loam / Limoneux (Balanced, high fertility)</option>
+                                    <option value="clay_loam">Clay-Loam / Argilo-limoneux (High retention)</option>
+                                    <option value="heavy_clay">Heavy Clay / Argileux lourd (Compacts, slow drainage)</option>
+                                    <option value="sandy_loam">Sandy-Loam / Sablo-limoneux (Light, fast draining)</option>
+                                    <option value="sandy">Sandy / Sableux (Poor retention, leaches nutrients)</option>
+                                    <option value="chalky">Chalky / Calcaire (Alkaline, high CaCO3)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Soil pH Range" %}</label>
+                                <select id="field-soil-ph" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="neutral" selected>Neutral (pH 6.5 – 7.5)</option>
+                                    <option value="alkaline">Alkaline / Calcareous (pH 7.6 – 8.5)</option>
+                                    <option value="acidic">Acidic (pH < 6.2)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Soil Salinity (EC)" %}</label>
+                                <select id="field-soil-salinity" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="low" selected>Low Non-Saline (&lt; 2 dS/m)</option>
+                                    <option value="moderate">Moderate Salinity (2 – 4 dS/m)</option>
+                                    <option value="high">High Saline Parcel (&gt; 4 dS/m)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Effective Soil Depth" %}</label>
+                                <select id="field-soil-depth" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="deep" selected>Deep (&gt; 80 cm) – Ideal for deep roots</option>
+                                    <option value="medium">Medium (40 – 80 cm)</option>
+                                    <option value="shallow">Shallow (&lt; 40 cm / Hardpan layer)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Column 2: Climate & Weather Profile -->
+                        <div class="bg-surface-container-low/60 rounded-xl p-4 border border-outline-variant/50 space-y-3">
+                            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-secondary border-b border-outline-variant/40 pb-2">
+                                <span class="material-symbols-outlined text-base text-secondary">cloud</span>
+                                {% trans "2. Weather & Climate Info" %}
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Annual Rainfall (mm/year)" %}</label>
+                                <select id="field-rainfall" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="humid">Sub-humid / High (> 550 mm/yr - North)</option>
+                                    <option value="moderate" selected>Moderate Mediterranean (400 – 550 mm/yr)</option>
+                                    <option value="semi_arid">Semi-arid (250 – 400 mm/yr - Central)</option>
+                                    <option value="arid">Arid / Deficit (&lt; 250 mm/yr - South)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Summer Thermal Peak" %}</label>
+                                <select id="field-summer-temp" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="moderate" selected>Moderate Coast (28°C – 33°C peak)</option>
+                                    <option value="hot">Hot Interior (34°C – 39°C peak)</option>
+                                    <option value="extreme">Extreme Heatwave / Sirocco (> 40°C peak)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Winter Frost Occurrence" %}</label>
+                                <select id="field-frost-risk" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="rare" selected>Rare / Frost-free Coastal zone</option>
+                                    <option value="occasional">Occasional light frost (-1°C to -3°C)</option>
+                                    <option value="frequent">Frequent winter frost (Interior valleys)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Recent Soil Moisture / Drought Index" %}</label>
+                                <select id="field-current-moisture" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="normal" selected>Normal / Adequate autumn rainfall</option>
+                                    <option value="mild_deficit">Mild moisture deficit</option>
+                                    <option value="severe_deficit">Severe drought stress (SPEI &lt; -1.5)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Column 3: Irrigation & Infrastructure -->
+                        <div class="bg-surface-container-low/60 rounded-xl p-4 border border-outline-variant/50 space-y-3">
+                            <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-800 border-b border-outline-variant/40 pb-2">
+                                <span class="material-symbols-outlined text-base text-emerald-800">water</span>
+                                {% trans "3. Water & Irrigation Setup" %}
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Irrigation System Available" %}</label>
+                                <select id="field-irrig-type" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="drip" selected>Localized Drip / Goutte-à-goutte (High efficiency)</option>
+                                    <option value="sprinkler">Sprinkler / Aspersion / Pivot</option>
+                                    <option value="flood">Surface / Submersion / Canals</option>
+                                    <option value="rainfed">Strictly Rainfed / Bour (No irrigation)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Water Supply Reliability" %}</label>
+                                <select id="field-water-availability" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="abundant" selected>Secure regular quota (Dam / Active well)</option>
+                                    <option value="restricted">Restricted / Rationed summer quotas</option>
+                                    <option value="none">Zero supplemental water (Rain only)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Irrigation Water Salinity" %}</label>
+                                <select id="field-water-quality" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="fresh" selected>Fresh Water (&lt; 1.0 g/L TDS)</option>
+                                    <option value="brackish">Slightly Brackish (1.5 – 3.0 g/L TDS)</option>
+                                    <option value="saline">High Saline Well (&gt; 3.0 g/L TDS)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-semibold text-on-surface mb-1">{% trans "Farmer Risk Strategy" %}</label>
+                                <select id="field-risk-strategy" class="w-full text-xs rounded-lg border border-outline-variant bg-white p-2 focus:ring-2 focus:ring-secondary">
+                                    <option value="balanced" selected>Balanced Yield & Resilience</option>
+                                    <option value="conservative">Conservative (Maximum drought security)</option>
+                                    <option value="cash_crop">High Value Cash Crop Maximizer</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trigger Button -->
+                    <div class="flex items-center justify-between pt-3 border-t border-outline-variant/60">
+                        <span class="text-xs text-on-surface-variant font-mono">
+                            {% trans "Calculates soil compatibility, thermal stress limits, and moisture thresholds." %}
+                        </span>
+                        <button onclick="runLandDiagnostic()" class="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-white font-bold text-xs flex items-center gap-2 transition-all shadow-md cursor-pointer">
+                            <span class="material-symbols-outlined text-base">psychiatry</span>
+                            {% trans "Analyze Land & Generate Recommendations" %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Diagnostic Output Report -->
+                <div id="diagnostic-results-box" class="space-y-6">
+
+                    <!-- Score Summary Header -->
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div id="land-index-ring" class="w-14 h-14 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center font-headline font-black text-xl text-emerald-800">
+                                86
+                            </div>
+                            <div>
+                                <h3 class="font-headline font-bold text-base text-primary">{% trans "Parcel Diagnostic Report" %}</h3>
+                                <p id="diagnostic-summary-subtitle" class="text-xs text-on-surface-variant">
+                                    Based on your input parameters, 7 crops are highly viable, 3 need adaptation, and 2 are non-recommended.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="px-3 py-1 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-300" id="stat-works-count">7 Works</span>
+                            <span class="px-3 py-1 rounded-full font-bold bg-amber-100 text-amber-800 border border-amber-300" id="stat-caution-count">3 Conditional</span>
+                            <span class="px-3 py-1 rounded-full font-bold bg-red-100 text-red-800 border border-red-300" id="stat-fails-count">2 Doesn't Work</span>
+                        </div>
+                    </div>
+
+                    <!-- 1. WHAT WORKS (HIGHLY SUITABLE CROPS) -->
+                    <div class="bg-surface-container-lowest border border-emerald-300/80 rounded-xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-emerald-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">check_circle</span>
+                                </span>
+                                <div>
+                                    <h3 class="font-headline font-bold text-base text-emerald-950">{% trans "What Works For Your Land (Recommended)" %}</h3>
+                                    <p class="text-xs text-emerald-800">{% trans "These crops have natural affinity with your soil texture, water balance, and thermal climate." %}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold font-mono px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg">High Resilience</span>
+                        </div>
+
+                        <div id="container-what-works" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- 2. CONDITIONAL / NEEDS ADAPTATION -->
+                    <div class="bg-surface-container-lowest border border-amber-300/80 rounded-xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-amber-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">tune</span>
+                                </span>
+                                <div>
+                                    <h3 class="font-headline font-bold text-base text-amber-950">{% trans "What Needs Adaptation (Conditional Potential)" %}</h3>
+                                    <p class="text-xs text-amber-800">{% trans "Viable only if you apply specific soil amendments, deficit irrigation, or windbreak protection." %}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold font-mono px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg">Requires Action</span>
+                        </div>
+
+                        <div id="container-what-caution" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- 3. WHAT DOESN'T WORK (HIGH RISK / NOT RECOMMENDED) -->
+                    <div class="bg-surface-container-lowest border border-red-300/80 rounded-xl p-6 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between border-b border-red-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-lg bg-red-100 text-red-800 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">cancel</span>
+                                </span>
+                                <div>
+                                    <h3 class="font-headline font-bold text-base text-red-950">{% trans "What Doesn't Work For Your Land (High Failure Risk)" %}</h3>
+                                    <p class="text-xs text-red-800">{% trans "These crops conflict with your parcel parameters and will suffer crop failure or negative ROI." %}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold font-mono px-2.5 py-1 bg-red-50 text-red-800 border border-red-200 rounded-lg">High Loss Risk</span>
+                        </div>
+
+                        <div id="container-what-fails" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Populated dynamically by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Actionable Rotation & Soil Strategy -->
+                    <div class="bg-gradient-to-br from-primary-container to-primary text-white rounded-xl p-6 shadow-sm space-y-3">
+                        <h4 class="font-headline font-bold text-base text-emerald-200 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-xl">recommend</span>
+                            {% trans "Recommended Crop Rotation & Soil Defense Plan" %}
+                        </h4>
+                        <div id="land-action-plan" class="text-xs text-slate-100 leading-relaxed grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                            <div class="bg-white/10 p-3.5 rounded-lg border border-white/15">
+                                <span class="font-bold text-emerald-300 block mb-1">{% trans "Rotation Sequence" %}</span>
+                                <span id="plan-rotation-text">Wheat / Barley (Winter) → Faba Bean / Chickpea (Legume fix) → Fallow / Forage.</span>
+                            </div>
+                            <div class="bg-white/10 p-3.5 rounded-lg border border-white/15">
+                                <span class="font-bold text-emerald-300 block mb-1">{% trans "Soil Amendments" %}</span>
+                                <span id="plan-amendment-text">Incorporate 20 T/ha compost to boost organic matter and moisture buffering capacity.</span>
+                            </div>
+                            <div class="bg-white/10 p-3.5 rounded-lg border border-white/15">
+                                <span class="font-bold text-emerald-300 block mb-1">{% trans "Water Strategy" %}</span>
+                                <span id="plan-water-text">Prioritize supplemental drip in March–April during reproductive phase; avoid overhead sprinklers in midday.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- =============================================================== -->
+            <!-- TAB 3: COMPARATIVE AGRICULTURAL MATRIX                          -->
+            <!-- =============================================================== -->
+            <div id="section-comparative-matrix" class="hidden space-y-6">
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-outline-variant/60 pb-3">
+                        <div>
+                            <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-xl">grid_on</span>
+                                {% trans "Complete Crop Phenology Matrix" %}
+                            </h2>
+                            <p class="text-xs text-on-surface-variant">
+                                {% trans "Side-by-side comparison of sowing windows, critical care periods, harvest dates, and base soil requirements." %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead>
+                                <tr class="bg-surface-container-low text-on-surface font-label uppercase text-[10px] tracking-wider">
+                                    <th class="p-3 font-bold">{% trans "Crop" %}</th>
+                                    <th class="p-3 font-bold">{% trans "Family / Type" %}</th>
+                                    <th class="p-3 font-bold text-emerald-700">{% trans "When to Plant (Sow)" %}</th>
+                                    <th class="p-3 font-bold text-blue-700">{% trans "Vegetative Growth" %}</th>
+                                    <th class="p-3 font-bold text-red-700">{% trans "Critical Period" %}</th>
+                                    <th class="p-3 font-bold text-amber-700">{% trans "When to Harvest" %}</th>
+                                    <th class="p-3 font-bold">{% trans "Water Req." %}</th>
+                                    <th class="p-3 font-bold">{% trans "Best Soil" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="matrix-table-body" class="divide-y divide-outline-variant/30 font-medium"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    {% include 'dashboard/_partners.html' %}
+    {% include "dashboard/_agroai_chat.html" %}
+    </main>
+</div>
+
+<!-- ========================================================================= -->
+<!-- JAVASCRIPT: MASTER DATA & DIAGNOSTIC ENGINE                               -->
+<!-- ========================================================================= -->
+<script>
+/* ── Master Crop Database: 12 Key Tunisian Crops with Rich Phenology & Agronomic Constraints ── */
+var MASTER_CROPS = [
+    {
+        id: 'wheat',
+        icon: '🌾',
+        name: 'Wheat (Blé Dur / Tendre)',
+        category: 'Cereal',
+        family: 'Poaceae',
+        duration: '120–150 days',
+        season: 'Winter Cereal',
+        waterDemand: 'medium',
+        waterReqMm: 350,
+        tempMin: 5, tempMax: 26,
+        phMin: 6.0, phMax: 8.2,
+        maxSalinity: 3.5,
+        soils: ['loam', 'clay_loam', 'chalky'],
+        minDepth: 'medium',
+        plantDates: '15 Nov – 15 Dec',
+        growDates: 'January – April',
+        critDates: 'March – April',
+        harvestDates: '25 May – 20 Jun',
+        plantDesc: 'Sow following initial autumn rains (>25mm cumulative). Depth: 3–5 cm. Seed rate: 140–160 kg/ha.',
+        growDesc: 'Tillering (Jan–Feb), Stem extension (Feb–Mar). Apply top-dress nitrogen during early tillering.',
+        critDesc: 'Heading, flowering and milk-grain stage. Water deficit during this window causes severe kernel shriveling.',
+        harvestDesc: 'Combine when grain moisture drops below 13%. Store dry at <15°C to prevent weevils.',
+        directives: [
+            'Sow after first autumn soaking rains to ensure 90%+ emergence.',
+            'Fractionate nitrogen: 1/3 at sowing, 2/3 at 3-leaf / tillering phase.',
+            'Rotate with faba beans or chickpeas to break cereal root disease cycle.'
+        ],
+        waterGuidance: 'Rainfed in Northern Tunisia (>400mm). In Central basins, 2 supplemental irrigations (each 40mm) during tillering and heading increase yield by 35%.',
+        plantMonths: [10, 11], growMonths: [0, 1, 2, 3], critMonths: [2, 3], harvestMonths: [4, 5],
+        reasonsGood: 'Ideal match for loamy soils and Mediterranean winter rains. High food security value.',
+        reasonsBad: 'Cannot tolerate standing waterlogging in compacted heavy clays. Severe failure in arid zones (<250mm) without irrigation.'
+    },
+    {
+        id: 'barley',
+        icon: '🌾',
+        name: 'Barley (Orge)',
+        category: 'Cereal',
+        family: 'Poaceae',
+        duration: '90–120 days',
+        season: 'Winter Cereal',
+        waterDemand: 'low',
+        waterReqMm: 220,
+        tempMin: 3, tempMax: 28,
+        phMin: 6.0, phMax: 8.8,
+        maxSalinity: 5.0,
+        soils: ['loam', 'sandy_loam', 'chalky', 'clay_loam'],
+        minDepth: 'shallow',
+        plantDates: '1 Nov – 10 Dec',
+        growDates: 'December – March',
+        critDates: 'February – March',
+        harvestDates: '10 May – 5 Jun',
+        plantDesc: 'Sow at 120 kg/ha. Highly drought and salinity tolerant. Very rustic root establishment.',
+        growDesc: 'Fast initial growth compared to wheat. Tolerates shallower and more calcareous soils.',
+        critDesc: 'Heading and grain filling. Needs at least minimal soil moisture during early March.',
+        harvestDesc: 'Harvest early when heads bend downward. Used for animal fodder and traditional gastronomy.',
+        directives: [
+            'Unrivaled hardiness: best winter cereal for lower rainfall parcels (250–350mm).',
+            'Tolerates higher soil salinity (up to 5.0 dS/m) where wheat fails.',
+            'Excellent green forage cut available at 60 days if dual-purpose needed.'
+        ],
+        waterGuidance: 'Thrives under rainfed semi-arid conditions. Needs zero irrigation in normal years.',
+        plantMonths: [10, 11], growMonths: [11, 0, 1, 2], critMonths: [1, 2], harvestMonths: [4, 5],
+        reasonsGood: 'Highly salt-tolerant, drought-resilient, minimal fertilizer input required.',
+        reasonsBad: 'Susceptible to lodging on overly fertile soils with high nitrogen.'
+    },
+    {
+        id: 'olive',
+        icon: '🫒',
+        name: 'Olive (Olivier - Chemlali/Chétoui)',
+        category: 'Orchard',
+        family: 'Oleaceae',
+        duration: 'Perennial Tree',
+        season: 'Year-round',
+        waterDemand: 'low',
+        waterReqMm: 200,
+        tempMin: 8, tempMax: 42,
+        phMin: 6.5, phMax: 8.8,
+        maxSalinity: 4.5,
+        soils: ['loam', 'sandy_loam', 'chalky', 'clay_loam', 'sandy'],
+        minDepth: 'deep',
+        plantDates: 'November – February',
+        growDates: 'March – September',
+        critDates: 'May – June',
+        harvestDates: '15 Oct – 15 Jan',
+        plantDesc: 'Plant certified nursery saplings (2-yr old) at 10x10m or 12x12m in semi-arid zones.',
+        growDesc: 'Canopy vegetative flush occurs in spring and early autumn. Perform winter pruning every 2 years.',
+        critDesc: 'Flowering & pit hardening (May–June). Severe drought here causes premature fruit drop.',
+        harvestDesc: 'Hand or vibration harvest. Green harvest in Nov for high polyphenol oil; black harvest in Dec.',
+        directives: [
+            'Tunisia’s signature agro-forestry crop with unmatched drought resilience.',
+            'Chemlali cultivar dominates central/southern basins; Chétoui in north.',
+            'Practice deficit drip irrigation in July–August for 2x oil yield stability.'
+        ],
+        waterGuidance: 'Survives on as little as 180mm rain. 2 summer micro-irrigations (50mm total) prevent alternate bearing.',
+        plantMonths: [10, 11, 0, 1], growMonths: [2, 3, 4, 5, 6, 7, 8], critMonths: [4, 5], harvestMonths: [9, 10, 11, 0],
+        reasonsGood: 'Thrives on calcareous, shallow, or sandy soils. Exceptional climate change buffer.',
+        reasonsBad: 'Cannot tolerate waterlogged heavy clays with poor internal aeration (leads to Verticillium wilt).'
+    },
+    {
+        id: 'citrus',
+        icon: '🍊',
+        name: 'Citrus (Agrumes - Maltaise/Clémentine)',
+        category: 'Orchard',
+        family: 'Rutaceae',
+        duration: 'Perennial Tree',
+        season: 'Year-round',
+        waterDemand: 'high',
+        waterReqMm: 650,
+        tempMin: 12, tempMax: 36,
+        phMin: 6.0, phMax: 7.8,
+        maxSalinity: 2.0,
+        soils: ['loam', 'sandy_loam', 'clay_loam'],
+        minDepth: 'deep',
+        plantDates: 'February – April',
+        growDates: 'April – October',
+        critDates: 'April – June',
+        harvestDates: '15 Nov – 15 Mar',
+        plantDesc: 'Plant graft trees on Sour Orange or Citrange Carrizo rootstocks. Deep well-drained loam required.',
+        growDesc: 'Three annual flushes. Heavy fertilizer consumers: N, P, K + micronutrients (Zinc, Iron, Manganese).',
+        critDesc: 'Flowering and fruit set (April–June). Extremely sensitive to drought, hot Sirocco winds, and frost.',
+        harvestDesc: 'Clip with shears. Maltaise half-blood harvested Jan–Feb in Cap Bon / Mornag basins.',
+        directives: [
+            'Strictly requires pressurized drip irrigation and reliable abundant fresh water.',
+            'Install windbreaks (Cypress, Casuarina) to shield against dry winds.',
+            'Avoid saline water: leaves suffer severe chlorosis and defoliation if EC > 2.2 dS/m.'
+        ],
+        waterGuidance: 'High water requirement (600–800 mm). Weekly drip cycles required from May to October.',
+        plantMonths: [1, 2, 3], growMonths: [3, 4, 5, 6, 7, 8, 9], critMonths: [3, 4, 5], harvestMonths: [10, 11, 0, 1, 2],
+        reasonsGood: 'High commercial cash-crop profitability on fertile, frost-free, irrigated coastal soils.',
+        reasonsBad: 'Will fail without abundant irrigation; intolerant of frost, saline water (>2 dS/m), or compact clay.'
+    },
+    {
+        id: 'tomato',
+        icon: '🍅',
+        name: 'Tomato (Tomate Industrielle & Fraîche)',
+        category: 'Horticulture',
+        family: 'Solanaceae',
+        duration: '90–120 days',
+        season: 'Spring / Summer',
+        waterDemand: 'high',
+        waterReqMm: 500,
+        tempMin: 18, tempMax: 32,
+        phMin: 6.0, phMax: 7.5,
+        maxSalinity: 2.5,
+        soils: ['loam', 'sandy_loam', 'clay_loam'],
+        minDepth: 'medium',
+        plantDates: '15 Feb – 15 Apr',
+        growDates: 'March – July',
+        critDates: 'April – May',
+        harvestDates: '20 Jun – 15 Aug',
+        plantDesc: 'Transplant nursery plugs (3–4 leaves) onto raised beds with drip tape and plastic mulch.',
+        growDesc: 'Rapid vegetative branch development. Stake fresh varieties; processing varieties grow as bushes.',
+        critDesc: 'Flowering & fruit set. Water deficit causes blossom-end rot (calcium deficiency) and flower drop.',
+        harvestDesc: 'Harvest for cannery at 85%+ uniform red color. Brix target: 4.8–5.2°.',
+        directives: [
+            'Essential Tunisian processing crop (Cap Bon, Medjerda, Kairouan).',
+            'Drip fertigation with balanced N-P-K + soluble Calcium is indispensable.',
+            'Rotate with non-Solanaceous crops for 3 years to prevent Nematodes and Tuta absoluta.'
+        ],
+        waterGuidance: 'Requires consistent drip irrigation (450–600 mm). Never allow root zone to drop below 50% field capacity.',
+        plantMonths: [1, 2, 3], growMonths: [2, 3, 4, 5], critMonths: [3, 4], harvestMonths: [5, 6, 7],
+        reasonsGood: 'Excellent ROI with good irrigation infrastructure and warm Mediterranean spring.',
+        reasonsBad: 'Complete crop loss under drought or rainfed regime; susceptible to blight in poorly drained clay.'
+    },
+    {
+        id: 'pepper',
+        icon: '🌶️',
+        name: 'Pepper (Piment / Baklouti Harissa)',
+        category: 'Horticulture',
+        family: 'Solanaceae',
+        duration: '100–140 days',
+        season: 'Spring / Summer',
+        waterDemand: 'high',
+        waterReqMm: 480,
+        tempMin: 18, tempMax: 34,
+        phMin: 6.2, phMax: 7.6,
+        maxSalinity: 2.2,
+        soils: ['loam', 'sandy_loam', 'clay_loam'],
+        minDepth: 'medium',
+        plantDates: '1 Mar – 20 Apr',
+        growDates: 'April – August',
+        critDates: 'May – June',
+        harvestDates: '10 Jul – 30 Sep',
+        plantDesc: 'Plant Baklouti or local cultivars. Sensitive to cold soils below 15°C.',
+        growDesc: 'Erect shrubby growth. High warmth requirement. Mulch preserves root moisture.',
+        critDesc: 'Continuous flowering and pod development. Thermal spikes above 36°C abort flowers.',
+        harvestDesc: 'Multiple hand harvests as pods reach deep red maturation for harissa drying.',
+        directives: [
+            'High value domestic spice crop with intense cultural demand.',
+            'Apply potassium during fruit maturation to enhance capsaicin and color.',
+            'Drip irrigation only — sprinkler watering causes severe Phytophthora blight.'
+        ],
+        waterGuidance: 'Needs 450–550 mm water through drip. Irrigation cutoff 10 days before harvest concentrates dry matter.',
+        plantMonths: [2, 3], growMonths: [3, 4, 5, 6], critMonths: [4, 5], harvestMonths: [6, 7, 8],
+        reasonsGood: 'High market demand, great fit for warm sunny plains with drip lines.',
+        reasonsBad: 'Fails under rainfed or water-scarce conditions; sensitive to salinity and nematodes.'
+    },
+    {
+        id: 'potato',
+        icon: '🥔',
+        name: 'Potato (Pomme de Terre - Spunta)',
+        category: 'Horticulture',
+        family: 'Solanaceae',
+        duration: '90–120 days',
+        season: 'Dual (Arrière-saison & Primeur)',
+        waterDemand: 'medium',
+        waterReqMm: 400,
+        tempMin: 10, tempMax: 26,
+        phMin: 5.5, phMax: 7.2,
+        maxSalinity: 2.0,
+        soils: ['loam', 'sandy_loam'],
+        minDepth: 'medium',
+        plantDates: 'Autumn: Sep · Spring: Jan',
+        growDates: 'Oct–Dec / Feb–Apr',
+        critDates: 'Tuber initiation (45d)',
+        harvestDates: 'Dec–Jan / May–Jun',
+        plantDesc: 'Plant certified seed tubers at 10–12 cm depth on raised ridges. Spacing 75x30 cm.',
+        growDesc: 'Hill soil up along stems to prevent greening. High potash consumers.',
+        critDesc: 'Stolon formation and tuber bulking. Water deficit causes hollow heart and reduced tuber size.',
+        harvestDesc: 'Defoliate canopy 10 days before lifting to allow skin hardening.',
+        directives: [
+            'Bizerte and Cap Bon produce the premier national harvests.',
+            'Light, loose, stone-free loam or sandy-loam is mandatory for smooth tuber development.',
+            'Heavy clay causes deformed tubers and rotting during wet winters.'
+        ],
+        waterGuidance: 'Frequent shallow drip or sprinkler applications (350–450 mm). Intolerant of waterlogging.',
+        plantMonths: [0, 8], growMonths: [1, 2, 9, 10], critMonths: [2, 9], harvestMonths: [4, 5, 11, 0],
+        reasonsGood: 'Short cycle, exceptional staple market value and high caloric productivity.',
+        reasonsBad: 'Fails completely in heavy compacted clay; high disease sensitivity if drainage is deficient.'
+    },
+    {
+        id: 'chickpea',
+        icon: '🫘',
+        name: 'Chickpea (Pois Chiche - Béja)',
+        category: 'Legume',
+        family: 'Fabaceae',
+        duration: '110–135 days',
+        season: 'Winter / Spring',
+        waterDemand: 'low',
+        waterReqMm: 240,
+        tempMin: 8, tempMax: 30,
+        phMin: 6.2, phMax: 8.8,
+        maxSalinity: 2.5,
+        soils: ['loam', 'clay_loam', 'chalky'],
+        minDepth: 'medium',
+        plantDates: '15 Dec – 15 Jan (Winter type)',
+        growDates: 'January – April',
+        critDates: 'March – April',
+        harvestDates: '20 May – 20 Jun',
+        plantDesc: 'Sow Ascochyta-resistant cultivars (e.g. Béja 1, Nayer). Depth 5 cm, no nitrogen needed.',
+        growDesc: 'Symbiotic Rhizobium nodules fix atmospheric nitrogen. Leaves soil richer for subsequent cereal.',
+        critDesc: 'Flowering & pod setting. Excessive humidity promotes Ascochyta rabiei; severe drought causes flower drop.',
+        harvestDesc: 'Combine or hand-pull when pods turn pale parchment and seeds rattle inside.',
+        directives: [
+            'Best natural soil enricher in cereal crop rotations across northern Tunisia.',
+            'Fixes 60–90 kg of atmospheric nitrogen per hectare into the soil profile.',
+            'Do NOT irrigate during flowering — excessive moisture triggers flower abortion.'
+        ],
+        waterGuidance: 'Almost exclusively rainfed. Needs 220–300 mm total rainfall. One spring watering in dry years doubles pod count.',
+        plantMonths: [11, 0], growMonths: [0, 1, 2, 3], critMonths: [2, 3], harvestMonths: [4, 5],
+        reasonsGood: 'Fixes nitrogen, requires low inputs, excellent drought resilience, premium local market price.',
+        reasonsBad: 'Vulnerable to Ascochyta blight in waterlogged soils; poor pod set if spring frost strikes.'
+    },
+    {
+        id: 'faba_bean',
+        icon: '🌱',
+        name: 'Faba Bean (Fève / Féverole)',
+        category: 'Legume',
+        family: 'Fabaceae',
+        duration: '120–150 days',
+        season: 'Winter Legume',
+        waterDemand: 'medium',
+        waterReqMm: 340,
+        tempMin: 6, tempMax: 26,
+        phMin: 6.5, phMax: 8.5,
+        maxSalinity: 2.8,
+        soils: ['loam', 'clay_loam', 'heavy_clay'],
+        minDepth: 'medium',
+        plantDates: '15 Oct – 30 Nov',
+        growDates: 'November – March',
+        critDates: 'February – March',
+        harvestDates: 'Green: Mar · Dry: May–Jun',
+        plantDesc: 'Sow at 120–140 kg/ha for dry beans, or large seeded fava for early green pod market.',
+        growDesc: 'Vigorous upright growth. Deep taproot breaks subsoil compaction in heavier soils.',
+        critDesc: 'Flowering and early pod fill. Watch for Orobanche (broomrape) weed parasitism and Botrytis chocolate spot.',
+        harvestDesc: 'Harvest pods green for fresh consumption, or dry when bottom pods turn black.',
+        directives: [
+            'Tolerates heavier clay soils better than chickpeas.',
+            'Enriches soil nitrogen reserves, dramatically improving subsequent wheat yields by 15–25%.',
+            'Sow early in October for high-priced winter green fava market.'
+        ],
+        waterGuidance: 'Rainfed in Northern Tunisia (>400mm). In semi-arid zones, 1–2 spring irrigations ensure plump pods.',
+        plantMonths: [9, 10, 11], growMonths: [11, 0, 1, 2], critMonths: [1, 2], harvestMonths: [2, 4, 5],
+        reasonsGood: 'Breaks clay compaction, supplies free biological nitrogen, dual green & dry revenue streams.',
+        reasonsBad: 'Susceptible to Orobanche parasite on infested land; sensitive to high salinity.'
+    },
+    {
+        id: 'alfalfa',
+        icon: '🌿',
+        name: 'Alfalfa (Luzerne Pérenne)',
+        category: 'Forage',
+        family: 'Fabaceae',
+        duration: 'Perennial (3–5 years)',
+        season: 'Multi-cut (6–8 cuts/yr)',
+        waterDemand: 'high',
+        waterReqMm: 750,
+        tempMin: 10, tempMax: 38,
+        phMin: 6.5, phMax: 8.4,
+        maxSalinity: 3.5,
+        soils: ['loam', 'clay_loam', 'chalky'],
+        minDepth: 'deep',
+        plantDates: 'Autumn: Oct · Spring: Mar',
+        growDates: 'Year-round active flush',
+        critDates: 'Each regrowth post-mowing',
+        harvestDates: 'Every 28–35 days (Spring to Autumn)',
+        plantDesc: 'Broadcast or drill at 25–30 kg/ha on a fine, firm seedbed. Inoculate seed with Rhizobium.',
+        growDesc: 'Deep taproot reaching 2–4 meters. High protein forage queen for dairy and livestock sectors.',
+        critDesc: 'Crown regrowth immediately after each mowing cut requires rapid irrigation.',
+        harvestDesc: 'Cut at 10% flower bloom for optimal crude protein (18–22%) and digestibility.',
+        directives: [
+            'Supreme perennial forage with highest protein yield per hectare in Tunisia.',
+            'Requires abundant irrigation water; not suitable for rainfed regimes.',
+            'Stand lasts 4–5 years while regenerating soil organic nitrogen.'
+        ],
+        waterGuidance: 'Needs regular irrigation (700–900 mm total annually). Water immediately after each mowing cut.',
+        plantMonths: [2, 9], growMonths: [3, 4, 5, 6, 7, 8, 9, 10], critMonths: [4, 6, 8], harvestMonths: [3, 4, 5, 6, 7, 8, 9],
+        reasonsGood: 'Multi-cut cash flow, deep subsoil mining, exceptional dairy feed value.',
+        reasonsBad: 'High water consumer: economically unviable without guaranteed irrigation.'
+    },
+    {
+        id: 'date_palm',
+        icon: '🌴',
+        name: 'Date Palm (Palmier - Deglet Nour)',
+        category: 'Orchard',
+        family: 'Arecaceae',
+        duration: 'Perennial Palm',
+        season: 'Year-round',
+        waterDemand: 'medium',
+        waterReqMm: 450,
+        tempMin: 15, tempMax: 48,
+        phMin: 6.5, phMax: 8.8,
+        maxSalinity: 7.0,
+        soils: ['sandy_loam', 'sandy', 'loam', 'chalky'],
+        minDepth: 'deep',
+        plantDates: 'March – May',
+        growDates: 'May – October',
+        critDates: 'Pollination: Mar–Apr · Fruit fill: Jul–Aug',
+        harvestDates: '15 Oct – 30 Nov',
+        plantDesc: 'Plant offshoots (djebbars) in oases / southern plains. Heat requirement: >3000 degree-days.',
+        growDesc: 'Can withstand desert heat up to 50°C. High salt tolerance up to 7 dS/m.',
+        critDesc: 'Manual pollination in spring; fruit bunch protection with covers against autumn rain in Oct.',
+        harvestDesc: 'Selective harvest of golden translucent Deglet Nour date clusters.',
+        directives: [
+            'Tunisia’s top export agricultural commodity (Tozeur, Kebili, Gabès).',
+            'Tolerates brackish irrigation water that would kill any other orchard tree.',
+            'Needs dry hot air for fruit ripening, but requires water at its roots (“head in fire, feet in water”).'
+        ],
+        waterGuidance: 'Oasis flood or localized bubbler irrigation. High tolerance to saline irrigation well water.',
+        plantMonths: [2, 3, 4], growMonths: [4, 5, 6, 7, 8], critMonths: [2, 3, 6, 7], harvestMonths: [9, 10],
+        reasonsGood: 'Highest salt & heat tolerance of any orchard crop. Premium export value.',
+        reasonsBad: 'Cannot mature fruit in cool northern coastal basins; requires desert heat summation.'
+    },
+    {
+        id: 'grapevine',
+        icon: '🍇',
+        name: 'Grapevine (Vigne - Table & Cuve)',
+        category: 'Orchard',
+        family: 'Vitaceae',
+        duration: 'Perennial Vine',
+        season: 'Spring to Autumn',
+        waterDemand: 'low',
+        waterReqMm: 280,
+        tempMin: 10, tempMax: 38,
+        phMin: 6.0, phMax: 8.4,
+        maxSalinity: 2.8,
+        soils: ['loam', 'chalky', 'sandy_loam', 'clay_loam'],
+        minDepth: 'deep',
+        plantDates: 'December – February',
+        growDates: 'March – September',
+        critDates: 'May – June',
+        harvestDates: 'July – September',
+        plantDesc: 'Plant grafted rootstocks (e.g. 110R, 1103P) on trellised wire systems.',
+        growDesc: 'Budbreak in March, rapid cane expansion. Winter spur pruning establishes yield potential.',
+        critDesc: 'Véraison (color change) and flowering. Excess moisture here promotes mildew and grape rot.',
+        harvestDesc: 'Harvest by sugar-acid ratio for table grapes (Muscat d’Alexandrie) or oenology.',
+        directives: [
+            'Historic prominence in Northern Tunisia (Grombalia, Bizerte, Mornag, Béja).',
+            'Well adapted to calcareous hillsides and rocky slopes where annual crops struggle.',
+            'Deficit irrigation enhances sugar concentration and skin phenolic compounds.'
+        ],
+        waterGuidance: 'Low water consumer (250–350 mm). Drip deficit irrigation during berry expansion.',
+        plantMonths: [11, 0, 1], growMonths: [2, 3, 4, 5, 6, 7], critMonths: [4, 5], harvestMonths: [6, 7, 8],
+        reasonsGood: 'Thrives on gravelly slopes and calcareous hillsides; low water demand.',
+        reasonsBad: 'Susceptible to fungal mildew in humid coastal depressions with poor air movement.'
+    }
+];
+
+var MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var activeCropId = 'wheat';
+
+/* ── TAB SWITCHING ── */
+function switchMainTab(tabId) {
+    var secCrop = document.getElementById('section-crop-timeline');
+    var secEval = document.getElementById('section-land-evaluator');
+    var secMatr = document.getElementById('section-comparative-matrix');
+    var btnCrop = document.getElementById('tab-btn-crop');
+    var btnEval = document.getElementById('tab-btn-evaluator');
+    var btnMatr = document.getElementById('tab-btn-matrix');
+
+    [secCrop, secEval, secMatr].forEach(function(el) { el.classList.add('hidden'); });
+    [btnCrop, btnEval, btnMatr].forEach(function(btn) {
+        btn.className = 'shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all text-on-surface-variant hover:text-primary hover:bg-surface-container-low cursor-pointer';
+    });
+
+    if (tabId === 'crop') {
+        secCrop.classList.remove('hidden');
+        btnCrop.className = 'shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm cursor-pointer';
+    } else if (tabId === 'evaluator') {
+        secEval.classList.remove('hidden');
+        btnEval.className = 'shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm cursor-pointer';
+    } else if (tabId === 'matrix') {
+        secMatr.classList.remove('hidden');
+        btnMatr.className = 'shrink-0 whitespace-nowrap flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm cursor-pointer';
+    }
+}
+
+/* ── CROP GRID RENDERING ── */
+var activeCategory = 'all';
+
+function filterCropCategory(cat) {
+    activeCategory = cat;
+    document.querySelectorAll('.cat-pill').forEach(function(p) {
+        if (p.getAttribute('data-cat') === cat) {
+            p.className = 'cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-bold bg-primary text-white text-xs';
+        } else {
+            p.className = 'cat-pill shrink-0 whitespace-nowrap px-3 py-1 rounded-full font-medium bg-surface-container-low text-on-surface-variant hover:text-primary text-xs';
+        }
+    });
+    renderCropGrid();
+}
+
+function renderCropGrid() {
+    var grid = document.getElementById('crop-grid');
+    if (!grid) return;
+    var html = '';
+    var filtered = MASTER_CROPS.filter(function(c) {
+        return activeCategory === 'all' || c.category === activeCategory;
+    });
+
+    for (var i = 0; i < filtered.length; i++) {
+        var crop = filtered[i];
+        var isAct = crop.id === activeCropId;
+        var waterBadge = crop.waterDemand === 'low' ? 'text-emerald-700 bg-emerald-50' : (crop.waterDemand === 'high' ? 'text-blue-700 bg-blue-50' : 'text-amber-700 bg-amber-50');
+
+        html += '<button onclick="selectCrop(\'' + crop.id + '\')" '
+            + 'id="crop-card-' + crop.id + '" '
+            + 'class="crop-card-btn flex flex-col items-start p-3.5 rounded-xl border-2 transition-all cursor-pointer hover:shadow-md text-left '
+            + (isAct ? 'active border-primary bg-emerald-50/50' : 'border-outline-variant/60 bg-surface-container-lowest') + '">'
+            + '<div class="flex items-center justify-between w-full mb-1.5">'
+            + '<span class="text-2xl">' + crop.icon + '</span>'
+            + '<span class="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded ' + waterBadge + '">' + crop.waterDemand + ' water</span>'
+            + '</div>'
+            + '<span class="text-xs font-headline font-bold text-on-surface leading-tight line-clamp-1">' + crop.name.split('(')[0] + '</span>'
+            + '<span class="text-[10px] text-on-surface-variant mt-0.5">' + crop.season + '</span>'
+            + '</button>';
+    }
+    grid.innerHTML = html;
+}
+
+function selectCrop(id) {
+    activeCropId = id;
+    renderCropGrid();
+    var crop = MASTER_CROPS.find(function(c) { return c.id === id; });
+    if (!crop) return;
+
+    document.getElementById('crop-hero-icon').textContent = crop.icon;
+    document.getElementById('crop-hero-name').textContent = crop.name;
+    document.getElementById('crop-hero-cat').textContent = crop.category;
+    document.getElementById('crop-hero-subtitle').textContent = crop.family + ' · Cycle: ' + crop.duration + ' · Season: ' + crop.season;
+
+    document.getElementById('badge-water-demand').textContent = '💧 ' + crop.waterDemand.toUpperCase() + ' (' + crop.waterReqMm + ' mm)';
+    document.getElementById('badge-temp-range').textContent = '🌡️ ' + crop.tempMin + '°C to ' + crop.tempMax + '°C';
+    document.getElementById('badge-soil-type').textContent = '🌱 ' + crop.soils.join(', ').replace(/_/g, ' ');
+
+    document.getElementById('milestone-plant-dates').textContent = crop.plantDates;
+    document.getElementById('milestone-plant-desc').textContent = crop.plantDesc;
+    document.getElementById('milestone-grow-dates').textContent = crop.growDates;
+    document.getElementById('milestone-grow-desc').textContent = crop.growDesc;
+    document.getElementById('milestone-crit-dates').textContent = crop.critDates;
+    document.getElementById('milestone-crit-desc').textContent = crop.critDesc;
+    document.getElementById('milestone-harvest-dates').textContent = crop.harvestDates;
+    document.getElementById('milestone-harvest-desc').textContent = crop.harvestDesc;
+
+    // Render Gantt
+    renderGantt(crop);
+
+    // Render Directives
+    var dirList = document.getElementById('crop-directives-list');
+    dirList.innerHTML = '';
+    crop.directives.forEach(function(d) {
+        var li = document.createElement('li');
+        li.textContent = d;
+        dirList.appendChild(li);
+    });
+
+    document.getElementById('crop-water-guidance').textContent = crop.waterGuidance;
+}
+
+function renderGantt(crop) {
+    var strip = document.getElementById('crop-gantt-strip');
+    if (!strip) return;
+    var html = '';
+    for (var m = 0; m < 12; m++) {
+        var cls = 'stage-rest';
+        var label = 'Off';
+
+        if (crop.critMonths && crop.critMonths.indexOf(m) !== -1) {
+            cls = 'stage-crit'; label = 'Critical';
+        } else if (crop.plantMonths && crop.plantMonths.indexOf(m) !== -1) {
+            cls = 'stage-plant'; label = 'Plant';
+        } else if (crop.harvestMonths && crop.harvestMonths.indexOf(m) !== -1) {
+            cls = 'stage-harvest'; label = 'Harvest';
+        } else if (crop.growMonths && crop.growMonths.indexOf(m) !== -1) {
+            cls = 'stage-grow'; label = 'Grow';
+        }
+
+        html += '<div class="flex flex-col items-center justify-center p-2 rounded-lg text-center ' + cls + '">'
+            + '<span class="text-[10px] font-mono font-bold uppercase opacity-85">' + MONTH_NAMES[m] + '</span>'
+            + '<span class="text-xs font-headline font-black mt-0.5">' + label + '</span>'
+            + '</div>';
+    }
+    strip.innerHTML = html;
+}
+
+/* ── COMPARATIVE MATRIX TAB ── */
+function renderComparativeMatrix() {
+    var tbody = document.getElementById('matrix-table-body');
+    if (!tbody) return;
+    var html = '';
+    for (var i = 0; i < MASTER_CROPS.length; i++) {
+        var c = MASTER_CROPS[i];
+        html += '<tr class="hover:bg-surface-container-low/60 transition-colors">'
+            + '<td class="p-3 flex items-center gap-2 font-bold text-primary">'
+            + '<span class="text-xl">' + c.icon + '</span> ' + c.name.split('(')[0]
+            + '</td>'
+            + '<td class="p-3 text-on-surface-variant font-mono text-[11px]">' + c.category + '</td>'
+            + '<td class="p-3 text-emerald-800 font-bold">' + c.plantDates + '</td>'
+            + '<td class="p-3 text-blue-800">' + c.growDates + '</td>'
+            + '<td class="p-3 text-red-700 font-bold">' + c.critDates + '</td>'
+            + '<td class="p-3 text-amber-800 font-bold">' + c.harvestDates + '</td>'
+            + '<td class="p-3 font-mono text-xs">' + c.waterReqMm + ' mm</td>'
+            + '<td class="p-3 text-on-surface-variant text-[11px]">' + c.soils.join(', ').replace(/_/g, ' ') + '</td>'
+            + '</tr>';
+    }
+    tbody.innerHTML = html;
+}
+
+/* ── PRESET BASIN LOADER ── */
+var BASIN_PRESETS = {
+    ichkeul: {
+        texture: 'clay_loam', ph: 'neutral', salinity: 'moderate', depth: 'deep',
+        rainfall: 'humid', temp: 'moderate', frost: 'rare', moisture: 'normal',
+        irrig: 'drip', waterAvail: 'abundant', waterQual: 'fresh', strategy: 'balanced'
+    },
+    medjerda: {
+        texture: 'loam', ph: 'neutral', salinity: 'low', depth: 'deep',
+        rainfall: 'moderate', temp: 'hot', frost: 'occasional', moisture: 'normal',
+        irrig: 'sprinkler', waterAvail: 'abundant', waterQual: 'fresh', strategy: 'balanced'
+    },
+    capbon: {
+        texture: 'sandy_loam', ph: 'neutral', salinity: 'low', depth: 'medium',
+        rainfall: 'moderate', temp: 'moderate', frost: 'rare', moisture: 'normal',
+        irrig: 'drip', waterAvail: 'abundant', waterQual: 'fresh', strategy: 'cash_crop'
+    },
+    kairouan: {
+        texture: 'loam', ph: 'alkaline', salinity: 'high', depth: 'medium',
+        rainfall: 'semi_arid', temp: 'extreme', frost: 'rare', moisture: 'mild_deficit',
+        irrig: 'drip', waterAvail: 'restricted', waterQual: 'brackish', strategy: 'conservative'
+    },
+    siliana: {
+        texture: 'clay_loam', ph: 'neutral', salinity: 'low', depth: 'deep',
+        rainfall: 'semi_arid', temp: 'hot', frost: 'frequent', moisture: 'mild_deficit',
+        irrig: 'rainfed', waterAvail: 'none', waterQual: 'fresh', strategy: 'conservative'
+    },
+    beja: {
+        texture: 'loam', ph: 'neutral', salinity: 'low', depth: 'deep',
+        rainfall: 'humid', temp: 'moderate', frost: 'occasional', moisture: 'normal',
+        irrig: 'rainfed', waterAvail: 'none', waterQual: 'fresh', strategy: 'balanced'
+    }
+};
+
+function loadBasinPreset(presetKey) {
+    if (presetKey === 'custom' || !BASIN_PRESETS[presetKey]) return;
+    var p = BASIN_PRESETS[presetKey];
+    document.getElementById('field-soil-texture').value = p.texture;
+    document.getElementById('field-soil-ph').value = p.ph;
+    document.getElementById('field-soil-salinity').value = p.salinity;
+    document.getElementById('field-soil-depth').value = p.depth;
+    document.getElementById('field-rainfall').value = p.rainfall;
+    document.getElementById('field-summer-temp').value = p.temp;
+    document.getElementById('field-frost-risk').value = p.frost;
+    document.getElementById('field-current-moisture').value = p.moisture;
+    document.getElementById('field-irrig-type').value = p.irrig;
+    document.getElementById('field-water-availability').value = p.waterAvail;
+    document.getElementById('field-water-quality').value = p.waterQual;
+    document.getElementById('field-risk-strategy').value = p.strategy;
+
+    runLandDiagnostic();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DIAGNOSTIC ENGINE: EVALUATE WHAT WORKS & WHAT DOESN'T FOR USER'S LAND
+   ═══════════════════════════════════════════════════════════════════════════ */
+function runLandDiagnostic() {
+    var texture   = document.getElementById('field-soil-texture').value;
+    var ph        = document.getElementById('field-soil-ph').value;
+    var salinity  = document.getElementById('field-soil-salinity').value;
+    var depth     = document.getElementById('field-soil-depth').value;
+    var rainfall  = document.getElementById('field-rainfall').value;
+    var temp      = document.getElementById('field-summer-temp').value;
+    var frost     = document.getElementById('field-frost-risk').value;
+    var moisture  = document.getElementById('field-current-moisture').value;
+    var irrig     = document.getElementById('field-irrig-type').value;
+    var waterAvail= document.getElementById('field-water-availability').value;
+    var waterQual = document.getElementById('field-water-quality').value;
+
+    var whatWorks   = [];
+    var whatCaution = [];
+    var whatFails   = [];
+
+    MASTER_CROPS.forEach(function(crop) {
+        var score = 85;
+        var failureReasons = [];
+        var cautionReasons = [];
+        var successReasons = [];
+
+        // 1. Soil Texture Compatibility
+        if (crop.soils.indexOf(texture) !== -1) {
+            score += 6;
+            successReasons.push('Optimal soil physical affinity with ' + texture.replace('_', ' ') + '.');
+        } else {
+            if (texture === 'heavy_clay' && (crop.id === 'potato' || crop.id === 'citrus' || crop.id === 'olive')) {
+                score -= 35;
+                failureReasons.push('Heavy clay creates root asphyxiation, poor internal aeration, and high fungal rot risk.');
+            } else if (texture === 'sandy' && (crop.id === 'wheat' || crop.id === 'alfalfa')) {
+                score -= 28;
+                failureReasons.push('Excessively sandy soil leaches nitrogen and fails to hold moisture for root uptake.');
+            } else {
+                score -= 15;
+                cautionReasons.push('Sub-optimal soil texture; requires organic matter additions or ridge planting.');
+            }
+        }
+
+        // 2. Salinity Check
+        var salVal = salinity === 'high' ? 4.5 : (salinity === 'moderate' ? 2.8 : 1.2);
+        if (salVal > crop.maxSalinity) {
+            score -= 32;
+            failureReasons.push('Soil electrical conductivity (' + salVal + ' dS/m) exceeds maximum tolerance threshold (' + crop.maxSalinity + ' dS/m).');
+        } else if (salVal > crop.maxSalinity * 0.7) {
+            score -= 10;
+            cautionReasons.push('Moderate salt stress: yield will decline by ~10–15% without leaching fractions.');
+        }
+
+        // 3. Water & Irrigation Check
+        var hasAdequateWater = (irrig !== 'rainfed' && waterAvail !== 'none');
+        var isRainfedZoneArid = (rainfall === 'arid' || rainfall === 'semi_arid');
+
+        if (!hasAdequateWater) {
+            // Rainfed regime
+            if (crop.waterDemand === 'high') {
+                score -= 45;
+                failureReasons.push('High water consumer (' + crop.waterReqMm + 'mm) cannot survive under purely rainfed regime in this basin.');
+            } else if (crop.waterDemand === 'medium' && isRainfedZoneArid) {
+                score -= 25;
+                failureReasons.push('Rainfall (' + rainfall + ') is insufficient for rainfed ' + crop.name.split('(')[0] + '; heading dry-spell risk.');
+            } else if (crop.waterDemand === 'low') {
+                score += 8;
+                successReasons.push('Drought-rustic crop capable of producing solid harvest under rainfed conditions.');
+            }
+        } else {
+            // Irrigated regime
+            score += 10;
+            if (irrig === 'drip') {
+                successReasons.push('High efficiency pressurized drip irrigation provides complete moisture security.');
+            }
+            if (waterQual === 'saline' && crop.maxSalinity < 3.0) {
+                score -= 20;
+                cautionReasons.push('Saline irrigation water (>3 g/L) risks leaf scorch and salt accumulation in root zone.');
+            }
+        }
+
+        // 4. Frost / Thermal Sensitivity
+        if (frost === 'frequent' && (crop.id === 'citrus' || crop.id === 'tomato' || crop.id === 'pepper' || crop.id === 'date_palm')) {
+            score -= 35;
+            failureReasons.push('Frequent winter frost kills foliage, aborts buds, and destroys early harvests.');
+        }
+
+        if (temp === 'extreme' && crop.id === 'potato') {
+            score -= 20;
+            cautionReasons.push('Extreme summer Sirocco stops tuber bulking prematurely.');
+        }
+
+        // Final score capping
+        score = Math.min(98, Math.max(15, score));
+
+        var resObj = {
+            crop: crop,
+            score: score,
+            failureReasons: failureReasons,
+            cautionReasons: cautionReasons,
+            successReasons: successReasons
+        };
+
+        if (score >= 75 && failureReasons.length === 0) {
+            whatWorks.push(resObj);
+        } else if (score >= 50 && failureReasons.length <= 1) {
+            whatCaution.push(resObj);
+        } else {
+            whatFails.push(resObj);
+        }
+    });
+
+    // Sort descending
+    whatWorks.sort(function(a, b) { return b.score - a.score; });
+    whatCaution.sort(function(a, b) { return b.score - a.score; });
+    whatFails.sort(function(a, b) { return a.score - b.score; });
+
+    // Update Counter Badges
+    document.getElementById('stat-works-count').textContent = whatWorks.length + ' Recommended';
+    document.getElementById('stat-caution-count').textContent = whatCaution.length + ' Conditional';
+    document.getElementById('stat-fails-count').textContent = whatFails.length + ' High Risk';
+
+    var avgScore = Math.round(whatWorks.reduce(function(acc, x){ return acc + x.score; }, 0) / Math.max(whatWorks.length, 1));
+    document.getElementById('land-index-ring').textContent = avgScore || 70;
+    document.getElementById('diagnostic-summary-subtitle').textContent = 
+        'Evaluated across 12 staple crops: ' + whatWorks.length + ' crops naturally match your soil & water, ' 
+        + whatCaution.length + ' can succeed with adaptation, and ' + whatFails.length + ' are non-viable.';
+
+    // 1. Render What Works
+    var cWorks = document.getElementById('container-what-works');
+    var htmlWorks = '';
+    whatWorks.forEach(function(item) {
+        var c = item.crop;
+        htmlWorks += '<div class="bg-surface-container-lowest border border-emerald-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-emerald-500 transition-all">'
+            + '<div>'
+            + '<div class="flex items-center justify-between mb-2">'
+            + '<div class="flex items-center gap-2">'
+            + '<span class="text-2xl">' + c.icon + '</span>'
+            + '<span class="font-headline font-bold text-sm text-primary">' + c.name.split('(')[0] + '</span>'
+            + '</div>'
+            + '<span class="text-xs font-mono font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">' + item.score + '% Match</span>'
+            + '</div>'
+            + '<div class="space-y-1.5 text-xs mt-3">'
+            + '<div class="flex justify-between border-b border-outline-variant/30 pb-1">'
+            + '<span class="text-on-surface-variant font-medium">When to Plant:</span>'
+            + '<span class="font-bold text-emerald-800">' + c.plantDates + '</span>'
+            + '</div>'
+            + '<div class="flex justify-between border-b border-outline-variant/30 pb-1">'
+            + '<span class="text-on-surface-variant font-medium">When to Harvest:</span>'
+            + '<span class="font-bold text-amber-800">' + c.harvestDates + '</span>'
+            + '</div>'
+            + '<p class="text-emerald-950 font-medium text-[11px] pt-1.5 leading-snug">✓ ' + (item.successReasons[0] || c.reasonsGood) + '</p>'
+            + '</div>'
+            + '</div>'
+            + '<button onclick="switchMainTab(\'crop\'); selectCrop(\'' + c.id + '\')" class="mt-4 w-full py-1.5 text-center rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200 transition-colors cursor-pointer">'
+            + 'View Full Lifecycle & Sowing Timeline →'
+            + '</button>'
+            + '</div>';
+    });
+    cWorks.innerHTML = htmlWorks || '<div class="col-span-full p-4 text-center text-xs text-on-surface-variant">No crops in this category under current strict filters.</div>';
+
+    // 2. Render What Needs Caution
+    var cCaution = document.getElementById('container-what-caution');
+    var htmlCaution = '';
+    whatCaution.forEach(function(item) {
+        var c = item.crop;
+        htmlCaution += '<div class="bg-surface-container-lowest border border-amber-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-amber-500 transition-all">'
+            + '<div>'
+            + '<div class="flex items-center justify-between mb-2">'
+            + '<div class="flex items-center gap-2">'
+            + '<span class="text-2xl">' + c.icon + '</span>'
+            + '<span class="font-headline font-bold text-sm text-on-surface">' + c.name.split('(')[0] + '</span>'
+            + '</div>'
+            + '<span class="text-xs font-mono font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">' + item.score + '% Partial</span>'
+            + '</div>'
+            + '<div class="space-y-1.5 text-xs mt-3">'
+            + '<div class="flex justify-between border-b border-outline-variant/30 pb-1">'
+            + '<span class="text-on-surface-variant font-medium">Sowing Window:</span>'
+            + '<span class="font-bold text-on-surface">' + c.plantDates + '</span>'
+            + '</div>'
+            + '<p class="text-amber-900 font-medium text-[11px] pt-1 leading-snug">⚠️ <span class="underline">Required Action:</span> ' + (item.cautionReasons[0] || 'Requires supplemental irrigation or soil drainage.') + '</p>'
+            + '</div>'
+            + '</div>'
+            + '<button onclick="switchMainTab(\'crop\'); selectCrop(\'' + c.id + '\')" class="mt-4 w-full py-1.5 text-center rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold border border-amber-200 transition-colors cursor-pointer">'
+            + 'Inspect Phenological Timeline →'
+            + '</button>'
+            + '</div>';
+    });
+    cCaution.innerHTML = htmlCaution || '<div class="col-span-full p-4 text-center text-xs text-on-surface-variant">No conditional crops for this profile.</div>';
+
+    // 3. Render What Doesn't Work (High Risk)
+    var cFails = document.getElementById('container-what-fails');
+    var htmlFails = '';
+    whatFails.forEach(function(item) {
+        var c = item.crop;
+        var failExplanation = item.failureReasons[0] || c.reasonsBad;
+        htmlFails += '<div class="bg-surface-container-lowest border border-red-200 rounded-xl p-4 shadow-sm flex flex-col justify-between hover:border-red-400 transition-all opacity-90">'
+            + '<div>'
+            + '<div class="flex items-center justify-between mb-2">'
+            + '<div class="flex items-center gap-2">'
+            + '<span class="text-2xl grayscale">' + c.icon + '</span>'
+            + '<span class="font-headline font-bold text-sm text-red-950 line-through">' + c.name.split('(')[0] + '</span>'
+            + '</div>'
+            + '<span class="text-xs font-mono font-bold text-red-700 bg-red-100 px-2 py-0.5 rounded-full">' + item.score + '% High Risk</span>'
+            + '</div>'
+            + '<div class="space-y-1.5 text-xs mt-3">'
+            + '<div class="bg-red-50/70 p-2.5 rounded-lg border border-red-100 text-[11px] text-red-900 leading-snug">'
+            + '<span class="font-bold block text-red-950 mb-0.5">✕ Why This Fails on Your Land:</span>'
+            + failExplanation
+            + '</div>'
+            + '</div>'
+            + '</div>'
+            + '<div class="mt-3 text-[10px] text-red-800/80 font-mono text-center">Not recommended for commercial sowing</div>'
+            + '</div>';
+    });
+    cFails.innerHTML = htmlFails || '<div class="col-span-full p-4 text-center text-xs text-on-surface-variant">Congratulations: No crops fail under your optimal conditions!</div>';
+}
+
+/* ── BOOT INITIALIZATION ── */
+document.addEventListener('DOMContentLoaded', function() {
+    renderCropGrid();
+    selectCrop('wheat');
+    renderComparativeMatrix();
+    runLandDiagnostic();
+});
+</script>
+
+</body>
+</html>

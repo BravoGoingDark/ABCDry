@@ -1,7 +1,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ABCDryBASIN\n"
+"Project-Id-Version: APWRS\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -122,8 +122,8 @@ msgstr ""
 "Ping : __LAT__, __LNG__ | Vent : __WS__ km/h | Temp : __T__°C | Humidité : "
 "__H__% | Pluie : __R__ mm"
 
-msgid "ABCDryBASIN — drought risk assessment tool"
-msgstr "ABCDryBASIN — outil d'évaluation du risque de sécheresse"
+msgid "APWRS — Adaptive Planting Window Recommendation System"
+msgstr "APWRS — outil d'évaluation du risque de sécheresse"
 
 msgid "Drought risk assessment tool"
 msgstr "Outil d'évaluation du risque de sécheresse"
@@ -218,6 +218,9 @@ msgstr "Température"
 msgid "Humidity"
 msgstr "Humidité"
 
+msgid "ABCDryBASIN — drought risk assessment tool"
+msgstr "ABCDryBASIN — outil d'évaluation du risque de sécheresse"
+
 msgid "Sponsors and partners"
 msgstr "Sponsors et partenaires"
 
@@ -247,3 +250,717 @@ msgstr "Sélectionner une région"
 
 msgid "Ping point"
 msgstr "Point ping"
+
+msgid "My farms"
+msgstr "Mes exploitations"
+
+msgid "Farmer space"
+msgstr "Espace agriculteur"
+
+msgid "Adaptive Planting Window Recommendation System"
+msgstr "Système de recommandation adaptative des fenêtres de semis"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Farmer"
+msgstr "Agriculteur"
+
+msgid "Log out"
+msgstr "Déconnexion"
+
+msgid "Farm map"
+msgstr "Carte des parcelles"
+
+msgid ""
+"Tap each corner of your land. Tap the first point again, or press Finish, to"
+" close the shape."
+msgstr ""
+"Touchez chaque coin de votre terrain. Touchez à nouveau le premier point, ou"
+" appuyez sur Terminer, pour fermer la forme."
+
+msgid "Undo point"
+msgstr "Annuler le point"
+
+msgid "Cancel"
+msgstr "Annuler"
+
+msgid "Finish"
+msgstr "Terminer"
+
+msgid "Satellite / map"
+msgstr "Satellite / carte"
+
+msgid "Go to my position"
+msgstr "Aller à ma position"
+
+msgid "Show all my farms"
+msgstr "Voir toutes mes parcelles"
+
+msgid "Draw a new farm"
+msgstr "Dessiner une parcelle"
+
+msgid "What to plant"
+msgstr "Quoi planter"
+
+msgid "Crop plan"
+msgstr "Plan de culture"
+
+msgid "Weather"
+msgstr "Météo"
+
+msgid "Assistant"
+msgstr "Assistant"
+
+msgid "Farm details"
+msgstr "Détails de la parcelle"
+
+msgid "Close"
+msgstr "Fermer"
+
+msgid "Farm name"
+msgstr "Nom de la parcelle"
+
+msgid "What is growing there now?"
+msgstr "Qu’est-ce qui y pousse actuellement ?"
+
+msgid "Leave empty if the land is free: we will recommend a crop."
+msgstr ""
+"Laissez vide si le terrain est libre : nous vous recommanderons une culture."
+
+msgid "Sowing / planting date"
+msgstr "Date de semis / plantation"
+
+msgid "Water"
+msgstr "Eau"
+
+msgid "Rain only"
+msgstr "Pluie seulement"
+
+msgid "I can irrigate"
+msgstr "Je peux irriguer"
+
+msgid "Water available per season (mm)"
+msgstr "Eau disponible par saison (mm)"
+
+msgid "Optional. 100 mm = 1 000 m³ per hectare."
+msgstr "Facultatif. 100 mm = 1 000 m³ par hectare."
+
+msgid "Delete"
+msgstr "Supprimer"
+
+msgid "Redraw border"
+msgstr "Redessiner la limite"
+
+msgid "Save"
+msgstr "Enregistrer"
+
+msgid "Loading…"
+msgstr "Chargement…"
+
+msgid "Welcome! Let’s map your land"
+msgstr "Bienvenue ! Cartographions votre terrain"
+
+msgid ""
+"Draw the border of your land on the map. We will tell you what to plant and "
+"when, how to fertilise and protect it, and what the weather will do."
+msgstr ""
+"Dessinez la limite de votre terrain sur la carte. Nous vous dirons quoi "
+"planter et quand, comment fertiliser et protéger vos cultures, et quel temps"
+" il fera."
+
+msgid "Draw your land"
+msgstr "Dessinez votre terrain"
+
+msgid "Tap each corner of the field on the satellite map."
+msgstr "Touchez chaque coin du champ sur la carte satellite."
+
+msgid "Describe it"
+msgstr "Décrivez-le"
+
+msgid "Give it a name and say if you can irrigate."
+msgstr "Donnez-lui un nom et indiquez si vous pouvez irriguer."
+
+msgid "Get advice"
+msgstr "Recevez des conseils"
+
+msgid "Crops, calendar, fertiliser, weather and the assistant."
+msgstr "Cultures, calendrier, engrais, météo et l’assistant."
+
+msgid "Start drawing"
+msgstr "Commencer à dessiner"
+
+msgid "Add a farm"
+msgstr "Ajouter une parcelle"
+
+msgid "new border"
+msgstr "nouvelle limite"
+
+msgid "Edit"
+msgstr "Modifier"
+
+msgid "No crop yet"
+msgstr "Pas encore de culture"
+
+msgid "Irrigated"
+msgstr "Irrigué"
+
+msgid "Soil: loading"
+msgstr "Sol : chargement"
+
+msgid "Soil: no data"
+msgstr "Sol : pas de données"
+
+msgid "Climate"
+msgstr "Climat"
+
+msgid "Today"
+msgstr "Aujourd’hui"
+
+msgid "Rain this week"
+msgstr "Pluie cette semaine"
+
+msgid "rainy days"
+msgstr "jours de pluie"
+
+msgid "Drought outlook"
+msgstr "Risque de sécheresse"
+
+msgid "Next task"
+msgstr "Prochaine tâche"
+
+msgid "Choose a crop"
+msgstr "Choisissez une culture"
+
+msgid "Low"
+msgstr "Faible"
+
+msgid "Medium"
+msgstr "Moyen"
+
+msgid "High"
+msgstr "Élevé"
+
+msgid "chance of drought next month"
+msgstr "de risque de sécheresse le mois prochain"
+
+msgid "Recommendations for"
+msgstr "Recommandations pour"
+
+msgid "Best crops to plant this month"
+msgstr "Meilleures cultures à planter ce mois-ci"
+
+msgid ""
+"No well-suited crop can be sown this month. Look at the list below for the "
+"next sowing windows."
+msgstr ""
+"Aucune culture bien adaptée ne peut être semée ce mois-ci. Consultez la "
+"liste ci-dessous pour les prochaines périodes de semis."
+
+msgid "All crops for your land"
+msgstr "Toutes les cultures pour votre terrain"
+
+msgid "Grow this"
+msgstr "Cultiver ceci"
+
+msgid "Current crop"
+msgstr "Culture actuelle"
+
+msgid "Excellent choice"
+msgstr "Excellent choix"
+
+msgid "Good choice"
+msgstr "Bon choix"
+
+msgid "Possible, with care"
+msgstr "Possible, avec précaution"
+
+msgid "Not recommended"
+msgstr "Déconseillé"
+
+msgid "needs more water"
+msgstr "demande plus d’eau"
+
+msgid "climate not ideal"
+msgstr "climat peu adapté"
+
+msgid "soil pH not ideal"
+msgstr "pH du sol peu adapté"
+
+msgid "soil type not ideal"
+msgstr "type de sol peu adapté"
+
+msgid "salty soil"
+msgstr "sol salé"
+
+msgid "Sow in"
+msgstr "Semer en"
+
+msgid "Next sowing window"
+msgstr "Prochaine période de semis"
+
+msgid "Tree / perennial — plant in"
+msgstr "Arbre / pérenne — planter en"
+
+msgid "Rain covers most of its water need"
+msgstr "La pluie couvre l’essentiel de ses besoins en eau"
+
+msgid "Irrigation"
+msgstr "Irrigation"
+
+msgid "m³/ha per season"
+msgstr "m³/ha par saison"
+
+msgid "Expected harvest without irrigation"
+msgstr "Récolte attendue sans irrigation"
+
+msgid "Based on your soil, the climate of"
+msgstr "Basé sur votre sol et le climat de"
+
+msgid "This is guidance, not a guarantee."
+msgstr "Ce sont des conseils, pas une garantie."
+
+msgid "Plan for"
+msgstr "Plan pour"
+
+msgid "— choose a crop —"
+msgstr "— choisir une culture —"
+
+msgid "Choose a crop to see its calendar, fertiliser and protection plan."
+msgstr ""
+"Choisissez une culture pour voir son calendrier, ses engrais et son plan de "
+"protection."
+
+msgid "Calendar — what to do and when"
+msgstr "Calendrier — quoi faire et quand"
+
+msgid "NEXT"
+msgstr "PROCHAIN"
+
+msgid "Growth stage"
+msgstr "Stade de croissance"
+
+msgid "Fertiliser"
+msgstr "Engrais"
+
+msgid "Watch for pests"
+msgstr "Surveiller les ravageurs"
+
+msgid "kg per hectare per season"
+msgstr "kg par hectare et par saison"
+
+msgid "Pests, diseases and weeds"
+msgstr "Ravageurs, maladies et mauvaises herbes"
+
+msgid "Watch for"
+msgstr "À surveiller"
+
+msgid "Prevent"
+msgstr "Prévenir"
+
+msgid "Treat"
+msgstr "Traiter"
+
+msgid "all year"
+msgstr "toute l’année"
+
+msgid "Sowing"
+msgstr "Semis"
+
+msgid "Next 7 days"
+msgstr "7 prochains jours"
+
+msgid "16-day forecast"
+msgstr "Prévisions sur 16 jours"
+
+msgid "Field alerts"
+msgstr "Alertes au champ"
+
+msgid "Wind"
+msgstr "Vent"
+
+msgid "Rain"
+msgstr "Pluie"
+
+msgid "Chance"
+msgstr "Probabilité"
+
+msgid ""
+"Hello! I am your farm assistant. Ask me what to plant, when to irrigate, how"
+" the drought looks, or about your crop."
+msgstr ""
+"Bonjour ! Je suis votre assistant agricole. Demandez-moi quoi planter, quand"
+" irriguer, comment évolue la sécheresse, ou parlez-moi de votre culture."
+
+msgid "Ask a question about your farm…"
+msgstr "Posez une question sur votre exploitation…"
+
+msgid "Answers use live data for"
+msgstr "Les réponses utilisent les données en direct de"
+
+msgid "The assistant is unavailable right now."
+msgstr "L’assistant est indisponible pour le moment."
+
+msgid "drought risk"
+msgstr "risque de sécheresse"
+
+msgid "New farm"
+msgstr "Nouvelle parcelle"
+
+msgid "Edit farm"
+msgstr "Modifier la parcelle"
+
+msgid "Farm"
+msgstr "Parcelle"
+
+msgid "— none —"
+msgstr "— aucune —"
+
+msgid "Farm saved"
+msgstr "Parcelle enregistrée"
+
+msgid "Farm deleted"
+msgstr "Parcelle supprimée"
+
+msgid "Delete this farm and its data?"
+msgstr "Supprimer cette parcelle et ses données ?"
+
+msgid "Border updated"
+msgstr "Limite mise à jour"
+
+msgid "Crop saved to your farm"
+msgstr "Culture enregistrée pour votre parcelle"
+
+msgid "Soil data loaded for"
+msgstr "Données de sol chargées pour"
+
+msgid "Add at least three corners first."
+msgstr "Ajoutez d’abord au moins trois coins."
+
+msgid "Your position is not available."
+msgstr "Votre position n’est pas disponible."
+
+msgid "Draw your farm first, then ask the assistant about it."
+msgstr ""
+"Dessinez d’abord votre parcelle, puis posez vos questions à l’assistant."
+
+msgid "Soil probe"
+msgstr "Sonde de sol"
+
+msgid "Real data"
+msgstr "Données réelles"
+
+msgid ""
+"SmartFarm capacitive probe: soil moisture at three depths and soil "
+"temperature, about one reading a day."
+msgstr ""
+"Sonde capacitive SmartFarm : humidité du sol à trois profondeurs et "
+"température du sol, environ une mesure par jour."
+
+msgid "Fetch now"
+msgstr "Actualiser"
+
+msgid "Reading the probe…"
+msgstr "Lecture de la sonde…"
+
+msgid "Moisture at each reading"
+msgstr "Humidité à chaque mesure"
+
+msgid "Real data · SmartFarm"
+msgstr "Données réelles · SmartFarm"
+
+msgid ""
+"The SmartFarm probe is not connected yet. An administrator must add "
+"SMARTFARM_EMAIL and SMARTFARM_PASSWORD to the server settings."
+msgstr ""
+"La sonde SmartFarm n’est pas encore connectée. Un administrateur doit "
+"ajouter SMARTFARM_EMAIL et SMARTFARM_PASSWORD aux paramètres du serveur."
+
+msgid "SmartFarm could not be reached right now."
+msgstr "SmartFarm est injoignable pour le moment."
+
+msgid "The probe has not sent a reading from the soil yet."
+msgstr "La sonde n’a pas encore envoyé de mesure depuis le sol."
+
+msgid "cm deep"
+msgstr "cm de profondeur"
+
+msgid "Soil temperature"
+msgstr "Température du sol"
+
+msgid "Root zone (average)"
+msgstr "Zone racinaire (moyenne)"
+
+msgid "Last reading"
+msgstr "Dernière mesure"
+
+msgid "readings stored"
+msgstr "mesures enregistrées"
+
+msgid "synced"
+msgstr "synchronisé"
+
+msgid "Last sync failed; showing stored readings."
+msgstr ""
+"La dernière synchronisation a échoué ; affichage des mesures enregistrées."
+
+msgid "Dry"
+msgstr "Sec"
+
+msgid "Good"
+msgstr "Bon"
+
+msgid "Wet"
+msgstr "Humide"
+
+msgid "Daily soil moisture"
+msgstr "Humidité du sol par jour"
+
+msgid "days"
+msgstr "jours"
+
+msgid "All"
+msgstr "Tout"
+
+msgid "reporting"
+msgstr "actifs"
+
+msgid "reporting in the last 48 h"
+msgstr "ont transmis ces dernières 48 h"
+
+msgid "Moisture by depth"
+msgstr "Humidité par profondeur"
+
+msgid "Readings stored"
+msgstr "Mesures enregistrées"
+
+msgid "Real measurements"
+msgstr "Mesures réelles"
+
+msgid "Installed sensors, where they are and what they measure."
+msgstr "Capteurs installés, leur emplacement et ce qu’ils mesurent."
+
+msgid "No data connected"
+msgstr "Aucune donnée connectée"
+
+msgid ""
+"No readings from this sensor yet. Only sensors connected to a real data "
+"source show graphs."
+msgstr ""
+"Aucune mesure de ce capteur pour l’instant. Seuls les capteurs reliés à une "
+"vraie source de données affichent des graphiques."
+
+msgid "Sensor Locations"
+msgstr "Emplacement des capteurs"
+
+msgid "Click a sensor to see its last reading and coordinates."
+msgstr ""
+"Cliquez sur un capteur pour voir sa dernière mesure et ses coordonnées."
+
+msgid "Map layer"
+msgstr "Couche de la carte"
+
+msgid "Risk"
+msgstr "Risque"
+
+msgid "Vegetation (NDVI), Sentinel-2"
+msgstr "Végétation (NDVI), Sentinel-2"
+
+msgid "Vegetation water (NDWI), Sentinel-2"
+msgstr "Eau de la végétation (NDWI), Sentinel-2"
+
+msgid "Clouds and open water are left clear. Click the map for the value."
+msgstr ""
+"Les nuages et l’eau libre restent transparents. Cliquez sur la carte pour "
+"lire la valeur."
+
+msgid "Vegetation (NDVI)"
+msgstr "Végétation (NDVI)"
+
+msgid "Vegetation water (NDWI)"
+msgstr "Eau de la végétation (NDWI)"
+
+msgid "Bare"
+msgstr "Sol nu"
+
+msgid "Dense"
+msgstr "Dense"
+
+msgid "Moist"
+msgstr "Humide"
+
+msgid "Loading Sentinel-2 imagery…"
+msgstr "Chargement des images Sentinel-2…"
+
+msgid "Sentinel-2 imagery is unavailable right now."
+msgstr "Les images Sentinel-2 sont indisponibles pour le moment."
+
+msgid "No value here (cloud, water or outside the basin)."
+msgstr "Pas de valeur ici (nuage, eau ou hors du bassin)."
+
+msgid "Sentinel-2 least-cloud mosaic"
+msgstr "Mosaïque Sentinel-2 la moins nuageuse"
+
+msgid "Zoom in to see the satellite layer."
+msgstr "Zoomez pour voir la couche satellite."
+
+msgid "Temperature (30-day mean)"
+msgstr "Température (moyenne sur 30 jours)"
+
+msgid "Rainfall (30-day total)"
+msgstr "Pluie (cumul sur 30 jours)"
+
+msgid "SPI-3 (3-month drought index)"
+msgstr "SPI-3 (indice de sécheresse sur 3 mois)"
+
+msgid "Temp"
+msgstr "Temp."
+
+msgid "Cooler"
+msgstr "Plus frais"
+
+msgid "Hotter"
+msgstr "Plus chaud"
+
+msgid "Less"
+msgstr "Moins"
+
+msgid "More"
+msgstr "Plus"
+
+msgid "Drier"
+msgstr "Plus sec"
+
+msgid "Wetter"
+msgstr "Plus humide"
+
+msgid "Loading map layer…"
+msgstr "Chargement de la couche…"
+
+msgid "This map layer is unavailable right now."
+msgstr "Cette couche est indisponible pour le moment."
+
+msgid "Zoom in to see this layer."
+msgstr "Zoomez pour voir cette couche."
+
+msgid "About 10 km resolution, smoothed. Click the map for the value."
+msgstr ""
+"Résolution d’environ 10 km, lissée. Cliquez sur la carte pour lire la "
+"valeur."
+
+msgid ""
+"Last 3 months of rain compared with the same months in the 30 previous "
+"years. Below -1 is drought. Click the map for the value."
+msgstr ""
+"Pluie des 3 derniers mois comparée aux mêmes mois des 30 années précédentes."
+" En dessous de -1 : sécheresse. Cliquez sur la carte pour lire la valeur."
+
+msgid "Extremely dry"
+msgstr "Extrêmement sec"
+
+msgid "Severely dry"
+msgstr "Sévèrement sec"
+
+msgid "Moderately dry"
+msgstr "Modérément sec"
+
+msgid "Near normal"
+msgstr "Proche de la normale"
+
+msgid "Moderately wet"
+msgstr "Modérément humide"
+
+msgid "Severely wet"
+msgstr "Très humide"
+
+msgid "Extremely wet"
+msgstr "Extrêmement humide"
+
+msgid ""
+"Each point of the basin is judged on its own rain, soil moisture and "
+"vegetation"
+msgstr ""
+"Chaque point du bassin est jugé sur sa propre pluie, son humidité du sol et "
+"sa végétation"
+
+msgid "Satellite detection"
+msgstr "Détection satellite"
+
+msgid "Drought detection"
+msgstr "Détection de la sécheresse"
+
+msgid "Alert"
+msgstr "Alerte"
+
+msgid "Warning"
+msgstr "Avertissement"
+
+msgid "Watch"
+msgstr "Vigilance"
+
+msgid "No drought"
+msgstr "Pas de sécheresse"
+
+msgid "vegetation stressed"
+msgstr "végétation en stress"
+
+msgid "soil drying"
+msgstr "sol qui s’assèche"
+
+msgid "rain deficit"
+msgstr "déficit de pluie"
+
+msgid ""
+"Each level adds a signal: rain, then soil, then vegetation. Click the map to"
+" see why."
+msgstr ""
+"Chaque niveau ajoute un signal : la pluie, puis le sol, puis la végétation. "
+"Cliquez sur la carte pour voir pourquoi."
+
+msgid "Area in drought"
+msgstr "Surface en sécheresse"
+
+msgid "Basin land area"
+msgstr "Surface terrestre du bassin"
+
+msgid "Watch · rain deficit"
+msgstr "Vigilance · déficit de pluie"
+
+msgid "Warning · soil drying"
+msgstr "Avertissement · sol qui s’assèche"
+
+msgid "Alert · vegetation stressed"
+msgstr "Alerte · végétation en stress"
+
+msgid "Rain, last 3 months (SPI-3)"
+msgstr "Pluie, 3 derniers mois (SPI-3)"
+
+msgid "Soil moisture vs normal"
+msgstr "Humidité du sol vs normale"
+
+msgid "Vegetation vs normal"
+msgstr "Végétation vs normale"
+
+msgid "Below -1 counts as drought."
+msgstr "En dessous de -1 : sécheresse."
+
+msgid "Rain and soil"
+msgstr "Pluie et sol"
+
+msgid "vegetation"
+msgstr "végétation"
+
+msgid "Normal"
+msgstr "Normal"
+
+msgid "Mild"
+msgstr "Léger"
+
+msgid "Moderate"
+msgstr "Modéré"
+
+msgid "Severe"
+msgstr "Sévère"
+
+msgid "Extreme"
+msgstr "Extrême"

@@ -1,0 +1,185 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "Edit User — APWRS" %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "on-secondary": "#ffffff",
+                "primary-container": "#1b4332",
+                "on-tertiary": "#ffffff",
+                "error-container": "#ffdad6",
+                "tertiary": "#322319",
+                "tertiary-container": "#4a382d",
+                "surface": "#f9f9ff",
+                "on-error": "#ffffff",
+                "on-tertiary-fixed-variant": "#554338",
+                "secondary-fixed-dim": "#69d4f4",
+                "on-secondary-container": "#006075",
+                "on-secondary-fixed-variant": "#004e5f",
+                "inverse-on-surface": "#ebf1ff",
+                "secondary": "#00677d",
+                "primary": "#012d1d",
+                "surface-variant": "#dce2f3",
+                "outline-variant": "#c1c8c2",
+                "surface-container-low": "#f0f3ff",
+                "surface-container": "#e7eefe",
+                "surface-tint": "#3f6653",
+                "on-secondary-fixed": "#001f27",
+                "primary-fixed": "#c1ecd4",
+                "inverse-surface": "#2a313d",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed": "#002114",
+                "inverse-primary": "#a5d0b9",
+                "surface-container-high": "#e2e8f8",
+                "surface-bright": "#f9f9ff",
+                "secondary-container": "#72ddfd",
+                "on-primary": "#ffffff",
+                "on-primary-fixed-variant": "#274e3d",
+                "tertiary-fixed": "#f9ddce",
+                "on-primary-container": "#86af99",
+                "on-surface-variant": "#414844",
+                "surface-container-highest": "#dce2f3",
+                "secondary-fixed": "#b2ebff",
+                "background": "#f9f9ff",
+                "primary-fixed-dim": "#a5d0b9",
+                "surface-dim": "#d3daea",
+                "tertiary-fixed-dim": "#dcc1b2",
+                "error": "#ba1a1a",
+                "on-tertiary-container": "#baa193",
+                "on-surface": "#151c27",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed": "#27180f",
+                "on-background": "#151c27",
+                "outline": "#717973"
+              },
+              borderRadius: {
+                DEFAULT: "0.125rem",
+                lg: "0.25rem",
+                xl: "0.5rem",
+                full: "0.75rem"
+              },
+              fontFamily: {
+                headline: ["Hanken Grotesk"],
+                display: ["Hanken Grotesk"],
+                body: ["Inter"],
+                label: ["Jetbrains Mono"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen">
+<div class="flex-1 flex flex-col bg-surface min-h-screen overflow-hidden">
+    <!-- Top Navigation Header -->
+    {% include "dashboard/_header.html" %}
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="fixed top-20 right-8 z-40 space-y-2 max-w-sm">
+        {% for message in messages %}
+        <div class="px-5 py-3 rounded-xl text-sm font-medium shadow-lg border backdrop-blur-sm
+            {% if message.tags == 'error' %}bg-error-container/95 text-on-error-container border-error/20
+            {% elif message.tags == 'success' %}bg-secondary-container/95 text-on-secondary-container border-secondary/20
+            {% else %}bg-surface-container-lowest/95 text-on-surface border-outline-variant/30{% endif %}">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm
+                    {% if message.tags == 'error' %}text-error
+                    {% elif message.tags == 'success' %}text-secondary
+                    {% else %}text-on-surface-variant{% endif %}">
+                    {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}
+                </span>
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- APWRS Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="users_and_roles" %}
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 transition-all duration-300 ease-in-out lg:ml-60">
+        <div class="max-w-3xl mx-auto px-8 py-8">
+            <!-- Breadcrumb -->
+            <a href="{% url 'dashboard:admin_panel' %}" class="inline-flex items-center gap-1.5 text-sm text-on-surface-variant hover:text-primary transition-colors mb-6">
+                <span class="material-symbols-outlined text-sm">arrow_back</span>
+                {% trans "Back to Admin Panel" %}
+            </a>
+
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 shadow-sm">
+                <!-- Header -->
+                <div class="flex items-center gap-4 mb-2">
+                    <div class="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center text-lg font-bold text-primary shrink-0">
+                        {{ target_user.username|first|upper }}
+                    </div>
+                    <div>
+                        <h1 class="font-headline font-bold text-2xl text-primary">{% trans "Edit User" %}</h1>
+                        <p class="text-sm text-on-surface-variant">{{ target_user.username }} &middot; {{ target_user.email|default:"no email" }}</p>
+                    </div>
+                </div>
+
+                <form method="post" class="space-y-6 mt-8">
+                    {% csrf_token %}
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold uppercase tracking-widest text-outline" for="role">{% trans "Role" %}</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">badge</span>
+                            <select class="w-full pl-10 pr-10 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm appearance-none" id="role" name="role">
+                                {% for value, label in role_choices %}
+                                <option value="{{ value }}" {% if target_user.profile.role == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm pointer-events-none">arrow_drop_down</span>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold uppercase tracking-widest text-outline" for="region">{% trans "Assigned Region" %}</label>
+                        <div class="relative group">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">public</span>
+                            <select class="w-full pl-10 pr-10 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm appearance-none" id="region" name="region">
+                                <option value="">{% trans "— No region —" %}</option>
+                                {% for r in regions %}
+                                <option value="{{ r.id }}" {% if target_user.profile.region_id == r.id %}selected{% endif %}>{{ r.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm pointer-events-none">arrow_drop_down</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant mt-1.5">{% trans "Subadmins are restricted to this region. Superadmins and viewers ignore this." %}</p>
+                    </div>
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="inline-flex items-center gap-2 bg-primary text-on-primary py-3 px-6 rounded-lg font-headline font-bold text-sm uppercase tracking-widest shadow-md hover:shadow-lg active:scale-[0.98] transition-all">
+                            <span class="material-symbols-outlined text-sm">save</span>
+                            {% trans "Save Changes" %}
+                        </button>
+                        <a href="{% url 'dashboard:admin_panel' %}" class="inline-flex items-center gap-2 py-3 px-6 rounded-lg font-medium text-sm text-on-surface-variant border border-outline-variant hover:bg-surface-variant transition-all">
+                            <span class="material-symbols-outlined text-sm">close</span>
+                            {% trans "Cancel" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% include 'dashboard/_partners.html' %}
+    {% include "dashboard/_agroai_chat.html" %}
+    </main>
+</div>
+</body>
+</html>

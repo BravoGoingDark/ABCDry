@@ -13,10 +13,9 @@ from fpdf import FPDF
 
 from ..models import (
     CropType,
-    EnvironmentalSnapshot,
+    IrrigationMethod,
     ObservationYear,
     Region,
-    RiskAssessment,
     DroughtPrediction,
     SoilMetrics,
     ClimateMetrics,
@@ -30,25 +29,20 @@ from ..prediction_engine.spei_features import (
     drought_probability_band,
     drought_warning,
 )
+from ..services.weather_forecast import (
+    get_region_forecast,
+    region_point,
+    regions_with_coordinates,
+)
 from .utils import (
-    _check_data_permission,
     _get_region_stations,
-    _haversine_distance,
     _prediction_warning_block,
+    assess_drought_risk,
     METRICS_REGISTRY,
     MODEL_MAP,
 )
 
 logger = logging.getLogger('django')
-
-
-def parameter_review(request):
-    """Display parameter review and manual entry interface with expandable categories"""
-    context = {
-        'regions': Region.objects.all(),
-        'years': ObservationYear.objects.all(),
-    }
-    return render(request, 'dashboard/parameter_review.html', context)
 
 
 def analysis_results(request):
@@ -174,53 +168,25 @@ def analysis_results(request):
 
     trend_line, trend_fill = _risk_svg(risk_pts)
 
-    def _time_ago(date_val):
-        if date_val is None:
-            return "Unknown"
-        if hasattr(date_val, 'date'):
-            date_val = date_val.date()
-        delta = (timezone.now().date() - date_val).days
-        if delta == 0:
-            return "Today"
-        if delta == 1:
-            return "Yesterday"
-        return f"{delta}d ago"
-
-    alerts = []
-    sm = safe_float(getattr(latest_soil, 'moisture_content_percent', None))
-    if sm is not None and sm < 12:
-        sm_date = getattr(latest_soil, 'measurement_date', None)
-        alerts.append({
-            'priority': 'High Priority', 'priority_cls': 'border-error bg-error-container/20 text-error',
-            'time': _time_ago(sm_date), 'title': 'Soil Moisture Critical Drop',
-            'desc': f'Sensor station S-04 reported &lt; {sm:.0f}% moisture. Immediate verification required.',
-            'btn_text': 'Action Required', 'btn_cls': 'text-error',
-        })
-    rf_30d = safe_float(getattr(latest_climate, 'rainfall_mm', None))
-    if rf_30d is not None and rf_30d < 20:
-        rf_date = getattr(latest_climate, 'measurement_date', None)
-        alerts.append({
-            'priority': 'Medium Priority', 'priority_cls': 'border-secondary bg-surface-container-low text-secondary',
-            'time': _time_ago(rf_date), 'title': 'Precipitation Gap Warning',
-            'desc': f'Low rainfall ({rf_30d:.1f}mm recorded). Trend analysis updated.',
-            'btn_text': 'View Trends', 'btn_cls': 'text-secondary',
-        })
-    ndvi_val = safe_float(getattr(latest_remote, 'ndvi', None))
-    if ndvi_val is not None and ndvi_val < 0.3:
-        ndvi_date = getattr(latest_remote, 'measurement_date', None)
-        alerts.append({
-            'priority': 'Medium Priority', 'priority_cls': 'border-yellow-500 bg-yellow-50 text-yellow-700',
-            'time': _time_ago(ndvi_date), 'title': 'Vegetation Stress Detected',
-            'desc': f'NDVI at {ndvi_val:.2f} indicates significant vegetation water stress in the basin.',
-            'btn_text': 'Analyze', 'btn_cls': 'text-yellow-600',
-        })
-    if not alerts:
-        alerts.append({
-            'priority': 'Info', 'priority_cls': 'border-primary bg-primary-container/10 text-primary',
-            'time': 'Just now', 'title': 'All Clear',
-            'desc': 'No critical thresholds exceeded. Standard monitoring continues.',
-            'btn_text': 'Dashboard', 'btn_cls': 'text-primary',
-        })
+    # Risk Overview: reuse the same measured-SPEI-3 assessment as the dashboard
+    # so a missing or stale reading is always shown as "Unknown", never as safe.
+    default_crop = CropType.objects.order_by('name').first()
+    default_irrigation = IrrigationMethod.objects.order_by('name').first()
+    risk = assess_drought_risk(
+        default_region,
+        default_crop.name if default_crop else '',
+        default_irrigation.name if default_irrigation else '',
+    )
+    # Needle angle for the semicircle gauge: -90° points fully left (score 0),
+    # +90° points fully right (score 100). No score => straight down (0°).
+    if risk.get('score') is not None:
+        risk_needle_deg = round(-90 + (risk['score'] / 100.0) * 180, 1)
+    else:
+        risk_needle_deg = 0
+    risk_age_months = (
+        max(1, round(risk['days_old'] / 30.44))
+        if risk.get('days_old') is not None else None
+    )
 
     soil_labels = []
     for s in soil_qs:
@@ -233,21 +199,6 @@ def analysis_results(request):
         soil_labels.append('—')
 
     trend_labels = ['T-21', 'T-14', 'T-7', 'Today', '+7 Days', '+14 Days', '+30 Days']
-
-    base_area = 1200
-    extreme_pct = max(0.05, (risk_today / 100) * 0.35)
-    severe_pct = max(0.05, (risk_7 / 100) * 0.30)
-    moderate_pct = max(0.05, 0.25 - (risk_today / 100) * 0.10)
-    safe_pct = max(0.05, 1.0 - extreme_pct - severe_pct - moderate_pct)
-    total_pct = extreme_pct + severe_pct + moderate_pct + safe_pct
-    extreme_pct /= total_pct; severe_pct /= total_pct; moderate_pct /= total_pct; safe_pct /= total_pct
-
-    heatmap_zones = {
-        'extreme_km2': f"{extreme_pct * base_area:.1f}",
-        'severe_km2': f"{severe_pct * base_area:.1f}",
-        'moderate_km2': f"{moderate_pct * base_area:.1f}",
-        'total_km2': f"{base_area:,}",
-    }
 
     year_choices = [(y.label.split()[0], y.label) for y in ObservationYear.objects.all() if y.label.split()[0].isdigit()]
 
@@ -268,8 +219,9 @@ def analysis_results(request):
         'trend_line': trend_line,
         'trend_fill': trend_fill,
         'trend_labels': trend_labels,
-        'alerts': alerts,
-        'heatmap_zones': heatmap_zones,
+        'risk': risk,
+        'risk_needle_deg': risk_needle_deg,
+        'risk_age_months': risk_age_months,
         'soil_water_labels': soil_labels,
         'stations': stations_data,
         'stations_json': json.dumps(stations_data, cls=DjangoJSONEncoder),
@@ -734,7 +686,8 @@ def drought_prediction_api(request):
     if year_id:
         year = get_object_or_404(ObservationYear, pk=year_id)
     else:
-        year = ObservationYear.objects.order_by('-label').first()
+        year = (ObservationYear.objects.filter(label=str(timezone.localdate().year)).first()
+                or ObservationYear.objects.order_by('-label').first())
 
     if region is None or year is None:
         return JsonResponse({'success': False, 'error': 'Region and year are required.'}, status=400)
@@ -745,7 +698,32 @@ def drought_prediction_api(request):
     _fc_soil = SoilMetrics.objects.filter(region=region, field_capacity_percent__isnull=False).order_by('-measurement_date').first()
     _fc = float(_fc_soil.field_capacity_percent) if _fc_soil and _fc_soil.field_capacity_percent else 30.0
     stations_data = _get_region_stations(region, year)
-    if latest_prediction and not refresh:
+    # Risk Overview shown next to the map: same measured-SPEI-3 assessment the
+    # analysis page is rendered with, returned here so the gauge/pointer can be
+    # refreshed when the region or year selector changes.
+    _risk_crop = CropType.objects.order_by('name').first()
+    _risk_irrigation = IrrigationMethod.objects.order_by('name').first()
+    _drought_risk = assess_drought_risk(
+        region,
+        _risk_crop.name if _risk_crop else '',
+        _risk_irrigation.name if _risk_irrigation else '',
+    )
+    drought_risk_payload = {
+        'level': str(_drought_risk.get('risk_level') or 'Unknown'),
+        'score': _drought_risk.get('score'),
+        'spei': _drought_risk.get('spei'),
+        'measured_on': (_drought_risk['measured_on'].strftime('%Y-%m')
+                        if _drought_risk.get('measured_on') else None),
+        'stale': bool(_drought_risk.get('stale')),
+        'band': _drought_risk.get('band') or 'unknown',
+        'days_old': _drought_risk.get('days_old'),
+        'recommendation': str(_drought_risk.get('recommendation') or ''),
+    }
+    # A saved prediction is reused only on the day it was made; from the next
+    # day it is regenerated (a few seconds) so the scores follow new data.
+    fresh = (latest_prediction is not None
+             and timezone.localtime(latest_prediction.generated_at).date() >= timezone.localdate())
+    if latest_prediction and fresh and not refresh:
         sm_today = float(latest_prediction.soil_moisture_today_pct or 0)
         sm_7 = float(latest_prediction.soil_moisture_7day_pct or 0)
         sm_30 = float(latest_prediction.soil_moisture_30day_pct or 0)
@@ -757,6 +735,7 @@ def drought_prediction_api(request):
                 'year': year.label,
                 'generated_at': latest_prediction.generated_at,
                 'stations': stations_data,
+                'drought_risk': drought_risk_payload,
                 'risk_scores': {
                     'today': float(latest_prediction.current_risk_score),
                     'day_7': float(latest_prediction.risk_7day),
@@ -801,6 +780,7 @@ def drought_prediction_api(request):
                 'year': year.label,
                 'generated_at': saved_prediction.generated_at,
                 'stations': stations_data,
+                'drought_risk': drought_risk_payload,
                 'risk_scores': result['risk_scores'],
                 'current': result['current'],
                 'forecasts': result['forecasts'],
@@ -822,6 +802,7 @@ def drought_prediction_api(request):
                     'region': region.name,
                     'year': year.label,
                     'generated_at': latest_prediction.generated_at,
+                    'drought_risk': drought_risk_payload,
                     'risk_scores': {
                         'today': float(latest_prediction.current_risk_score),
                         'day_7': float(latest_prediction.risk_7day),
@@ -910,10 +891,128 @@ def spei_forecast_api(request):
     })
 
 
+# ============== CROP RECOMMENDATION API ==============
+@require_http_methods(['GET'])
+def crop_recommendation_api(request):
+    """Rank crops by suitability for a region.
+
+    GET /api/crop-recommendations/?region=<id>
+        [&month=1-12]                  flag crops that can be sown that month
+        [&mode=rainfed|irrigated]
+        [&scenario=auto|normal|dry]    auto = dry when the SPEI T+1 outlook warns
+        [&water_mm=<seasonal supply>]  irrigated only: gross water available
+    """
+    from ..models import Region
+    from ..services import crop_suitability as cs
+
+    try:
+        region = Region.objects.get(id=int(request.GET.get('region', '')))
+    except (ValueError, Region.DoesNotExist):
+        return JsonResponse({'error': 'Unknown or missing ?region=<id>'}, status=400)
+
+    mode = request.GET.get('mode', 'rainfed')
+    scenario = request.GET.get('scenario', 'auto')
+    if mode not in ('rainfed', 'irrigated') or scenario not in ('auto', 'normal', 'dry'):
+        return JsonResponse({'error': 'mode must be rainfed|irrigated, scenario auto|normal|dry'}, status=400)
+    try:
+        month = int(request.GET['month']) if request.GET.get('month') else None
+        water_mm = float(request.GET['water_mm']) if request.GET.get('water_mm') else None
+    except ValueError:
+        return JsonResponse({'error': 'month and water_mm must be numbers'}, status=400)
+    if month is not None and not 1 <= month <= 12:
+        return JsonResponse({'error': 'month must be 1-12'}, status=400)
+
+    clim = cs.region_climatology(region)
+    if clim is None:
+        return JsonResponse({'error': f'Not enough climate history for {region.name}'}, status=404)
+    soil = cs.region_soil(region)
+    outlook = None
+    if scenario == 'auto':
+        scenario, outlook = cs.drought_scenario(region)
+
+    ranking = cs.rank_crops(clim, soil, month=month, mode=mode, scenario=scenario,
+                            water_supply_mm=water_mm)
+    return JsonResponse({
+        'region': region.name,
+        'region_id': region.id,
+        'mode': mode,
+        'scenario': scenario,
+        'drought_outlook_t1': outlook,
+        'climate_period': clim['_meta']['years'],
+        'soil': soil,
+        'soil_note': None if soil else 'No soil data: run "python manage.py fetch_soilgrids"; pH/texture not scored.',
+        'crops': ranking,
+    })
+
+
+# ============== LIVE WEATHER FORECAST API ==============
+@require_http_methods(["GET"])
+def weather_forecast_api(request):
+    """Live daily temperature + rainfall forecast for one region.
+
+    GET /api/weather-forecast/?region=<id>[&days=16]
+
+    Server-side proxy to Open-Meteo with a 30-minute cache. The browser never
+    calls the third-party service directly.
+    """
+    try:
+        days = int(request.GET.get("days", 16))
+    except (TypeError, ValueError):
+        days = 16
+    days = max(1, min(days, 16))
+
+    region = None
+    region_id = request.GET.get("region")
+    if region_id:
+        try:
+            region = Region.objects.filter(pk=int(region_id)).first()
+        except (TypeError, ValueError):
+            region = None
+        if region is None:
+            return JsonResponse({"error": "Unknown region."}, status=404)
+    else:
+        region = Region.objects.filter(
+            latitude__isnull=False, longitude__isnull=False
+        ).order_by("name").first()
+        if region is None:
+            region = Region.objects.order_by("name").first()
+
+    if region is None:
+        return JsonResponse({"error": "No regions configured."}, status=400)
+    if region_point(region) is None:
+        return JsonResponse(
+            {"error": "This region has no coordinates; forecasts are unavailable."},
+            status=400,
+        )
+
+    payload = get_region_forecast(region, days=days)
+    status = 502 if payload and payload.get("error") else 200
+    return JsonResponse(payload or {"error": "Weather forecast unavailable."},
+                        status=status)
+
+
+# ============== GRIDDED DROUGHT FORECAST API ==============
+@require_http_methods(['GET'])
+def drought_grid_api(request):
+    """Latest 29-cell SPEI forecast for Ichkeul (built by `manage.py build_drought_grid`)."""
+    from ..models import DroughtGridForecast
+    run = DroughtGridForecast.objects.first()
+    if run is None:
+        return JsonResponse({'error': 'No gridded drought forecast has been built yet. '
+                                      'Run: python manage.py build_drought_grid'}, status=404)
+    payload = dict(run.payload)
+    payload['generated_at'] = run.generated_at.isoformat()
+    issue = run.issue_month
+    today = timezone.now().date()
+    payload['months_behind_today'] = (today.year - issue.year) * 12 + today.month - issue.month
+    return JsonResponse(payload)
+
+
 # ============== SPEI OUTLOOK PAGE ==============
 def spei_outlook_view(request):
     """SPEI drought outlook page: latest per-region forecast + live
-    verification scoreboard (predicted vs what actually happened)."""
+    verification scoreboard (predicted vs what actually happened) and a
+    16-day temperature/rainfall forecast from Open-Meteo."""
     from ..models import Region, SpeiForecast, SpeiVerification
 
     forecasts = []
@@ -952,9 +1051,57 @@ def spei_outlook_view(request):
     stale_months = max((f.months_behind or 0) for f in forecasts) if forecasts else 0
     if stale_months <= MAX_FORECAST_LAG_MONTHS:
         stale_months = 0
+
+    # Live 16-day weather forecast (Open-Meteo). Rendered server-side first,
+    # then refreshed in place by the region selector via /api/weather-forecast/.
+    weather_regions = regions_with_coordinates()
+    weather_region = None
+    requested_region = request.GET.get("weather_region")
+    if requested_region:
+        weather_region = next(
+            (r for r in weather_regions if str(r.id) == str(requested_region)),
+            None,
+        )
+    if weather_region is None and weather_regions:
+        weather_region = weather_regions[0]
+    weather = get_region_forecast(weather_region, days=16) if weather_region else None
+
     return render(request, 'dashboard/spei_outlook.html',
                   {'forecasts': forecasts, 'verifications': verifications,
-                   'stats': stats, 'stale_months': stale_months})
+                   'stats': stats, 'stale_months': stale_months,
+                   'weather_regions': weather_regions,
+                   'weather_region': weather_region,
+                   'weather': weather})
+
+
+# ============== PLANTING CALENDAR & AGRO-CLIMATIC OUTLOOK ==============
+def planting_calendar_view(request):
+    """Adaptive Planting Window Calendar & Agro-Climatic Outlook view."""
+    from ..models import Region, SpeiForecast
+
+    regions = Region.objects.filter(latitude__isnull=False).order_by('name')
+    region_id = request.GET.get('region')
+    selected_region = None
+    if region_id:
+        try:
+            selected_region = Region.objects.get(id=int(region_id))
+        except (ValueError, Region.DoesNotExist):
+            selected_region = None
+    if not selected_region and regions.exists():
+        selected_region = regions.first()
+
+    forecasts = []
+    for reg in regions:
+        fc = SpeiForecast.objects.filter(region=reg).first()
+        if fc:
+            forecasts.append(fc)
+
+    return render(request, 'dashboard/calendar.html', {
+        'regions': regions,
+        'selected_region': selected_region,
+        'forecasts': forecasts,
+        'active_page': 'calander',
+    })
 
 
 # ============== FARMER ASSISTANT PAGE ==============

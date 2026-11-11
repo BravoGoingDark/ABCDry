@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Calculated Metrics | Ichkeul Intel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dce2f3",
+                    "surface-dim": "#d3daea",
+                    "secondary-container": "#72ddfd",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#002114",
+                    "primary": "#012d1d",
+                    "on-tertiary-fixed-variant": "#554338",
+                    "background": "#f9f9ff",
+                    "inverse-primary": "#a5d0b9",
+                    "on-surface": "#151c27",
+                    "outline": "#717973",
+                    "tertiary": "#322319",
+                    "secondary": "#00677d",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#f9ddce",
+                    "outline-variant": "#c1c8c2",
+                    "on-primary-container": "#86af99",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#b2ebff",
+                    "on-tertiary-fixed": "#27180f",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-highest": "#dce2f3",
+                    "surface-container-low": "#f0f3ff",
+                    "primary-container": "#1b4332",
+                    "on-background": "#151c27",
+                    "secondary-fixed-dim": "#69d4f4",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "tertiary-fixed-dim": "#dcc1b2",
+                    "on-secondary-container": "#006075",
+                    "tertiary-container": "#4a382d",
+                    "surface-container": "#e7eefe",
+                    "primary-fixed": "#c1ecd4",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-tint": "#3f6653",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "surface-bright": "#f9f9ff",
+                    "on-tertiary-container": "#baa193",
+                    "on-secondary-fixed-variant": "#004e5f",
+                    "on-secondary-fixed": "#001f27",
+                    "surface": "#f9f9ff",
+                    "inverse-surface": "#2a313d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Hanken Grotesk"],
+                    "display": ["Hanken Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Compact formula card value styling */
+        .calc-value{font-family: 'JetBrains Mono', monospace;}
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+
+<div class="flex-1 min-w-0 flex flex-col bg-surface h-screen">
+    {% include "dashboard/_header.html" %}
+
+    <!-- APWRS Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="analyse" %}
+
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 transition-all duration-300 ease-in-out lg:ml-60">
+        {% include "dashboard/_page_toolbar.html" with page_actions="dashboard/_page_actions_calculations.html" %}
+        <div class="mb-6">
+            <h3 class="font-headline font-black text-lg uppercase tracking-widest">Calculated Metrics</h3>
+            <p class="text-sm text-on-surface-variant mt-1">Formulas and computed values that drive the drought risk assessment. Each value is the latest record for the selected region and date.</p>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {% for section in calc_sections %}
+            <div {% if section.category == 'Soil' %}id="soil"{% elif section.category == 'Climate' %}id="climate"{% elif section.category == 'Drought Indices' %}id="drought"{% elif section.category == 'Remote Sensing' %}id="remote"{% elif section.category == 'Hydrology' %}id="hydro"{% elif section.category == 'Agriculture' %}id="agri"{% endif %} class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="font-headline font-bold text-sm text-primary">{{ section.category }}</h4>
+                    <span class="text-[10px] text-on-surface-variant font-label">Derived</span>
+                </div>
+                <div class="space-y-1.5">
+                    {% for item in section.items %}
+                    <div class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-surface-container transition-colors text-xs">
+                        <div class="min-w-0 flex-1">
+                            <div class="font-medium text-on-surface truncate">{{ item.name }}</div>
+                            <div class="text-[10px] text-on-surface-variant leading-tight truncate">{{ item.formula }}</div>
+                        </div>
+                        <div class="text-right shrink-0 ml-3">
+                            <span class="font-semibold text-on-surface font-label text-sm">{{ item.value }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- ── Custom Chart Builder ── -->
+        <div class="mt-6 bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="font-headline font-bold text-primary">Custom Chart Builder</h4>
+                <span class="text-xs text-on-surface-variant">Pick any metric for X and Y axes</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div>
+                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Region</label>
+                    <select id="chart-region" class="w-full px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary">
+                        {% for r in regions %}
+                        <option value="{{ r.id }}"{% if r.id == selected_region.id %} selected{% endif %}>{{ r.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="text-[10px] text-on-surface-variant mt-0.5">Region filter above also applies</p>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Metric (over time)</label>
+                    <select id="chart-y" class="w-full px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary"></select>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Date From</label>
+                    <input type="date" id="chart-from" class="w-full px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Date To</label>
+                    <div class="flex gap-2">
+                        <input type="date" id="chart-to" class="flex-1 px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary">
+                        <button id="chart-go" class="px-4 py-1.5 bg-primary text-on-primary rounded-DEFAULT text-sm font-semibold hover:opacity-90 transition-opacity">Plot</button>
+                    </div>
+                </div>
+            </div>
+            <div class="h-72 md:h-80">
+                <canvas id="customChart"></canvas>
+            </div>
+        </div>
+
+        <div class="mt-8 text-sm text-on-surface-variant">Note: Calculated values use reference formulas (FAO-56, Saxton &amp; Rawls, SEBAL). Underlying inputs must be present in the metrics tables for the selected region.</div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+        <script>
+        (function(){
+            // ── Populate metric dropdowns ──
+            var METRICS = {{ metrics_json|safe }};
+            var chartY = document.getElementById('chart-y');
+            function populateSelect(sel, selectedKey) {
+                sel.innerHTML = '<option value="">-- Select --</option>';
+                var cats = {};
+                METRICS.forEach(function(m) {
+                    if (!cats[m.category]) cats[m.category] = [];
+                    cats[m.category].push(m);
+                });
+                Object.keys(cats).sort().forEach(function(cat) {
+                    var optgroup = document.createElement('optgroup');
+                    optgroup.label = cat;
+                    cats[cat].forEach(function(m) {
+                        var opt = document.createElement('option');
+                        opt.value = m.key;
+                        opt.textContent = m.label;
+                        if (m.key === selectedKey) opt.selected = true;
+                        optgroup.appendChild(opt);
+                    });
+                    sel.appendChild(optgroup);
+                });
+            }
+            populateSelect(chartY, 'spi1');
+
+            // ── Line chart: metric over time ──
+            var ctx = document.getElementById('customChart').getContext('2d');
+            var customChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                title: function(items) {
+                                    var raw = items[0] && items[0].raw;
+                                    return raw && raw.date ? raw.date.split('T')[0] : '';
+                                },
+                                label: function(ctx) {
+                                    var yLbl = METRICS.find(function(m) { return m.key === chartY.value; });
+                                    var unit = yLbl ? yLbl.unit : '';
+                                    return 'Value: ' + ctx.parsed.y.toFixed(2) + (unit ? ' ' + unit : '');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { tooltipFormat: 'yyyy-MM-dd', unit: 'month', displayFormats: { month: 'MMM yyyy', day: 'MMM dd' } },
+                            title: { display: true, text: 'Date' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Value' },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            function fetchAndPlot() {
+                var rid = document.getElementById('chart-region').value;
+                var yKey = chartY.value;
+                var from = document.getElementById('chart-from').value;
+                var to = document.getElementById('chart-to').value;
+                if (!rid || !yKey) return;
+
+                fetch('/analysis/calculations/chart-data/?region_id=' + rid + '&metric=' + yKey + (from ? '&date_from=' + from : '') + (to ? '&date_to=' + to : '')).then(function(r) {
+                    if (!r.ok) throw new Error('Fetch failed');
+                    return r.json();
+                }).then(function(data) {
+                    var label = data.label + (data.unit ? ' (' + data.unit + ')' : '');
+                    var points = data.dates.map(function(d, i) {
+                        return { date: d.split('T')[0], y: data.values[i] };
+                    });
+                    var color = '#06b6d4';
+                    customChart.data = {
+                        datasets: [{
+                            label: label,
+                            data: points,
+                            borderColor: color,
+                            backgroundColor: 'rgba(6,182,212,0.12)',
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 3,
+                            pointHoverRadius: 6,
+                            parsing: { xAxisKey: 'date', yAxisKey: 'y' }
+                        }]
+                    };
+                    customChart.options.scales.y.title.text = label;
+                    customChart.update();
+                }).catch(function(err) {
+                    console.warn('Chart fetch error:', err);
+                });
+            }
+
+            document.getElementById('chart-go').addEventListener('click', fetchAndPlot);
+            document.getElementById('chart-region').addEventListener('change', fetchAndPlot);
+            chartY.addEventListener('change', fetchAndPlot);
+
+            // Auto-plot on load
+            setTimeout(fetchAndPlot, 300);
+        })();
+        </script>
+
+
+
+        {% include 'dashboard/_partners.html' %}
+
+      </main>
+  </div>
+  {% include "dashboard/_agroai_chat.html" %}
+  </body></html>
+

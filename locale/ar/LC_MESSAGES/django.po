@@ -1,0 +1,2899 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: APWRS\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 ? 4 : 5;\n"
+
+msgid "Toggle Sidebar"
+msgstr "إظهار/إخفاء القائمة الجانبية"
+
+msgid "Adaptive Planting Window Recommendation System"
+msgstr "نظام التوصية التكيفي بمواعيد الزراعة"
+
+msgid "Language"
+msgstr "اللغة"
+
+msgid "Notifications"
+msgstr "الإشعارات"
+
+msgid "Admin"
+msgstr "مسؤول"
+
+msgid "Manage"
+msgstr "إدارة"
+
+msgid "Subadmin"
+msgstr "مسؤول فرعي"
+
+msgid "Viewer"
+msgstr "مشاهد"
+
+msgid "Sign Out"
+msgstr "تسجيل الخروج"
+
+msgid "Sign In"
+msgstr "تسجيل الدخول"
+
+msgid "Region"
+msgstr "المنطقة"
+
+msgid "Lake"
+msgstr "البحيرة"
+
+msgid "Export"
+msgstr "تصدير"
+
+msgid "Add Sensor"
+msgstr "إضافة مستشعر"
+
+msgid "Strategic Partners"
+msgstr "الشركاء الاستراتيجيون"
+
+msgid "Operations"
+msgstr "العمليات"
+
+msgid "Overview"
+msgstr "نظرة عامة"
+
+msgid "Sensors"
+msgstr "المستشعرات"
+
+msgid "Sensors, Map & Telemetry"
+msgstr "المستشعرات والخريطة والقياس عن بعد"
+
+msgid "Analyse"
+msgstr "التحليل"
+
+msgid "Analyse & Correlation"
+msgstr "التحليل والارتباط"
+
+msgid "Data"
+msgstr "البيانات"
+
+msgid "Data & Ingestion"
+msgstr "البيانات والإدخال"
+
+msgid "Forcast"
+msgstr "التوقعات"
+
+msgid "SPEI Drought Forcast"
+msgstr "توقعات الجفاف SPEI"
+
+msgid "Agronomy & Logs"
+msgstr "الزراعة والسجلات"
+
+msgid "Calander"
+msgstr "التقويم"
+
+msgid "Planting Window Calander"
+msgstr "تقويم مواعيد الزراعة"
+
+msgid "History"
+msgstr "السجل"
+
+msgid "Historical Climate Data"
+msgstr "البيانات المناخية التاريخية"
+
+msgid "Administration"
+msgstr "الإدارة"
+
+msgid "Users and Roles"
+msgstr "المستخدمون والأدوار"
+
+msgid "Collapse"
+msgstr "طي"
+
+msgid "Planting Window Calendar"
+msgstr "تقويم مواعيد الزراعة"
+
+msgid ""
+"Select a crop to see its full lifecycle timeline. Enter your conditions to "
+"get recommendations."
+msgstr ""
+"اختر محصولًا لعرض الجدول الزمني الكامل لدورة حياته. أدخل ظروفك للحصول على "
+"توصيات."
+
+msgid "Crop Lifecycle"
+msgstr "دورة حياة المحصول"
+
+msgid "Smart Recommend"
+msgstr "توصية ذكية"
+
+msgid "Select a Crop"
+msgstr "اختر محصولًا"
+
+msgid "Ideal Temp"
+msgstr "الحرارة المثالية"
+
+msgid "Annual Lifecycle Timeline"
+msgstr "الجدول الزمني السنوي لدورة الحياة"
+
+msgid "Plant"
+msgstr "الزراعة"
+
+msgid "Grow"
+msgstr "النمو"
+
+msgid "Harvest"
+msgstr "الحصاد"
+
+msgid "Planting / Sowing"
+msgstr "الغرس / البذر"
+
+msgid "Vegetative Growth"
+msgstr "النمو الخضري"
+
+msgid "Harvest Window"
+msgstr "فترة الحصاد"
+
+msgid "Critical Phase"
+msgstr "المرحلة الحرجة"
+
+msgid "Agronomic Recommendations"
+msgstr "التوصيات الزراعية"
+
+msgid "Enter Your Conditions"
+msgstr "أدخل ظروفك"
+
+msgid "Soil Type"
+msgstr "نوع التربة"
+
+msgid "Clay"
+msgstr "طينية"
+
+msgid "Loam"
+msgstr "طميية"
+
+msgid "Sandy"
+msgstr "رملية"
+
+msgid "Silty"
+msgstr "غرينية"
+
+msgid "Chalky / Calcareous"
+msgstr "طباشيرية / كلسية"
+
+msgid "Climate Zone"
+msgstr "المنطقة المناخية"
+
+msgid "Semi-Arid"
+msgstr "شبه جاف"
+
+msgid "Mediterranean"
+msgstr "متوسطي"
+
+msgid "Arid"
+msgstr "جاف"
+
+msgid "Sub-Humid"
+msgstr "شبه رطب"
+
+msgid "Avg Annual Rain (mm)"
+msgstr "متوسط الأمطار السنوية (مم)"
+
+msgid "Avg Temp (°C)"
+msgstr "متوسط الحرارة (°م)"
+
+msgid "Irrigation Available"
+msgstr "الري المتاح"
+
+msgid "None (Rainfed)"
+msgstr "لا يوجد (بعلي)"
+
+msgid "Drip Irrigation"
+msgstr "الري بالتنقيط"
+
+msgid "Sprinkler"
+msgstr "الري بالرش"
+
+msgid "Flood / Furrow"
+msgstr "الري بالغمر / الأخاديد"
+
+msgid "Soil pH"
+msgstr "حموضة التربة (pH)"
+
+msgid "Find Compatible Crops"
+msgstr "ابحث عن المحاصيل المناسبة"
+
+msgid "Recommended Crops"
+msgstr "المحاصيل الموصى بها"
+
+msgid ""
+"Enter your soil and climate conditions, then click 'Find Compatible Crops' "
+"to get recommendations."
+msgstr ""
+"أدخل ظروف التربة والمناخ، ثم انقر على «ابحث عن المحاصيل المناسبة» للحصول على"
+" التوصيات."
+
+msgid "Condition-Based Advice"
+msgstr "نصائح حسب الظروف"
+
+msgid "Edit User — APWRS"
+msgstr "تعديل المستخدم — APWRS"
+
+msgid "Back to Admin Panel"
+msgstr "العودة إلى لوحة الإدارة"
+
+msgid "Edit User"
+msgstr "تعديل المستخدم"
+
+msgid "Role"
+msgstr "الدور"
+
+msgid "Assigned Region"
+msgstr "المنطقة المخصصة"
+
+msgid "— No region —"
+msgstr "— بدون منطقة —"
+
+msgid ""
+"Subadmins are restricted to this region. Superadmins and viewers ignore "
+"this."
+msgstr ""
+"يقتصر عمل المسؤولين الفرعيين على هذه المنطقة. لا ينطبق هذا على المسؤولين "
+"الرئيسيين والمشاهدين."
+
+msgid "Save Changes"
+msgstr "حفظ التغييرات"
+
+msgid "Cancel"
+msgstr "إلغاء"
+
+msgid "Admin Panel — APWRS"
+msgstr "لوحة الإدارة — APWRS"
+
+msgid "User Management"
+msgstr "إدارة المستخدمين"
+
+msgid "Create, edit, and manage user roles and regional access."
+msgstr "أنشئ أدوار المستخدمين وصلاحيات المناطق وعدّلها وأدرها."
+
+msgid "Create User"
+msgstr "إنشاء مستخدم"
+
+msgid "Username"
+msgstr "اسم المستخدم"
+
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+msgid "Password"
+msgstr "كلمة المرور"
+
+msgid "Only used for subadmin role restriction."
+msgstr "يُستخدم فقط لتقييد دور المسؤول الفرعي."
+
+msgid "Manage Users"
+msgstr "إدارة المستخدمين"
+
+msgid "total"
+msgstr "المجموع"
+
+msgid "User"
+msgstr "المستخدم"
+
+msgid "Actions"
+msgstr "الإجراءات"
+
+msgid "Edit"
+msgstr "تعديل"
+
+msgid "Delete user"
+msgstr "حذف المستخدم"
+
+msgid "This action cannot be undone."
+msgstr "لا يمكن التراجع عن هذا الإجراء."
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "No users found."
+msgstr "لم يتم العثور على مستخدمين."
+
+msgid "Risk Overview"
+msgstr "نظرة عامة على المخاطر"
+
+msgid "Measured SPEI-3"
+msgstr "مؤشر SPEI-3 المقاس"
+
+msgid "Stale"
+msgstr "قديم"
+
+msgid "Current"
+msgstr "حالي"
+
+msgid "Drought Risk"
+msgstr "خطر الجفاف"
+
+msgid "Score"
+msgstr "الدرجة"
+
+msgid "Measured SPEI-3 driving this level"
+msgstr "مؤشر SPEI-3 المقاس الذي يحدد هذا المستوى"
+
+msgid "SPEI-3"
+msgstr "SPEI-3"
+
+msgid "Safe"
+msgstr "آمن"
+
+msgid "Watch"
+msgstr "مراقبة"
+
+msgid "Severe"
+msgstr "شديد"
+
+msgid "Extreme"
+msgstr "قصوى"
+
+msgid "Reading"
+msgstr "القراءة"
+
+msgid "Age"
+msgstr "العمر"
+
+msgid ""
+"This region has no recent SPEI-3 reading, so the level above is not current."
+" Re-run the drought-index import."
+msgstr ""
+"لا توجد قراءة حديثة لمؤشر SPEI-3 لهذه المنطقة، لذا فإن المستوى أعلاه غير "
+"محدّث. أعد تشغيل استيراد مؤشر الجفاف."
+
+msgid "Recommended action"
+msgstr "الإجراء الموصى به"
+
+msgid "See map"
+msgstr "عرض الخريطة"
+
+msgid "Planting Calendar & Land Suitability Evaluator"
+msgstr "تقويم الزراعة ومقيّم ملاءمة الأرض"
+
+msgid "Crop Lifecycle & Sowing Timelines"
+msgstr "دورة حياة المحاصيل ومواعيد البذر"
+
+msgid "Land Evaluator (What Works & What Doesn't)"
+msgstr "مقيّم الأرض (ما ينجح وما لا ينجح)"
+
+msgid "Comparative Agricultural Matrix"
+msgstr "المصفوفة الزراعية المقارنة"
+
+msgid "12 Tunisian Agricultural Basins Supported"
+msgstr "12 حوضًا زراعيًا تونسيًا مدعومًا"
+
+msgid "Choose Crop Type"
+msgstr "اختر نوع المحصول"
+
+msgid ""
+"Select a crop to inspect its phenological calendar, critical growth stages, "
+"and field recommendations."
+msgstr ""
+"اختر محصولًا لعرض تقويمه الفينولوجي ومراحل نموه الحرجة والتوصيات الحقلية."
+
+msgid "Water Demand"
+msgstr "الاحتياج المائي"
+
+msgid "Thermal Range"
+msgstr "النطاق الحراري"
+
+msgid "Preferred Soil"
+msgstr "التربة المفضلة"
+
+msgid "Key Milestones: When to Plant, Grow, and Harvest"
+msgstr "المحطات الرئيسية: متى تزرع وتنمّي وتحصد"
+
+msgid "Stage 1"
+msgstr "المرحلة 1"
+
+msgid "When to Plant (Sowing)"
+msgstr "متى تزرع (البذر)"
+
+msgid "Stage 2"
+msgstr "المرحلة 2"
+
+msgid "When to Grow (Vegetative)"
+msgstr "متى ينمو (النمو الخضري)"
+
+msgid "Critical Risk"
+msgstr "خطر حرج"
+
+msgid "Critical Care Window"
+msgstr "فترة العناية الحرجة"
+
+msgid "Stage 4"
+msgstr "المرحلة 4"
+
+msgid "When to Harvest"
+msgstr "متى تحصد"
+
+msgid "12-Month Annual Gantt Timeline"
+msgstr "الجدول الزمني السنوي لـ 12 شهرًا"
+
+msgid "Sowing"
+msgstr "البذر"
+
+msgid "Vegetative"
+msgstr "النمو الخضري"
+
+msgid "Critical Period"
+msgstr "الفترة الحرجة"
+
+msgid "Dormant / Off"
+msgstr "سكون / خارج الموسم"
+
+msgid "Actionable Field Management Directives"
+msgstr "توجيهات عملية لإدارة الحقل"
+
+msgid "Irrigation & Water Stress Guidance"
+msgstr "إرشادات الري والإجهاد المائي"
+
+msgid "Land Diagnostic: Enter Your Field Parameters"
+msgstr "تشخيص الأرض: أدخل معطيات حقلك"
+
+msgid ""
+"Provide your soil, weather, climate, and water infrastructure info to "
+"evaluate what crops will thrive and what will fail on your parcel."
+msgstr ""
+"أدخل معلومات التربة والطقس والمناخ والبنية المائية لتقييم المحاصيل التي "
+"ستنجح والتي ستفشل في قطعتك."
+
+msgid "Load Basin Preset:"
+msgstr "تحميل إعدادات حوض جاهزة:"
+
+msgid "Custom Field Data"
+msgstr "بيانات حقل مخصصة"
+
+msgid "1. Soil Characteristics"
+msgstr "1. خصائص التربة"
+
+msgid "Soil Texture"
+msgstr "قوام التربة"
+
+msgid "Soil pH Range"
+msgstr "نطاق حموضة التربة"
+
+msgid "Soil Salinity (EC)"
+msgstr "ملوحة التربة (EC)"
+
+msgid "Effective Soil Depth"
+msgstr "العمق الفعّال للتربة"
+
+msgid "2. Weather & Climate Info"
+msgstr "2. معلومات الطقس والمناخ"
+
+msgid "Annual Rainfall (mm/year)"
+msgstr "الأمطار السنوية (مم/سنة)"
+
+msgid "Summer Thermal Peak"
+msgstr "ذروة الحرارة الصيفية"
+
+msgid "Winter Frost Occurrence"
+msgstr "حدوث الصقيع الشتوي"
+
+msgid "Recent Soil Moisture / Drought Index"
+msgstr "رطوبة التربة الحديثة / مؤشر الجفاف"
+
+msgid "3. Water & Irrigation Setup"
+msgstr "3. المياه وتجهيزات الري"
+
+msgid "Irrigation System Available"
+msgstr "نظام الري المتاح"
+
+msgid "Water Supply Reliability"
+msgstr "موثوقية التزود بالمياه"
+
+msgid "Irrigation Water Salinity"
+msgstr "ملوحة مياه الري"
+
+msgid "Farmer Risk Strategy"
+msgstr "استراتيجية الفلاح تجاه المخاطر"
+
+msgid ""
+"Calculates soil compatibility, thermal stress limits, and moisture "
+"thresholds."
+msgstr "يحسب ملاءمة التربة وحدود الإجهاد الحراري وعتبات الرطوبة."
+
+msgid "Analyze Land & Generate Recommendations"
+msgstr "حلّل الأرض وأنشئ التوصيات"
+
+msgid "Parcel Diagnostic Report"
+msgstr "تقرير تشخيص القطعة"
+
+msgid "What Works For Your Land (Recommended)"
+msgstr "ما يناسب أرضك (موصى به)"
+
+msgid ""
+"These crops have natural affinity with your soil texture, water balance, and"
+" thermal climate."
+msgstr ""
+"تتلاءم هذه المحاصيل طبيعيًا مع قوام تربتك وتوازنها المائي ومناخها الحراري."
+
+msgid "What Needs Adaptation (Conditional Potential)"
+msgstr "ما يحتاج إلى تكييف (إمكانية مشروطة)"
+
+msgid ""
+"Viable only if you apply specific soil amendments, deficit irrigation, or "
+"windbreak protection."
+msgstr "ممكن فقط إذا طبّقت محسّنات تربة محددة أو ريًا ناقصًا أو مصدات رياح."
+
+msgid "What Doesn't Work For Your Land (High Failure Risk)"
+msgstr "ما لا يناسب أرضك (خطر فشل مرتفع)"
+
+msgid ""
+"These crops conflict with your parcel parameters and will suffer crop "
+"failure or negative ROI."
+msgstr ""
+"تتعارض هذه المحاصيل مع خصائص قطعتك وستتعرض لفشل المحصول أو لمردود سلبي."
+
+msgid "Recommended Crop Rotation & Soil Defense Plan"
+msgstr "الدورة الزراعية الموصى بها وخطة حماية التربة"
+
+msgid "Rotation Sequence"
+msgstr "تسلسل الدورة الزراعية"
+
+msgid "Soil Amendments"
+msgstr "محسّنات التربة"
+
+msgid "Water Strategy"
+msgstr "استراتيجية المياه"
+
+msgid "Complete Crop Phenology Matrix"
+msgstr "المصفوفة الفينولوجية الكاملة للمحاصيل"
+
+msgid ""
+"Side-by-side comparison of sowing windows, critical care periods, harvest "
+"dates, and base soil requirements."
+msgstr ""
+"مقارنة جنبًا إلى جنب لفترات البذر وفترات العناية الحرجة ومواعيد الحصاد "
+"ومتطلبات التربة الأساسية."
+
+msgid "Crop"
+msgstr "المحصول"
+
+msgid "Family / Type"
+msgstr "العائلة / النوع"
+
+msgid "When to Plant (Sow)"
+msgstr "متى تزرع (البذر)"
+
+msgid "Water Req."
+msgstr "الاحتياج المائي"
+
+msgid "Best Soil"
+msgstr "أفضل تربة"
+
+msgid "APWRS — Adaptive Planting Window Recommendation System"
+msgstr "APWRS — نظام التوصية التكيفي بمواعيد الزراعة"
+
+msgid "Wind Dynamics"
+msgstr "ديناميكية الرياح"
+
+msgid "Gusts up to"
+msgstr "هبات تصل إلى"
+
+msgid "Precipitation"
+msgstr "التساقطات"
+
+msgid "Micro-climate"
+msgstr "المناخ المحلي"
+
+msgid "Temperature"
+msgstr "درجة الحرارة"
+
+msgid "Humidity"
+msgstr "الرطوبة"
+
+msgid "Drawing Tool"
+msgstr "أداة الرسم"
+
+msgid "Measure Area"
+msgstr "قياس المساحة"
+
+msgid "Select Region"
+msgstr "اختر المنطقة"
+
+msgid "Ping Point"
+msgstr "تحديد نقطة"
+
+msgid "Optimal"
+msgstr "مثالي"
+
+msgid "Marginal"
+msgstr "هامشي"
+
+msgid "Measure"
+msgstr "قياس"
+
+msgid "Choose a tool to begin."
+msgstr "اختر أداة للبدء."
+
+msgid "Clear drawings"
+msgstr "مسح الرسومات"
+
+msgid "Clear ruler"
+msgstr "مسح المسطرة"
+
+msgid "Basemap unavailable — retrying."
+msgstr "الخريطة الأساسية غير متاحة — جارٍ إعادة المحاولة."
+
+msgid "My farms"
+msgstr "مزارعي"
+
+msgid "Farmer space"
+msgstr "فضاء الفلاح"
+
+msgid "Farmer"
+msgstr "فلاح"
+
+msgid "Log out"
+msgstr "تسجيل الخروج"
+
+msgid "Farm map"
+msgstr "خريطة المزرعة"
+
+msgid ""
+"Tap each corner of your land. Tap the first point again, or press Finish, to"
+" close the shape."
+msgstr ""
+"انقر على كل زاوية من أرضك. انقر على النقطة الأولى مرة أخرى، أو اضغط «إنهاء»،"
+" لإغلاق الشكل."
+
+msgid "Undo point"
+msgstr "تراجع عن النقطة"
+
+msgid "Finish"
+msgstr "إنهاء"
+
+msgid "Satellite / map"
+msgstr "قمر صناعي / خريطة"
+
+msgid "Go to my position"
+msgstr "انتقل إلى موقعي"
+
+msgid "Show all my farms"
+msgstr "عرض جميع مزارعي"
+
+msgid "Draw a new farm"
+msgstr "ارسم مزرعة جديدة"
+
+msgid "What to plant"
+msgstr "ماذا أزرع"
+
+msgid "Crop plan"
+msgstr "خطة المحصول"
+
+msgid "Weather"
+msgstr "الطقس"
+
+msgid "Assistant"
+msgstr "المساعد"
+
+msgid "Farm details"
+msgstr "تفاصيل المزرعة"
+
+msgid "Close"
+msgstr "إغلاق"
+
+msgid "Farm name"
+msgstr "اسم المزرعة"
+
+msgid "What is growing there now?"
+msgstr "ماذا يُزرع فيها الآن؟"
+
+msgid "Leave empty if the land is free: we will recommend a crop."
+msgstr "اتركه فارغًا إذا كانت الأرض غير مزروعة: سنوصي لك بمحصول."
+
+msgid "Sowing / planting date"
+msgstr "تاريخ البذر / الغرس"
+
+msgid "Water"
+msgstr "الماء"
+
+msgid "Rain only"
+msgstr "مطر فقط"
+
+msgid "I can irrigate"
+msgstr "أستطيع الري"
+
+msgid "Water available per season (mm)"
+msgstr "الماء المتاح في الموسم (مم)"
+
+msgid "Optional. 100 mm = 1 000 m³ per hectare."
+msgstr "اختياري. 100 مم = 1 000 م³ في الهكتار."
+
+msgid "Redraw border"
+msgstr "أعد رسم الحدود"
+
+msgid "Save"
+msgstr "حفظ"
+
+msgid "Loading…"
+msgstr "جارٍ التحميل…"
+
+msgid "Welcome! Let’s map your land"
+msgstr "مرحبًا! لنرسم خريطة أرضك"
+
+msgid ""
+"Draw the border of your land on the map. We will tell you what to plant and "
+"when, how to fertilise and protect it, and what the weather will do."
+msgstr ""
+"ارسم حدود أرضك على الخريطة. سنخبرك ماذا تزرع ومتى، وكيف تسمّدها وتحميها، "
+"وكيف سيكون الطقس."
+
+msgid "Draw your land"
+msgstr "ارسم أرضك"
+
+msgid "Tap each corner of the field on the satellite map."
+msgstr "انقر على كل زاوية من الحقل على خريطة القمر الصناعي."
+
+msgid "Describe it"
+msgstr "صِفها"
+
+msgid "Give it a name and say if you can irrigate."
+msgstr "أعطها اسمًا وحدّد إن كنت تستطيع الري."
+
+msgid "Get advice"
+msgstr "احصل على النصائح"
+
+msgid "Crops, calendar, fertiliser, weather and the assistant."
+msgstr "المحاصيل والتقويم والأسمدة والطقس والمساعد."
+
+msgid "Start drawing"
+msgstr "ابدأ الرسم"
+
+msgid "Add a farm"
+msgstr "أضف مزرعة"
+
+msgid "new border"
+msgstr "حدود جديدة"
+
+msgid "No crop yet"
+msgstr "لا يوجد محصول بعد"
+
+msgid "Irrigated"
+msgstr "مسقي"
+
+msgid "Soil: loading"
+msgstr "التربة: جارٍ التحميل"
+
+msgid "Soil: no data"
+msgstr "التربة: لا توجد بيانات"
+
+msgid "Climate"
+msgstr "المناخ"
+
+msgid "Today"
+msgstr "اليوم"
+
+msgid "Rain this week"
+msgstr "الأمطار هذا الأسبوع"
+
+msgid "rainy days"
+msgstr "أيام ممطرة"
+
+msgid "Drought outlook"
+msgstr "توقعات الجفاف"
+
+msgid "Next task"
+msgstr "المهمة التالية"
+
+msgid "Choose a crop"
+msgstr "اختر محصولًا"
+
+msgid "Low"
+msgstr "منخفض"
+
+msgid "Medium"
+msgstr "متوسط"
+
+msgid "High"
+msgstr "مرتفع"
+
+msgid "chance of drought next month"
+msgstr "احتمال الجفاف الشهر القادم"
+
+msgid "Recommendations for"
+msgstr "التوصيات لشهر"
+
+msgid "Best crops to plant this month"
+msgstr "أفضل المحاصيل للزراعة هذا الشهر"
+
+msgid ""
+"No well-suited crop can be sown this month. Look at the list below for the "
+"next sowing windows."
+msgstr ""
+"لا يوجد محصول مناسب للبذر هذا الشهر. اطّلع على القائمة أدناه لمعرفة فترات "
+"البذر القادمة."
+
+msgid "All crops for your land"
+msgstr "جميع المحاصيل لأرضك"
+
+msgid "Grow this"
+msgstr "ازرع هذا"
+
+msgid "Current crop"
+msgstr "المحصول الحالي"
+
+msgid "Excellent choice"
+msgstr "اختيار ممتاز"
+
+msgid "Good choice"
+msgstr "اختيار جيد"
+
+msgid "Possible, with care"
+msgstr "ممكن، مع الحذر"
+
+msgid "Not recommended"
+msgstr "غير موصى به"
+
+msgid "needs more water"
+msgstr "يحتاج إلى مزيد من الماء"
+
+msgid "climate not ideal"
+msgstr "المناخ غير مثالي"
+
+msgid "soil pH not ideal"
+msgstr "حموضة التربة غير مثالية"
+
+msgid "soil type not ideal"
+msgstr "نوع التربة غير مثالي"
+
+msgid "salty soil"
+msgstr "تربة مالحة"
+
+msgid "Sow in"
+msgstr "البذر في"
+
+msgid "Next sowing window"
+msgstr "فترة البذر القادمة"
+
+msgid "Tree / perennial — plant in"
+msgstr "شجرة / معمّر — الغرس في"
+
+msgid "Rain covers most of its water need"
+msgstr "يغطي المطر معظم احتياجه المائي"
+
+msgid "Irrigation"
+msgstr "الري"
+
+msgid "m³/ha per season"
+msgstr "م³/هكتار في الموسم"
+
+msgid "Expected harvest without irrigation"
+msgstr "المحصول المتوقع دون ري"
+
+msgid "Based on your soil, the climate of"
+msgstr "بناءً على تربتك ومناخ"
+
+msgid "This is guidance, not a guarantee."
+msgstr "هذه إرشادات وليست ضمانًا."
+
+msgid "Plan for"
+msgstr "خطة"
+
+msgid "— choose a crop —"
+msgstr "— اختر محصولًا —"
+
+msgid "Choose a crop to see its calendar, fertiliser and protection plan."
+msgstr "اختر محصولًا لعرض تقويمه وخطة تسميده وحمايته."
+
+msgid "Calendar — what to do and when"
+msgstr "التقويم — ماذا تفعل ومتى"
+
+msgid "NEXT"
+msgstr "التالي"
+
+msgid "Growth stage"
+msgstr "مرحلة النمو"
+
+msgid "Fertiliser"
+msgstr "السماد"
+
+msgid "Watch for pests"
+msgstr "مراقبة الآفات"
+
+msgid "kg per hectare per season"
+msgstr "كغ في الهكتار في الموسم"
+
+msgid "Pests, diseases and weeds"
+msgstr "الآفات والأمراض والأعشاب الضارة"
+
+msgid "Watch for"
+msgstr "راقب"
+
+msgid "Prevent"
+msgstr "الوقاية"
+
+msgid "Treat"
+msgstr "المعالجة"
+
+msgid "all year"
+msgstr "طوال السنة"
+
+msgid "Next 7 days"
+msgstr "الأيام السبعة القادمة"
+
+msgid "16-day forecast"
+msgstr "توقعات 16 يومًا"
+
+msgid "Field alerts"
+msgstr "تنبيهات الحقل"
+
+msgid "Wind"
+msgstr "الرياح"
+
+msgid "Rain"
+msgstr "المطر"
+
+msgid "Chance"
+msgstr "الاحتمال"
+
+msgid ""
+"Hello! I am your farm assistant. Ask me what to plant, when to irrigate, how"
+" the drought looks, or about your crop."
+msgstr ""
+"مرحبًا! أنا مساعدك الزراعي. اسألني ماذا تزرع، ومتى تسقي، وكيف هو وضع الجفاف،"
+" أو عن محصولك."
+
+msgid "Ask a question about your farm…"
+msgstr "اطرح سؤالًا عن مزرعتك…"
+
+msgid "Answers use live data for"
+msgstr "تعتمد الإجابات على البيانات الحية لـ"
+
+msgid "The assistant is unavailable right now."
+msgstr "المساعد غير متاح حاليًا."
+
+msgid "drought risk"
+msgstr "خطر الجفاف"
+
+msgid "New farm"
+msgstr "مزرعة جديدة"
+
+msgid "Edit farm"
+msgstr "تعديل المزرعة"
+
+msgid "Farm"
+msgstr "مزرعة"
+
+msgid "— none —"
+msgstr "— لا شيء —"
+
+msgid "Farm saved"
+msgstr "تم حفظ المزرعة"
+
+msgid "Farm deleted"
+msgstr "تم حذف المزرعة"
+
+msgid "Delete this farm and its data?"
+msgstr "هل تريد حذف هذه المزرعة وبياناتها؟"
+
+msgid "Border updated"
+msgstr "تم تحديث الحدود"
+
+msgid "Crop saved to your farm"
+msgstr "تم حفظ المحصول في مزرعتك"
+
+msgid "Soil data loaded for"
+msgstr "تم تحميل بيانات التربة لـ"
+
+msgid "Add at least three corners first."
+msgstr "أضف ثلاث زوايا على الأقل أولًا."
+
+msgid "Your position is not available."
+msgstr "موقعك غير متاح."
+
+msgid "Historical Observations"
+msgstr "الرصدات التاريخية"
+
+msgid "TEMPORAL INTELLIGENCE & OBSERVATION ARCHIVE"
+msgstr "الذكاء الزمني وأرشيف الرصدات"
+
+msgid "HISTORICAL"
+msgstr "التاريخية"
+
+msgid "OBSERVATIONS"
+msgstr "الرصدات"
+
+msgid ""
+"Query, compare, and analyze previous environmental observations across "
+"specific time intervals, biometric sensors, and satellite records."
+msgstr ""
+"استعلم عن الرصدات البيئية السابقة وقارنها وحلّلها عبر فترات زمنية محددة "
+"والمستشعرات وسجلات الأقمار الصناعية."
+
+msgid "Refresh Data"
+msgstr "تحديث البيانات"
+
+msgid "Refresh"
+msgstr "تحديث"
+
+msgid "Target Region / Basin"
+msgstr "المنطقة / الحوض المستهدف"
+
+msgid "Primary Database - 125k+ Records"
+msgstr "قاعدة البيانات الرئيسية - أكثر من 125 ألف سجل"
+
+msgid "Primary Database"
+msgstr "قاعدة البيانات الرئيسية"
+
+msgid "Metric Domain / Category"
+msgstr "مجال / فئة المؤشر"
+
+msgid "Observed Metric"
+msgstr "المؤشر المرصود"
+
+msgid "Temporal Interval"
+msgstr "الفترة الزمنية"
+
+msgid "ALL"
+msgstr "الكل"
+
+msgid "Custom"
+msgstr "مخصص"
+
+msgid "From:"
+msgstr "من:"
+
+msgid "To:"
+msgstr "إلى:"
+
+msgid "Apply Date Window"
+msgstr "تطبيق الفترة"
+
+msgid "Latest Observation"
+msgstr "آخر رصد"
+
+msgid "Interval Mean"
+msgstr "متوسط الفترة"
+
+msgid "Over -- observations"
+msgstr "على -- رصدة"
+
+msgid "Interval Max (Peak)"
+msgstr "أقصى قيمة في الفترة (الذروة)"
+
+msgid "Interval Min (Low)"
+msgstr "أدنى قيمة في الفترة"
+
+msgid "Interval Trend"
+msgstr "اتجاه الفترة"
+
+msgid "Calculating"
+msgstr "جارٍ الحساب"
+
+msgid "Temporal Metric Observations"
+msgstr "الرصدات الزمنية للمؤشر"
+
+msgid ""
+"Recorded observation points over the requested interval with baseline "
+"threshold and anomaly deviation."
+msgstr ""
+"نقاط الرصد المسجلة خلال الفترة المطلوبة مع عتبة المرجع وانحراف الشذوذ."
+
+msgid "Line"
+msgstr "خطي"
+
+msgid "Bar"
+msgstr "أعمدة"
+
+msgid "Export Series"
+msgstr "تصدير السلسلة"
+
+msgid "Loading observation series..."
+msgstr "جارٍ تحميل سلسلة الرصدات..."
+
+msgid "Observed Value"
+msgstr "القيمة المرصودة"
+
+msgid "Interval Baseline Mean"
+msgstr "المتوسط المرجعي للفترة"
+
+msgid "Data Frequency: Chronological observation records"
+msgstr "تواتر البيانات: سجلات رصد زمنية"
+
+msgid "PREVIOUS OBSERVATIONS LOG"
+msgstr "سجل الرصدات السابقة"
+
+msgid ""
+"Granular chronological list of recorded observations for this metric in the "
+"selected interval."
+msgstr "قائمة زمنية مفصلة بالرصدات المسجلة لهذا المؤشر في الفترة المختارة."
+
+msgid "Search date or station..."
+msgstr "ابحث عن تاريخ أو محطة..."
+
+msgid "All Statuses"
+msgstr "جميع الحالات"
+
+msgid "Normal"
+msgstr "عادي"
+
+msgid "Elevated / Surplus"
+msgstr "مرتفع / فائض"
+
+msgid "Deficit / Low"
+msgstr "عجز / منخفض"
+
+msgid "Excel"
+msgstr "Excel"
+
+msgid "Observation Date"
+msgstr "تاريخ الرصد"
+
+msgid "Station / Subregion"
+msgstr "المحطة / المنطقة الفرعية"
+
+msgid "Baseline Mean"
+msgstr "المتوسط المرجعي"
+
+msgid "Deviation (Anomaly)"
+msgstr "الانحراف (الشذوذ)"
+
+msgid "Condition Flag"
+msgstr "مؤشر الحالة"
+
+msgid "Loading previous observations..."
+msgstr "جارٍ تحميل الرصدات السابقة..."
+
+msgid "Showing 0 to 0 of 0 observations"
+msgstr "عرض 0 إلى 0 من 0 رصدة"
+
+msgid "Previous"
+msgstr "السابق"
+
+msgid "Next"
+msgstr "التالي"
+
+msgid "Data Provenance & Calculation Methodology"
+msgstr "مصدر البيانات ومنهجية الحساب"
+
+msgid ""
+"Historical records reflect combined field station telemetries, CHIRPS 0.05° "
+"satellite precipitation estimates, MODIS/Sentinel-2 vegetation products, and"
+" FAO-56 Penman-Monteith agro-hydrological models. Deviations are calculated "
+"against the empirical baseline mean for the active interval window."
+msgstr ""
+"تعكس السجلات التاريخية مزيجًا من قياسات المحطات الميدانية وتقديرات الأمطار "
+"بالأقمار الصناعية CHIRPS بدقة 0.05° ومنتجات الغطاء النباتي MODIS/Sentinel-2 "
+"ونماذج FAO-56 بنمان-مونتيث الزراعية الهيدرولوجية. تُحسب الانحرافات مقارنةً "
+"بالمتوسط المرجعي التجريبي للفترة النشطة."
+
+msgid "Export Observation Data"
+msgstr "تصدير بيانات الرصد"
+
+msgid "Observation Scope"
+msgstr "نطاق الرصد"
+
+msgid "Current Active Metric Series"
+msgstr "سلسلة المؤشر النشط الحالية"
+
+msgid "All Metrics Combined (Standard Audit)"
+msgstr "جميع المؤشرات مجتمعة (تدقيق قياسي)"
+
+msgid "Date From"
+msgstr "من تاريخ"
+
+msgid "Date To"
+msgstr "إلى تاريخ"
+
+msgid "Export to Excel"
+msgstr "تصدير إلى Excel"
+
+msgid "APWRS Environmental Intelligence System"
+msgstr "نظام APWRS للذكاء البيئي"
+
+msgid "Ichkeul & Medjerda Agricultural Observatories"
+msgstr "مراصد إشكل ومجردة الزراعية"
+
+msgid "Planting Calendar"
+msgstr "تقويم الزراعة"
+
+msgid "Predictions"
+msgstr "التوقعات"
+
+msgid "IoT Sensors"
+msgstr "مستشعرات إنترنت الأشياء"
+
+msgid ""
+"Drought monitoring, SPEI forecasting and planting-window recommendations for"
+" the Ichkeul basin and Tunisian agriculture."
+msgstr ""
+"رصد الجفاف وتوقعات SPEI وتوصيات مواعيد الزراعة لحوض إشكل والفلاحة التونسية."
+
+msgid "Sections"
+msgstr "الأقسام"
+
+msgid "Problem"
+msgstr "المشكلة"
+
+msgid "Concept"
+msgstr "الفكرة"
+
+msgid "Goals"
+msgstr "الأهداف"
+
+msgid "Study Basin"
+msgstr "حوض الدراسة"
+
+msgid "Sign in"
+msgstr "تسجيل الدخول"
+
+msgid "Drought intelligence · Tunisia"
+msgstr "ذكاء الجفاف · تونس"
+
+msgid "Plant at the right time, with the water you actually have."
+msgstr "ازرع في الوقت المناسب، بالماء المتوفر لديك فعلًا."
+
+msgid ""
+"APWRS combines satellite observation, ground sensors and drought forecasting"
+" to tell farmers and basin managers when to sow and how much water stress "
+"the season will bring."
+msgstr ""
+"يجمع APWRS بين الرصد بالأقمار الصناعية والمستشعرات الأرضية وتوقعات الجفاف "
+"ليخبر الفلاحين ومسيّري الأحواض متى يبذرون وما مقدار الإجهاد المائي الذي "
+"سيجلبه الموسم."
+
+msgid "Access the platform"
+msgstr "الدخول إلى المنصة"
+
+msgid "See how it works"
+msgstr "اكتشف طريقة العمل"
+
+msgid ""
+"Satellite map of the Ichkeul catchment with its boundary and grid sections"
+msgstr "خريطة بالقمر الصناعي لحوض إشكل مع حدوده وأقسام الشبكة"
+
+msgid "Pilot basin"
+msgstr "الحوض النموذجي"
+
+msgid "Ichkeul Catchment, Bizerte"
+msgstr "حوض إشكل، بنزرت"
+
+msgid "Catchment boundary"
+msgstr "حدود الحوض"
+
+msgid "29 ERA5-Land grid sections"
+msgstr "29 قسمًا من شبكة ERA5-Land"
+
+msgid "Imagery © Esri, Maxar"
+msgstr "الصور © Esri, Maxar"
+
+msgid "Climate record"
+msgstr "السجل المناخي"
+
+msgid "years"
+msgstr "سنة"
+
+msgid "Drought forecast"
+msgstr "توقعات الجفاف"
+
+msgid "months ahead"
+msgstr "أشهر مسبقًا"
+
+msgid "Staple crops"
+msgstr "المحاصيل الأساسية"
+
+msgid "Languages"
+msgstr "اللغات"
+
+msgid "The problem"
+msgstr "المشكلة"
+
+msgid "Drought arrives quietly. Planting decisions are made blind."
+msgstr "يأتي الجفاف بصمت، وتُتخذ قرارات الزراعة دون رؤية."
+
+msgid ""
+"Northern Tunisia's rain-fed agriculture depends on a short, irregular wet "
+"season. When sowing is timed on habit rather than evidence, a dry autumn or "
+"a hot spring can cost a whole harvest — and the Ichkeul wetland downstream "
+"pays for every litre over-drawn upstream."
+msgstr ""
+"تعتمد الفلاحة البعلية في شمال تونس على موسم مطري قصير وغير منتظم. وعندما "
+"يُحدَّد موعد البذر بالعادة لا بالأدلة، قد يكلّف خريف جاف أو ربيع حار صابة "
+"كاملة — وتدفع بحيرة إشكل الرطبة في المصب ثمن كل لتر يُسحب زيادةً في المنبع."
+
+msgid "Erratic rainfall"
+msgstr "أمطار متذبذبة"
+
+msgid ""
+"Rain arrives late, early or all at once. Calendar dates inherited from "
+"wetter decades no longer match the season farmers actually get."
+msgstr ""
+"تأتي الأمطار متأخرة أو مبكرة أو دفعة واحدة. لم تعد المواعيد الموروثة من عقود"
+" أكثر رطوبة تتوافق مع الموسم الذي يعيشه الفلاحون فعلًا."
+
+msgid "Rising water demand"
+msgstr "تزايد الطلب على الماء"
+
+msgid ""
+"Warmer temperatures raise evapotranspiration, so even a normal rainfall year"
+" can leave soils in deficit. Rainfall alone hides the real stress."
+msgstr ""
+"يرفع ارتفاع الحرارة التبخر-نتح، فحتى سنة ذات أمطار عادية قد تترك التربة في "
+"عجز. الأمطار وحدها تُخفي الإجهاد الحقيقي."
+
+msgid "Scattered data"
+msgstr "بيانات مشتتة"
+
+msgid ""
+"Satellite products, station records and field sensors live in separate "
+"systems and formats. Few people on the ground can combine them in time to "
+"act."
+msgstr ""
+"منتجات الأقمار الصناعية وسجلات المحطات والمستشعرات الحقلية موزعة على أنظمة "
+"وصيغ مختلفة، وقليلون في الميدان يستطيعون جمعها في الوقت المناسب للتصرف."
+
+msgid "Late warnings"
+msgstr "تحذيرات متأخرة"
+
+msgid ""
+"Drought is usually recognised once crops are already stressed. By then, the "
+"sowing date and the irrigation plan can no longer be changed."
+msgstr ""
+"عادةً لا يُكتشف الجفاف إلا بعد أن تتأثر المحاصيل، وعندها لا يعود ممكنًا "
+"تغيير موعد البذر وخطة الري."
+
+msgid "The concept"
+msgstr "الفكرة"
+
+msgid "One pipeline, from the satellite to the sowing date."
+msgstr "مسار واحد، من القمر الصناعي إلى موعد البذر."
+
+msgid ""
+"APWRS measures both sides of the water balance — what falls as rain and what"
+" the atmosphere takes back — then turns it into a drought index, a forecast "
+"and a concrete planting window for each crop."
+msgstr ""
+"يقيس APWRS طرفي الميزان المائي — ما يسقط مطرًا وما يسترجعه الغلاف الجوي — ثم"
+" يحوّله إلى مؤشر جفاف وتوقعات وموعد زراعة محدد لكل محصول."
+
+msgid "Step 1"
+msgstr "الخطوة 1"
+
+msgid "Observe"
+msgstr "الرصد"
+
+msgid ""
+"CHIRPS rainfall, ERA5 climate reanalysis, MODIS and Sentinel vegetation "
+"indices, ground stations and IoT soil-moisture probes."
+msgstr ""
+"أمطار CHIRPS، وإعادة التحليل المناخي ERA5، ومؤشرات الغطاء النباتي MODIS "
+"وSentinel، والمحطات الأرضية، ومجسات رطوبة التربة المتصلة."
+
+msgid "Step 2"
+msgstr "الخطوة 2"
+
+msgid ""
+"Reference evapotranspiration (FAO-56, Hargreaves) and the water balance P − "
+"ET₀, standardised into SPEI from 1 to 24 months."
+msgstr ""
+"التبخر-نتح المرجعي (FAO-56، هارغريفز) والميزان المائي P − ET₀، موحّدًا في "
+"مؤشر SPEI من 1 إلى 24 شهرًا."
+
+msgid "Step 3"
+msgstr "الخطوة 3"
+
+msgid "Forecast"
+msgstr "التوقع"
+
+msgid ""
+"Machine-learning SPEI forecasts one to six months ahead, with drought "
+"probabilities and a live record of forecast accuracy."
+msgstr ""
+"توقعات SPEI بالتعلم الآلي من شهر إلى ستة أشهر مسبقًا، مع احتمالات الجفاف "
+"وسجل حي لدقة التوقعات."
+
+msgid "Step 4"
+msgstr "الخطوة 4"
+
+msgid "Recommend"
+msgstr "التوصية"
+
+msgid ""
+"A 0–100 drought risk score and a planting calendar that matches sowing "
+"windows to crop, soil, irrigation and risk tolerance."
+msgstr ""
+"درجة خطر جفاف من 0 إلى 100 وتقويم زراعي يوائم فترات البذر مع المحصول والتربة"
+" والري ومدى تحمّل المخاطر."
+
+msgid "Drought Risk Score"
+msgstr "درجة خطر الجفاف"
+
+msgid ""
+"Every region is read on the same 0–100 scale, with a clear action attached "
+"to each band."
+msgstr "تُقرأ كل منطقة على نفس السلّم من 0 إلى 100، مع إجراء واضح لكل مستوى."
+
+msgid "Normal irrigation schedules."
+msgstr "جداول ري عادية."
+
+msgid "Moderate"
+msgstr "متوسط"
+
+msgid "Monitor soils, trim non-critical irrigation."
+msgstr "راقب التربة وقلّل الري غير الضروري."
+
+msgid "Deficit irrigation, protect sensitive crops."
+msgstr "ري ناقص وحماية المحاصيل الحساسة."
+
+msgid "Strict water rationing."
+msgstr "تقنين صارم للمياه."
+
+msgid "What the project sets out to achieve."
+msgstr "ما يسعى المشروع إلى تحقيقه."
+
+msgid ""
+"Built for farmers, agronomists, basin managers and decision-makers, with "
+"role-based access for each."
+msgstr ""
+"مصمم للفلاحين والمهندسين الزراعيين ومسيّري الأحواض وصنّاع القرار، مع صلاحيات"
+" وصول حسب دور كل منهم."
+
+msgid "Time sowing to the season"
+msgstr "مواءمة البذر مع الموسم"
+
+msgid ""
+"Replace fixed calendar dates with planting windows driven by current soil "
+"water and the coming months' outlook."
+msgstr ""
+"استبدال المواعيد الثابتة بفترات زراعة مبنية على ماء التربة الحالي وتوقعات "
+"الأشهر القادمة."
+
+msgid "Warn before the damage"
+msgstr "التحذير قبل الضرر"
+
+msgid ""
+"Flag developing drought months ahead, while irrigation plans and crop "
+"choices can still change."
+msgstr ""
+"الإنذار بالجفاف قبل أشهر، ما دام تغيير خطط الري واختيار المحاصيل ممكنًا."
+
+msgid "Use water more efficiently"
+msgstr "استعمال الماء بكفاءة أكبر"
+
+msgid ""
+"Match irrigation to real crop demand and protect the flows that sustain the "
+"Ichkeul wetland."
+msgstr ""
+"مواءمة الري مع الاحتياج الفعلي للمحصول وحماية التدفقات التي تحافظ على بحيرة "
+"إشكل الرطبة."
+
+msgid "Unify the evidence"
+msgstr "توحيد الأدلة"
+
+msgid ""
+"Bring satellite, reanalysis, station and sensor data into one validated, "
+"exportable record."
+msgstr ""
+"جمع بيانات الأقمار الصناعية وإعادة التحليل والمحطات والمستشعرات في سجل واحد "
+"موثّق وقابل للتصدير."
+
+msgid "Stay transparent"
+msgstr "الالتزام بالشفافية"
+
+msgid ""
+"Publish every formula and track forecast accuracy openly, so recommendations"
+" can be trusted and audited."
+msgstr ""
+"نشر كل المعادلات وتتبع دقة التوقعات علنًا، حتى تكون التوصيات موثوقة وقابلة "
+"للتدقيق."
+
+msgid "Reach people in their language"
+msgstr "مخاطبة الناس بلغتهم"
+
+msgid ""
+"An AgroAI assistant answers questions in English, French and Arabic, by text"
+" or voice."
+msgstr ""
+"مساعد AgroAI يجيب عن الأسئلة بالإنجليزية والفرنسية والعربية، كتابةً أو "
+"صوتًا."
+
+msgid "Study basin"
+msgstr "حوض الدراسة"
+
+msgid "Starting where the stakes are highest."
+msgstr "البداية حيث تكون الرهانات أعلى."
+
+msgid ""
+"The Ichkeul catchment drains farmland around Mateur and Bizerte into Lake "
+"Ichkeul, a UNESCO World Heritage wetland whose balance of fresh and salt "
+"water depends on what agriculture leaves in the rivers. The basin is divided"
+" into 29 grid sections so soil water, rain and temperature can be followed "
+"section by section."
+msgstr ""
+"يصرّف حوض إشكل مياه الأراضي الفلاحية حول ماطر وبنزرت نحو بحيرة إشكل، وهي "
+"منطقة رطبة مدرجة في التراث العالمي لليونسكو يعتمد توازن مياهها العذبة "
+"والمالحة على ما تتركه الفلاحة في الأودية. ينقسم الحوض إلى 29 قسمًا شبكيًا "
+"لمتابعة ماء التربة والأمطار والحرارة قسمًا بقسم."
+
+msgid ""
+"The platform also monitors other agricultural regions across Tunisia, "
+"including Medjerda, Siliana, Kairouan, Cap Bon, Zaghouan, Jendouba and Beja."
+msgstr ""
+"تراقب المنصة أيضًا مناطق فلاحية أخرى في تونس، منها مجردة وسليانة والقيروان "
+"والوطن القبلي وزغوان وجندوبة وباجة."
+
+msgid "Inside the platform"
+msgstr "داخل المنصة"
+
+msgid "Interactive drought map"
+msgstr "خريطة جفاف تفاعلية"
+
+msgid "Risk by region, with drawing and measuring tools."
+msgstr "المخاطر حسب المنطقة، مع أدوات الرسم والقياس."
+
+msgid "SPEI outlook"
+msgstr "توقعات SPEI"
+
+msgid "7-day weather and 12-month rain and temperature forecasts."
+msgstr "طقس 7 أيام وتوقعات الأمطار والحرارة لـ 12 شهرًا."
+
+msgid "Planting calendar"
+msgstr "تقويم الزراعة"
+
+msgid "Crop phenology and a smart sowing recommender."
+msgstr "فينولوجيا المحاصيل ومُوصٍ ذكي بمواعيد البذر."
+
+msgid "Sensor network"
+msgstr "شبكة المستشعرات"
+
+msgid "Multi-depth soil moisture and weather telemetry."
+msgstr "قياسات رطوبة التربة على أعماق متعددة والطقس عن بعد."
+
+msgid "Historical trends"
+msgstr "الاتجاهات التاريخية"
+
+msgid "30 years of climate baselines and drought chronology."
+msgstr "30 سنة من المراجع المناخية وتسلسل الجفاف."
+
+msgid "Read the season before it reads you."
+msgstr "اقرأ الموسم قبل أن يفاجئك."
+
+msgid ""
+"Sign in to see live drought risk, forecasts and planting windows for your "
+"region."
+msgstr ""
+"سجّل الدخول لمتابعة خطر الجفاف الحي والتوقعات ومواعيد الزراعة لمنطقتك."
+
+msgid "Sign in to APWRS"
+msgstr "تسجيل الدخول إلى APWRS"
+
+msgid "Data: CHIRPS · ERA5 · MODIS · Sentinel"
+msgstr "البيانات: CHIRPS · ERA5 · MODIS · Sentinel"
+
+msgid "Sign in — APWRS"
+msgstr "تسجيل الدخول — APWRS"
+
+msgid "29 grid sections"
+msgstr "29 قسمًا شبكيًا"
+
+msgid "Back to home"
+msgstr "العودة إلى الرئيسية"
+
+msgid "Platform access"
+msgstr "الدخول إلى المنصة"
+
+msgid "Use the account provided by your administrator."
+msgstr "استخدم الحساب الذي منحك إياه المسؤول."
+
+msgid "Show or hide password"
+msgstr "إظهار أو إخفاء كلمة المرور"
+
+msgid ""
+"Need an account or lost your password? Contact your platform administrator."
+msgstr "تحتاج إلى حساب أو نسيت كلمة المرور؟ اتصل بمسؤول المنصة."
+
+msgid "Ichkeul basin"
+msgstr "حوض إشكل"
+
+msgid "Sensor Network & Telemetry"
+msgstr "شبكة المستشعرات والقياس عن بعد"
+
+msgid "Sensor Network & Telemetry Infrastructure"
+msgstr "البنية التحتية لشبكة المستشعرات والقياس عن بعد"
+
+msgid "Uptime"
+msgstr "مدة التشغيل"
+
+msgid ""
+"Real-time geographical station mapping, multi-depth soil moisture probes, "
+"automated weather stations (AWS), and hydrology sensors."
+msgstr ""
+"خرائط جغرافية آنية للمحطات، ومجسات رطوبة التربة متعددة الأعماق، ومحطات الطقس"
+" الآلية (AWS)، ومستشعرات هيدرولوجية."
+
+msgid "Register New Station"
+msgstr "تسجيل محطة جديدة"
+
+msgid "View Telemetry Graphs"
+msgstr "عرض رسوم القياسات"
+
+msgid "Active Fleet"
+msgstr "الأسطول النشط"
+
+msgid "Online & Transmitting"
+msgstr "متصل ويرسل"
+
+msgid "Weather AWS"
+msgstr "محطات الطقس الآلية"
+
+msgid "Rain, Temp, Wind, Solar"
+msgstr "المطر، الحرارة، الرياح، الإشعاع الشمسي"
+
+msgid "Soil Probes"
+msgstr "مجسات التربة"
+
+msgid "10cm, 30cm, 60cm VWC"
+msgstr "الرطوبة الحجمية على 10 و30 و60 سم"
+
+msgid "Water Gauges"
+msgstr "مقاييس المياه"
+
+msgid "Lake Level & Inflow"
+msgstr "منسوب البحيرة والتدفق الداخل"
+
+msgid "Avg Battery"
+msgstr "متوسط البطارية"
+
+msgid "Solar Charged LiFePO4"
+msgstr "LiFePO4 مشحونة بالطاقة الشمسية"
+
+msgid "Geographical Sensor Locations & Coverage Map"
+msgstr "المواقع الجغرافية للمستشعرات وخريطة التغطية"
+
+msgid ""
+"Click any station marker to view coverage radius, live telemetry snapshot, "
+"and coordinates."
+msgstr "انقر على أي محطة لعرض نطاق التغطية ولمحة القياسات الحية والإحداثيات."
+
+msgid "Filter"
+msgstr "تصفية"
+
+msgid "All"
+msgstr "الكل"
+
+msgid "AWS"
+msgstr "AWS"
+
+msgid "Soil"
+msgstr "التربة"
+
+msgid "Tower"
+msgstr "برج"
+
+msgid "Map"
+msgstr "خريطة"
+
+msgid "Satellite"
+msgstr "قمر صناعي"
+
+msgid "Sensor Types & Radii"
+msgstr "أنواع المستشعرات ونطاقاتها"
+
+msgid "Weather AWS (15-20 km)"
+msgstr "محطات الطقس الآلية (15-20 كم)"
+
+msgid "Soil Moisture Array (8-10 km)"
+msgstr "شبكة رطوبة التربة (8-10 كم)"
+
+msgid "Hydrology Level Station (12-14 km)"
+msgstr "محطة المنسوب الهيدرولوجي (12-14 كم)"
+
+msgid "Ground Truth Flux Tower (25 km)"
+msgstr "برج قياس التدفقات المرجعي (25 كم)"
+
+msgid "Types of Sensors & Station Inventory"
+msgstr "أنواع المستشعرات وجرد المحطات"
+
+msgid ""
+"Comprehensive registry of installed agro-climatic stations with live "
+"wireless signal, battery state, and metrics provided."
+msgstr ""
+"سجل شامل للمحطات الزراعية المناخية المركّبة مع قوة الإشارة اللاسلكية الحية "
+"وحالة البطارية والمؤشرات المقدمة."
+
+msgid "Total Stations"
+msgstr "إجمالي المحطات"
+
+msgid "Telemetry Provided"
+msgstr "القياسات المقدمة"
+
+msgid "Locate on Map"
+msgstr "تحديد على الخريطة"
+
+msgid "View Graphs"
+msgstr "عرض الرسوم"
+
+msgid "Live Telemetry Graphs & Data Streams"
+msgstr "رسوم القياسات الحية وتدفقات البيانات"
+
+msgid "Displaying real-time sensor streams for"
+msgstr "عرض التدفقات الآنية للمستشعرات لـ"
+
+msgid "All Sensors (Fleet Aggregate)"
+msgstr "جميع المستشعرات (مجموع الأسطول)"
+
+msgid "Refresh Live Stream"
+msgstr "تحديث البث الحي"
+
+msgid "Register New Station Node"
+msgstr "تسجيل عقدة محطة جديدة"
+
+msgid "Station Name & Identifier"
+msgstr "اسم المحطة ومعرّفها"
+
+msgid "Sensor Type"
+msgstr "نوع المستشعر"
+
+msgid "Coverage Radius (km)"
+msgstr "نطاق التغطية (كم)"
+
+msgid "Latitude"
+msgstr "خط العرض"
+
+msgid "Longitude"
+msgstr "خط الطول"
+
+msgid "Hardware Description & Sensor Model"
+msgstr "وصف الجهاز وطراز المستشعر"
+
+msgid "Register Station"
+msgstr "تسجيل المحطة"
+
+msgid "Predictive Forecasts & SPEI Drought Outlook"
+msgstr "التوقعات التنبؤية وآفاق الجفاف SPEI"
+
+msgid "Prediction & Climate Forecasting Engine"
+msgstr "محرك التنبؤ والتوقعات المناخية"
+
+msgid ""
+"A live 16-day temperature and rainfall forecast from Open-Meteo, alongside "
+"multi-horizon SPEI-3 drought risk. Short-range weather comes from a real "
+"forecast API; monthly drought outlooks are verified against ground truth as "
+"observations arrive."
+msgstr ""
+"توقعات حية للحرارة والأمطار لمدة 16 يومًا من Open-Meteo، إلى جانب خطر الجفاف"
+" SPEI-3 على عدة آفاق. يأتي الطقس القصير المدى من واجهة توقعات حقيقية؛ "
+"وتُتحقق توقعات الجفاف الشهرية مقارنةً بالواقع عند وصول الرصدات."
+
+msgid "Detailed Analysis"
+msgstr "تحليل مفصل"
+
+msgid "Live data feed is"
+msgstr "تدفق البيانات الحية متأخر بـ"
+
+msgid ""
+"months behind. The outlook below reflects the latest available observations,"
+" not today."
+msgstr "أشهر. تعكس التوقعات أدناه آخر الرصدات المتاحة، وليس اليوم."
+
+msgid "Live Weather & Immediate Risk Outlook"
+msgstr "الطقس الحي وآفاق المخاطر الفورية"
+
+msgid "Live API"
+msgstr "واجهة حية"
+
+msgid "No regions with coordinates"
+msgstr "لا توجد مناطق بإحداثيات"
+
+msgid "Total Rain (7d)"
+msgstr "مجموع الأمطار (7 أيام)"
+
+msgid "Peak Temp (7d)"
+msgstr "ذروة الحرارة (7 أيام)"
+
+msgid "Avg Temp (7d)"
+msgstr "متوسط الحرارة (7 أيام)"
+
+msgid "Avg Humidity (7d)"
+msgstr "متوسط الرطوبة (7 أيام)"
+
+msgid "Loading live forecast…"
+msgstr "جارٍ تحميل التوقعات الحية…"
+
+msgid "16-Day Rain Forecast"
+msgstr "توقعات الأمطار لـ 16 يومًا"
+
+msgid "Forecast Rain"
+msgstr "الأمطار المتوقعة"
+
+msgid "Rain Probability"
+msgstr "احتمال المطر"
+
+msgid "10-yr Daily Normal"
+msgstr "المعدل اليومي لـ 10 سنوات"
+
+msgid "Date"
+msgstr "التاريخ"
+
+msgid "Rain (mm)"
+msgstr "المطر (مم)"
+
+msgid "Normal (mm)"
+msgstr "المعدل (مم)"
+
+msgid "Anomaly"
+msgstr "الشذوذ"
+
+msgid "Status"
+msgstr "الحالة"
+
+msgid ""
+"The 10-year normal is computed from this region's own observed climate "
+"records. Forecasts cover the 16-day model horizon; longer horizons are not "
+"shown because a weather model cannot support them."
+msgstr ""
+"يُحسب المعدل العشري من السجلات المناخية المرصودة لهذه المنطقة. تغطي التوقعات"
+" أفق النموذج البالغ 16 يومًا؛ ولا تُعرض الآفاق الأطول لأن نموذج الطقس لا "
+"يدعمها."
+
+msgid "16-Day Temperature Forecast & Thermal Stress"
+msgstr "توقعات الحرارة لـ 16 يومًا والإجهاد الحراري"
+
+msgid "Max Temperature"
+msgstr "الحرارة القصوى"
+
+msgid "Avg Temperature"
+msgstr "متوسط الحرارة"
+
+msgid "Min Temperature"
+msgstr "الحرارة الدنيا"
+
+msgid "Historical Avg"
+msgstr "المتوسط التاريخي"
+
+msgid "Daily Heat Intensity Map"
+msgstr "خريطة شدة الحرارة اليومية"
+
+msgid "Cool"
+msgstr "معتدل البرودة"
+
+msgid "Warm"
+msgstr "دافئ"
+
+msgid "Hot"
+msgstr "حار"
+
+msgid "Current Outlook — Next Month (T+1 Drought Risk)"
+msgstr "التوقعات الحالية — الشهر القادم (خطر الجفاف T+1)"
+
+msgid "WARNING"
+msgstr "تحذير"
+
+msgid "NORMAL"
+msgstr "عادي"
+
+msgid "Target"
+msgstr "الهدف"
+
+msgid "Drought Probability"
+msgstr "احتمال الجفاف"
+
+msgid "Key Predictive Drivers"
+msgstr "أهم العوامل التنبؤية"
+
+msgid ""
+"No forecasts calculated yet. Run the prediction engine or import latest "
+"satellite metrics."
+msgstr ""
+"لم تُحسب أي توقعات بعد. شغّل محرك التنبؤ أو استورد أحدث مؤشرات الأقمار "
+"الصناعية."
+
+msgid "Live Reliability Scoreboard & Verifications"
+msgstr "لوحة الموثوقية الحية والتحققات"
+
+msgid ""
+"Every monthly prediction is tracked and scored against ground reality as "
+"observations arrive."
+msgstr ""
+"يُتابَع كل توقع شهري ويُقيَّم مقارنةً بالواقع الميداني عند وصول الرصدات."
+
+msgid "Recall (Droughts Caught)"
+msgstr "الاستدعاء (حالات الجفاف المكتشفة)"
+
+msgid "Exact Category Match"
+msgstr "تطابق الفئة تمامًا"
+
+msgid "Target Month"
+msgstr "الشهر المستهدف"
+
+msgid "Predicted SPEI"
+msgstr "SPEI المتوقع"
+
+msgid "Observed SPEI"
+msgstr "SPEI المرصود"
+
+msgid "Alert Flag"
+msgstr "مؤشر التنبيه"
+
+msgid "Actual Drought"
+msgstr "الجفاف الفعلي"
+
+msgid "Verification"
+msgstr "التحقق"
+
+msgid "Correct warning flag"
+msgstr "تحذير صحيح"
+
+msgid "Missed or false alarm"
+msgstr "تحذير فائت أو إنذار كاذب"
+
+msgid "User Management — APWRS"
+msgstr "إدارة المستخدمين — APWRS"
+
+msgid "User \"{}\" created successfully!"
+msgstr "تم إنشاء المستخدم «{}» بنجاح!"
+
+msgid "You cannot remove your own superadmin role."
+msgstr "لا يمكنك إزالة دور المسؤول الرئيسي الخاص بك."
+
+msgid ""
+"This account is a Django superuser and always keeps the superadmin role."
+msgstr "هذا الحساب مستخدم Django رئيسي ويحتفظ دائمًا بدور المسؤول الرئيسي."
+
+msgid "User profile updated!"
+msgstr "تم تحديث ملف المستخدم!"
+
+msgid "You cannot delete your own account."
+msgstr "لا يمكنك حذف حسابك الخاص."
+
+msgid "User deleted successfully."
+msgstr "تم حذف المستخدم بنجاح."
+
+msgid "You do not have permission to submit risk assessments."
+msgstr "ليست لديك صلاحية إرسال تقييمات المخاطر."
+
+msgid "Demo Risk Level"
+msgstr "مستوى خطر تجريبي"
+
+msgid ""
+"This is a demo risk banner shown when no risk assessment has been performed."
+msgstr "هذا شريط خطر تجريبي يظهر عند عدم إجراء أي تقييم للمخاطر."
+
+msgid "Climate & Weather"
+msgstr "المناخ والطقس"
+
+msgid "Precipitation / Rainfall"
+msgstr "التساقطات / الأمطار"
+
+msgid ""
+"Cumulative precipitation measured via regional rain gauges and CHIRPS "
+"satellite estimates."
+msgstr ""
+"التساقطات التراكمية المقاسة بمقاييس الأمطار الإقليمية وتقديرات CHIRPS "
+"بالأقمار الصناعية."
+
+msgid "Mean Temperature"
+msgstr "متوسط الحرارة"
+
+msgid "Average 24-hour air temperature at 2-meter observation height."
+msgstr "متوسط حرارة الهواء خلال 24 ساعة على ارتفاع رصد مترين."
+
+msgid "Maximum recorded daily temperature peak."
+msgstr "أعلى ذروة حرارة يومية مسجلة."
+
+msgid "Minimum recorded overnight temperature trough."
+msgstr "أدنى حرارة ليلية مسجلة."
+
+msgid "Relative Humidity"
+msgstr "الرطوبة النسبية"
+
+msgid "Relative atmospheric humidity percentage."
+msgstr "نسبة الرطوبة الجوية النسبية."
+
+msgid "Wind Speed"
+msgstr "سرعة الرياح"
+
+msgid "Anemometer wind velocity measured at 2m height."
+msgstr "سرعة الرياح المقاسة بمقياس الرياح على ارتفاع مترين."
+
+msgid "Solar Radiation"
+msgstr "الإشعاع الشمسي"
+
+msgid "Daily global solar insolation energy."
+msgstr "طاقة الإشعاع الشمسي الكلي اليومي."
+
+msgid "Reference Evapotranspiration (ET₀)"
+msgstr "التبخر-نتح المرجعي (ET₀)"
+
+msgid "FAO-56 Penman-Monteith grass reference evapotranspiration."
+msgstr "التبخر-نتح المرجعي للعشب وفق FAO-56 بنمان-مونتيث."
+
+msgid "Soil & Moisture"
+msgstr "التربة والرطوبة"
+
+msgid "Volumetric Soil Moisture"
+msgstr "الرطوبة الحجمية للتربة"
+
+msgid "Soil water content across effective root zone."
+msgstr "محتوى التربة من الماء في منطقة الجذور الفعالة."
+
+msgid "Soil acidity / alkalinity chemical indicator."
+msgstr "مؤشر كيميائي لحموضة / قلوية التربة."
+
+msgid "Electrical Conductivity / Salinity (ECe)"
+msgstr "الناقلية الكهربائية / الملوحة (ECe)"
+
+msgid "Saturated paste electrical conductivity measuring soil salinity."
+msgstr "الناقلية الكهربائية لمستخلص العجينة المشبعة لقياس ملوحة التربة."
+
+msgid "Organic Matter"
+msgstr "المادة العضوية"
+
+msgid "Soil organic matter content percentage."
+msgstr "نسبة المادة العضوية في التربة."
+
+msgid "Infiltration Rate"
+msgstr "معدل التسرب"
+
+msgid "Rate of water percolation into the soil profile."
+msgstr "معدل تسرب الماء داخل مقطع التربة."
+
+msgid "Field Capacity"
+msgstr "السعة الحقلية"
+
+msgid "Maximum water retention capacity against gravity."
+msgstr "أقصى قدرة على الاحتفاظ بالماء ضد الجاذبية."
+
+msgid "Drought Indices"
+msgstr "مؤشرات الجفاف"
+
+msgid "SPEI (3-Month Drought Index)"
+msgstr "SPEI (مؤشر جفاف 3 أشهر)"
+
+msgid "Standardized Precipitation-Evapotranspiration Index over 3 months."
+msgstr "مؤشر التساقطات-التبخر نتح المعياري على 3 أشهر."
+
+msgid "SPEI (1-Month Flash Drought Index)"
+msgstr "SPEI (مؤشر الجفاف المفاجئ لشهر واحد)"
+
+msgid "Short-term monthly water balance standardized deviation."
+msgstr "الانحراف المعياري للميزان المائي الشهري قصير المدى."
+
+msgid "SPEI (12-Month Hydrological Drought)"
+msgstr "SPEI (الجفاف الهيدرولوجي لـ 12 شهرًا)"
+
+msgid "Long-term annual standardized precipitation-evapotranspiration index."
+msgstr "مؤشر التساقطات-التبخر نتح المعياري السنوي طويل المدى."
+
+msgid "SPI (3-Month Precipitation Index)"
+msgstr "SPI (مؤشر التساقطات لـ 3 أشهر)"
+
+msgid "Standardized Precipitation Index indicating rainfall deficit."
+msgstr "مؤشر التساقطات المعياري الدال على عجز الأمطار."
+
+msgid "SPI (1-Month Precipitation)"
+msgstr "SPI (تساقطات شهر واحد)"
+
+msgid ""
+"Monthly precipitation anomaly relative to long-term gamma distribution."
+msgstr "شذوذ التساقطات الشهرية مقارنةً بتوزيع غاما طويل المدى."
+
+msgid "Palmer Drought Severity Index (PDSI)"
+msgstr "مؤشر بالمر لشدة الجفاف (PDSI)"
+
+msgid "Meteorological drought index based on water supply and demand balance."
+msgstr "مؤشر جفاف جوي قائم على التوازن بين عرض الماء والطلب عليه."
+
+msgid "Remote Sensing & Satellite"
+msgstr "الاستشعار عن بعد والأقمار الصناعية"
+
+msgid "NDVI (Normalized Difference Vegetation Index)"
+msgstr "NDVI (مؤشر الغطاء النباتي المعياري)"
+
+msgid ""
+"Sentinel-2 & Landsat derived photosynthetic vigor and canopy greenness."
+msgstr "النشاط الضوئي واخضرار الغطاء المستمد من Sentinel-2 وLandsat."
+
+msgid "NDWI (Normalized Difference Water Index)"
+msgstr "NDWI (مؤشر الماء المعياري)"
+
+msgid "Vegetation canopy liquid water content and surface water presence."
+msgstr "محتوى الغطاء النباتي من الماء ووجود المياه السطحية."
+
+msgid "Land Surface Temperature (LST)"
+msgstr "حرارة سطح الأرض (LST)"
+
+msgid "Radiometric thermal skin temperature from MODIS/Landsat sensors."
+msgstr "حرارة السطح الإشعاعية من مستشعرات MODIS/Landsat."
+
+msgid "Satellite Surface Soil Moisture"
+msgstr "رطوبة سطح التربة بالأقمار الصناعية"
+
+msgid ""
+"Top 5cm soil moisture derived from SMAP / Sentinel-1 radar backscatter."
+msgstr ""
+"رطوبة الطبقة العليا (5 سم) من التربة المستمدة من رادار SMAP / Sentinel-1."
+
+msgid "VCI (Vegetation Condition Index)"
+msgstr "VCI (مؤشر حالة الغطاء النباتي)"
+
+msgid "Relative vegetation health compared to historical minimum and maximum."
+msgstr "صحة الغطاء النباتي النسبية مقارنةً بالحد الأدنى والأقصى التاريخيين."
+
+msgid "Hydrology & Water Balance"
+msgstr "الهيدرولوجيا والميزان المائي"
+
+msgid "Hydrological Precipitation"
+msgstr "التساقطات الهيدرولوجية"
+
+msgid "Catchment basin precipitation input."
+msgstr "مدخلات التساقطات في الحوض."
+
+msgid "Basin Evapotranspiration"
+msgstr "التبخر-نتح في الحوض"
+
+msgid "Estimated catchment water loss to atmosphere."
+msgstr "فقدان الماء المقدّر من الحوض نحو الغلاف الجوي."
+
+msgid "Water Balance (Supply vs Demand)"
+msgstr "الميزان المائي (العرض مقابل الطلب)"
+
+msgid "Catchment water balance surplus or deficit percentage."
+msgstr "نسبة فائض أو عجز الميزان المائي للحوض."
+
+msgid "Groundwater Depth"
+msgstr "عمق المياه الجوفية"
+
+msgid "Piezometric water table depth below surface level."
+msgstr "عمق المائدة المائية البيزومترية تحت سطح الأرض."
+
+msgid "River Flow Rate"
+msgstr "صبيب الوادي"
+
+msgid "Gauging station discharge flow rate."
+msgstr "صبيب التصريف في محطة القياس."
+
+msgid "Surface Runoff"
+msgstr "الجريان السطحي"
+
+msgid "Overland storm and irrigation runoff depth."
+msgstr "عمق الجريان السطحي الناتج عن العواصف والري."
+
+msgid "Agricultural & Crop Health"
+msgstr "الفلاحة وصحة المحاصيل"
+
+msgid "Crop Water Requirement (CWR)"
+msgstr "الاحتياج المائي للمحصول (CWR)"
+
+msgid "Daily evapotranspiration demand of cultivated crops."
+msgstr "الطلب اليومي على التبخر-نتح للمحاصيل المزروعة."
+
+msgid "Crop Coefficient (Kc)"
+msgstr "معامل المحصول (Kc)"
+
+msgid "Stage-dependent crop water consumption coefficient."
+msgstr "معامل استهلاك المحصول للماء حسب مرحلة النمو."
+
+msgid "Water Stress Yield Impact Factor"
+msgstr "عامل تأثير الإجهاد المائي على المردود"
+
+msgid "Fractional expected yield loss attributed to water stress."
+msgstr "نسبة خسارة المردود المتوقعة بسبب الإجهاد المائي."
+
+msgid "Irrigation Water Applied"
+msgstr "ماء الري المستعمل"
+
+msgid "Artificial irrigation depth delivered to the parcel."
+msgstr "عمق الري الاصطناعي المقدّم للقطعة."
+
+msgid "Canopy Leaf Temperature"
+msgstr "حرارة أوراق الغطاء النباتي"
+
+msgid "Infrared sensor temperature indicating crop transpiration stress."
+msgstr "حرارة المستشعر تحت الأحمر الدالة على إجهاد النتح لدى المحصول."
+
+msgid "Elevated Surplus"
+msgstr "فائض مرتفع"
+
+msgid "Elevated"
+msgstr "مرتفع"
+
+msgid "Deficit"
+msgstr "عجز"
+
+msgid "Optimal Normal"
+msgstr "عادي مثالي"
+
+msgid "Historical Comparison & Time-Series Observations"
+msgstr "المقارنة التاريخية ورصدات السلاسل الزمنية"
+
+msgid "Unknown metric type."
+msgstr "نوع مؤشر غير معروف."
+
+msgid "%s updated successfully!"
+msgstr "تم تحديث %s بنجاح!"
+
+msgid "%s deleted successfully!"
+msgstr "تم حذف %s بنجاح!"
+
+msgid "No region assigned to your account."
+msgstr "لا توجد منطقة مخصصة لحسابك."
+
+msgid "All %s deleted successfully!"
+msgstr "تم حذف كل %s بنجاح!"
+
+msgid "All metric data deleted successfully!"
+msgstr "تم حذف جميع بيانات المؤشرات بنجاح!"
+
+msgid "All data for your region deleted successfully!"
+msgstr "تم حذف جميع بيانات منطقتك بنجاح!"
+
+msgid "You can only add data for your assigned region."
+msgstr "يمكنك إضافة بيانات لمنطقتك المخصصة فقط."
+
+msgid "Soil metrics added successfully!"
+msgstr "تمت إضافة مؤشرات التربة بنجاح!"
+
+msgid "Climate metrics added successfully!"
+msgstr "تمت إضافة المؤشرات المناخية بنجاح!"
+
+msgid "Drought indices added successfully!"
+msgstr "تمت إضافة مؤشرات الجفاف بنجاح!"
+
+msgid "Agricultural metrics added successfully!"
+msgstr "تمت إضافة المؤشرات الزراعية بنجاح!"
+
+msgid "Remote sensing metrics added successfully!"
+msgstr "تمت إضافة مؤشرات الاستشعار عن بعد بنجاح!"
+
+msgid "Hydrology metrics added successfully!"
+msgstr "تمت إضافة المؤشرات الهيدرولوجية بنجاح!"
+
+msgid "Invalid username or password."
+msgstr "اسم المستخدم أو كلمة المرور غير صحيحة."
+
+msgid "You have been logged out."
+msgstr "تم تسجيل خروجك."
+
+msgid "Viewers cannot submit data."
+msgstr "لا يمكن للمشاهدين إرسال البيانات."
+
+msgid "You can only submit data for your assigned region."
+msgstr "يمكنك إرسال بيانات لمنطقتك المخصصة فقط."
+
+msgid "Data submitted successfully"
+msgstr "تم إرسال البيانات بنجاح"
+
+msgid "Viewers cannot import data."
+msgstr "لا يمكن للمشاهدين استيراد البيانات."
+
+msgid "Soil Moisture"
+msgstr "رطوبة التربة"
+
+msgid "Sand Ratio"
+msgstr "نسبة الرمل"
+
+msgid "Clay Ratio"
+msgstr "نسبة الطين"
+
+msgid "Silt Ratio"
+msgstr "نسبة الطمي"
+
+msgid "Root Zone Depth"
+msgstr "عمق منطقة الجذور"
+
+msgid "Wilting Point"
+msgstr "نقطة الذبول"
+
+msgid "Salinity"
+msgstr "الملوحة"
+
+msgid "pH Level"
+msgstr "مستوى الحموضة (pH)"
+
+msgid "Rainfall"
+msgstr "الأمطار"
+
+msgid "Reference ET (ET0)"
+msgstr "التبخر-نتح المرجعي (ET0)"
+
+msgid "Crop ET (ETc)"
+msgstr "التبخر-نتح للمحصول (ETc)"
+
+msgid "SPI 1-Month"
+msgstr "SPI شهر واحد"
+
+msgid "Drought"
+msgstr "الجفاف"
+
+msgid "SPI 3-Month"
+msgstr "SPI 3 أشهر"
+
+msgid "SPI 12-Month"
+msgstr "SPI 12 شهرًا"
+
+msgid "SPEI 1-Month"
+msgstr "SPEI شهر واحد"
+
+msgid "SPEI 3-Month"
+msgstr "SPEI 3 أشهر"
+
+msgid "SPEI 12-Month"
+msgstr "SPEI 12 شهرًا"
+
+msgid "PDSI"
+msgstr "PDSI"
+
+msgid "Growth Stage"
+msgstr "مرحلة النمو"
+
+msgid "Agriculture"
+msgstr "الفلاحة"
+
+msgid "Water Requirement"
+msgstr "الاحتياج المائي"
+
+msgid "Yield Reduction Factor"
+msgstr "عامل انخفاض المردود"
+
+msgid "Irrigation Efficiency"
+msgstr "كفاءة الري"
+
+msgid "Water Applied"
+msgstr "الماء المستعمل"
+
+msgid "Leaf Temperature"
+msgstr "حرارة الورقة"
+
+msgid "Stomatal Conductance"
+msgstr "الناقلية الثغرية"
+
+msgid "NDVI"
+msgstr "NDVI"
+
+msgid "Remote Sensing"
+msgstr "الاستشعار عن بعد"
+
+msgid "NDWI"
+msgstr "NDWI"
+
+msgid "Land Surface Temperature"
+msgstr "حرارة سطح الأرض"
+
+msgid "Soil Moisture (Satellite)"
+msgstr "رطوبة التربة (قمر صناعي)"
+
+msgid "Vegetation Condition Index"
+msgstr "مؤشر حالة الغطاء النباتي"
+
+msgid "ET (SEBAL)"
+msgstr "التبخر-نتح (SEBAL)"
+
+msgid "Hydrology"
+msgstr "الهيدرولوجيا"
+
+msgid "Evapotranspiration"
+msgstr "التبخر-نتح"
+
+msgid "Runoff"
+msgstr "الجريان"
+
+msgid "River Flow"
+msgstr "صبيب الوادي"
+
+msgid "Reservoir Storage"
+msgstr "مخزون السد"
+
+msgid "Irrigation Supply"
+msgstr "إمدادات الري"
+
+msgid "Soil Water Deficit"
+msgstr "عجز ماء التربة"
+
+msgid "Water Balance"
+msgstr "الميزان المائي"
+
+msgid "You do not have permission to access the admin panel."
+msgstr "ليست لديك صلاحية الدخول إلى لوحة الإدارة."
+
+msgid "You do not have permission to modify data."
+msgstr "ليست لديك صلاحية تعديل البيانات."
+
+msgid "Latitude and longitude are required."
+msgstr "خط العرض وخط الطول مطلوبان."
+
+msgid "Invalid latitude or longitude values."
+msgstr "قيم خط العرض أو خط الطول غير صالحة."
+
+msgid "Latitude must be between -90 and 90, longitude between -180 and 180."
+msgstr "يجب أن يكون خط العرض بين -90 و90، وخط الطول بين -180 و180."
+
+msgid ""
+"Coordinates are {:.0f} km from the center of {}, which exceeds the {:.0f} km"
+" limit."
+msgstr ""
+"تبعد الإحداثيات {:.0f} كم عن مركز {}، وهو ما يتجاوز الحد المسموح {:.0f} كم."
+
+msgid "Unknown"
+msgstr "غير معروف"
+
+msgid "No region was selected, so no drought assessment can be made."
+msgstr "لم يتم اختيار أي منطقة، لذا لا يمكن تقييم الجفاف."
+
+msgid ""
+"No SPEI-3 reading exists for this region, so the drought risk cannot be "
+"determined. Run the drought-index import before assessing risk."
+msgstr ""
+"لا توجد قراءة SPEI-3 لهذه المنطقة، لذا لا يمكن تحديد خطر الجفاف. شغّل "
+"استيراد مؤشر الجفاف قبل تقييم الخطر."
+
+msgid "Unknown (stale data)"
+msgstr "غير معروف (بيانات قديمة)"
+
+msgid ""
+"No current assessment is possible: the newest SPEI-3 reading for this region"
+" is %(months)s months old (%(date)s). Re-run the drought-index import before"
+" acting on this result. For reference only, that reading was %(level)s "
+"(SPEI-3 %(spei)s)."
+msgstr ""
+"لا يمكن إجراء تقييم حالي: عمر أحدث قراءة SPEI-3 لهذه المنطقة %(months)s أشهر"
+" (%(date)s). أعد تشغيل استيراد مؤشر الجفاف قبل الاعتماد على هذه النتيجة. "
+"للعلم فقط، كانت تلك القراءة %(level)s (SPEI-3 %(spei)s)."
+
+msgid ""
+"SPEI-3 is %(spei)s as of %(date)s: no drought stress indicated. Keep the "
+"current irrigation schedule and monitor weekly."
+msgstr ""
+"قيمة SPEI-3 هي %(spei)s بتاريخ %(date)s: لا يوجد إجهاد جفاف. حافظ على جدول "
+"الري الحالي وتابع أسبوعيًا."
+
+msgid ""
+"Near-normal: SPEI-3 is %(spei)s as of %(date)s. Keep normal monitoring and "
+"avoid unnecessary irrigation."
+msgstr ""
+"قريب من العادي: قيمة SPEI-3 هي %(spei)s بتاريخ %(date)s. حافظ على المتابعة "
+"العادية وتجنّب الري غير الضروري."
+
+msgid ""
+"Moderate drought: SPEI-3 is %(spei)s as of %(date)s. Shorten the irrigation "
+"interval slightly and prioritise the most sensitive growth stage."
+msgstr ""
+"جفاف متوسط: قيمة SPEI-3 هي %(spei)s بتاريخ %(date)s. قصّر الفاصل بين الريات "
+"قليلًا وأعطِ الأولوية لأكثر مراحل النمو حساسية."
+
+msgid ""
+"Severe drought: SPEI-3 is %(spei)s as of %(date)s. Increase irrigation "
+"frequency, concentrate limited water on the most sensitive growth stage, and"
+" postpone any non-essential sowing."
+msgstr ""
+"جفاف شديد: قيمة SPEI-3 هي %(spei)s بتاريخ %(date)s. زِد عدد الريات، وركّز "
+"الماء المحدود على أكثر مراحل النمو حساسية، وأجّل كل بذر غير ضروري."
+
+msgid ""
+"Extreme drought: SPEI-3 is %(spei)s as of %(date)s. Water availability is "
+"the binding constraint. Prioritise the most sensitive crop areas, and "
+"consider deferring water-demanding crops until conditions improve."
+msgstr ""
+"جفاف قصوى: قيمة SPEI-3 هي %(spei)s بتاريخ %(date)s. توفر الماء هو القيد "
+"الحاسم. أعطِ الأولوية لمساحات المحاصيل الأكثر حساسية، وفكّر في تأجيل "
+"المحاصيل المستهلكة للماء حتى تتحسن الظروف."
+
+msgid "SPEI-3 is %(spei)s (%(level)s) as of %(date)s."
+msgstr "قيمة SPEI-3 هي %(spei)s (%(level)s) بتاريخ %(date)s."
+
+msgid ""
+"Note: gravity-fed irrigation loses a large share of applied water, so the "
+"crop is less buffered than the regional index alone suggests."
+msgstr ""
+"ملاحظة: الري بالجاذبية يُضيّع جزءًا كبيرًا من الماء المستعمل، لذا يكون "
+"المحصول أقل حماية مما يوحي به المؤشر الإقليمي وحده."
+
+msgid ""
+"Note: drip irrigation delivers water efficiently, which partially buffers "
+"this deficit."
+msgstr "ملاحظة: الري بالتنقيط يوصل الماء بكفاءة، مما يخفف هذا العجز جزئيًا."
+
+msgid "Ichkeul National Park, Tunisia"
+msgstr "منتزه إشكل الوطني، تونس"
+
+msgid "Rabat area, Morocco"
+msgstr "منطقة الرباط، المغرب"
+
+msgid "Algiers area, Algeria"
+msgstr "منطقة الجزائر العاصمة، الجزائر"
+
+msgid "Lake Ichkeul"
+msgstr "بحيرة إشكل"
+
+msgid "Lake Ghezala"
+msgstr "بحيرة غزالة"
+
+msgid "Lake of Bizerte"
+msgstr "بحيرة بنزرت"
+
+msgid "Dayet Aoua"
+msgstr "ضاية عوا"
+
+msgid "Lake Afennourir"
+msgstr "بحيرة أفنورير"
+
+msgid "Bin el Ouidane"
+msgstr "بين الويدان"
+
+msgid "Lake Oubeira"
+msgstr "بحيرة أوبيرا"
+
+msgid "Lake Fetzara"
+msgstr "بحيرة فتزارة"
+
+msgid "Lake Mellah"
+msgstr "بحيرة الملاح"
+
+msgid "Map centered on __PLACE__."
+msgstr "الخريطة متمركزة على __PLACE__."
+
+msgid "The map could not be loaded. Please reload the page."
+msgstr "تعذّر تحميل الخريطة. يرجى إعادة تحميل الصفحة."
+
+msgid "All drawings have been removed."
+msgstr "تمت إزالة جميع الرسومات."
+
+msgid "Selection mode: click a drawn area to see its details."
+msgstr "وضع التحديد: انقر على منطقة مرسومة لعرض تفاصيلها."
+
+msgid "Draw mode: trace a polygon to measure the area."
+msgstr "وضع الرسم: ارسم مضلعًا لقياس المساحة."
+
+msgid "Ruler mode: click two points on the map to measure distance."
+msgstr "وضع المسطرة: انقر على نقطتين في الخريطة لقياس المسافة."
+
+msgid "Ping mode: click a point for exact live metrics."
+msgstr "وضع التحديد: انقر على نقطة للحصول على مؤشرات حية دقيقة."
+
+msgid "Ruler measurement cleared."
+msgstr "تم مسح قياس المسطرة."
+
+msgid "Ping saved, but live metrics are unavailable for now."
+msgstr "تم حفظ النقطة، لكن المؤشرات الحية غير متاحة حاليًا."
+
+msgid "First point recorded. Click the second point."
+msgstr "تم تسجيل النقطة الأولى. انقر على النقطة الثانية."
+
+msgid "Distance: __M__ m (__KM__ km)."
+msgstr "المسافة: __M__ م (__KM__ كم)."
+
+msgid "Center: __LAT__, __LNG__"
+msgstr "المركز: __LAT__, __LNG__"
+
+msgid ""
+"Area: __M2__ m² (__HA__ ha, __KM2__ km²) | Perimeter: __PM__ m | Center: "
+"__LAT__, __LNG__"
+msgstr ""
+"المساحة: __M2__ م² (__HA__ هكتار، __KM2__ كم²) | المحيط: __PM__ م | المركز: "
+"__LAT__, __LNG__"
+
+msgid ""
+"Ping: __LAT__, __LNG__ | Wind: __WS__ km/h | Temp: __T__°C | Humidity: "
+"__H__% | Rain: __R__ mm"
+msgstr ""
+"نقطة: __LAT__, __LNG__ | الرياح: __WS__ كم/س | الحرارة: __T__°م | الرطوبة: "
+"__H__% | المطر: __R__ مم"
+
+msgid "Sensor drop mode: click the map to place a sensor pin."
+msgstr "وضع وضع المستشعر: انقر على الخريطة لوضع دبوس المستشعر."
+
+msgid "Coordinates filled. Complete the form and submit."
+msgstr "تم ملء الإحداثيات. أكمل الاستمارة وأرسلها."
+
+msgid "Draw your farm first, then ask the assistant about it."
+msgstr "ارسم مزرعتك أولًا، ثم اسأل المساعد عنها."
+
+msgid "Soil probe"
+msgstr "مسبار التربة"
+
+msgid "Real data"
+msgstr "بيانات حقيقية"
+
+msgid ""
+"SmartFarm capacitive probe: soil moisture at three depths and soil "
+"temperature, about one reading a day."
+msgstr ""
+"مسبار SmartFarm السعوي: رطوبة التربة على ثلاثة أعماق وحرارة التربة، قراءة "
+"واحدة تقريبًا في اليوم."
+
+msgid "Fetch now"
+msgstr "تحديث الآن"
+
+msgid "Reading the probe…"
+msgstr "جارٍ قراءة المسبار…"
+
+msgid "Moisture at each reading"
+msgstr "الرطوبة في كل قراءة"
+
+msgid "Real data · SmartFarm"
+msgstr "بيانات حقيقية · SmartFarm"
+
+msgid ""
+"The SmartFarm probe is not connected yet. An administrator must add "
+"SMARTFARM_EMAIL and SMARTFARM_PASSWORD to the server settings."
+msgstr ""
+"مسبار SmartFarm غير متصل بعد. يجب على المسؤول إضافة SMARTFARM_EMAIL و "
+"SMARTFARM_PASSWORD إلى إعدادات الخادم."
+
+msgid "SmartFarm could not be reached right now."
+msgstr "تعذّر الوصول إلى SmartFarm حاليًا."
+
+msgid "The probe has not sent a reading from the soil yet."
+msgstr "لم يرسل المسبار أي قراءة من التربة بعد."
+
+msgid "cm deep"
+msgstr "سم عمقًا"
+
+msgid "Soil temperature"
+msgstr "حرارة التربة"
+
+msgid "Root zone (average)"
+msgstr "منطقة الجذور (المعدل)"
+
+msgid "Last reading"
+msgstr "آخر قراءة"
+
+msgid "readings stored"
+msgstr "قراءة محفوظة"
+
+msgid "synced"
+msgstr "تمت المزامنة"
+
+msgid "Last sync failed; showing stored readings."
+msgstr "فشلت آخر مزامنة؛ تُعرض القراءات المحفوظة."
+
+msgid "Dry"
+msgstr "جاف"
+
+msgid "Good"
+msgstr "جيد"
+
+msgid "Wet"
+msgstr "رطب"
+
+msgid "Daily soil moisture"
+msgstr "رطوبة التربة اليومية"
+
+msgid "days"
+msgstr "يومًا"
+
+msgid "reporting"
+msgstr "نشطة"
+
+msgid "reporting in the last 48 h"
+msgstr "أرسلت بيانات خلال آخر 48 ساعة"
+
+msgid "Moisture by depth"
+msgstr "الرطوبة حسب العمق"
+
+msgid "Readings stored"
+msgstr "القراءات المحفوظة"
+
+msgid "Real measurements"
+msgstr "قياسات حقيقية"
+
+msgid "Installed sensors, where they are and what they measure."
+msgstr "المستشعرات المثبتة ومواقعها وما تقيسه."
+
+msgid "No data connected"
+msgstr "لا توجد بيانات متصلة"
+
+msgid ""
+"No readings from this sensor yet. Only sensors connected to a real data "
+"source show graphs."
+msgstr ""
+"لا توجد قراءات من هذا المستشعر بعد. تظهر الرسوم البيانية فقط للمستشعرات "
+"المتصلة بمصدر بيانات حقيقي."
+
+msgid "Sensor Locations"
+msgstr "مواقع المستشعرات"
+
+msgid "Click a sensor to see its last reading and coordinates."
+msgstr "انقر على مستشعر لرؤية آخر قراءة له وإحداثياته."
+
+msgid "Map layer"
+msgstr "طبقة الخريطة"
+
+msgid "Risk"
+msgstr "الخطر"
+
+msgid "Vegetation (NDVI), Sentinel-2"
+msgstr "الغطاء النباتي (NDVI)، Sentinel-2"
+
+msgid "Vegetation water (NDWI), Sentinel-2"
+msgstr "ماء النبات (NDWI)، Sentinel-2"
+
+msgid "Clouds and open water are left clear. Click the map for the value."
+msgstr "تُترك السحب والمياه المكشوفة شفافة. انقر على الخريطة لمعرفة القيمة."
+
+msgid "Vegetation (NDVI)"
+msgstr "الغطاء النباتي (NDVI)"
+
+msgid "Vegetation water (NDWI)"
+msgstr "ماء النبات (NDWI)"
+
+msgid "Bare"
+msgstr "أرض جرداء"
+
+msgid "Dense"
+msgstr "كثيف"
+
+msgid "Moist"
+msgstr "رطب"
+
+msgid "Loading Sentinel-2 imagery…"
+msgstr "جارٍ تحميل صور Sentinel-2…"
+
+msgid "Sentinel-2 imagery is unavailable right now."
+msgstr "صور Sentinel-2 غير متاحة حاليًا."
+
+msgid "No value here (cloud, water or outside the basin)."
+msgstr "لا توجد قيمة هنا (سحب أو ماء أو خارج الحوض)."
+
+msgid "Sentinel-2 least-cloud mosaic"
+msgstr "فسيفساء Sentinel-2 الأقل غيومًا"
+
+msgid "Zoom in to see the satellite layer."
+msgstr "كبّر الخريطة لرؤية طبقة القمر الصناعي."
+
+msgid "Temperature (30-day mean)"
+msgstr "الحرارة (متوسط 30 يومًا)"
+
+msgid "Rainfall (30-day total)"
+msgstr "الأمطار (مجموع 30 يومًا)"
+
+msgid "SPI-3 (3-month drought index)"
+msgstr "SPI-3 (مؤشر الجفاف لثلاثة أشهر)"
+
+msgid "Temp"
+msgstr "حرارة"
+
+msgid "Cooler"
+msgstr "أبرد"
+
+msgid "Hotter"
+msgstr "أحر"
+
+msgid "Less"
+msgstr "أقل"
+
+msgid "More"
+msgstr "أكثر"
+
+msgid "Drier"
+msgstr "أجف"
+
+msgid "Wetter"
+msgstr "أرطب"
+
+msgid "Loading map layer…"
+msgstr "جارٍ تحميل الطبقة…"
+
+msgid "This map layer is unavailable right now."
+msgstr "هذه الطبقة غير متاحة حاليًا."
+
+msgid "Zoom in to see this layer."
+msgstr "كبّر الخريطة لرؤية هذه الطبقة."
+
+msgid "About 10 km resolution, smoothed. Click the map for the value."
+msgstr "دقة تقارب 10 كم، مُنعّمة. انقر على الخريطة لمعرفة القيمة."
+
+msgid ""
+"Last 3 months of rain compared with the same months in the 30 previous "
+"years. Below -1 is drought. Click the map for the value."
+msgstr ""
+"أمطار الأشهر الثلاثة الأخيرة مقارنة بالأشهر نفسها في السنوات الثلاثين "
+"السابقة. أقل من -1 يعني جفافًا. انقر على الخريطة لمعرفة القيمة."
+
+msgid "Extremely dry"
+msgstr "جاف للغاية"
+
+msgid "Severely dry"
+msgstr "جاف بشدة"
+
+msgid "Moderately dry"
+msgstr "جاف باعتدال"
+
+msgid "Near normal"
+msgstr "قريب من المعدل"
+
+msgid "Moderately wet"
+msgstr "رطب باعتدال"
+
+msgid "Severely wet"
+msgstr "رطب بشدة"
+
+msgid "Extremely wet"
+msgstr "رطب للغاية"
+
+msgid ""
+"Each point of the basin is judged on its own rain, soil moisture and "
+"vegetation"
+msgstr "تُقيَّم كل نقطة من الحوض حسب أمطارها ورطوبة تربتها وغطائها النباتي"
+
+msgid "Satellite detection"
+msgstr "رصد بالأقمار الصناعية"
+
+msgid "Drought detection"
+msgstr "رصد الجفاف"
+
+msgid "Alert"
+msgstr "إنذار"
+
+msgid "Warning"
+msgstr "تحذير"
+
+msgid "No drought"
+msgstr "لا جفاف"
+
+msgid "vegetation stressed"
+msgstr "إجهاد الغطاء النباتي"
+
+msgid "soil drying"
+msgstr "جفاف التربة"
+
+msgid "rain deficit"
+msgstr "عجز في الأمطار"
+
+msgid ""
+"Each level adds a signal: rain, then soil, then vegetation. Click the map to"
+" see why."
+msgstr ""
+"كل مستوى يضيف إشارة: المطر ثم التربة ثم الغطاء النباتي. انقر على الخريطة "
+"لمعرفة السبب."
+
+msgid "Area in drought"
+msgstr "المساحة المتأثرة بالجفاف"
+
+msgid "Basin land area"
+msgstr "مساحة يابسة الحوض"
+
+msgid "Watch · rain deficit"
+msgstr "مراقبة · عجز في الأمطار"
+
+msgid "Warning · soil drying"
+msgstr "تحذير · جفاف التربة"
+
+msgid "Alert · vegetation stressed"
+msgstr "إنذار · إجهاد الغطاء النباتي"
+
+msgid "Rain, last 3 months (SPI-3)"
+msgstr "الأمطار، آخر 3 أشهر (SPI-3)"
+
+msgid "Soil moisture vs normal"
+msgstr "رطوبة التربة مقارنة بالمعدل"
+
+msgid "Vegetation vs normal"
+msgstr "الغطاء النباتي مقارنة بالمعدل"
+
+msgid "Below -1 counts as drought."
+msgstr "أقل من -1 يُعدّ جفافًا."
+
+msgid "Rain and soil"
+msgstr "المطر والتربة"
+
+msgid "vegetation"
+msgstr "الغطاء النباتي"
+
+msgid "Mild"
+msgstr "خفيف"

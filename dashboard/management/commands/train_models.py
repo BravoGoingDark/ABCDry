@@ -1,5 +1,4 @@
 import os
-import warnings
 
 from django.db import models
 from django.core.management.base import BaseCommand, CommandError

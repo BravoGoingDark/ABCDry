@@ -608,6 +608,7 @@ class UserProfile(models.Model):
         ('superadmin', 'Superadmin'),
         ('subadmin', 'Subadmin'),
         ('viewer', 'Viewer'),
+        ('farmer', 'Farmer'),
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
@@ -616,6 +617,8 @@ class UserProfile(models.Model):
         Region, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='assigned_users'
     )
+    phone = models.CharField(max_length=30, blank=True, default='',
+                             help_text="Farmer's contact number (public signup).")
 
     class Meta:
         pass
@@ -632,10 +635,55 @@ class UserProfile(models.Model):
     def is_viewer(self):
         return self.role == 'viewer'
 
+    def is_farmer(self):
+        return self.role == 'farmer'
+
 
 @receiver(post_save, sender=User)
 def ensure_user_profile(sender, instance, **kwargs):
-    UserProfile.objects.get_or_create(user=instance)
+    # Django superusers (createsuperuser, /admin/) get the superadmin role so
+    # the app's RBAC agrees with Django's own notion of an administrator.
+    role = 'superadmin' if instance.is_superuser else 'viewer'
+    profile, created = UserProfile.objects.get_or_create(user=instance, defaults={'role': role})
+    if not created and instance.is_superuser and profile.role != 'superadmin':
+        profile.role = 'superadmin'
+        profile.save(update_fields=['role'])
+
+
+class Farm(models.Model):
+    """A farmer's parcel, drawn on the map as a GeoJSON polygon.
+
+    Stored as plain GeoJSON (not a PostGIS geometry) so it works on every
+    supported database backend. Area and centroid are derived on save by
+    dashboard.services.farmer_service.
+    """
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='farms')
+    name = models.CharField(max_length=100)
+    boundary = models.JSONField(help_text='GeoJSON Polygon geometry (WGS84 lon/lat)')
+    area_ha = models.DecimalField(max_digits=10, decimal_places=2)
+    centroid_lat = models.DecimalField(max_digits=10, decimal_places=6)
+    centroid_lon = models.DecimalField(max_digits=10, decimal_places=6)
+    # Nearest region with climate history: drives climatology, the SPEI
+    # outlook and the assistant's regional facts.
+    region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True, blank=True,
+                               related_name='farms')
+    crop = models.CharField(max_length=30, blank=True, default='',
+                            help_text='Current crop key (see services.crop_suitability.CROPS)')
+    sowing_date = models.DateField(null=True, blank=True)
+    irrigated = models.BooleanField(default=False)
+    water_supply_mm = models.DecimalField(max_digits=7, decimal_places=1, null=True, blank=True,
+                                          help_text='Seasonal irrigation water available (mm)')
+    soil = models.JSONField(null=True, blank=True,
+                            help_text='0-30 cm soil properties fetched from SoilGrids')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'farms'
+        ordering = ['name']
+
+    def __str__(self):
+        return f"{self.name} ({self.owner.username})"
 
 
 class Sensor(models.Model):
@@ -657,9 +705,87 @@ class Sensor(models.Model):
     description = models.TextField(blank=True, null=True)
     installed_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    # Set for hardware whose readings come from a vendor cloud (e.g. 'smartfarm'),
+    # with the vendor's device code; blank for pins added by hand.
+    external_source = models.CharField(max_length=30, blank=True, default='')
+    external_id = models.CharField(max_length=100, blank=True, default='', db_index=True)
+    # Vendor metadata kept as-is: probe depths, field name, status label.
+    external_meta = models.JSONField(default=dict, blank=True)
+    last_synced_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'sensors'
 
     def __str__(self):
         return f"{self.name} ({self.get_sensor_type_display()})"
+
+
+class SoilProbeReading(models.Model):
+    """One real measurement from a soil probe: moisture at three depths and soil
+    temperature. Depths (cm) live in sensor.external_meta['depths']."""
+    sensor = models.ForeignKey(Sensor, on_delete=models.CASCADE, related_name='soil_readings')
+    measured_at = models.DateTimeField(db_index=True)
+    moisture_1 = models.FloatField(null=True, blank=True, help_text='% at the shallowest depth')
+    moisture_2 = models.FloatField(null=True, blank=True, help_text='% at the middle depth')
+    moisture_3 = models.FloatField(null=True, blank=True, help_text='% at the deepest depth')
+    soil_temp_c = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'soil_probe_readings'
+        ordering = ['measured_at']
+        unique_together = [('sensor', 'measured_at')]
+
+    @property
+    def in_soil(self):
+        """All three channels read, i.e. the probe is buried and working."""
+        return None not in (self.moisture_1, self.moisture_2, self.moisture_3)
+
+    @property
+    def root_zone(self):
+        vals = [v for v in (self.moisture_1, self.moisture_2, self.moisture_3) if v is not None]
+        return sum(vals) / len(vals) if vals else None
+
+    def __str__(self):
+        return f"{self.sensor_id} @ {self.measured_at:%Y-%m-%d %H:%M}"
+
+
+# ============== GRIDDED DROUGHT FORECAST (29 Ichkeul ERA5-Land cells) ==============
+class GridCellClimate(models.Model):
+    """Monthly climate for one 0.1° Ichkeul grid section (S01..S29).
+
+    precip_mm from CHIRPS v2 daily (summed); everything else is the monthly
+    mean of ERA5-Land daily aggregates. Feeds prediction_engine.drought_grid.
+    """
+    cell = models.CharField(max_length=8, db_index=True)
+    month = models.DateField(help_text='First day of the month')
+    precip_mm = models.FloatField(null=True, blank=True)
+    tmax_c = models.FloatField(null=True, blank=True)
+    tmin_c = models.FloatField(null=True, blank=True)
+    tmean_c = models.FloatField(null=True, blank=True)
+    tdew_c = models.FloatField(null=True, blank=True)
+    wind_ms = models.FloatField(null=True, blank=True, help_text='10 m wind speed')
+    solar_mj = models.FloatField(null=True, blank=True, help_text='Downward shortwave, MJ/m2/day')
+    soil_moisture = models.FloatField(null=True, blank=True, help_text='m3/m3, mean of ERA5-Land layers 1-2')
+
+    class Meta:
+        db_table = 'grid_cell_climate'
+        ordering = ['cell', 'month']
+        unique_together = [('cell', 'month')]
+
+    def __str__(self):
+        return f'{self.cell} {self.month:%Y-%m}'
+
+
+class DroughtGridForecast(models.Model):
+    """One published gridded SPEI forecast run (issue month = last complete data month)."""
+    issue_month = models.DateField(unique=True)
+    generated_at = models.DateTimeField(auto_now=True)
+    model_version = models.CharField(max_length=50)
+    payload = models.JSONField(help_text='Per-cell forecasts, skill table and metadata')
+
+    class Meta:
+        db_table = 'drought_grid_forecasts'
+        ordering = ['-issue_month']
+
+    def __str__(self):
+        return f'Drought grid forecast issued {self.issue_month:%Y-%m}'

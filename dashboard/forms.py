@@ -4,7 +4,6 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext as _
-import pandas as pd
 
 from .models import (
     CropType, 
@@ -249,24 +248,6 @@ class ExcelImportForm(forms.Form):
         return excel_file
 
 
-class BulkMetricsImportForm(forms.Form):
-    """Form for importing multiple metric types at once"""
-    excel_file = forms.FileField(
-        label='Select Excel File with Multiple Metrics',
-        help_text='Excel file should have sheets named: Soil, Climate, Drought, Agricultural, RemoteSensing, Hydrology',
-        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': '.xlsx,.xls'})
-    )
-    
-    def clean_excel_file(self):
-        excel_file = self.cleaned_data['excel_file']
-        if excel_file:
-            if not excel_file.name.endswith(('.xlsx', '.xls')):
-                raise ValidationError('Only Excel files (.xlsx, .xls) are allowed.')
-            if excel_file.size > 50 * 1024 * 1024:  # 50 MB limit
-                raise ValidationError('File size must not exceed 50 MB.')
-        return excel_file
-
-
 BASE_INPUT = 'w-full pl-10 pr-4 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm placeholder:text-outline-variant/50'
 BASE_SELECT = 'w-full pl-10 pr-10 py-3 bg-white border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all text-sm appearance-none'
 
@@ -311,4 +292,73 @@ class UserCreateForm(forms.ModelForm):
             profile.role = self.cleaned_data['role']
             profile.region = self.cleaned_data.get('region')
             profile.save()
+        return user
+
+
+# ============== FARMER SIGNUP (public) ==============
+class FarmerSignupForm(forms.Form):
+    """Public farmer self-registration.
+
+    Collects username, optional email, phone number, password and confirm
+    password. The account is active immediately — no administrator approval.
+    """
+    username = forms.CharField(
+        label=_('Username'),
+        max_length=150,
+        widget=forms.TextInput(attrs={'class': BASE_INPUT, 'placeholder': 'Username'}),
+    )
+    email = forms.EmailField(
+        label=_('Email (optional)'),
+        required=False,
+        widget=forms.EmailInput(attrs={'class': BASE_INPUT, 'placeholder': 'name@example.com'}),
+    )
+    phone = forms.CharField(
+        label=_('Phone number'),
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'class': BASE_INPUT, 'placeholder': '+216 XX XXX XXX'}),
+    )
+    password1 = forms.CharField(
+        label=_('Password'),
+        widget=forms.PasswordInput(attrs={'class': BASE_INPUT, 'placeholder': 'Password'}),
+    )
+    password2 = forms.CharField(
+        label=_('Confirm password'),
+        widget=forms.PasswordInput(attrs={'class': BASE_INPUT, 'placeholder': 'Confirm password'}),
+    )
+
+    def clean_username(self):
+        username = self.cleaned_data['username'].strip()
+        if User.objects.filter(username__iexact=username).exists():
+            raise ValidationError(_('This username is already taken.'))
+        return username
+
+    def clean_email(self):
+        email = (self.cleaned_data.get('email') or '').strip()
+        if email and User.objects.filter(email__iexact=email).exists():
+            raise ValidationError(_('An account with this email already exists.'))
+        return email
+
+    def clean_phone(self):
+        return (self.cleaned_data.get('phone') or '').strip()
+
+    def clean_password2(self):
+        p1 = self.cleaned_data.get('password1', '')
+        p2 = self.cleaned_data.get('password2', '')
+        if p1 and p2 and p1 != p2:
+            raise ValidationError(_('The two passwords do not match.'))
+        if len(p1) < 6:
+            raise ValidationError(_('Password must be at least 6 characters.'))
+        return p2
+
+    def save(self):
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data.get('email', ''),
+            password=self.cleaned_data['password1'],
+        )
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        profile.role = 'farmer'
+        profile.phone = self.cleaned_data['phone']
+        profile.save()
         return user

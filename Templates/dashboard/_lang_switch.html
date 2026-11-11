@@ -1,0 +1,7 @@
+{% load i18n %}{% get_current_language as CUR_LANG %}
+<form action="{% url 'set_language' %}" method="post" class="lang-float{% if lang_inline %} lang-inline{% endif %}" aria-label="{% trans 'Language' %}">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button type="submit" name="language" value="en" class="{% if CUR_LANG == 'en' %}on{% endif %}" lang="en" title="English">EN</button>
+    <button type="submit" name="language" value="fr" class="{% if CUR_LANG == 'fr' %}on{% endif %}" lang="fr" title="Français">FR</button>
+    <button type="submit" name="language" value="ar" class="{% if CUR_LANG == 'ar' %}on{% endif %}" lang="ar" title="العربية">ع</button>
+</form>

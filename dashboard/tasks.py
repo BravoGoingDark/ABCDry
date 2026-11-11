@@ -40,7 +40,9 @@ def generate_daily_risk_assessments():
     from dashboard.models import ObservationYear, Region
     from dashboard.prediction_engine.pipeline import DroughtPredictionPipeline
 
-    year = ObservationYear.objects.order_by('-label').first()
+    from django.utils import timezone
+    year = (ObservationYear.objects.filter(label=str(timezone.localdate().year)).first()
+            or ObservationYear.objects.order_by('-label').first())
     if year is None:
         return 'No observation years found.'
 
@@ -87,6 +89,11 @@ def monthly_spei_forecast():
     # 2) Model refresh + forecasts + verification
     call_command('train_spei_pooled')
     call_command('verify_spei_forecasts')
+    # 2b) Gridded 29-cell Ichkeul forecast (incremental fetch, re-verify, publish)
+    try:
+        call_command('build_drought_grid')
+    except Exception:
+        logger.warning('Gridded drought forecast build failed', exc_info=True)
     # 3) Pre-warm assistant answers (all regions x intents x languages)
     try:
         from dashboard.services.farmer_assistant import prewarm_answers
@@ -95,3 +102,27 @@ def monthly_spei_forecast():
     except Exception:
         logger.warning('Assistant pre-warm failed', exc_info=True)
     return 'Monthly SPEI forecast + verification complete.'
+
+
+@shared_task
+def sync_smartfarm_probe():
+    """Pull new readings from the SmartFarm soil probe (reports ~once a day)."""
+    from dashboard.services import smartfarm
+
+    if not smartfarm.configured():
+        return 'SmartFarm not configured.'
+    out = smartfarm.sync(days=14)
+    return f"SmartFarm: {out['added']} new readings."
+
+
+@shared_task
+def update_station_climate():
+    """Continue the two Ichkeul stations' daily climate (ERA5-Land + CHIRPS via Earth Engine).
+
+    Daily: ERA5-Land arrives ~1 week late and CHIRPS ~5-6 weeks late; each run
+    adds the new days and swaps provisional IMERG rain for CHIRPS once published.
+    """
+    from dashboard.services import station_climate
+
+    summary = station_climate.update()
+    return f'Station climate: {summary}'

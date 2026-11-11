@@ -31,6 +31,45 @@ def calculate_et0(temp_mean_c, wind_speed_ms, solar_radiation_wm2, humidity_pct)
     return max(0, round(et0, 2))
 
 
+def fao56_et0(tmax_c, tmin_c, solar_mjm2day, rh_mean_pct, wind_ms, lat_deg, doy,
+              elevation_m=0.0, wind_height_m=10.0):
+    """Full FAO-56 Penman-Monteith reference ET0 (Allen et al. 1998, Eq. 6).
+
+    Unlike calculate_et0 above, this derives NET radiation from incoming
+    shortwave (albedo 0.23 + net longwave, Eqs. 38-39), uses the FAO-56
+    aerodynamic term and converts wind to 2 m (Eq. 47). Works on daily or
+    monthly-mean inputs. Returns mm/day.
+    """
+    tmean = (tmax_c + tmin_c) / 2.0
+    u2 = wind_ms * 4.87 / np.log(67.8 * wind_height_m - 5.42) if wind_height_m != 2 else wind_ms
+
+    def svp(t):
+        return 0.6108 * np.exp(17.27 * t / (t + 237.3))
+
+    es = (svp(tmax_c) + svp(tmin_c)) / 2.0
+    ea = es * rh_mean_pct / 100.0
+    delta = 4098 * svp(tmean) / (tmean + 237.3) ** 2
+    pressure = 101.3 * ((293 - 0.0065 * elevation_m) / 293) ** 5.26
+    gamma = 0.000665 * pressure
+
+    lat = np.radians(lat_deg)
+    dr = 1 + 0.033 * np.cos(2 * np.pi * doy / 365)
+    decl = 0.409 * np.sin(2 * np.pi * doy / 365 - 1.39)
+    ws = np.arccos(np.clip(-np.tan(lat) * np.tan(decl), -1, 1))
+    ra = 24 * 60 / np.pi * 0.0820 * dr * (
+        ws * np.sin(lat) * np.sin(decl) + np.cos(lat) * np.cos(decl) * np.sin(ws))
+    rso = (0.75 + 2e-5 * elevation_m) * ra
+    rns = (1 - 0.23) * solar_mjm2day
+    rel_sw = min(solar_mjm2day / rso, 1.0) if rso > 0 else 0.5
+    rnl = 4.903e-9 * (((tmax_c + 273.16) ** 4 + (tmin_c + 273.16) ** 4) / 2) \
+        * (0.34 - 0.14 * np.sqrt(max(ea, 0.0))) * (1.35 * rel_sw - 0.35)
+    rn = rns - rnl
+
+    et0 = (0.408 * delta * rn + gamma * 900 / (tmean + 273) * u2 * (es - ea)) \
+        / (delta + gamma * (1 + 0.34 * u2))
+    return max(0.0, float(et0))
+
+
 def get_crop_coefficient(crop_type, days_since_planting, total_growth_days):
     """FAO-56 Kc lookup based on crop type and growth stage."""
     kc_table = {
@@ -95,6 +134,35 @@ def _fit_monthly_gamma(monthly_values):
             pass
         params[month] = (alpha, loc, beta, prob_zero)
     return params
+
+
+def spi_at(rainfall_series, end_date, days=90, max_years=30, min_years=10):
+    """SPI of the `days`-day rainfall total ending on `end_date` (SPI-3 for 90).
+
+    The window is compared with the same calendar window in each earlier
+    year (up to `max_years`) through the usual gamma fit with a zero-rain
+    probability. Unlike the calendar-month SPI above, a date in the middle of
+    a month is not judged on a part-filled month, which would always look dry.
+    Returns None without enough complete earlier windows.
+    """
+    s = rainfall_series.sort_index()
+    end = pd.Timestamp(end_date).normalize()
+
+    def window_total(e):
+        w = s[(s.index > e - pd.Timedelta(days=days)) & (s.index <= e)]
+        return float(w.sum()) if len(w) >= days * 0.9 else None   # tolerate a few missing days
+
+    current = window_total(end)
+    if current is None:
+        return None
+    past = [window_total(end - pd.DateOffset(years=k)) for k in range(1, max_years + 1)]
+    past = np.array([v for v in past if v is not None])
+    if len(past) < min_years:
+        return None
+    alpha, _, beta, q = _fit_monthly_gamma({1: list(past)})[1]
+    g = scipy_stats.gamma.cdf(current, alpha, scale=beta) if current > 0 else 0.0
+    h = q + (1 - q) * g
+    return float(scipy_stats.norm.ppf(np.clip(h, 1e-6, 1 - 1e-6)))
 
 
 def calculate_spi(rainfall_series, nmonth=1):

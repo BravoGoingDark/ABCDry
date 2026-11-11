@@ -58,3 +58,6 @@ assistant_index/
 .idea/
 .ds_store
 Thumbs.db
+
+# graphify AST cache (rebuilt locally)
+graphify-out/cache/

@@ -1,0 +1,16 @@
+{% load i18n static %}
+<!-- Region Selector Dropdown -->
+<div class="relative">
+    <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
+    <select class="pl-7 sm:pl-8 pr-5 sm:pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-xs sm:text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24 sm:w-32" id="region-selector" name="region">
+        {% for option in form.region.field.queryset %}
+        <option value="{{ option.pk }}" {% if form.region.value|stringformat:"s" == option.pk|stringformat:"s" %}selected{% endif %}>{{ option.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+<!-- Lake Selector Dropdown (Critical dynamic script hook) -->
+<div class="relative">
+    <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">water</span>
+    <select class="pl-7 sm:pl-8 pr-5 sm:pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-xs sm:text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24 sm:w-36" id="lake-selector" name="lake">
+    </select>
+</div>

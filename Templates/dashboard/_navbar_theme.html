@@ -1,0 +1,38 @@
+{% comment %}
+Design tokens the shared navbar (_header.html) needs, taken from the overview
+page. Include at the end of <head>, after the page's own tailwind.config:
+tokens the page already defines are kept, missing ones are filled in, so the
+navbar renders identically everywhere without restyling the page itself.
+{% endcomment %}
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+(function () {
+    if (typeof tailwind === "undefined") return;
+    var navbar = {
+        colors: {
+            "primary": "#012d1d", "primary-container": "#1b4332", "on-primary": "#ffffff",
+            "primary-fixed": "#c1ecd4", "primary-fixed-dim": "#a5d0b9",
+            "secondary": "#00677d", "secondary-container": "#72ddfd", "on-secondary-container": "#006075",
+            "surface": "#f9f9ff", "surface-dim": "#d3daea", "surface-variant": "#dce2f3",
+            "surface-container-lowest": "#ffffff", "surface-container-low": "#f0f3ff",
+            "surface-container": "#e7eefe", "surface-container-high": "#e2e8f8",
+            "on-surface": "#151c27", "on-surface-variant": "#414844",
+            "outline": "#717973", "outline-variant": "#c1c8c2", "error": "#ba1a1a"
+        },
+        fontFamily: { headline: ["Hanken Grotesk"], display: ["Hanken Grotesk"], body: ["Inter"], label: ["Jetbrains Mono"] },
+        borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" }
+    };
+    var cfg = tailwind.config || {};
+    cfg.theme = cfg.theme || {};
+    var ext = cfg.theme.extend = cfg.theme.extend || {};
+    Object.keys(navbar).forEach(function (group) {
+        var target = ext[group] = ext[group] || {};
+        Object.keys(navbar[group]).forEach(function (key) {
+            if (!(key in target)) target[key] = navbar[group][key];
+        });
+    });
+    // Reassigning (not just mutating) makes the Tailwind CDN rebuild.
+    tailwind.config = cfg;
+})();
+</script>

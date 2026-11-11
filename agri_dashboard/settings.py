@@ -12,11 +12,16 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+# Real environment values win, but an *empty* one is filled from .env: editors
+# (VS Code's python.envFile) copy .env into new terminals, so a key that was
+# blank when the terminal opened would otherwise hide the value saved later.
+for _key, _value in dotenv_values(BASE_DIR / '.env').items():
+    if _value is not None and not os.environ.get(_key):
+        os.environ[_key] = _value
 
 
 # Quick-start development settings - unsuitable for production
@@ -59,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # Require login for all views by default (exemptions handled in middleware)
     'agri_dashboard.middleware.LoginRequiredMiddleware',
+    'agri_dashboard.middleware.FarmerScopeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'agri_dashboard.middleware.NoCacheHTMLMiddleware',
@@ -78,6 +84,7 @@ TEMPLATES = [
                 'django.template.context_processors.i18n',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dashboard.context_processors.navbar',
             ],
         },
     },
@@ -144,6 +151,7 @@ LANGUAGE_CODE = 'en'
 LANGUAGES = [
     ('en', 'English'),
     ('fr', 'French'),
+    ('ar', 'العربية'),
 ]
 
 LOCALE_PATHS = [
@@ -229,7 +237,9 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB
 # ── AgroAI assistant (local Ollama LLM) ──────────────────────────────
 # The assistant never invents data: these settings only control how the
 # model *explains* facts already computed from the database.
-ASSISTANT_LLM_URL = os.getenv('ASSISTANT_LLM_URL', 'http://localhost:11434')
+# 127.0.0.1, not localhost: on Windows 'localhost' tries IPv6 (::1) first and
+# Ollama only listens on IPv4, which added ~2 s to every embed and chat call.
+ASSISTANT_LLM_URL = os.getenv('ASSISTANT_LLM_URL', 'http://127.0.0.1:11434')
 # empty string = auto-detect the best installed Ollama model
 ASSISTANT_LLM_MODEL = os.getenv('ASSISTANT_LLM_MODEL', '')
 ASSISTANT_LLM_TIMEOUT = int(os.getenv('ASSISTANT_LLM_TIMEOUT', '60'))
@@ -310,6 +320,18 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes hard limit
 from celery.schedules import crontab
 
 CELERY_BEAT_SCHEDULE = {
+    # Two Ichkeul stations: new ERA5-Land / CHIRPS days, provisional rain replaced (daily 05:30 UTC)
+    'update-station-climate-daily': {
+        'task': 'dashboard.tasks.update_station_climate',
+        'schedule': crontab(hour=5, minute=30),
+        'options': {'expires': 6 * 3600}
+    },
+    # SmartFarm soil probe: reports ~once a day; poll every 3 hours
+    'sync-smartfarm-probe': {
+        'task': 'dashboard.tasks.sync_smartfarm_probe',
+        'schedule': crontab(minute=15, hour='*/3'),
+        'options': {'expires': 3600}
+    },
     # Daily satellite data pull (3 AM UTC)
     'pull-satellite-daily': {
         'task': 'dashboard.tasks.pull_satellite_and_retrain',

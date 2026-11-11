@@ -1,6 +1,5 @@
 import logging
 import os
-from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -14,9 +13,7 @@ from ..models import (
     ClimateMetrics,
     DroughtIndices,
     HydrologyMetrics,
-    ObservationYear,
     RemoteSensingMetrics,
-    Region,
     SoilMetrics,
     DroughtPrediction,
 )
@@ -25,13 +22,12 @@ from .lstm_forecaster import LSTMDroughtForecaster
 from .rainfall_forecast import build_next_days_rain, climatological_daily_rain
 from .physical_helpers import (
     calculate_available_water_capacity,
-    calculate_etc,
     calculate_et0,
     calculate_field_capacity,
     calculate_spi,
-    calculate_vci,
     calculate_wilting_point,
     get_crop_coefficient,
+    spi_at,
     update_soil_water,
 )
 from .xgboost_risk_predictor import XGBoostDroughtRiskPredictor
@@ -371,17 +367,17 @@ class DroughtPredictionPipeline:
     # ── Forecast-augmented SPI-3 risk (GFS/ECMWF rainfall + climatology) ──
 
     def _observed_daily_rain(self, region, end_date=None):
-        rows = []
-        qs = ClimateMetrics.objects.filter(region=region, rainfall_mm__isnull=False).order_by('measurement_date')
-        end = pd.Timestamp(end_date).date() if end_date is not None else None
-        for obj in qs:
-            d = self._naive(pd.Timestamp(obj.measurement_date))
-            if end is not None and d.date() > end:
-                break
-            rows.append((d, float(obj.rainfall_mm)))
+        """Daily rainfall for the region: one value per day, the mean of its
+        measuring points (a region can hold several stations' rows per day)."""
+        qs = ClimateMetrics.objects.filter(region=region, rainfall_mm__isnull=False)
+        rows = list(qs.values_list('measurement_date', 'rainfall_mm'))
         if not rows:
             return pd.Series(dtype='float64')
-        return pd.Series([r[1] for r in rows], index=pd.DatetimeIndex([r[0] for r in rows]), dtype='float64')
+        index = pd.DatetimeIndex([self._naive(pd.Timestamp(d)).normalize() for d, _ in rows])
+        daily = pd.Series([float(v) for _, v in rows], index=index, dtype='float64').groupby(level=0).mean().sort_index()
+        if end_date is not None:
+            daily = daily[daily.index <= self._naive(pd.Timestamp(end_date)).normalize()]
+        return daily
 
     @staticmethod
     def _naive(ts):
@@ -393,36 +389,41 @@ class DroughtPredictionPipeline:
         by an expected-rainfall scenario for the following horizon days.
 
         expected_rain: pd.Series indexed by the future dates, or None to use
-        climatology. Returns None if there is not enough history."""
+        climatology. horizon_days=0 gives today's SPI-3 from observed rain only.
+        SPI-3 is the 90-day total ending on the target date against the same
+        window in earlier years (spi_at), and the risk uses the project's
+        documented SPEI/SPI -> 0-100 scale, the same as the Risk Overview.
+        Returns None if there is not enough history."""
+        from ..services.assistant_brain import _score_from_spei
+
+        end_date = self._naive(pd.Timestamp(end_date)).normalize()
         observed = self._observed_daily_rain(region, end_date)
         if len(observed) < 370:
             return None
-        if expected_rain is None:
-            expected_rain = climatological_daily_rain(region, end_date + pd.Timedelta(days=1), horizon_days)
-
-        future_dates = pd.date_range(start=end_date + pd.Timedelta(days=1), periods=horizon_days, freq='D')
-        expected = pd.Series(
-            [float(expected_rain.loc[d]) for d in future_dates],
-            index=future_dates,
-            dtype='float64',
-        )
-        extended = pd.concat([observed, expected])
-        spi3 = calculate_spi(extended, nmonth=3)
-        if spi3.empty:
-            return None
-        spi = float(spi3.iloc[-1])
-        if pd.isna(spi):
+        extended = observed
+        if horizon_days > 0:
+            if expected_rain is None:
+                expected_rain = climatological_daily_rain(region, end_date + pd.Timedelta(days=1), horizon_days)
+            future_dates = pd.date_range(start=end_date + pd.Timedelta(days=1), periods=horizon_days, freq='D')
+            expected = pd.Series([float(expected_rain.loc[d]) for d in future_dates], index=future_dates, dtype='float64')
+            extended = pd.concat([observed, expected])
+        spi = spi_at(extended, end_date + pd.Timedelta(days=horizon_days), days=90)
+        if spi is None or pd.isna(spi):
             return None
         return {
-            'risk': round(max(0.0, min(100.0, 50.0 - spi * 15.0)), 1),
+            'risk': float(_score_from_spei(spi)),
             'spi3': spi,
             'horizon_days': horizon_days,
         }
 
+    def _latest_observed_day(self, region):
+        latest = (ClimateMetrics.objects.filter(region=region, rainfall_mm__isnull=False)
+                  .order_by('-measurement_date').first())
+        return self._naive(pd.Timestamp(latest.measurement_date)).normalize() if latest else pd.Timestamp.today().normalize()
+
     def _forecast_risk_block(self, region, end_date=None, lat=None, lon=None):
         if end_date is None:
-            latest = ClimateMetrics.objects.filter(region=region).order_by('-measurement_date').first()
-            end_date = self._naive(pd.Timestamp(latest.measurement_date)) if latest else pd.Timestamp.today().normalize()
+            end_date = self._latest_observed_day(region)
         else:
             end_date = self._naive(pd.Timestamp(end_date))
         if lat is None or lon is None:
@@ -520,7 +521,8 @@ class DroughtPredictionPipeline:
             [float(i.spi_3month) for i in idx_qs],
             index=pd.DatetimeIndex([self._naive(pd.Timestamp(i.measurement_date)) for i in idx_qs]),
         )
-        actual_risk = np.clip(50.0 - actual * 15.0, 0, 100)
+        from ..services.assistant_brain import _score_from_spei
+        actual_risk = actual.map(lambda v: float(_score_from_spei(v)))
 
         eval_dates = [d for d in actual.index if d >= pd.Timestamp('2023-01-01')][::step]
         if not eval_dates:
@@ -736,7 +738,6 @@ class DroughtPredictionPipeline:
     def _heuristic_prediction(self, prepared_df, use_llm=True, llm_model='llama3.2:3b'):
         current_soil_moisture = float(prepared_df['soil_moisture_pct'].iloc[-1]) if 'soil_moisture_pct' in prepared_df.columns else 0
         current_soil_water_mm = float(prepared_df['soil_water_mm'].iloc[-1]) if 'soil_water_mm' in prepared_df.columns else 0
-        rainfall_30d = float(prepared_df['rainfall_mm'].tail(30).sum()) if 'rainfall_mm' in prepared_df.columns else 0
         rainfall_7d = float(prepared_df['rainfall_mm'].tail(7).sum()) if 'rainfall_mm' in prepared_df.columns else 0
         soil_trend = float(prepared_df['soil_moisture_pct'].tail(7).diff().mean()) if 'soil_moisture_pct' in prepared_df.columns else 0
         ndvi = float(prepared_df['ndvi'].iloc[-1]) if 'ndvi' in prepared_df.columns else 0.5
@@ -832,6 +833,19 @@ class DroughtPredictionPipeline:
         except Exception as exc:
             logger.warning('Rainfall-forecast risk unavailable for %s: %s', region, exc)
             forecast_block = None
+
+        # "Today" from measured rainfall: SPI-3 over the 90 days to the newest
+        # observed day, on the same scale as +7 / +30 days and the Risk
+        # Overview. The ML nowcast leans on satellite and soil inputs that
+        # can lag by months, which made "today" contradict the measurements.
+        try:
+            today_block = self.forecast_spi_risk(region, self._latest_observed_day(region), 0)
+        except Exception as exc:
+            logger.warning('Measured SPI-3 unavailable for %s: %s', region, exc)
+            today_block = None
+        if today_block:
+            result['risk_scores']['today'] = today_block['risk']
+            result['today_spi3'] = round(today_block['spi3'], 2)
 
         if forecast_block:
             if forecast_block.get('day_7'):

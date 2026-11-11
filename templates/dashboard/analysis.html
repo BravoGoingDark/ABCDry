@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+{% load static i18n %}
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analysis Results | Ichkeul Intel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "error": "#ba1a1a",
+                    "surface-variant": "#dce2f3",
+                    "surface-dim": "#d3daea",
+                    "secondary-container": "#72ddfd",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#002114",
+                    "primary": "#012d1d",
+                    "on-tertiary-fixed-variant": "#554338",
+                    "background": "#f9f9ff",
+                    "inverse-primary": "#a5d0b9",
+                    "on-surface": "#151c27",
+                    "outline": "#717973",
+                    "tertiary": "#322319",
+                    "secondary": "#00677d",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#274e3d",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed": "#f9ddce",
+                    "outline-variant": "#c1c8c2",
+                    "on-primary-container": "#86af99",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#b2ebff",
+                    "on-tertiary-fixed": "#27180f",
+                    "inverse-on-surface": "#ebf1ff",
+                    "surface-container-highest": "#dce2f3",
+                    "surface-container-low": "#f0f3ff",
+                    "primary-container": "#1b4332",
+                    "on-background": "#151c27",
+                    "secondary-fixed-dim": "#69d4f4",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#414844",
+                    "tertiary-fixed-dim": "#dcc1b2",
+                    "on-secondary-container": "#006075",
+                    "tertiary-container": "#4a382d",
+                    "surface-container": "#e7eefe",
+                    "primary-fixed": "#c1ecd4",
+                    "on-primary": "#ffffff",
+                    "surface-container-high": "#e2e8f8",
+                    "surface-tint": "#3f6653",
+                    "primary-fixed-dim": "#a5d0b9",
+                    "surface-bright": "#f9f9ff",
+                    "on-tertiary-container": "#baa193",
+                    "on-secondary-fixed-variant": "#004e5f",
+                    "on-secondary-fixed": "#001f27",
+                    "surface": "#f9f9ff",
+                    "inverse-surface": "#2a313d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "fontFamily": {
+                    "headline": ["Hanken Grotesk"],
+                    "display": ["Hanken Grotesk"],
+                    "body": ["Inter"],
+                    "label": ["JetBrains Mono"]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .map-gradient {
+            background: radial-gradient(circle at center, rgba(186, 26, 26, 0.15) 0%, rgba(255, 184, 0, 0.1) 40%, rgba(0, 103, 125, 0.05) 100%);
+        }
+        /* Leaflet map sits behind overlays inside the map container */
+        #ichkeul-heatmap { z-index: 0; }
+        .map-overlay-panel { z-index: 20; }
+
+        .custom-station-icon {
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer;
+        }
+        .station-marker-container {
+            position: relative;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .station-marker-badge {
+            position: relative;
+            z-index: 10;
+            width: 22px;
+            height: 22px;
+            border-radius: 9999px;
+            border: 1.5px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+        .custom-station-icon:hover .station-marker-badge {
+            transform: scale(1.22);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.45);
+        }
+        .station-radar-ripple {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border-radius: 9999px;
+            border: 1.5px solid;
+            animation: stationPulse 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        @keyframes stationPulse {
+            0% { transform: scale(0.5); opacity: 0.9; }
+            100% { transform: scale(2.0); opacity: 0; }
+        }
+        /* Smooth, elegant hover tooltips */
+        .leaflet-tooltip.station-tooltip-smooth {
+            background: rgba(15, 23, 42, 0.92) !important;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #f8fafc !important;
+            border-radius: 8px !important;
+            padding: 6px 10px !important;
+            font-size: 11px !important;
+            line-height: 1.4 !important;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35) !important;
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out !important;
+            pointer-events: none !important;
+        }
+        .leaflet-tooltip.station-tooltip-smooth:before {
+            border-top-color: rgba(15, 23, 42, 0.92) !important;
+        }
+        /* Refined zoom controls */
+        .leaflet-control-zoom {
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+            border: 1px solid rgba(0,0,0,0.1) !important;
+            margin-bottom: 14px !important;
+            margin-left: 14px !important;
+        }
+        .leaflet-control-zoom a {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            transition: background-color 0.18s ease, color 0.18s ease !important;
+        }
+        .leaflet-control-zoom a:hover {
+            background-color: #f1f5f9 !important;
+            color: #0284c7 !important;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+        <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+<!-- Main Content Wrapper -->
+<div class="flex-1 min-w-0 flex flex-col bg-surface h-screen">
+<!-- Top Navigation Header -->
+    {% include "dashboard/_header.html" %}
+    
+    <!-- APWRS Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="analyse" %}
+
+<!-- Scrollable Content Area -->
+<main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 transition-all duration-300 ease-in-out lg:ml-60">
+    {% include "dashboard/_page_toolbar.html" with page_actions="dashboard/_page_actions_analysis.html" %}
+<script id="initial-data" type="application/json">{{ initial_data_json|safe }}</script>
+<!-- SECTION 1: Current Drought Status -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+<!-- Today Risk -->
+<div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label text-xs uppercase text-on-surface-variant">Today Risk</span>
+<span id="risk-today-badge" class="bg-yellow-100 text-yellow-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-yellow-200">—</span>
+</div>
+<div class="flex items-end gap-2 mb-2">
+<span id="risk-today-score" class="text-5xl font-black font-headline text-on-surface">—</span>
+<span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
+</div>
+<p id="risk-today-desc" class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Loading prediction…</p>
+<div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="monitoring">monitoring</span>
+</div>
+</div>
+<!-- 7 Days Risk -->
+<div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label text-xs uppercase text-on-surface-variant">7 Days Risk</span>
+<span id="risk-7day-badge" class="bg-orange-100 text-orange-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-orange-200">—</span>
+</div>
+<div class="flex items-end gap-2 mb-2">
+<span id="risk-7day-score" class="text-5xl font-black font-headline text-on-surface">—</span>
+<span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
+</div>
+<p id="risk-7day-desc" class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Loading prediction…</p>
+<div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="water_drop">water_drop</span>
+</div>
+</div>
+<!-- 30 Days Risk -->
+<div class="bg-surface border border-outline-variant p-6 relative overflow-hidden group">
+<div class="flex justify-between items-start mb-4">
+<span class="font-label text-xs uppercase text-on-surface-variant">30 Days Risk</span>
+<span id="risk-30day-badge" class="bg-red-100 text-red-800 px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border border-red-200">—</span>
+</div>
+<div class="flex items-end gap-2 mb-2">
+<span id="risk-30day-score" class="text-5xl font-black font-headline text-on-surface">—</span>
+<span class="text-on-surface-variant mb-1 text-sm font-medium">/ 100</span>
+</div>
+<p id="risk-30day-desc" class="text-on-surface-variant text-sm border-t border-outline-variant/30 pt-3">Loading prediction…</p>
+<div class="absolute bottom-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl" data-icon="emergency_home">emergency_home</span>
+</div>
+</div>
+</div>
+<!-- SECTION 2: Heatmap & Alerts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+<div class="lg:col-span-8 space-y-8">
+<!-- Risk Zone Heatmap -->
+<div class="bg-surface border border-outline-variant flex flex-col overflow-hidden" style="height:520px">
+  <!-- Card Header -->
+  <div class="p-3 sm:p-4 border-b border-outline-variant flex flex-wrap lg:flex-nowrap justify-between items-center gap-2 sm:gap-3 bg-surface-container-low">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <h3 class="font-headline font-bold text-sm uppercase tracking-wider truncate" title="Spatial Risk Distribution (Ichkeul Basin)">Spatial Risk Distribution (Ichkeul Basin)</h3>
+      <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 shadow-sm" title="{% trans 'Each point of the basin is judged on its own rain, soil moisture and vegetation' %}">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="material-symbols-outlined text-[13px]">satellite_alt</span>
+        {% trans "Satellite detection" %}
+      </span>
+    </div>
+    <div class="flex flex-wrap sm:flex-nowrap gap-2 items-center w-full sm:w-auto sm:shrink-0">
+      <div id="s2-mode" class="flex rounded border border-outline-variant overflow-hidden" role="group" aria-label="{% trans 'Map layer' %}">
+        <button type="button" data-mode="risk" class="s2-mode-btn px-3 py-1 text-xs font-bold uppercase bg-primary text-on-primary">{% trans "Risk" %}</button>
+        <button type="button" data-mode="ndvi" class="s2-mode-btn px-3 py-1 text-xs font-bold uppercase bg-surface-variant text-on-surface-variant" title="{% trans 'Vegetation (NDVI), Sentinel-2' %}">NDVI</button>
+        <button type="button" data-mode="ndwi" class="s2-mode-btn px-3 py-1 text-xs font-bold uppercase bg-surface-variant text-on-surface-variant" title="{% trans 'Vegetation water (NDWI), Sentinel-2' %}">NDWI</button>
+        <button type="button" data-mode="temp" class="s2-mode-btn px-3 py-1 text-xs font-bold uppercase bg-surface-variant text-on-surface-variant" title="{% trans 'Temperature (30-day mean)' %}">{% trans "Temp" %}</button>
+        <button type="button" data-mode="rain" class="s2-mode-btn px-3 py-1 text-xs font-bold uppercase bg-surface-variant text-on-surface-variant" title="{% trans 'Rainfall (30-day total)' %}">{% trans "Rain" %}</button>
+        <button type="button" data-mode="spi" class="s2-mode-btn px-3 py-1 text-xs font-bold uppercase bg-surface-variant text-on-surface-variant" title="{% trans 'SPI-3 (3-month drought index)' %}">SPI</button>
+      </div>
+      <div class="flex rounded border border-outline-variant overflow-hidden" role="group" aria-label="Basemap">
+        <button id="satellite-btn" class="layer-btn px-3 py-1 bg-primary text-on-primary text-xs font-bold uppercase">Satellite</button>
+        <button id="topography-btn" class="layer-btn px-3 py-1 bg-surface-variant text-on-surface-variant text-xs font-bold uppercase">Topography</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Map canvas -->
+  <div class="flex-grow relative bg-[#E2E8F0]">
+    <!-- Leaflet map fills this div -->
+    <div id="ichkeul-heatmap" class="absolute inset-0 z-0" data-basin-url="{% static 'dashboard/data/ichkeul_basin.geojson' %}"></div>
+
+    <!-- Sentinel-2 layer status -->
+    <div id="s2-status" class="hidden absolute top-3 left-1/2 -translate-x-1/2 z-20 bg-surface-container-high text-on-surface-variant text-[11px] font-bold px-3 py-1.5 rounded-full border border-outline-variant flex items-center gap-1.5 shadow-md">
+      <span id="s2-status-icon" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+      <span id="s2-status-text"></span>
+    </div>
+
+    <!-- Tile-unavailable toast -->
+    <div id="heatmap-tile-warning"
+      class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-surface-container-high text-on-surface-variant text-[11px] font-bold px-3 py-1.5 rounded-full border border-outline-variant flex items-center gap-1.5 shadow-md">
+      <span class="material-symbols-outlined text-sm">map</span>
+      Basemap unavailable — retrying.
+    </div>
+
+    <!-- Legend (top-left) -->
+    <div class="absolute top-3 left-3 z-10">
+      <div id="s2-legend" class="hidden bg-surface/90 backdrop-blur-md rounded-xl border border-outline-variant shadow-lg p-3 w-56">
+        <p id="s2-legend-title" class="font-label text-[10px] uppercase font-bold text-on-surface-variant mb-2 tracking-widest"></p>
+        <div id="s2-legend-bar" class="h-2.5 rounded-full"></div>
+        <div class="flex justify-between mt-1 text-[10px] font-mono text-on-surface-variant">
+          <span id="s2-legend-lo"></span><span id="s2-legend-hi"></span>
+        </div>
+        <div class="flex justify-between text-[11px] font-medium">
+          <span id="s2-legend-lo-word"></span><span id="s2-legend-hi-word"></span>
+        </div>
+        <p class="mt-2 pt-2 border-t border-outline-variant/50 text-[10px] leading-snug text-on-surface-variant">
+          <span id="s2-legend-window"></span><br>
+          <span id="s2-legend-note"></span>
+        </p>
+      </div>
+      <div id="risk-legend" class="bg-surface/90 backdrop-blur-md rounded-xl border border-outline-variant shadow-lg p-3 w-56">
+        <p class="font-label text-[10px] uppercase font-bold text-on-surface-variant mb-2 tracking-widest">{% trans "Drought detection" %}</p>
+        <div class="space-y-1.5 text-[11px]">
+          <div class="flex items-start gap-2"><span class="mt-0.5 w-2.5 h-2.5 shrink-0 rounded-sm" style="background:#D96565"></span><span><b>{% trans "Alert" %}</b> · {% trans "vegetation stressed" %}</span></div>
+          <div class="flex items-start gap-2"><span class="mt-0.5 w-2.5 h-2.5 shrink-0 rounded-sm" style="background:#EE8434"></span><span><b>{% trans "Warning" %}</b> · {% trans "soil drying" %}</span></div>
+          <div class="flex items-start gap-2"><span class="mt-0.5 w-2.5 h-2.5 shrink-0 rounded-sm" style="background:#E7A83B"></span><span><b>{% trans "Watch" %}</b> · {% trans "rain deficit" %}</span></div>
+          <div class="flex items-start gap-2"><span class="mt-0.5 w-2.5 h-2.5 shrink-0 rounded-sm" style="background:#38A88A"></span><span><b>{% trans "No drought" %}</b></span></div>
+        </div>
+        <p class="mt-2 pt-2 border-t border-outline-variant/50 text-[10px] leading-snug text-on-surface-variant">
+          <span id="risk-legend-window"></span><br>
+          {% trans "Each level adds a signal: rain, then soil, then vegetation. Click the map to see why." %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Drought area summary (bottom-right): measured from the map -->
+    <div id="zone-summary" class="absolute bottom-3 right-3 z-10 w-60">
+      <div class="bg-surface/90 backdrop-blur-md rounded-xl border border-outline-variant shadow-lg p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="font-label text-[10px] uppercase font-bold text-on-surface-variant tracking-widest">{% trans "Area in drought" %}</p>
+          <span class="material-symbols-outlined text-sm text-on-surface-variant" data-icon="layers">layers</span>
+        </div>
+        <div class="space-y-2.5">
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full inline-block" style="background:#D96565"></span> {% trans "Alert" %}</span>
+              <span class="font-bold font-mono" id="zone-alert-km2">—</span>
+            </div>
+            <div class="h-1 rounded-full bg-surface-variant overflow-hidden">
+              <div class="h-full rounded-full" id="zone-alert-bar" style="width:0%;background:#D96565"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full inline-block" style="background:#EE8434"></span> {% trans "Warning" %}</span>
+              <span class="font-bold font-mono" id="zone-warning-km2">—</span>
+            </div>
+            <div class="h-1 rounded-full bg-surface-variant overflow-hidden">
+              <div class="h-full rounded-full" id="zone-warning-bar" style="width:0%;background:#EE8434"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-[11px] mb-1">
+              <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full inline-block" style="background:#E7A83B"></span> {% trans "Watch" %}</span>
+              <span class="font-bold font-mono" id="zone-watch-km2">—</span>
+            </div>
+            <div class="h-1 rounded-full bg-surface-variant overflow-hidden">
+              <div class="h-full rounded-full" id="zone-watch-bar" style="width:0%;background:#E7A83B"></div>
+            </div>
+          </div>
+          <div class="pt-2 border-t border-outline-variant/50 flex justify-between text-[11px]">
+            <span class="text-on-surface-variant">{% trans "Basin land area" %}</span>
+            <span class="font-bold font-mono" id="zone-total-km2">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="flex items-center justify-between px-5 py-2 border-t border-outline-variant bg-surface-container-low text-[11px]">
+    <div id="s2-source-line" class="flex items-center gap-2 min-w-0">
+      <span class="material-symbols-outlined text-[14px] text-secondary">satellite_alt</span>
+      <span id="s2-source-text" class="font-mono text-primary font-semibold truncate"></span>
+    </div>
+    <span id="heatmap-last-updated" class="font-mono text-on-surface-variant">—</span>
+  </div>
+</div>
+</div>
+<!-- SECTION 7: Risk Overview -->
+<div class="lg:col-span-4 flex flex-col">
+<div class="bg-surface border border-outline-variant flex-grow flex flex-col max-h-[520px] overflow-hidden @container">
+<div class="px-4 py-3 border-b border-outline-variant bg-surface-container-low flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2.5 min-w-0">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-error/10 text-error shrink-0">
+            <span class="material-symbols-outlined text-[18px]" data-icon="warning">warning</span>
+        </span>
+        <div class="min-w-0">
+            <h3 class="font-headline font-bold text-sm uppercase tracking-wider leading-none truncate">{% trans "Risk Overview" %}</h3>
+            <p class="font-label text-[9px] uppercase tracking-widest text-on-surface-variant mt-1">{% trans "Measured SPEI-3" %}</p>
+        </div>
+    </div>
+    <span id="risk-overview-status" data-stale-label="{% trans "Stale" %}" data-current-label="{% trans "Current" %}" class="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide {% if risk.stale %}border-orange-500/30 bg-orange-500/10 text-orange-600{% else %}border-green-500/30 bg-green-500/10 text-green-700{% endif %}">
+        <span id="risk-overview-status-dot" class="h-1.5 w-1.5 rounded-full {% if risk.stale %}bg-orange-500{% else %}bg-green-500{% endif %}"></span>
+        <span id="risk-overview-status-label">{% if risk.stale %}{% trans "Stale" %}{% else %}{% trans "Current" %}{% endif %}</span>
+    </span>
+</div>
+<div class="flex-grow flex flex-col p-4 min-h-0 overflow-y-auto scrollbar-hide">
+    <!-- Gauge + headline -->
+    <div class="flex flex-col gap-4 @[20rem]:flex-row @[20rem]:items-start @[20rem]:gap-5">
+        <div class="relative w-20 h-10 shrink-0 overflow-hidden @[20rem]:w-28 @[20rem]:h-14">
+            <!-- Semicircle Gauge SVG -->
+            <svg class="w-full h-full overflow-visible" viewbox="0 0 100 50">
+                <!-- Five zones, one per drought level, at the exact score boundaries
+                     (Normal 0-20, Mild 20-40, Moderate 40-60, Severe 60-80, Extreme 80-100),
+                     with square ends so no zone spills into the next. -->
+                <path d="M 10 50 A 40 40 0 0 1 17.64 26.49" fill="none" stroke="#22c55e" stroke-width="13"><title>{% trans "Normal" %} 0–20</title></path>
+                <path d="M 17.64 26.49 A 40 40 0 0 1 37.64 11.96" fill="none" stroke="#eab308" stroke-width="13"><title>{% trans "Mild" %} 20–40</title></path>
+                <path d="M 37.64 11.96 A 40 40 0 0 1 62.36 11.96" fill="none" stroke="#f97316" stroke-width="13"><title>{% trans "Moderate" %} 40–60</title></path>
+                <path d="M 62.36 11.96 A 40 40 0 0 1 82.36 26.49" fill="none" stroke="#ef4444" stroke-width="13"><title>{% trans "Severe" %} 60–80</title></path>
+                <path d="M 82.36 26.49 A 40 40 0 0 1 90 50" fill="none" stroke="#991b1b" stroke-width="13"><title>{% trans "Extreme" %} 80–100</title></path>
+                <!-- Boundaries between levels -->
+                <g stroke="#ffffff" stroke-width="1.2">
+                    <line x1="24.92" y1="31.78" x2="10.36" y2="21.2"></line>
+                    <line x1="40.42" y1="20.52" x2="34.86" y2="3.4"></line>
+                    <line x1="59.58" y1="20.52" x2="65.14" y2="3.4"></line>
+                    <line x1="75.08" y1="31.78" x2="89.64" y2="21.2"></line>
+                </g>
+                <!-- Central pin pivot -->
+                <circle cx="50" cy="50" fill="#151c27" r="4"></circle>
+                <!-- Live needle: rotates to the measured score (0 = left, 100 = right) -->
+                <g id="risk-needle" style="transform: rotate({{ risk_needle_deg }}deg); transform-origin: 50px 50px; transform-box: view-box; transition: transform .8s cubic-bezier(.4,0,.2,1);">
+                    <line id="risk-needle-line" stroke="{% if risk.band == "unknown" or not risk %}#6b7280{% else %}#151c27{% endif %}" stroke-linecap="round" stroke-width="2.2" x1="50" x2="50" y1="50" y2="10"></line>
+                </g>
+            </svg>
+        </div>
+        <div class="min-w-0 flex-1">
+            <p class="font-label text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{% trans "Drought Risk" %}</p>
+            <p id="risk-overview-level" class="mt-1 text-lg font-bold font-headline leading-tight {% if risk %}{% if risk.band == "high" %}text-error{% elif risk.band == "moderate" %}text-orange-500{% elif risk.band == "low" %}text-green-500{% else %}text-on-surface-variant{% endif %}{% else %}text-on-surface-variant{% endif %}">
+                {{ risk.risk_level|default:"Unknown" }}
+            </p>
+            <span id="risk-overview-score-wrap" class="inline-flex items-center gap-1 mt-2 {% if risk.score is None %}hidden{% endif %}">
+                <span id="risk-overview-score" class="text-[11px] font-label font-bold px-2 py-0.5 rounded-full {% if risk.band == "high" %}bg-error/10 text-error{% elif risk.band == "moderate" %}bg-orange-500/10 text-orange-500{% elif risk.band == "low" %}bg-green-500/10 text-green-600{% else %}bg-surface-container-high text-on-surface-variant{% endif %}">
+                    {% trans "Score" %}: <span id="risk-overview-score-value">{{ risk.score|default:"—" }}</span>/100
+                </span>
+            </span>
+            <p id="risk-overview-spei" class="mt-2 text-[11px] text-on-surface-variant font-mono {% if risk.spei is None %}hidden{% endif %}" title="{% trans "Measured SPEI-3 driving this level" %}">
+                {% trans "SPEI-3" %}: <span id="risk-overview-spei-value">{{ risk.spei|default:"—" }}</span><span id="risk-overview-spei-date">{% if risk.measured_on %} &middot; {{ risk.measured_on|date:"Y-m" }}{% endif %}</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Colour scale: the same five levels as the gauge, with a marker at the score -->
+    <div class="mt-3">
+        <div class="relative">
+            <div class="flex h-1.5 overflow-hidden rounded-full">
+                <div class="w-1/5" style="background:#22c55e"></div>
+                <div class="w-1/5" style="background:#eab308"></div>
+                <div class="w-1/5" style="background:#f97316"></div>
+                <div class="w-1/5" style="background:#ef4444"></div>
+                <div class="w-1/5" style="background:#991b1b"></div>
+            </div>
+            <div id="risk-scale-marker" class="absolute -top-1 h-3.5 w-1 -translate-x-1/2 rounded-full bg-[#151c27] ring-2 ring-white {% if risk.score is None %}hidden{% endif %}"
+                 style="left:{{ risk.score|default:0 }}%"></div>
+        </div>
+        <div class="mt-1 grid grid-cols-5 text-center font-label text-[8px] uppercase tracking-wider text-on-surface-variant">
+            <span>{% trans "Normal" %}</span>
+            <span>{% trans "Mild" %}</span>
+            <span>{% trans "Moderate" %}</span>
+            <span>{% trans "Severe" %}</span>
+            <span>{% trans "Extreme" %}</span>
+        </div>
+    </div>
+
+    <!-- Assessment metadata -->
+    <div class="mt-3 grid grid-cols-3 divide-x divide-outline-variant/60 overflow-hidden rounded-md border border-outline-variant/60 bg-surface-container-low">
+        <div class="min-w-0 px-2 py-1.5 text-center">
+            <p class="font-label text-[8px] uppercase tracking-wider text-on-surface-variant">{% trans "Region" %}</p>
+            <p id="risk-overview-region" class="mt-0.5 truncate text-[10px] font-semibold text-on-surface">{{ default_region_name }}</p>
+        </div>
+        <div class="min-w-0 px-2 py-1.5 text-center">
+            <p class="font-label text-[8px] uppercase tracking-wider text-on-surface-variant">{% trans "Reading" %}</p>
+            <p id="risk-overview-reading" class="mt-0.5 font-mono text-[10px] font-semibold text-on-surface">{% if risk.measured_on %}{{ risk.measured_on|date:"Y-m" }}{% else %}—{% endif %}</p>
+        </div>
+        <div class="min-w-0 px-2 py-1.5 text-center">
+            <p class="font-label text-[8px] uppercase tracking-wider text-on-surface-variant">{% trans "Age" %}</p>
+            <p id="risk-overview-age" class="mt-0.5 font-mono text-[10px] font-semibold text-on-surface">{% if risk_age_months %}{{ risk_age_months }} mo{% else %}—{% endif %}</p>
+        </div>
+    </div>
+
+    <!-- Stale-data warning -->
+    <div id="risk-overview-warning" class="mt-3 flex items-start gap-2.5 rounded-md border border-orange-500/40 bg-orange-500/10 p-2.5 {% if not risk.stale %}hidden{% endif %}">
+        <span class="material-symbols-outlined text-[16px] text-orange-600 mt-0.5 shrink-0">warning</span>
+        <p class="text-[11px] leading-snug text-orange-700 dark:text-orange-400">
+            {% trans "This region has no recent SPEI-3 reading, so the level above is not current. Re-run the drought-index import." %}
+        </p>
+    </div>
+
+    <!-- Recommended action + map link pinned to the bottom -->
+    <div class="mt-auto pt-4">
+        <div class="rounded-md border border-outline-variant bg-surface-container-low p-3">
+            <div class="flex items-center gap-1.5 mb-1.5">
+                <span class="material-symbols-outlined text-[15px] text-primary">lightbulb</span>
+                <p class="font-label text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">{% trans "Recommended action" %}</p>
+            </div>
+            <p id="risk-overview-recommendation" class="text-[11px] text-on-surface-variant leading-snug">
+                {{ risk.recommendation|default:"" }}
+            </p>
+        </div>
+        <a class="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wide text-secondary hover:underline" href="#ichkeul-heatmap">
+            {% trans "See map" %} <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+        </a>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 3: Key Drought Metrics Grid -->
+<div class="mb-12">
+<h3 class="font-headline font-black text-lg uppercase tracking-widest mb-6 border-b-2 border-primary-container inline-block pb-1">Real-time Metrics</h3>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+<!-- Metric 1 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="humidity_percentage">humidity_percentage</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Soil Moisture</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="metric-soil-moisture" class="text-2xl font-black font-headline">—</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="rainy">rainy</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Rainfall (30d)</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="metric-rainfall" class="text-2xl font-black font-headline">—</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="eco">eco</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">NDVI Index</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="metric-ndvi" class="text-2xl font-black font-headline">—</span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="air">air</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">ETc (Daily)</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="metric-etc" class="text-2xl font-black font-headline">—</span>
+</div>
+</div>
+<!-- Metric 5 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="waves">waves</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Soil Water</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="metric-soil-water" class="text-2xl font-black font-headline">—</span>
+</div>
+</div>
+<!-- Metric 6 -->
+<div class="bg-surface border border-outline-variant p-4">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" data-icon="potted_plant">potted_plant</span>
+<span class="font-label text-[10px] uppercase font-bold text-on-surface-variant">Crop Stress</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span id="metric-crop-stress" class="text-2xl font-black font-headline">—</span>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 4 & 5: Trends and Drivers -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+<!-- Trends & Forecasts Charts -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-surface border border-outline-variant p-6">
+<h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">Trends &amp; Predictive Forecasts</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
+<!-- Soil Water Balance Chart -->
+<div>
+    <div class="text-[10px] font-bold font-mono uppercase tracking-wider text-on-surface-variant mb-3">Soil Water Balance (mm)</div>
+    <div class="h-48"><canvas id="swb-chart"></canvas></div>
+</div>
+<!-- Drought Risk Trend -->
+<div>
+    <div class="text-[10px] font-bold font-mono uppercase tracking-wider text-on-surface-variant mb-3">Drought Risk Trend (0–100)</div>
+    <div class="h-48"><canvas id="risk-chart"></canvas></div>
+</div>
+</div>
+<!-- Refined Insight Cards Row -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Qualitative Insight -->
+<div class="bg-surface-container-low border border-outline-variant p-4 flex gap-4">
+<div class="flex-shrink-0">
+<span class="material-symbols-outlined text-primary text-2xl" data-icon="lightbulb">lightbulb</span>
+</div>
+<div class="flex-grow">
+<p id="insight-text" class="text-xs text-on-surface-variant leading-relaxed italic">
+            "Loading prediction insight…"
+        </p>
+</div>
+</div>
+<!-- Quantitative Trajectory -->
+<div class="bg-primary-container p-4 border border-primary flex flex-col justify-between">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-white/80 text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-label text-[10px] uppercase font-bold text-white/60 tracking-wider">Trend</span>
+</div>
+<span id="trend-text" class="text-[11px] font-bold text-white">Loading trend…</span>
+</div>
+<div class="h-[1px] bg-white/10 w-full my-2"></div>
+<div class="flex justify-between items-end">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="font-label text-[10px] uppercase font-bold text-white/60 tracking-wider">Forecast</span>
+</div>
+<span id="forecast-text" class="text-[11px] font-bold text-secondary-fixed-dim">Loading…</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Drought Drivers -->
+<div class="lg:col-span-1">
+<div class="bg-surface border border-outline-variant p-6 h-full">
+<a href="{% url 'dashboard:calculations' %}" class="block hover:opacity-80 transition-opacity"><h3 class="font-headline font-bold text-sm uppercase tracking-wider mb-6">What's Driving Risk?</h3></a>
+<div class="space-y-6">
+<div id="driver-rainfall" class="block">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Rainfall Deficit</span>
+        <span class="font-label text-xs font-bold">—</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-error" style="width:0%"></div>
+    </div>
+</div>
+<div id="driver-temperature" class="block">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">High Temperature</span>
+        <span class="font-label text-xs font-bold">—</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-orange-500" style="width:0%"></div>
+    </div>
+</div>
+<div id="driver-soil-moisture" class="block">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Soil Moisture Decline</span>
+        <span class="font-label text-xs font-bold">—</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-orange-400" style="width:0%"></div>
+    </div>
+</div>
+<div id="driver-vegetation" class="block">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Vegetation Stress</span>
+        <span class="font-label text-xs font-bold">—</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-yellow-500" style="width:0%"></div>
+    </div>
+</div>
+<div id="driver-evapotranspiration" class="block">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-bold text-on-surface-variant">Evapotranspiration</span>
+        <span class="font-label text-xs font-bold">—</span>
+    </div>
+    <div class="h-2 bg-surface-variant rounded-full overflow-hidden">
+        <div class="h-full bg-purple-500" style="width:0%"></div>
+    </div>
+</div>
+</div>
+<div class="mt-10 pt-6 border-t border-outline-variant">
+<div class="bg-primary-container p-4 flex items-center gap-4">
+<span class="material-symbols-outlined text-white text-3xl">lightbulb</span>
+<div>
+<p class="text-[10px] font-bold text-white/70 uppercase">Insight</p>
+<p id="driver-insight-text" class="text-xs text-white font-medium">Loading prediction insight…</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- SECTION 6: Prediction Table -->
+<div class="mb-12"><div class="flex flex-wrap items-center justify-between gap-4 mb-4"><div class="flex items-center gap-3"><h3 class="font-headline font-black text-lg uppercase tracking-widest border-b-2 border-primary-container inline-block pb-1">Prévisions Actionnables &amp; Protocole de Réponse</h3><span class="text-xs font-label text-on-surface-variant px-2 py-0.5 bg-surface-container rounded border border-outline-variant">Scénario Standard Météo-Tunisie</span></div><div class="flex items-center gap-2"><button id="btn-export-analysis-report" class="px-3 py-1.5 bg-surface border border-outline-variant text-on-surface text-xs font-medium rounded hover:bg-surface-container-low transition-colors flex items-center gap-1.5"><span class="material-symbols-outlined text-sm">sim_card_download</span> Exporter GeoJSON / CSV</button><button onclick="alert('Protocole activé : Message SMS de vigilance transmis aux exploitants et au CRDA.')" class="px-3 py-1.5 bg-primary text-white text-xs font-bold rounded hover:bg-primary-container transition-colors flex items-center gap-1.5 shadow-sm"><span class="material-symbols-outlined text-sm">send</span> Déclencher Alerte SMS Agriculteurs</button></div></div><div class="overflow-x-auto shadow-sm rounded border border-outline-variant"><table class="w-full border-collapse bg-surface text-left"><thead><tr class="bg-surface-container font-label text-[10px] text-on-surface-variant uppercase tracking-tighter"><th class="p-4 border-b border-outline-variant">Horizon Temporel</th><th class="p-4 border-b border-outline-variant">Niveau de Risque DRI</th><th class="p-4 border-b border-outline-variant">Impact Hydro-Agricole Modélisé</th><th class="p-4 border-b border-outline-variant">Mesure Opérationnelle Recommandée</th><th class="p-4 text-center border-b border-outline-variant">Fiabilité</th><th class="p-4 text-right border-b border-outline-variant">Action Immédiate</th></tr></thead><tbody id="forecast-table-body" class="text-sm"><tr class="hover:bg-surface-container-low transition-colors"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-yellow-500"></span> Aujourd'hui (J+0)</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase border border-yellow-200 rounded">Vigilance (34)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Stress mineur des couches racinaires superficielles (0-20 cm). Nappe stable.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-medium text-xs">Maintien du calendrier d'arrosage standard et calibration des sondes tensiométriques.</td><td class="forecast-conf p-4 text-center font-label text-xs text-secondary font-bold border-b border-outline-variant/30">98%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="text-[11px] font-label uppercase font-bold text-outline hover:text-primary transition-colors">Surveiller</button></td></tr><tr class="hover:bg-surface-container-low transition-colors bg-orange-50/20"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-500"></span> À +7 Jours</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-orange-100 text-orange-800 text-[10px] font-bold uppercase border border-orange-200 rounded">Sévère (52)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Déficit hydrique généralisé sur Tinja &amp; Mateur. Assèchement du lit mineur des oueds.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-medium text-xs text-orange-900">Restriction immédiate de l'irrigation pour les cultures secondaires non vivrières.</td><td class="forecast-conf p-4 text-center font-label text-xs text-secondary font-bold border-b border-outline-variant/30">85%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="px-2.5 py-1 bg-orange-100 text-orange-900 hover:bg-orange-200 rounded text-[10px] font-bold uppercase font-label transition-colors">Simuler Quotas</button></td></tr><tr class="hover:bg-surface-container-low transition-colors"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-orange-600"></span> À +14 Jours</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-orange-200 text-orange-900 text-[10px] font-bold uppercase border border-orange-300 rounded">Sévère Élevé (68)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Point de flétrissement permanent atteint pour les céréales d'hiver non irriguées.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-medium text-xs text-orange-900">Activation de la réserve auxiliaire des barrages Joumine &amp; Ghezala.</td><td class="forecast-conf p-4 text-center font-label text-xs text-secondary font-bold border-b border-outline-variant/30">72%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="px-2.5 py-1 bg-surface border border-outline-variant text-on-surface hover:bg-surface-variant rounded text-[10px] font-bold uppercase font-label transition-colors">Pré-Alerte CRDA</button></td></tr><tr class="hover:bg-surface-container-low transition-colors bg-red-50/30"><td class="p-4 font-bold border-b border-outline-variant/30 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-error"></span> À +30 Jours</td><td class="p-4 border-b border-outline-variant/30"><span class="forecast-badge px-2 py-0.5 bg-red-100 text-red-800 text-[10px] font-bold uppercase border border-red-200 rounded font-bold">Extrême (78)</span></td><td class="forecast-pred p-4 text-on-surface-variant border-b border-outline-variant/30 text-xs">Risque élevé de sur-salinisation du lac Ichkeul et rupture d'approvisionnement agro-pastoral.</td><td class="forecast-action p-4 border-b border-outline-variant/30 font-bold text-xs text-error">Déclaration officielle de l'état de calamité sécheresse &amp; moratoire sur les forages illicites.</td><td class="forecast-conf p-4 text-center font-label text-xs text-on-surface-variant font-bold border-b border-outline-variant/30">60%</td><td class="p-4 text-right border-b border-outline-variant/30"><button class="px-2.5 py-1 bg-error text-white hover:bg-red-700 rounded text-[10px] font-bold uppercase font-label transition-colors shadow-sm">Plan de Crise</button></td></tr></tbody></table></div></div>
+
+{% include 'dashboard/_partners.html' %}
+</main>
+</div>
+<script src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'dashboard/js/map-tiles.js' %}"></script>
+<script>
+// ── Helpers ──────────────────────────────────────────────────────
+// One scale for every risk number on the page (the project's documented
+// convention, also used by the gauge): Normal 0-20, Mild 20-40,
+// Moderate 40-60, Severe 60-80, Extreme 80-100.
+var RISK_LEVELS = [
+    { max: 20, name: 'Normal', color: '#22c55e', cls: 'bg-green-100 text-green-800 border-green-200' },
+    { max: 40, name: 'Mild', color: '#eab308', cls: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+    { max: 60, name: 'Moderate', color: '#f97316', cls: 'bg-orange-100 text-orange-800 border-orange-200' },
+    { max: 80, name: 'Severe', color: '#ef4444', cls: 'bg-red-100 text-red-800 border-red-200' },
+    { max: Infinity, name: 'Extreme', color: '#991b1b', cls: 'bg-red-200 text-red-900 border-red-300' }
+];
+function riskLevel(score) {
+    for (var i = 0; i < RISK_LEVELS.length; i++) {
+        if (score <= RISK_LEVELS[i].max) return i;
+    }
+    return RISK_LEVELS.length - 1;
+}
+function riskLabel(score) {
+    if (score === null || score === undefined) return '—';
+    var l = RISK_LEVELS[riskLevel(score)];
+    return { text: l.name + ' (' + score + ')', cls: l.cls };
+}
+function riskColor(score) {
+    if (score === null || score === undefined) return '#6b7280';
+    return RISK_LEVELS[riskLevel(score)].color;
+}
+function riskBadgeHTML(score) {
+    const info = riskLabel(score);
+    return '<span class="forecast-badge px-2 py-0.5 text-[10px] font-bold uppercase border rounded '+info.cls+'">'+info.text+'</span>';
+}
+function recommendationFor(score) {
+    if (score === null || score === undefined) return 'Données non disponibles.';
+    return [
+        "Maintien du calendrier d'arrosage standard et calibration des sondes tensiométriques.",
+        "Maintien du calendrier d'arrosage standard ; surveillance hebdomadaire de l'humidité du sol.",
+        "Restriction de l'irrigation pour les cultures secondaires non vivrières.",
+        "Restriction immédiate de l'irrigation pour les cultures secondaires non vivrières.",
+        "Déclaration officielle de l'état de calamité sécheresse & moratoire sur les forages illicites."
+    ][riskLevel(score)];
+}
+function predictionText(score) {
+    if (score === null || score === undefined) return 'Données non disponibles.';
+    return [
+        'Pas de stress hydrique notable. Nappe stable.',
+        'Stress mineur des couches racinaires superficielles (0-20 cm). Nappe stable.',
+        'Déficit hydrique modéré sur Tinja & Mateur.',
+        'Déficit hydrique généralisé sur Tinja & Mateur. Assèchement du lit mineur des oueds.',
+        "Risque élevé de sur-salinisation du lac Ichkeul et rupture d'approvisionnement agro-pastoral."
+    ][riskLevel(score)];
+}
+function confidenceFor(days) {
+    return Math.round(100 - days * 1.2) + '%';
+}
+
+// ── Build heatmap ────────────────────────────────────────────────
+// Satellite map of the Ichkeul catchment with the drought indicator (or
+// another layer) from /api/s2/, the basin outline and the two stations. The
+// map is created once; data updates only redraw the station markers, so
+// pan/zoom survive a refresh.
+function stationRisk(st, riskToday) {
+    return (st.risk_score !== undefined && st.risk_score !== null) ? st.risk_score : (riskToday ?? null);
+}
+
+function loadBasinGeoJSON(url) {
+    if (!window._basinGeoJSONPromise) {
+        window._basinGeoJSONPromise = fetch(url).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        });
+    }
+    return window._basinGeoJSONPromise;
+}
+
+function riskBand(riskVal) {
+    if (riskVal === null || riskVal === undefined) return { color: '#6b7280', bg: 'rgba(107, 114, 128, 0.18)', text: 'Unknown' };
+    var l = RISK_LEVELS[riskLevel(riskVal)];
+    return { color: l.color, bg: l.color + '2e', text: l.name };
+}
+
+function initHeatmapMap(container) {
+    var map = L.map(container, {
+        center: [37.06, 9.48],
+        zoom: 10,
+        minZoom: 5,
+        maxZoom: 18,
+        zoomControl: false,
+        attributionControl: false,
+        // Occluded windows never advance Leaflet's rAF tile fade, which leaves
+        // a fully loaded basemap at opacity 0 (blank map).
+        fadeAnimation: false
+    });
+    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+    map.createPane('s2Pane'); map.getPane('s2Pane').style.zIndex = '350';
+    map.createPane('outlinePane'); map.getPane('outlinePane').style.zIndex = '400';
+    map.createPane('stationPane'); map.getPane('stationPane').style.zIndex = '650';
+
+    var tileWarning = document.getElementById('heatmap-tile-warning');
+    var currentVariant = 'satellite';
+    function makeTileLayer(variant) {
+        if (!window.MapTiles) {
+            return L.tileLayer('/api/tiles/{z}/{x}/{y}.png?layer=' + variant, { maxZoom: 19 });
+        }
+        return window.MapTiles.createTileLayer(L, map, {
+            variant: variant,
+            maxZoom: 19,
+            onSourceChange: function (state) {
+                if (tileWarning) tileWarning.classList.toggle('hidden', state !== 'retrying');
+            }
+        });
+    }
+    var tileLayer = makeTileLayer(currentVariant).addTo(map);
+
+    function setActiveLayer(variant) {
+        if (currentVariant === variant) return;
+        currentVariant = variant;
+        map.removeLayer(tileLayer);
+        tileLayer = makeTileLayer(variant).addTo(map);
+        tileLayer.bringToBack();
+        [['satellite-btn', 'satellite'], ['topography-btn', 'terrain']].forEach(function (pair) {
+            var btn = document.getElementById(pair[0]);
+            if (!btn) return;
+            btn.className = 'layer-btn px-3 py-1 text-xs font-bold uppercase '
+                + (pair[1] === variant ? 'bg-primary text-on-primary' : 'bg-surface-variant text-on-surface-variant');
+        });
+    }
+    var satBtn = document.getElementById('satellite-btn');
+    var topoBtn = document.getElementById('topography-btn');
+    if (satBtn) satBtn.onclick = function () { setActiveLayer('satellite'); };
+    if (topoBtn) topoBtn.onclick = function () { setActiveLayer('terrain'); };
+
+    window.addEventListener('resize', function () { map.invalidateSize(); });
+    setTimeout(function () { map.invalidateSize(); }, 150);
+
+    var state = {
+        map: map,
+        basinGroup: L.layerGroup().addTo(map),
+        stationGroup: L.layerGroup().addTo(map),
+        fitted: false
+    };
+    initS2Layers(state);
+    return state;
+}
+
+// ── Map layers: NDVI, NDWI, temperature, rainfall, SPI-3 ──────────
+// Tiles come from /api/s2/, computed in Earth Engine and clipped to the
+// basin (services/sentinel_tiles.py); each layer's scale, unit, dates and
+// source come from /api/s2/legend/.
+var S2_T = {
+    ndvi: "{% filter escapejs %}{% trans 'Vegetation (NDVI)' %}{% endfilter %}",
+    ndwi: "{% filter escapejs %}{% trans 'Vegetation water (NDWI)' %}{% endfilter %}",
+    temp: "{% filter escapejs %}{% trans 'Temperature (30-day mean)' %}{% endfilter %}",
+    rain: "{% filter escapejs %}{% trans 'Rainfall (30-day total)' %}{% endfilter %}",
+    spi: "{% filter escapejs %}{% trans 'SPI-3 (3-month drought index)' %}{% endfilter %}",
+    drought: "{% filter escapejs %}{% trans 'Drought detection' %}{% endfilter %}",
+    droughtClass: ["{% filter escapejs %}{% trans 'No drought' %}{% endfilter %}",
+                   "{% filter escapejs %}{% trans 'Watch · rain deficit' %}{% endfilter %}",
+                   "{% filter escapejs %}{% trans 'Warning · soil drying' %}{% endfilter %}",
+                   "{% filter escapejs %}{% trans 'Alert · vegetation stressed' %}{% endfilter %}"],
+    rainLast3: "{% filter escapejs %}{% trans 'Rain, last 3 months (SPI-3)' %}{% endfilter %}",
+    soilVsNormal: "{% filter escapejs %}{% trans 'Soil moisture vs normal' %}{% endfilter %}",
+    vegVsNormal: "{% filter escapejs %}{% trans 'Vegetation vs normal' %}{% endfilter %}",
+    belowOne: "{% filter escapejs %}{% trans 'Below -1 counts as drought.' %}{% endfilter %}",
+    rainWindow: "{% filter escapejs %}{% trans 'Rain and soil' %}{% endfilter %}",
+    vegWindow: "{% filter escapejs %}{% trans 'vegetation' %}{% endfilter %}",
+    Bare: "{% filter escapejs %}{% trans 'Bare' %}{% endfilter %}",
+    Dense: "{% filter escapejs %}{% trans 'Dense' %}{% endfilter %}",
+    Dry: "{% filter escapejs %}{% trans 'Dry' %}{% endfilter %}",
+    Moist: "{% filter escapejs %}{% trans 'Moist' %}{% endfilter %}",
+    Cooler: "{% filter escapejs %}{% trans 'Cooler' %}{% endfilter %}",
+    Hotter: "{% filter escapejs %}{% trans 'Hotter' %}{% endfilter %}",
+    Less: "{% filter escapejs %}{% trans 'Less' %}{% endfilter %}",
+    More: "{% filter escapejs %}{% trans 'More' %}{% endfilter %}",
+    Drier: "{% filter escapejs %}{% trans 'Drier' %}{% endfilter %}",
+    Wetter: "{% filter escapejs %}{% trans 'Wetter' %}{% endfilter %}",
+    loading: "{% filter escapejs %}{% trans 'Loading map layer…' %}{% endfilter %}",
+    failed: "{% filter escapejs %}{% trans 'This map layer is unavailable right now.' %}{% endfilter %}",
+    noValue: "{% filter escapejs %}{% trans 'No value here (cloud, water or outside the basin).' %}{% endfilter %}",
+    zoomIn: "{% filter escapejs %}{% trans 'Zoom in to see this layer.' %}{% endfilter %}",
+    noteS2: "{% filter escapejs %}{% trans 'Clouds and open water are left clear. Click the map for the value.' %}{% endfilter %}",
+    noteClimate: "{% filter escapejs %}{% trans 'About 10 km resolution, smoothed. Click the map for the value.' %}{% endfilter %}",
+    noteSpi: "{% filter escapejs %}{% trans 'Last 3 months of rain compared with the same months in the 30 previous years. Below -1 is drought. Click the map for the value.' %}{% endfilter %}",
+    spiClass: [
+        [-2, "{% filter escapejs %}{% trans 'Extremely dry' %}{% endfilter %}"],
+        [-1.5, "{% filter escapejs %}{% trans 'Severely dry' %}{% endfilter %}"],
+        [-1, "{% filter escapejs %}{% trans 'Moderately dry' %}{% endfilter %}"],
+        [1, "{% filter escapejs %}{% trans 'Near normal' %}{% endfilter %}"],
+        [1.5, "{% filter escapejs %}{% trans 'Moderately wet' %}{% endfilter %}"],
+        [2, "{% filter escapejs %}{% trans 'Severely wet' %}{% endfilter %}"],
+        [Infinity, "{% filter escapejs %}{% trans 'Extremely wet' %}{% endfilter %}"]
+    ]
+};
+var S2_MIN_ZOOM = 8, S2_MAX_ZOOM = 16;
+
+// A layer value with its unit, e.g. "19.6 °C", "96 mm", or "+0.42" for SPI.
+function s2Value(info, v, signed) {
+    var txt = (signed && v > 0 ? '+' : '') + v.toFixed(info ? info.decimals : 2);
+    return info && info.unit ? txt + ' ' + info.unit : txt;
+}
+
+function spiClass(v) {
+    for (var i = 0; i < S2_T.spiClass.length; i++) {
+        if (v <= S2_T.spiClass[i][0]) return S2_T.spiClass[i][1];
+    }
+    return '';
+}
+
+function s2Fmt(iso) {
+    return new Date(iso + 'T12:00:00Z').toLocaleDateString(document.documentElement.lang || 'en', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
+function initS2Layers(state) {
+    var map = state.map;
+    var legendInfo = null;
+    var current = null;
+    var layer = null;
+    var pending = 0;
+    var failed = false;
+    var statusEl = document.getElementById('s2-status');
+
+    fetch('/api/s2/legend/').then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) { legendInfo = d; setMode('risk', true); })
+        .catch(function () { setMode('risk', true); });
+
+    function setStatus(kind) {
+        if (!statusEl) return;
+        if (!kind) { statusEl.classList.add('hidden'); return; }
+        statusEl.classList.remove('hidden');
+        var icon = document.getElementById('s2-status-icon');
+        icon.textContent = kind === 'loading' ? 'progress_activity' : (kind === 'zoom' ? 'zoom_in' : 'cloud_off');
+        icon.classList.toggle('animate-spin', kind === 'loading');
+        document.getElementById('s2-status-text').textContent = kind === 'loading' ? S2_T.loading : (kind === 'zoom' ? S2_T.zoomIn : S2_T.failed);
+    }
+
+    // The "Risk" button shows the drought indicator layer.
+    function layerOf(mode) { return mode === 'risk' ? 'drought' : mode; }
+
+    function rangeOf(w) { return w ? s2Fmt(w.from) + ' – ' + s2Fmt(w.to) : ''; }
+
+    function showDroughtSummary(info) {
+        var km2 = info.areas_km2 || {};
+        var total = ['none', 'watch', 'warning', 'alert'].reduce(function (a, k) { return a + (km2[k] || 0); }, 0);
+        ['alert', 'warning', 'watch'].forEach(function (k) {
+            var v = km2[k] || 0;
+            document.getElementById('zone-' + k + '-km2').textContent = v.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' km²';
+            document.getElementById('zone-' + k + '-bar').style.width = (total ? 100 * v / total : 0) + '%';
+        });
+        document.getElementById('zone-total-km2').textContent = total ? total.toLocaleString(undefined, { maximumFractionDigits: 0 }) + ' km²' : '—';
+        document.getElementById('risk-legend-window').textContent =
+            S2_T.rainWindow + ' ' + rangeOf(info.window) + (info.vegetation_window ? ' · ' + S2_T.vegWindow + ' ' + rangeOf(info.vegetation_window) : '');
+    }
+
+    function showLegend(mode) {
+        var risk = mode === 'risk';
+        document.getElementById('risk-legend').classList.toggle('hidden', !risk);
+        document.getElementById('s2-legend').classList.toggle('hidden', risk);
+        document.getElementById('zone-summary').classList.toggle('hidden', !risk);
+        if (!legendInfo) return;
+        var info = legendInfo[layerOf(mode)];
+        var range = rangeOf(info.window);
+        document.getElementById('s2-source-text').textContent = info.source + (range ? ' · ' + range : '');
+        if (risk) { showDroughtSummary(info); return; }
+        document.getElementById('s2-legend-title').textContent = S2_T[mode];
+        document.getElementById('s2-legend-bar').style.background = 'linear-gradient(to right, ' + info.ramp.join(', ') + ')';
+        document.getElementById('s2-legend-lo').textContent = info.domain ? s2Value(info, info.domain[0], mode === 'spi') : '';
+        document.getElementById('s2-legend-hi').textContent = info.domain ? s2Value(info, info.domain[1], mode === 'spi') : '';
+        document.getElementById('s2-legend-lo-word').textContent = S2_T[info.ends[0]] || info.ends[0];
+        document.getElementById('s2-legend-hi-word').textContent = S2_T[info.ends[1]] || info.ends[1];
+        document.getElementById('s2-legend-window').textContent = info.source + (range ? ' · ' + range : '');
+        document.getElementById('s2-legend-note').textContent =
+            mode === 'spi' ? S2_T.noteSpi : (mode === 'ndvi' || mode === 'ndwi' ? S2_T.noteS2 : S2_T.noteClimate);
+    }
+
+    function zoomCheck() {
+        if (!current) return;
+        if (map.getZoom() < S2_MIN_ZOOM) setStatus('zoom');
+        else if (failed) setStatus('failed');
+        else setStatus(pending > 0 ? 'loading' : null);
+    }
+
+    function setMode(mode, force) {
+        if (mode === current && !force) return;
+        current = mode;
+        var key = layerOf(mode);
+        document.querySelectorAll('.s2-mode-btn').forEach(function (b) {
+            var on = b.dataset.mode === mode;
+            b.classList.toggle('bg-primary', on); b.classList.toggle('text-on-primary', on);
+            b.classList.toggle('bg-surface-variant', !on); b.classList.toggle('text-on-surface-variant', !on);
+        });
+        if (layer) { map.removeLayer(layer); layer = null; }
+        pending = 0; failed = false;
+        map.closePopup();
+        {
+            layer = L.tileLayer('/api/s2/' + key + '/{z}/{x}/{y}.png', {
+                pane: 's2Pane', minZoom: S2_MIN_ZOOM, maxZoom: 19,
+                // Coarse climate layers stop at their own zoom; Leaflet enlarges beyond it.
+                maxNativeZoom: legendInfo && legendInfo[key] ? legendInfo[key].max_zoom : S2_MAX_ZOOM,
+                tileSize: 256, opacity: 0.92, keepBuffer: 1, updateWhenZooming: false,
+                // Only tiles over the catchment exist; outside it Leaflet asks for none.
+                bounds: legendInfo ? [[legendInfo.bounds[1], legendInfo.bounds[0]], [legendInfo.bounds[3], legendInfo.bounds[2]]] : undefined
+            });
+            layer.on('tileloadstart', function () { pending++; zoomCheck(); });
+            layer.on('tileload', function () { pending = Math.max(0, pending - 1); zoomCheck(); });
+            layer.on('tileerror', function () {
+                pending = Math.max(0, pending - 1);
+                failed = true;
+                zoomCheck();
+            });
+            layer.addTo(map);
+            zoomCheck();
+        }
+        showLegend(mode);
+    }
+
+    document.querySelectorAll('.s2-mode-btn').forEach(function (b) {
+        b.addEventListener('click', function () { setMode(b.dataset.mode); });
+    });
+    map.on('zoomend', zoomCheck);
+
+    // Why a point has its drought level: the three signals, each against normal.
+    function droughtDetail(d) {
+        if (!d) return '';
+        var row = function (label, v) {
+            var dry = v !== null && v < -1;
+            return '<div style="display:flex;justify-content:space-between;gap:12px">' + label +
+                '<b style="font-family:monospace;color:' + (dry ? '#b91c1c' : '#0f172a') + '">' + (v === null ? '—' : (v > 0 ? '+' : '') + v.toFixed(2)) + '</b></div>';
+        };
+        return '<div style="margin-top:6px;padding-top:6px;border-top:1px solid #e2e8f0;font-size:11px;color:#475569">' +
+            row(S2_T.rainLast3, d.spi) + row(S2_T.soilVsNormal, d.soil) + row(S2_T.vegVsNormal, d.vegetation) +
+            '<div style="margin-top:4px;color:#94a3b8">' + S2_T.belowOne + '</div></div>';
+    }
+
+    map.on('click', function (e) {
+        if (!current) return;
+        var mode = current;
+        var key = layerOf(mode);
+        var popup = L.popup({ maxWidth: 260 }).setLatLng(e.latlng).setContent('…').openOn(map);
+        var info = legendInfo && legendInfo[key];
+        var top = info ? info.max_zoom : S2_MAX_ZOOM;
+        fetch('/api/s2/' + key + '/value/?lat=' + e.latlng.lat.toFixed(6) + '&lon=' + e.latlng.lng.toFixed(6) + '&z=' + Math.min(top, Math.max(S2_MIN_ZOOM, Math.round(map.getZoom()))))
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                if (mode !== current) return;
+                var title = '<b>' + S2_T[key] + '</b><br>';
+                if (d.value === null || d.value === undefined) {
+                    popup.setContent(title + '<span style="color:#64748b">' + (d.error ? S2_T.failed : S2_T.noValue) + '</span>');
+                } else if (key === 'drought') {
+                    var c = Math.round(d.value);
+                    popup.setContent(title + '<span style="font-size:15px;font-weight:700;color:' + info.ramp[c] + '">' +
+                        S2_T.droughtClass[c] + '</span>' + droughtDetail(d.detail));
+                } else {
+                    popup.setContent(title + '<span style="font-size:18px;font-weight:700;font-family:monospace">' + s2Value(info, d.value, key === 'spi') + '</span>'
+                        + (key === 'spi' ? '<br><span style="color:#475569">' + spiClass(d.value) + '</span>' : ''));
+                }
+            })
+            .catch(function () { popup.setContent(S2_T.failed); });
+    });
+}
+
+function buildHeatmap(riskToday, stationsData) {
+    const container = document.getElementById('ichkeul-heatmap');
+    if (!container || typeof L === 'undefined') return;
+    if (!window._heatmapState) {
+        window._heatmapState = initHeatmapMap(container);
+        window._heatmap = window._heatmapState.map;
+    }
+    const state = window._heatmapState;
+    const map = state.map;
+
+    const stations = (stationsData && stationsData.length)
+        ? stationsData
+        : (window._stationsData && window._stationsData.length ? window._stationsData : [
+            {
+                name: 'v8 st humide inf',
+                label: 'Station Humide Inférieure',
+                lat: 37.117,
+                lon: 9.318,
+                rain_mm: 28.0,
+                temp_c: 11.1,
+                humidity: 90,
+                spei: -0.12,
+                severity: 'Normal / Mild',
+                risk_score: 52
+            },
+            {
+                name: 'v8 st sub humide',
+                label: 'Station Sub-Humide',
+                lat: 37.010,
+                lon: 9.731,
+                rain_mm: 31.6,
+                temp_c: 11.1,
+                humidity: 86,
+                spei: -0.55,
+                severity: 'Abnormally Dry',
+                risk_score: 61
+            }
+        ]);
+
+    // ── Heat surface + basin borders (needs the catchment outline) ──
+    loadBasinGeoJSON(container.dataset.basinUrl)
+        .then(function (data) {
+            const byKind = function (kind) {
+                return { type: 'FeatureCollection', features: data.features.filter(function (f) { return f.properties.kind === kind; }) };
+            };
+            const outline = byKind('outline');
+            const sections = byKind('section');
+
+            state.basinGroup.clearLayers();
+
+            // Sections: thin white lines, named on hover.
+            L.geoJSON(sections, {
+                pane: 'outlinePane',
+                style: { color: '#ffffff', weight: 0.8, opacity: 0.7, fillColor: '#ffffff', fillOpacity: 0 },
+                onEachFeature: function (feature, layer) {
+                    layer.bindTooltip('<b>Section ' + feature.properties.id + '</b>',
+                        { sticky: true, direction: 'top', className: 'station-tooltip-smooth', opacity: 0.95 });
+                    layer.on('mouseover', function () { layer.setStyle({ weight: 2, fillOpacity: 0.12 }); });
+                    layer.on('mouseout', function () { layer.setStyle({ weight: 0.8, fillOpacity: 0 }); });
+                }
+            }).addTo(state.basinGroup);
+
+            // Catchment outline: dark casing under a white line, like the overview map.
+            L.geoJSON(outline, { pane: 'outlinePane', interactive: false, style: { color: '#0b1a22', weight: 5, opacity: 0.75, fill: false } }).addTo(state.basinGroup);
+            const outlineLayer = L.geoJSON(outline, { pane: 'outlinePane', interactive: false, style: { color: '#ffffff', weight: 2, fill: false } }).addTo(state.basinGroup);
+
+            if (!state.fitted) {
+                map.fitBounds(outlineLayer.getBounds(), { padding: [24, 24] });
+                state.fitted = true;
+            }
+        })
+        .catch(function (error) {
+            console.error('Ichkeul basin outline failed to load:', error);
+        });
+
+    // ── Station Markers & Visual Badges ──
+    state.stationGroup.clearLayers();
+    stations.forEach(st => {
+        const riskVal = stationRisk(st, riskToday);
+        const band = riskBand(riskVal);
+        const badgeColor = band.color;
+        const badgeBg = band.bg;
+
+        const iconHtml = `
+            <div class="station-marker-container">
+                <span class="station-radar-ripple" style="border-color:${badgeColor};"></span>
+                <div class="station-marker-badge" style="background:${badgeColor};" title="${st.label}">
+                    <span class="material-symbols-outlined" style="font-size:13px; line-height:1;">sensors</span>
+                </div>
+            </div>
+        `;
+
+        const stIcon = L.divIcon({
+            html: iconHtml,
+            className: 'custom-station-icon',
+            iconSize: [26, 26],
+            iconAnchor: [13, 13],
+            popupAnchor: [0, -15]
+        });
+
+        const popupContent = `
+            <div style="min-width:245px; font-family:Inter,sans-serif; color:#0f172a;" class="p-1.5">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200">
+                    <div>
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-500 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full" style="background:${badgeColor}"></span>
+                            Monitoring Station
+                        </div>
+                        <div class="font-bold text-sm text-slate-900">${st.label}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded text-[11px] font-bold" style="background:${badgeBg}; color:${badgeColor};">
+                        Risk ${riskVal}
+                    </span>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between py-0.5 border-b border-slate-100">
+                        <span class="text-slate-500 font-medium">Coordinates</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.lat).toFixed(4)}°N, ${Number(st.lon).toFixed(4)}°E</span>
+                    </div>
+                    ${st.rain_mm !== null && st.rain_mm !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">Precipitation</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.rain_mm).toFixed(1)} mm</span>
+                    </div>` : ''}
+                    ${st.temp_c !== null && st.temp_c !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">Temperature</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.temp_c).toFixed(1)} °C</span>
+                    </div>` : ''}
+                    ${st.humidity !== null && st.humidity !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">Humidity</span>
+                        <span class="font-mono font-bold text-slate-800">${st.humidity}%</span>
+                    </div>` : ''}
+                    ${st.spei !== null && st.spei !== undefined ? `
+                    <div class="flex justify-between py-0.5">
+                        <span class="text-slate-500 font-medium">SPEI-3</span>
+                        <span class="font-mono font-bold text-slate-800">${Number(st.spei).toFixed(2)}</span>
+                    </div>` : ''}
+                    ${st.date ? `
+                    <div class="flex justify-between pt-1 border-t border-slate-100 text-[10px] text-slate-400">
+                        <span>Database Reading</span>
+                        <span class="font-mono">${st.date}</span>
+                    </div>` : ''}
+                </div>
+            </div>
+        `;
+
+        const tooltipHtml = `
+            <div style="font-family:Inter,sans-serif;">
+                <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                    <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:${badgeColor};"></span>
+                    <b style="font-size:11px; color:#f8fafc;">${st.label}</b>
+                </div>
+                <div style="font-family:monospace; font-size:10px; color:#94a3b8;">${Number(st.lat).toFixed(4)}°N, ${Number(st.lon).toFixed(4)}°E</div>
+                <div style="font-size:10px; margin-top:2px; font-weight:600; color:${badgeColor};">${band.text} &bull; Risk ${riskVal}</div>
+            </div>
+        `;
+
+        L.marker([st.lat, st.lon], { icon: stIcon, pane: 'stationPane' })
+            .bindTooltip(tooltipHtml, {
+                direction: 'top',
+                offset: [0, -15],
+                className: 'station-tooltip-smooth',
+                opacity: 0.95
+            })
+            .bindPopup(popupContent, { maxWidth: 300 })
+            .addTo(state.stationGroup);
+    });
+
+    var tsEl = document.getElementById('heatmap-last-updated');
+    if (tsEl) {
+        var now = new Date();
+        tsEl.textContent = 'Updated ' + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' (' + stations.length + ' Stations)';
+    }
+}
+
+// ── Main update function ─────────────────────────────────────────
+function updateDashboard(data) {
+    if (!data || !data.prediction) return;
+    const p = data.prediction;
+    const rs = p.risk_scores || {};
+    const cur = p.current || {};
+    const fc = p.forecasts || {};
+    const dr = p.drivers || {};
+
+    // Risk cards
+    const renderRisk = function(id, score, descEl) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = score !== null && score !== undefined ? score : '—';
+        if (descEl) descEl.textContent = recommendationFor(score);
+    };
+    const badge = function(id, score) {
+        const el = document.getElementById(id);
+        if (el) {
+            const info = riskLabel(score);
+            el.textContent = info.text;
+            el.className = 'px-2 py-0.5 font-label text-[10px] font-bold uppercase rounded border ' + info.cls;
+        }
+    };
+    badge('risk-today-badge', rs.today);
+    badge('risk-7day-badge', rs.day_7);
+    badge('risk-30day-badge', rs.day_30);
+    renderRisk('risk-today-score', rs.today, document.getElementById('risk-today-desc'));
+    renderRisk('risk-7day-score', rs.day_7, document.getElementById('risk-7day-desc'));
+    renderRisk('risk-30day-score', rs.day_30, document.getElementById('risk-30day-desc'));
+
+    // Risk Overview gauge — measured SPEI-3, stale-aware; pointer follows the score
+    const gauge = p.drought_risk;
+    if (gauge) {
+        const needle = document.getElementById('risk-needle');
+        const needleLine = document.getElementById('risk-needle-line');
+        const hasScore = gauge.score !== null && gauge.score !== undefined;
+        if (needle) {
+            const deg = hasScore ? (-90 + (Number(gauge.score) / 100) * 180) : 0;
+            needle.style.transform = 'rotate(' + deg + 'deg)';
+        }
+        const marker = document.getElementById('risk-scale-marker');
+        if (marker) {
+            marker.classList.toggle('hidden', !hasScore);
+            if (hasScore) marker.style.left = Math.max(0, Math.min(100, Number(gauge.score))) + '%';
+        }
+        if (needleLine) {
+            needleLine.setAttribute('stroke', gauge.band === 'unknown' ? '#6b7280' : '#151c27');
+        }
+        const levelEl = document.getElementById('risk-overview-level');
+        if (levelEl) {
+            levelEl.textContent = gauge.level || 'Unknown';
+            levelEl.className = 'mt-1 text-lg font-bold font-headline leading-tight ' + (
+                gauge.band === 'high' ? 'text-error' :
+                gauge.band === 'moderate' ? 'text-orange-500' :
+                gauge.band === 'low' ? 'text-green-500' : 'text-on-surface-variant');
+        }
+        const statusEl = document.getElementById('risk-overview-status');
+        const statusDot = document.getElementById('risk-overview-status-dot');
+        const statusLabel = document.getElementById('risk-overview-status-label');
+        if (statusEl) {
+            statusEl.className = 'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide ' + (
+                gauge.stale
+                    ? 'border-orange-500/30 bg-orange-500/10 text-orange-600'
+                    : 'border-green-500/30 bg-green-500/10 text-green-700');
+        }
+        if (statusDot) {
+            statusDot.className = 'h-1.5 w-1.5 rounded-full ' + (gauge.stale ? 'bg-orange-500' : 'bg-green-500');
+        }
+        if (statusLabel) {
+            statusLabel.textContent = gauge.stale
+                ? (statusEl && statusEl.dataset.staleLabel) || 'Stale'
+                : (statusEl && statusEl.dataset.currentLabel) || 'Current';
+        }
+        const scoreWrap = document.getElementById('risk-overview-score-wrap');
+        const scoreEl = document.getElementById('risk-overview-score');
+        const scoreValueEl = document.getElementById('risk-overview-score-value');
+        if (scoreWrap) scoreWrap.classList.toggle('hidden', !hasScore);
+        if (scoreValueEl) scoreValueEl.textContent = hasScore ? gauge.score : '—';
+        if (scoreEl) {
+            scoreEl.className = 'text-[11px] font-label font-bold px-2 py-0.5 rounded-full ' + (
+                gauge.band === 'high' ? 'bg-error/10 text-error' :
+                gauge.band === 'moderate' ? 'bg-orange-500/10 text-orange-500' :
+                gauge.band === 'low' ? 'bg-green-500/10 text-green-600' : 'bg-surface-container-high text-on-surface-variant');
+        }
+        const speiWrap = document.getElementById('risk-overview-spei');
+        const speiValueEl = document.getElementById('risk-overview-spei-value');
+        const speiDateEl = document.getElementById('risk-overview-spei-date');
+        const hasSpei = gauge.spei !== null && gauge.spei !== undefined;
+        if (speiWrap) speiWrap.classList.toggle('hidden', !hasSpei);
+        if (speiValueEl) speiValueEl.textContent = hasSpei ? gauge.spei : '—';
+        if (speiDateEl) speiDateEl.textContent = gauge.measured_on ? ' · ' + gauge.measured_on : '';
+        const regionMeta = document.getElementById('risk-overview-region');
+        if (regionMeta && p.region) regionMeta.textContent = p.region;
+        const readingMeta = document.getElementById('risk-overview-reading');
+        if (readingMeta) readingMeta.textContent = gauge.measured_on || '—';
+        const ageMeta = document.getElementById('risk-overview-age');
+        if (ageMeta) {
+            const days = gauge.days_old;
+            ageMeta.textContent = (days === null || days === undefined)
+                ? '—'
+                : Math.max(1, Math.round(days / 30.44)) + ' mo';
+        }
+        const warnEl = document.getElementById('risk-overview-warning');
+        if (warnEl) warnEl.classList.toggle('hidden', !gauge.stale);
+        const recEl = document.getElementById('risk-overview-recommendation');
+        if (recEl) recEl.textContent = gauge.recommendation || '';
+    }
+
+    // Metrics
+    const setMetric = function(id, val, suffix) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val !== null && val !== undefined ? val + (suffix || '') : '—';
+    };
+    var safeSoilMoisture = cur.soil_moisture_pct !== undefined ? Number(cur.soil_moisture_pct) : null;
+    setMetric('metric-soil-moisture', safeSoilMoisture !== null ? safeSoilMoisture.toFixed(1) : null, '%');
+    var safeSoilWater = cur.soil_water_percent_of_capacity !== undefined ? Number(cur.soil_water_percent_of_capacity) : null;
+    setMetric('metric-soil-water', safeSoilWater !== null ? safeSoilWater.toFixed(0) : null, '%');
+    document.getElementById('metric-crop-stress').textContent = '—';
+
+    // Use initial data (from server-rendered JSON) for metrics not in prediction API
+    var initData = null;
+    try { var el = document.getElementById('initial-data'); if (el) initData = JSON.parse(el.textContent); } catch(e) {}
+    if (initData) {
+        setMetric('metric-rainfall', initData.rainfall_mm != null ? Number(initData.rainfall_mm).toFixed(1) : null, 'mm');
+        setMetric('metric-ndvi', initData.ndvi != null ? Number(initData.ndvi).toFixed(3) : null);
+        setMetric('metric-etc', initData.etc_mm != null ? Number(initData.etc_mm).toFixed(1) : null);
+        if (initData.stress_pct !== null) {
+            var sp = Math.round(initData.stress_pct * 100);
+            document.getElementById('metric-crop-stress').textContent = sp + '%';
+        }
+    }
+
+    // Drivers
+    const setDriver = function(id, pct) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const pctEl = el.querySelector('.font-label');
+        const barEl = el.querySelector('.h-full');
+        if (pctEl) pctEl.textContent = (pct !== undefined && pct !== null) ? Math.round(pct) + '%' : '—';
+        if (barEl) barEl.style.width = (pct !== undefined && pct !== null) ? Math.round(pct) + '%' : '0%';
+    };
+    setDriver('driver-rainfall', dr.rainfall_deficit);
+    setDriver('driver-temperature', dr.high_temperature);
+    setDriver('driver-soil-moisture', dr.soil_moisture_decline);
+    setDriver('driver-vegetation', dr.vegetation_stress);
+    setDriver('driver-evapotranspiration', dr.high_evapotranspiration);
+
+    // Forecast table (confidence/status comes from the trained model's validation)
+    const warn = p.warning || {};
+    const wc = function(h) { return h ? h.confidence_pct : null; };
+    const ws = function(h) { return h ? h.status : null; };
+    const forecasts = [
+        { days: 'Today', score: rs.today, conf: wc(warn.today), status: ws(warn.today) },
+        { days: '+7 Days', score: rs.day_7, conf: wc(warn.day_7), status: ws(warn.day_7) },
+        { days: '+14 Days', score: rs.day_7 !== undefined && rs.today !== undefined ? Math.min(100, Math.round((rs.today + rs.day_7) / 2 + 8)) : null, conf: null, status: null },
+        { days: '+30 Days', score: rs.day_30, conf: wc(warn.day_30), status: ws(warn.day_30) },
+    ];
+    const tbody = document.getElementById('forecast-table-body');
+    if (tbody) {
+        const rows = tbody.querySelectorAll('tr');
+        rows.forEach(function(row, i) {
+            if (i >= forecasts.length) return;
+            const f = forecasts[i];
+            const badgeEl = row.querySelector('.forecast-badge');
+            const predEl = row.querySelector('.forecast-pred');
+            const actionEl = row.querySelector('.forecast-action');
+            const confEl = row.querySelector('.forecast-conf');
+            if (badgeEl) badgeEl.outerHTML = riskBadgeHTML(f.score);
+            if (predEl) predEl.textContent = predictionText(f.score);
+            if (actionEl) actionEl.textContent = recommendationFor(f.score);
+            if (confEl) {
+                confEl.textContent = f.status === 'trend_only'
+                    ? 'trend only'
+                    : (f.conf !== null && f.conf !== undefined ? f.conf + '%' : confidenceFor(i * 7));
+            }
+        });
+    }
+
+    // Insight text (top card)
+    const drEntries = Object.entries(dr).filter(function(kv) { return kv[0] !== 'absolute'; });
+    const topDriver = drEntries.sort((a,b) => b[1] - a[1])[0];
+    const driverName = topDriver ? topDriver[0].replace(/_/g, ' ') : 'unknown';
+    var absMag = '';
+    if (topDriver && dr.absolute && dr.absolute[topDriver[0]] !== undefined) {
+        absMag = ' (' + Math.round(dr.absolute[topDriver[0]]) + '/100)';
+    }
+    var insightMsg = '"Risk score ' + (rs.today || '—') + '/100. Dominant driver: ' + driverName + absMag + '. '
+        + (p.llm_explanation ? p.llm_explanation.substring(0, 200) : 'Monitor conditions closely.') + '"';
+    const insightEl = document.getElementById('insight-text');
+    if (insightEl) {
+        insightEl.textContent = insightMsg;
+    }
+    // Driver insight card (bottom)
+    const driverInsightEl = document.getElementById('driver-insight-text');
+    if (driverInsightEl) {
+        driverInsightEl.textContent = insightMsg;
+    }
+    // Forecast text
+    const forecastEl = document.getElementById('forecast-text');
+    if (forecastEl) {
+        forecastEl.textContent = (rs.day_7 !== undefined && rs.day_7 !== null)
+            ? 'Risk expected to reach ' + rs.day_7 + ' by next week'
+            : 'Forecast pending';
+    }
+
+    // Trend text
+    const trendEl = document.getElementById('trend-text');
+    if (trendEl) {
+        const delta = (rs.day_7 !== undefined && rs.today !== undefined) ? (rs.day_7 - rs.today) : 0;
+        const dir = delta > 0 ? 'Increasing' : delta < 0 ? 'Decreasing' : 'Stable';
+        trendEl.textContent = dir + ' risk (' + (delta >= 0 ? '+' : '') + delta + ' points in 7 days)';
+    }
+
+    // Heatmap (originating from station coordinates)
+    if (p.stations && p.stations.length) {
+        window._stationsData = p.stations;
+    }
+    buildHeatmap(rs.today, window._stationsData);
+
+    // Log source
+    console.log('Prediction source:', data.source, data.prediction_id || '');
+}
+
+// ── Fetch from API ───────────────────────────────────────────────
+function fetchPrediction(regionId, yearId, refresh) {
+    const params = new URLSearchParams();
+    if (regionId) params.set('region_id', regionId);
+    if (yearId) params.set('year_id', yearId);
+    if (refresh) params.set('refresh', '1');
+    const url = '/api/drought-prediction/?' + params.toString();
+
+    // Show loading
+    document.getElementById('risk-today-score').textContent = '…';
+    document.getElementById('risk-today-badge').textContent = 'Loading';
+    document.getElementById('risk-today-desc').textContent = 'Running prediction…';
+
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                updateDashboard(data);
+            } else {
+                document.getElementById('risk-today-desc').textContent = 'Error: ' + (data.error || 'Unknown');
+            }
+        })
+        .catch(err => {
+            document.getElementById('risk-today-desc').textContent = 'Network error: ' + err.message;
+        });
+}
+
+// ── Initial load ─────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var regionMap = {{ region_map_json|safe }};
+    var yearMap = {{ year_map_json|safe }};
+    var defaultRegionId = {{ default_region_id }};
+    var defaultYearId = {{ default_year_id }};
+    window._stationsData = {{ stations_json|safe }};
+
+    // Default fetch
+    fetchPrediction(defaultRegionId, defaultYearId, false);
+
+    function getRegionId() { return regionMap[(document.getElementById('region-selector')||{}).value] || defaultRegionId; }
+    function getYearId() { return yearMap[(document.getElementById('year-selector')||{}).value] || defaultYearId; }
+
+    const regionSel = document.getElementById('region-selector');
+    const yearSel = document.getElementById('year-selector');
+    if (regionSel) {
+        regionSel.addEventListener('change', function() { fetchPrediction(getRegionId(), getYearId(), false); });
+    }
+    if (yearSel) {
+        yearSel.addEventListener('change', function() { fetchPrediction(getRegionId(), getYearId(), false); });
+    }
+
+    // Satellite/Topography tile switching
+    const satBtn = document.getElementById('satellite-btn');
+    const topoBtn = document.getElementById('topography-btn');
+    if (satBtn && topoBtn) {
+        function setActive(btn) {
+            [satBtn, topoBtn].forEach(function(b) { b.className = b.className.replace(/bg-primary/g, 'bg-surface-variant'); b.className = b.className.replace(/text-white/g, 'text-on-surface-variant'); });
+            btn.className = btn.className.replace(/bg-surface-variant/g, 'bg-primary'); btn.className = btn.className.replace(/text-on-surface-variant/g, 'text-white');
+        }
+        function getTiles() { return window._heatmapTileLayer; }
+        function setStyle(variant) {
+            var t = getTiles(); if (!t) return;
+            /* setVariant keeps the proxy + its own fallback chain; the URL form
+               is only used when the helper is unavailable, and stays
+               same-origin there too. */
+            if (typeof t.setVariant === 'function') t.setVariant(variant);
+            else t.setUrl('/api/tiles/{z}/{x}/{y}.png?layer=' + variant);
+        }
+        satBtn.addEventListener('click', function() {
+            setStyle('satellite');
+            setActive(satBtn);
+        });
+        topoBtn.addEventListener('click', function() {
+            setStyle('terrain');
+            setActive(topoBtn);
+        });
+        // Reset to the satellite view on region/year change (heatmap rebuild)
+        var origBuild = window.buildHeatmap;
+        window.buildHeatmap = function(risk, st) {
+            setStyle('satellite');
+            setActive(satBtn);
+            origBuild(risk, st || window._stationsData);
+        };
+    }
+
+    // ── Render Chart.js charts for Trends section ──
+    try {
+        var swData = {{ soil_water_bars|safe }};
+        var swLabels = {{ soil_water_labels|safe }};
+        var ctx1 = document.getElementById('swb-chart');
+        if (ctx1) {
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: swLabels,
+                    datasets: [{
+                        label: 'Soil Water (mm)',
+                        data: swData.map(function(v) { return v * 100; }),
+                        backgroundColor: swData.map(function(v) {
+                            var pct = v * 100;
+                            return pct > 60 ? 'rgba(1,45,29,0.7)' : pct > 30 ? 'rgba(219,163,26,0.7)' : 'rgba(186,26,26,0.7)';
+                        }),
+                        borderRadius: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { font: { size: 10, family: 'JetBrains Mono' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, family: 'JetBrains Mono' }, maxRotation: 45 } }
+                    }
+                }
+            });
+        }
+    } catch(e) { console.warn('SWB chart:', e); }
+
+    try {
+        var riskLabels = {{ trend_labels|safe }};
+        var riskPts = {{ risk_pts_json|safe }};
+        var ctx2 = document.getElementById('risk-chart');
+        if (ctx2 && riskPts.length) {
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: riskLabels,
+                    datasets: [{
+                        label: 'Drought Risk',
+                        data: riskPts,
+                        borderColor: '#1B4332',
+                        backgroundColor: 'rgba(27,67,50,0.06)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#1B4332',
+                        pointRadius: 3,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.06)' }, ticks: { font: { size: 10, family: 'JetBrains Mono' } } },
+                        x: { grid: { display: false }, ticks: { font: { size: 9, family: 'JetBrains Mono' } } }
+                    }
+                }
+            });
+        }
+    } catch(e) { console.warn('Risk chart:', e); }
+
+    // Language switcher — set django_language cookie and reload
+    var langSel = document.getElementById('lang-switcher');
+    if (langSel) {
+        langSel.addEventListener('change', function() {
+            document.cookie = 'django_language=' + this.value + '; path=/; max-age=31536000';
+            window.location.reload();
+        });
+    }
+
+    // Export button — download CSV for current region/year
+    var exportBtn = document.getElementById('export-btn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function() {
+            var rid = getRegionId();
+            var yid = getYearId();
+            if (!rid || !yid) return;
+            window.location.href = '/api/analysis-export/?region_id=' + rid + '&year_id=' + yid;
+        });
+    }
+});
+  </script>
+  {% include "dashboard/_agroai_chat.html" %}
+  </body></html>
+

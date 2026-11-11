@@ -1,0 +1,229 @@
+{% load i18n static %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "Create an account — APWRS" %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                "primary": "#012d1d",
+                "secondary": "#00677d",
+                "on-primary": "#ffffff",
+                "on-secondary": "#ffffff",
+                "primary-container": "#1b4332",
+                "secondary-fixed": "#b2ebff",
+                "on-secondary-container": "#001f27",
+                "on-primary-container": "#002114",
+                "surface": "#f9f9ff",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-low": "#f0f3ff",
+                "surface-variant": "#dce2f3",
+                "on-surface": "#151c27",
+                "on-surface-variant": "#414844",
+                "outline": "#717973",
+                "outline-variant": "#c1c8c2",
+                "background": "#f9f9ff",
+                "error": "#ba1a1a",
+                "error-container": "#ffdad6",
+                "on-error": "#ffffff",
+                "on-error-container": "#93000a",
+              },
+              "borderRadius": { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" },
+              "fontFamily": {
+                headline: ["Hanken Grotesk"],
+                display: ["Hanken Grotesk"],
+                body: ["Inter"],
+                label: ["Jetbrains Mono"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
+        .hero-bg {
+            background:
+                radial-gradient(900px 500px at 90% -10%, rgba(105, 212, 244, 0.14), transparent 60%),
+                linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+        }
+        #password1::-ms-reveal, #password1::-ms-clear,
+        #password2::-ms-reveal, #password2::-ms-clear { display: none; }
+    </style>
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background font-body text-on-surface antialiased min-h-screen">
+<div class="min-h-screen grid lg:grid-cols-2">
+
+    <!-- Left: brand panel with the satellite basin map -->
+    <aside class="hero-bg relative hidden lg:flex flex-col justify-between text-on-surface border-r border-outline-variant/70 p-12 xl:p-16 overflow-hidden">
+        <a class="relative z-10 flex items-center gap-3" href="{% url 'dashboard:home' %}">
+            <img alt="APWRS Logo" class="h-9 w-9 rounded-full object-contain ring-1 ring-outline-variant shadow-sm" src="{% static 'dashboard/img/apwrs-logo.png' %}" width="36" height="36"/>
+            <span class="flex flex-col leading-tight">
+                <span class="font-headline text-base font-extrabold tracking-tight text-primary">APWRS</span>
+                <span class="text-[10px] text-on-surface-variant">{% trans "Adaptive Planting Window Recommendation System" %}</span>
+            </span>
+        </a>
+
+        <div class="relative z-10 max-w-lg">
+            <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                <span class="w-8 h-px bg-secondary"></span>
+                {% trans "Farmer registration" %}
+            </p>
+            <h2 class="mt-6 font-display font-extrabold text-4xl xl:text-[2.75rem] leading-[1.08] tracking-[-0.02em] text-on-surface">
+                {% trans "Join APWRS as a farmer" %}
+            </h2>
+            <p class="mt-4 text-on-surface-variant text-[17px] leading-relaxed">
+                {% trans "Create your account to map your land, receive planting-window recommendations and track drought risk for your region." %}
+            </p>
+        </div>
+
+        <dl class="relative z-10 grid grid-cols-3 divide-x divide-outline-variant/70 border-t border-outline-variant/70 pt-6">
+            <div class="pr-4">
+                <dt class="text-xs text-on-surface-variant">{% trans "Climate record" %}</dt>
+                <dd class="mt-1 font-display font-bold text-2xl tracking-tight text-on-surface">30 <span class="text-sm font-medium text-on-surface-variant">{% trans "years" %}</span></dd>
+            </div>
+            <div class="px-4">
+                <dt class="text-xs text-on-surface-variant">{% trans "Drought forecast" %}</dt>
+                <dd class="mt-1 font-display font-bold text-2xl tracking-tight text-on-surface">6 <span class="text-sm font-medium text-on-surface-variant">{% trans "months ahead" %}</span></dd>
+            </div>
+            <div class="pl-4">
+                <dt class="text-xs text-on-surface-variant">{% trans "Staple crops" %}</dt>
+                <dd class="mt-1 font-display font-bold text-2xl tracking-tight text-on-surface">9</dd>
+            </div>
+        </dl>
+    </aside>
+
+    <!-- Right: sign-up form -->
+    <main class="flex flex-col min-h-screen bg-surface-container-lowest">
+        <div class="flex items-center justify-between px-6 sm:px-10 h-16">
+            <a class="flex items-center gap-2.5 lg:invisible" href="{% url 'dashboard:home' %}">
+                <img alt="APWRS Logo" class="h-8 w-8 rounded-full object-contain" src="{% static 'dashboard/img/apwrs-logo.png' %}" width="32" height="32"/>
+                <span class="font-headline font-extrabold text-primary tracking-tight">APWRS</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a class="inline-flex items-center gap-1.5 text-[13px] font-medium text-on-surface-variant hover:text-primary transition-colors" href="{% url 'dashboard:home' %}">
+                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                    {% trans "Back to home" %}
+                </a>
+                {% include "dashboard/_lang_switch.html" with lang_inline=True %}
+            </div>
+        </div>
+
+        <div class="flex-1 flex items-center justify-center px-6 sm:px-10 py-12">
+            <section class="w-full max-w-sm">
+                <p class="flex items-center gap-3 font-label text-[11px] uppercase tracking-[0.2em] text-secondary">
+                    <span class="w-8 h-px bg-secondary"></span>{% trans "Create account" %}
+                </p>
+                <h1 class="mt-5 font-headline font-extrabold text-3xl sm:text-[2.25rem] leading-tight text-primary tracking-tight">{% trans "Farmer sign-up" %}</h1>
+                <p class="mt-3 text-on-surface-variant leading-relaxed">{% trans "Enter your details below, then sign in with your new account." %}</p>
+
+                {% if messages %}
+                <div class="mt-8 space-y-2" role="status">
+                    {% for message in messages %}
+                    <div class="flex items-start gap-2.5 rounded-lg border px-4 py-3 text-sm {% if message.tags == 'error' %}border-error/30 bg-error-container/60 text-on-error-container{% else %}border-secondary/25 bg-secondary-fixed/40 text-on-secondary-container{% endif %}">
+                        <span class="material-symbols-outlined text-[20px]">{% if message.tags == 'error' %}error{% else %}info{% endif %}</span>
+                        <span>{{ message }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if form.errors %}
+                <div class="mt-8 rounded-lg border border-error/30 bg-error-container/60 text-on-error-container p-4">
+                    <span class="material-symbols-outlined text-[20px] mb-1 block">error</span>
+                    <p class="text-sm">{% trans "Please fix the errors below." %}</p>
+                </div>
+                {% endif %}
+
+                <form id="signup-form" class="mt-8 space-y-5" method="post" action="{% url 'dashboard:signup' %}">
+                    {% csrf_token %}
+
+                    <div class="space-y-1.5">
+                        <label class="text-[13px] font-semibold text-on-surface" for="id_username">{% trans "Username" %}</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">person</span>
+                            {{ form.username }}
+                        </div>
+                        {% if form.username.errors %}<p class="text-error text-xs mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[13px] font-semibold text-on-surface" for="id_email">{% trans "Email" %} <span class="font-normal text-on-surface-variant">({% trans "optional" %})</span></label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">mail</span>
+                            {{ form.email }}
+                        </div>
+                        {% if form.email.errors %}<p class="text-error text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[13px] font-semibold text-on-surface" for="id_phone">{% trans "Phone number" %}</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">phone</span>
+                            {{ form.phone }}
+                        </div>
+                        {% if form.phone.errors %}<p class="text-error text-xs mt-1">{{ form.phone.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[13px] font-semibold text-on-surface" for="id_password1">{% trans "Password" %}</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">lock</span>
+                            {{ form.password1 }}
+                        </div>
+                        {% if form.password1.errors %}<p class="text-error text-xs mt-1">{{ form.password1.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-[13px] font-semibold text-on-surface" for="id_password2">{% trans "Confirm password" %}</label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">lock_outline</span>
+                            {{ form.password2 }}
+                        </div>
+                        {% if form.password2.errors %}<p class="text-error text-xs mt-1">{{ form.password2.errors.0 }}</p>{% endif %}
+                    </div>
+
+                    <button class="w-full mt-2 inline-flex items-center justify-center gap-2 bg-primary-container text-on-primary py-3.5 rounded-lg font-headline font-bold text-sm shadow-md hover:bg-primary hover:shadow-lg active:scale-[0.99] transition-all group" type="submit">
+                        {% trans "Create account" %}
+                        <span class="material-symbols-outlined text-[20px] group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
+                    </button>
+                </form>
+
+                <p class="mt-10 pt-6 border-t border-outline-variant/70 text-xs text-on-surface-variant leading-relaxed text-center">
+                    {% trans "Already have an account?" %} <a href="{% url 'dashboard:login' %}" class="text-primary hover:underline font-medium">{% trans "Sign in" %}</a>
+                </p>
+            </section>
+        </div>
+
+        <footer class="px-6 sm:px-10 py-6 flex flex-wrap items-center justify-between gap-2 text-xs text-outline">
+            <span><span class="font-headline font-extrabold text-primary">APWRS</span> · {% trans "Ichkeul basin" %}</span>
+            <span class="font-label">{% trans "Data: CHIRPS · ERA5 · MODIS · Sentinel" %}</span>
+        </footer>
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var p1 = document.getElementById("id_password1");
+        var p2 = document.getElementById("id_password2");
+        if (p1 && p2) {
+            p2.addEventListener("input", function () {
+                p2.setCustomValidity(p1.value !== p2.value ? "Passwords do not match." : "");
+            });
+            p1.addEventListener("input", function () {
+                if (p2.value) p2.setCustomValidity(p1.value !== p2.value ? "Passwords do not match." : "");
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,528 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "Predictive Forecasts & SPEI Drought Outlook" %} — APWRS</title>
+    
+    <!-- Framework & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#012d1d",
+                "primary-container": "#1b4332",
+                "on-primary": "#ffffff",
+                "secondary": "#00677d",
+                "secondary-container": "#72ddfd",
+                "on-secondary": "#ffffff",
+                "surface": "#f9f9ff",
+                "surface-dim": "#d3daea",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-low": "#f0f4f8",
+                "surface-container-high": "#e2e8f0",
+                "surface-container-highest": "#cbd5e1",
+                "on-surface": "#151c27",
+                "on-surface-variant": "#414844",
+                "outline": "#717973",
+                "outline-variant": "#c1c8c2",
+                "error": "#ba1a1a",
+              },
+              fontFamily: {
+                headline: ["'Hanken Grotesk'", "sans-serif"],
+                body: ["'Inter'", "sans-serif"],
+                label: ["'Inter'", "sans-serif"],
+                mono: ["'JetBrains Mono'", "monospace"],
+              }
+            }
+          }
+        };
+    </script>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+<link rel="stylesheet" href="{% static 'dashboard/css/drought_grid.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen">
+
+<div class="flex-1 flex flex-col bg-surface min-h-screen overflow-hidden">
+    <!-- Top Navigation Header -->
+    {% include "dashboard/_header.html" %}
+
+    <!-- APWRS Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="forcast" %}
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 transition-all duration-300 ease-in-out lg:ml-60">
+        <div class="max-w-6xl mx-auto space-y-8">
+            
+            <!-- Page Hero Banner -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-2xl">online_prediction</span>
+                            <h1 class="font-headline font-bold text-2xl text-primary">{% trans "Prediction & Climate Forecasting Engine" %}</h1>
+                            <span class="text-xs font-label font-bold px-2 py-0.5 rounded-full bg-secondary/15 text-secondary">XGBoost ML</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant mt-2 max-w-3xl leading-relaxed">
+                            {% trans "A live 16-day temperature and rainfall forecast from Open-Meteo, alongside multi-horizon SPEI-3 drought risk. Short-range weather comes from a real forecast API; monthly drought outlooks are verified against ground truth as observations arrive." %}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a href="{% url 'dashboard:calendar' %}" class="px-3.5 py-2 rounded-lg bg-surface-container-low border border-outline-variant text-xs font-semibold text-on-surface hover:text-primary transition-colors flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-sm">calendar_month</span>
+                            {% trans "Planting Calendar" %}
+                        </a>
+                        <a href="{% url 'dashboard:analysis' %}" class="px-3.5 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container transition-colors flex items-center gap-1.5 shadow-sm">
+                            <span class="material-symbols-outlined text-sm">insights</span>
+                            {% trans "Detailed Analysis" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if stale_months %}
+            <div class="bg-amber-500/10 border-l-4 border-amber-500 p-4 rounded-r-lg text-xs text-amber-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-amber-600 text-lg">warning</span>
+                <span>{% trans "Live data feed is" %} {{ stale_months }} {% trans "months behind. The outlook below reflects the latest available observations, not today." %}</span>
+            </div>
+            {% endif %}
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- GRIDDED DROUGHT FORECAST MAP (29 ERA5-Land cells, SPEI, ridge)  -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <section id="drought-grid" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm"
+                     data-api-url="{% url 'dashboard:drought_grid_api' %}"
+                     data-basin-url="{% static 'dashboard/data/ichkeul_basin.geojson' %}">
+                <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 mb-5">
+                    <div>
+                        <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2 flex-wrap">
+                            <span class="material-symbols-outlined text-secondary text-xl">grid_on</span>
+                            {% trans "Drought Forecast Map — Ichkeul basin" %}
+                            <span class="text-[10px] font-label font-bold px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wider">{% trans "29 cells · verified" %}</span>
+                        </h2>
+                        <p class="text-xs text-on-surface-variant mt-1.5 max-w-3xl leading-relaxed">
+                            {% trans "Forecast of the Standardised Precipitation-Evapotranspiration Index (SPEI) for every 0.1° ERA5-Land cell. Only lead times that beat climatology in out-of-sample verification are offered; beyond them the honest forecast is the long-term average." %}
+                        </p>
+                    </div>
+                    <div id="dg-issue" class="shrink-0 text-[11px] font-label text-on-surface-variant lg:text-right leading-relaxed"></div>
+                </div>
+
+                <div class="flex flex-col xl:flex-row gap-3 xl:items-center mb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant w-12 shrink-0">{% trans "Index" %}</span>
+                        <div id="dg-scales" class="inline-flex rounded-lg border border-outline-variant p-0.5 bg-surface-container-low"></div>
+                    </div>
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant w-12 shrink-0">{% trans "Lead" %}</span>
+                        <div id="dg-leads" class="flex flex-wrap gap-1"></div>
+                    </div>
+                    <div class="flex items-center gap-2 xl:ms-auto">
+                        <span class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant shrink-0">{% trans "Show" %}</span>
+                        <div id="dg-modes" class="inline-flex rounded-lg border border-outline-variant p-0.5 bg-surface-container-low">
+                            <button type="button" data-mode="spei" class="dg-seg">{% trans "SPEI value" %}</button>
+                            <button type="button" data-mode="prob" class="dg-seg">{% trans "Drought probability" %}</button>
+                        </div>
+                    </div>
+                </div>
+                <p id="dg-scale-meaning" class="text-[11px] text-on-surface-variant mb-3"></p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-2 relative isolate rounded-lg overflow-hidden border border-outline-variant dg-map-box">
+                        <div id="dg-map" class="absolute inset-0"></div>
+                        <div id="dg-legend" class="absolute bottom-3 left-3 z-[500] bg-white/95 rounded-md border border-outline-variant shadow-sm px-3 py-2 text-[10px] font-label"></div>
+                        <div id="dg-status" class="absolute inset-0 z-[600] flex items-center justify-center text-sm text-white/80 px-6 text-center">{% trans "Loading forecast…" %}</div>
+                    </div>
+
+                    <div class="flex flex-col gap-3 min-w-0">
+                        <div class="rounded-lg border border-outline-variant p-4">
+                            <div class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">{% trans "Basin average (area-weighted)" %}</div>
+                            <div id="dg-basin" class="mt-1"></div>
+                        </div>
+                        <div class="rounded-lg border border-outline-variant p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">{% trans "Verified accuracy at this lead" %}</div>
+                                <span class="material-symbols-outlined text-sm text-outline" title="{% trans "Out-of-sample: every forecast used only data available at its issue date (expanding-window refit each year)." %}">info</span>
+                            </div>
+                            <div id="dg-skill" class="mt-2"></div>
+                        </div>
+                        <div class="rounded-lg border border-outline-variant p-4 flex-1">
+                            <div class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">{% trans "Selected cell" %}</div>
+                            <div id="dg-cell" class="mt-1 text-xs text-on-surface-variant">{% trans "Click a cell on the map to see its forecast and what drives it." %}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 rounded-lg border border-outline-variant p-4">
+                    <div class="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+                        <div class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant">{% trans "How far ahead is the forecast reliable? Drought detection skill (ROC AUC) by lead time" %}</div>
+                        <div class="text-[10px] font-label text-on-surface-variant">{% trans "0.5 = coin toss · 1.0 = perfect · publish threshold 0.75" %}</div>
+                    </div>
+                    <div id="dg-leadskill" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5"></div>
+                </div>
+
+                <div class="mt-5 rounded-lg border border-outline-variant p-4">
+                    <div class="text-[10px] font-label uppercase tracking-wider text-on-surface-variant mb-1">{% trans "Scenario outlook for the basin: what if the coming months repeat a past year?" %}</div>
+                    <div id="dg-scenarios" class="text-xs text-on-surface-variant overflow-x-auto"></div>
+                </div>
+
+                <details class="mt-4 text-xs text-on-surface-variant">
+                    <summary class="cursor-pointer font-semibold text-on-surface">{% trans "Method, data and limits" %}</summary>
+                    <div id="dg-method" class="mt-2 leading-relaxed space-y-1.5"></div>
+                </details>
+            </section>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- SECTION 1: 7-DAY WEATHER & IMMEDIATE RISK STRIP                 -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div id="weather-panel" data-api-url="{% url 'dashboard:weather_forecast_api' %}" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary text-xl">wb_sunny</span>
+                        {% trans "Live Weather & Immediate Risk Outlook" %}
+                        <span class="text-[10px] font-label font-bold px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 uppercase tracking-wider">
+                            {% trans "Live API" %}
+                        </span>
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-sm text-on-surface-variant">location_on</span>
+                        <select id="weather-region-select" onchange="loadWeatherForecast()"
+                                class="text-xs border border-outline-variant rounded-lg px-3 py-1.5 bg-surface-container-low text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary/40">
+                            {% for r in weather_regions %}
+                            <option value="{{ r.id }}" {% if weather_region and r.id == weather_region.id %}selected{% endif %}>{{ r.name }}</option>
+                            {% empty %}
+                            <option value="">{% trans "No regions with coordinates" %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Summary KPI row -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 text-center">
+                        <span class="material-symbols-outlined text-blue-600 text-2xl">water_drop</span>
+                        <div id="kpi-total-rain" class="text-2xl font-headline font-extrabold text-blue-700 mt-1">&mdash;</div>
+                        <div class="text-[11px] text-blue-600 font-medium mt-0.5">{% trans "Total Rain (7d)" %}</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-red-50 to-orange-100 border border-orange-200 rounded-xl p-4 text-center">
+                        <span class="material-symbols-outlined text-orange-600 text-2xl">thermometer</span>
+                        <div id="kpi-max-temp" class="text-2xl font-headline font-extrabold text-orange-700 mt-1">&mdash;</div>
+                        <div class="text-[11px] text-orange-600 font-medium mt-0.5">{% trans "Peak Temp (7d)" %}</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-50 to-teal-100 border border-teal-200 rounded-xl p-4 text-center">
+                        <span class="material-symbols-outlined text-teal-600 text-2xl">thermostat</span>
+                        <div id="kpi-avg-temp" class="text-2xl font-headline font-extrabold text-teal-700 mt-1">&mdash;</div>
+                        <div class="text-[11px] text-teal-600 font-medium mt-0.5">{% trans "Avg Temp (7d)" %}</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-indigo-100 border border-indigo-200 rounded-xl p-4 text-center">
+                        <span class="material-symbols-outlined text-indigo-600 text-2xl">humidity_percentage</span>
+                        <div id="kpi-avg-humidity" class="text-2xl font-headline font-extrabold text-indigo-700 mt-1">&mdash;</div>
+                        <div class="text-[11px] text-indigo-600 font-medium mt-0.5">{% trans "Avg Humidity (7d)" %}</div>
+                    </div>
+                </div>
+
+                <!-- Daily cards strip -->
+                <div id="daily-strip" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2"></div>
+
+                <div id="weather-error" class="hidden mt-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800 flex items-start gap-2">
+                    <span class="material-symbols-outlined text-base">warning</span>
+                    <span id="weather-error-text"></span>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-outline-variant/50 flex flex-wrap items-center justify-between gap-2 text-[10px] text-on-surface-variant font-label">
+                    <span id="weather-provenance">{% trans "Loading live forecast…" %}</span>
+                    <a href="https://open-meteo.com/" target="_blank" rel="noopener"
+                       class="underline decoration-dotted hover:text-secondary">
+                        Weather data by Open-Meteo.com (CC BY 4.0)
+                    </a>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- SECTION 2: 16-DAY PRECIPITATION FORECAST (RAIN)                 -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-blue-600 text-xl">grain</span>
+                        {% trans "16-Day Rain Forecast" %}
+                        <span class="text-[11px] font-label font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">mm / day</span>
+                    </h2>
+                    <span id="rain-region-label" class="text-xs text-on-surface-variant font-label px-2.5 py-1 bg-surface-container-low rounded-lg border border-outline-variant/60 font-semibold">&mdash;</span>
+                </div>
+
+                <!-- Precip legend -->
+                <div class="flex flex-wrap gap-3 mb-4 text-[11px] font-label">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-blue-500 inline-block"></span> {% trans "Forecast Rain" %}</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 rounded-sm bg-sky-400 inline-block border-t-2 border-dashed border-sky-400"></span> {% trans "Rain Probability" %}</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-1.5 rounded-sm bg-amber-500 inline-block"></span> {% trans "10-yr Daily Normal" %}</span>
+                </div>
+
+                <div class="relative h-72">
+                    <canvas id="precipChart"></canvas>
+                </div>
+
+                <!-- Daily rain detail table -->
+                <div class="mt-5 overflow-x-auto max-h-80 overflow-y-auto">
+                    <table class="w-full text-[11px] font-label text-center border-collapse">
+                        <thead class="sticky top-0">
+                            <tr class="bg-surface-container-low text-on-surface-variant">
+                                <th class="p-2 text-left font-semibold">{% trans "Date" %}</th>
+                                <th class="p-2 font-semibold">{% trans "Rain (mm)" %}</th>
+                                <th class="p-2 font-semibold">{% trans "Chance" %}</th>
+                                <th class="p-2 font-semibold">{% trans "Normal (mm)" %}</th>
+                                <th class="p-2 font-semibold">{% trans "Anomaly" %}</th>
+                                <th class="p-2 font-semibold">{% trans "Status" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="precip-table-body" class="divide-y divide-outline-variant/30"></tbody>
+                    </table>
+                </div>
+                <p class="mt-3 text-[10px] leading-relaxed text-on-surface-variant font-label">
+                    {% trans "The 10-year normal is computed from this region's own observed climate records. Forecasts cover the 16-day model horizon; longer horizons are not shown because a weather model cannot support them." %}
+                </p>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- SECTION 3: 16-DAY TEMPERATURE FORECAST (TEMPERATURE)            -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-orange-600 text-xl">device_thermostat</span>
+                        {% trans "16-Day Temperature Forecast & Thermal Stress" %}
+                        <span class="text-[11px] font-label font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 border border-orange-200">&deg;C</span>
+                    </h2>
+                    <div class="flex items-center gap-2">
+                        <span id="temp-region-label" class="text-xs text-on-surface-variant font-label px-2.5 py-1 bg-surface-container-low rounded-lg border border-outline-variant/60 font-semibold">&mdash;</span>
+                        <div class="flex rounded-lg overflow-hidden border border-outline-variant text-[11px]">
+                            <button id="temp-max-btn" onclick="setTempMode('max')" class="px-2.5 py-1 font-bold bg-primary text-on-primary transition-colors">Max</button>
+                            <button id="temp-min-btn" onclick="setTempMode('min')" class="px-2.5 py-1 font-bold bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors">Min</button>
+                            <button id="temp-avg-btn" onclick="setTempMode('avg')" class="px-2.5 py-1 font-bold bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors">Avg</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temp legend -->
+                <div class="flex flex-wrap gap-3 mb-4 text-[11px] font-label">
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-500 inline-block"></span> {% trans "Max Temperature" %}</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-orange-300 inline-block"></span> {% trans "Avg Temperature" %}</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-sky-400 inline-block"></span> {% trans "Min Temperature" %}</span>
+                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 rounded-sm bg-gray-400 inline-block border-t-2 border-dashed border-gray-400"></span> {% trans "Historical Avg" %}</span>
+                </div>
+
+                <div class="relative h-72">
+                    <canvas id="tempChart"></canvas>
+                </div>
+
+                <!-- Temperature heat-map row -->
+                <div class="mt-5">
+                    <p class="text-[11px] font-label text-on-surface-variant mb-2 font-semibold uppercase tracking-wider">{% trans "Daily Heat Intensity Map" %}</p>
+                    <div id="temp-heatmap" class="grid grid-cols-4 sm:grid-cols-8 gap-1"></div>
+                    <div class="flex items-center gap-2 mt-2 text-[10px] text-on-surface-variant font-label">
+                        <span class="w-4 h-3 rounded bg-sky-200 inline-block"></span><span>{% trans "Cool" %}</span>
+                        <span class="w-4 h-3 rounded bg-yellow-300 inline-block"></span><span>{% trans "Warm" %}</span>
+                        <span class="w-4 h-3 rounded bg-orange-400 inline-block"></span><span>{% trans "Hot" %}</span>
+                        <span class="w-4 h-3 rounded bg-red-600 inline-block"></span><span>{% trans "Extreme" %}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- SECTION 4: CURRENT OUTLOOK & MULTI-HORIZON DROUGHT RISK (RISK)  -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div>
+                <h2 class="font-headline font-bold text-lg text-on-surface mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">event_upcoming</span>
+                    {% trans "Current Outlook — Next Month (T+1 Drought Risk)" %}
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {% for f in forecasts %}
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm hover:border-primary transition-colors flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex items-start justify-between">
+                                <h3 class="font-headline font-bold text-base text-primary">{{ f.region.name }}</h3>
+                                {% if f.warning_t1 %}
+                                <span class="text-[10px] font-label font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-800 border border-red-200">
+                                    {% trans "WARNING" %}
+                                </span>
+                                {% else %}
+                                <span class="text-[10px] font-label font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    {% trans "NORMAL" %}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="text-xs text-on-surface-variant mt-1">
+                                {% trans "Target" %}: <span class="font-semibold text-on-surface">{{ f.target_month_t1|date:"F Y" }}</span>
+                            </div>
+
+                            <div class="flex items-center gap-2 mt-3">
+                                <span class="text-xs font-semibold px-2 py-0.5 rounded {{ f.level_t1_css }}">
+                                    {{ f.level_t1 }}
+                                </span>
+                                <span class="text-xs text-on-surface-variant">
+                                    SPEI-3: <strong class="text-on-surface">{{ f.spei_t1|floatformat:2 }}</strong>
+                                </span>
+                            </div>
+
+                            <div class="mt-4">
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-on-surface-variant">{% trans "Drought Probability" %}</span>
+                                    <span class="font-bold text-on-surface">{{ f.prob_drought_t1|default:0 }}%</span>
+                                </div>
+                                <div class="w-full bg-surface-container-high rounded-full h-2 overflow-hidden">
+                                    <div class="h-2 rounded-full transition-all {% if f.prob_drought_t1 >= 50 %}bg-red-500{% elif f.prob_drought_t1 >= 25 %}bg-amber-500{% else %}bg-emerald-500{% endif %}" 
+                                         style="width: {{ f.prob_drought_t1|default:0 }}%;"></div>
+                                </div>
+                            </div>
+
+                            {% if f.top_drivers_t1 %}
+                            <div class="mt-4 pt-3 border-t border-outline-variant/50">
+                                <div class="text-[11px] font-label text-on-surface-variant font-semibold uppercase tracking-wider mb-1.5">
+                                    {% trans "Key Predictive Drivers" %}
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    {% for d in f.top_drivers_t1 %}
+                                    <span class="text-[11px] px-2 py-0.5 rounded bg-surface-container-low text-on-surface border border-outline-variant/60 font-mono">
+                                        {{ d.name }}: {{ d.value|floatformat:1 }}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        {% if f.recommendations %}
+                        <div class="pt-3 border-t border-outline-variant/50">
+                            <ul class="text-xs text-on-surface-variant space-y-1">
+                                {% for r in f.recommendations %}
+                                <li class="flex items-start gap-1.5">
+                                    <span class="material-symbols-outlined text-sm text-secondary shrink-0 mt-0.5">chevron_right</span>
+                                    <span>{{ r }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="col-span-full bg-surface-container-lowest border border-outline-variant rounded-xl p-8 text-center text-on-surface-variant">
+                        {% trans "No forecasts calculated yet. Run the prediction engine or import latest satellite metrics." %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <!-- SECTION 5: LIVE RELIABILITY SCOREBOARD                          -->
+            <!-- ═══════════════════════════════════════════════════════════════ -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-outline-variant/50 pb-4">
+                    <div>
+                        <h2 class="font-headline font-bold text-lg text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-xl">verified</span>
+                            {% trans "Live Reliability Scoreboard & Verifications" %}
+                        </h2>
+                        <p class="text-xs text-on-surface-variant mt-0.5">
+                            {% trans "Every monthly prediction is tracked and scored against ground reality as observations arrive." %}
+                        </p>
+                    </div>
+                    {% if stats.total %}
+                    <div class="flex items-center gap-4 text-xs">
+                        <div class="text-center">
+                            <span class="text-xs text-on-surface-variant block">{% trans "Recall (Droughts Caught)" %}</span>
+                            <span class="font-headline font-bold text-base {% if stats.recall_pct >= 70 %}text-emerald-700{% else %}text-amber-700{% endif %}">
+                                {{ stats.recall_pct|default:"—" }}%
+                            </span>
+                        </div>
+                        <div class="h-8 w-px bg-outline-variant/60"></div>
+                        <div class="text-center">
+                            <span class="text-xs text-on-surface-variant block">{% trans "Exact Category Match" %}</span>
+                            <span class="font-headline font-bold text-base text-primary">
+                                {{ stats.exact_pct|default:"—" }}%
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if verifications %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-low text-on-surface-variant font-label uppercase text-[10px] tracking-wider">
+                                <th class="p-3 font-semibold">{% trans "Region" %}</th>
+                                <th class="p-3 font-semibold">{% trans "Target Month" %}</th>
+                                <th class="p-3 font-semibold">{% trans "Predicted SPEI" %}</th>
+                                <th class="p-3 font-semibold">{% trans "Observed SPEI" %}</th>
+                                <th class="p-3 font-semibold">{% trans "Alert Flag" %}</th>
+                                <th class="p-3 font-semibold">{% trans "Actual Drought" %}</th>
+                                <th class="p-3 font-semibold text-center">{% trans "Verification" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant/30">
+                            {% for v in verifications %}
+                            <tr class="hover:bg-surface-container-low/50 transition-colors">
+                                <td class="p-3 font-semibold text-on-surface">{{ v.region.name }}</td>
+                                <td class="p-3 font-mono text-on-surface-variant">{{ v.target_month|date:"M Y" }}</td>
+                                <td class="p-3 font-mono">{{ v.spei_pred|floatformat:2 }}</td>
+                                <td class="p-3 font-mono">{{ v.spei_actual|floatformat:2 }}</td>
+                                <td class="p-3">
+                                    {% if v.flag_predicted %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">WARNED</span>
+                                    {% else %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">CLEAR</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-3">
+                                    {% if v.drought_actual %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">YES</span>
+                                    {% else %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">NO</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-3 text-center">
+                                    {% if v.flag_correct %}
+                                    <span class="material-symbols-outlined text-emerald-700 text-base" title="{% trans 'Correct warning flag' %}">check_circle</span>
+                                    {% else %}
+                                    <span class="material-symbols-outlined text-red-600 text-base" title="{% trans 'Missed or false alarm' %}">cancel</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    {% include 'dashboard/_partners.html' %}
+    {% include "dashboard/_agroai_chat.html" %}
+    </main>
+</div>
+
+<!-- ========================================================================= -->
+<!-- JAVASCRIPT: LIVE WEATHER (Open-Meteo) + FORECAST CHARTS                   -->
+<!-- ========================================================================= -->
+{{ weather|json_script:"weather-data" }}
+<script src="{% static 'dashboard/js/spei_outlook_weather.js' %}"></script>
+<script defer src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+<script defer src="{% static 'dashboard/js/map-tiles.js' %}"></script>
+<script defer src="{% static 'dashboard/js/drought_grid_map.js' %}"></script>
+
+</body>
+</html>

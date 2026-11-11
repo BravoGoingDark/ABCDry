@@ -1,0 +1,71 @@
+{% load i18n static %}
+{% comment %}
+Shared top navbar, included by every app page: identical everywhere.
+Region/Lake come from _header_controls_default.html (they open the overview);
+the overview passes header_controls="dashboard/_header_controls_dashboard.html"
+so its own selectors keep the ids dashboard.js drives. Page-specific actions
+(export, filters, back links) live in each page's _page_actions_*.html toolbar.
+{% endcomment %}
+<header class="bg-surface dark:bg-surface-dim text-primary dark:text-primary-fixed font-headline text-headline-sm font-semibold fixed top-0 right-0 z-30 h-16 border-b border-outline-variant dark:border-outline shadow-sm dark:shadow-none flex justify-between items-center gap-2 px-3 sm:px-8 w-full left-0 min-w-0">
+    <div class="flex items-center gap-2 sm:gap-4 min-w-0 sm:flex-1">
+        <!-- Sidebar Toggle Button (mobile only: on desktop the sidebar is always visible) -->
+        <button id="sidebar-toggle-btn"
+                onclick="toggleSidebar()"
+                class="p-1.5 -ml-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors flex lg:hidden items-center justify-center shrink-0 cursor-pointer"
+                title="{% trans 'Toggle Sidebar' %}"
+                type="button">
+            <span class="material-symbols-outlined text-2xl">menu</span>
+        </button>
+        <a class="hidden sm:flex items-center gap-3 shrink min-w-0 group" href="{% url 'dashboard:dashboard' %}">
+            <span class="relative shrink-0">
+                <span aria-hidden="true" class="pointer-events-none absolute inset-0 rounded-full bg-secondary/20 blur-[3px] scale-[1.08] opacity-0 transition-opacity duration-300 group-hover:opacity-100"></span>
+                <img alt="APWRS Logo" class="relative h-10 w-auto rounded-full object-contain ring-2 ring-secondary/40 ring-offset-2 ring-offset-surface dark:ring-offset-surface-dim shadow-md" src="{% static 'dashboard/img/apwrs-logo.png' %}" width="40" height="40"/>
+            </span>
+            <div class="hidden md:flex flex-col min-w-0 leading-tight">
+                <span class="text-base font-extrabold text-primary dark:text-primary-fixed tracking-tight">APWRS</span>
+                <span class="text-[10px] font-normal text-on-surface-variant">{% trans "Adaptive Planting Window Recommendation System" %}</span>
+            </div>
+        </a>
+    </div>
+    <div class="flex items-center gap-1.5 sm:gap-3 shrink-0 min-w-0">
+        {% include header_controls|default:"dashboard/_header_controls_default.html" %}
+        <!-- Language Switcher Dynamic POST Form -->
+        <form action="{% url 'set_language' %}" class="flex items-center" method="post" id="lang-form">
+            {% csrf_token %}
+            <input name="next" type="hidden" value="{{ request.get_full_path }}"/>
+            <div class="relative">
+                <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm hidden sm:inline">language</span>
+                <select name="language" onchange="document.getElementById('lang-form').submit();" class="pl-2 sm:pl-8 pr-5 sm:pr-6 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-xs sm:text-sm font-headline focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-14 sm:w-24" aria-label="{% trans 'Language' %}">
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>EN</option>
+                    <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>FR</option>
+                    <option value="ar" {% if LANGUAGE_CODE == 'ar' %}selected{% endif %}>AR · ع</option>
+                </select>
+            </div>
+        </form>
+        <!-- Profile Actions -->
+        <div class="flex items-center gap-2 text-on-surface-variant shrink-0">
+            <button type="button" class="hidden md:inline-flex hover:text-primary-container dark:hover:text-primary-fixed transition-colors cursor-pointer active:opacity-70" title="{% trans 'Notifications' %}">
+                <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+            </button>
+            <!-- Auth Section -->
+            <div class="flex items-center gap-2 shrink-0 md:border-l border-outline-variant md:pl-3 md:ml-1">
+                {% if user.is_authenticated %}
+                    <span class="text-xs text-on-surface-variant hidden md:inline">{{ user.username }}</span>
+                    {% if user.is_superuser or user.profile.role == 'superadmin' %}
+                    <span class="hidden md:inline text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary-container text-on-primary">{% trans "Admin" %}</span>
+                    <a href="{% url 'dashboard:admin_panel' %}" class="hidden md:inline text-xs text-secondary hover:underline font-medium">{% trans "Manage" %}</a>
+                    {% elif user.profile.role == 'subadmin' %}
+                    <span class="hidden md:inline text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-secondary-container text-on-secondary-container">{% trans "Subadmin" %}</span>
+                    {% else %}
+                    <span class="hidden md:inline text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-surface-variant text-on-surface-variant">{% trans "Viewer" %}</span>
+                    {% endif %}
+                    <a href="{% url 'dashboard:logout' %}" class="text-on-surface-variant hover:text-error transition-colors" title="{% trans 'Sign Out' %}">
+                        <span class="material-symbols-outlined text-xl sm:text-sm">logout</span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'dashboard:login' %}" class="px-3 py-1.5 text-xs font-bold uppercase tracking-wider bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all">{% trans "Sign In" %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</header>

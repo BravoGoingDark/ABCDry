@@ -1,0 +1,1540 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "Sensor Network & Telemetry" %} — APWRS</title>
+
+    <!-- Framework & Fonts -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}"/>
+    <script src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+    <script src="{% static 'dashboard/js/map-tiles.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700;800;900&amp;family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#012d1d",
+                "primary-container": "#1b4332",
+                "on-primary": "#ffffff",
+                "secondary": "#00677d",
+                "secondary-container": "#72ddfd",
+                "on-secondary-container": "#006075",
+                "surface": "#f9f9ff",
+                "surface-container-lowest": "#ffffff",
+                "surface-container-low": "#f0f3ff",
+                "surface-container": "#e7eefe",
+                "surface-container-high": "#e2e8f8",
+                "surface-variant": "#dce2f3",
+                "on-surface": "#151c27",
+                "on-surface-variant": "#414844",
+                "outline-variant": "#c1c8c2",
+                "outline": "#717973",
+                "error": "#ba1a1a",
+                "error-container": "#ffdad6",
+              },
+              fontFamily: {
+                headline: ["Hanken Grotesk"],
+                body: ["Inter"],
+                label: ["JetBrains Mono"]
+              }
+            }
+          }
+        };
+    </script>
+
+    <style>
+        .custom-station-icon {
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer;
+        }
+        .station-marker-container {
+            position: relative;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .station-marker-badge {
+            position: relative;
+            z-index: 10;
+            width: 28px;
+            height: 28px;
+            border-radius: 9999px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+        .custom-station-icon:hover .station-marker-badge {
+            transform: scale(1.28);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+        }
+        .station-radar-ripple {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-radius: 9999px;
+            border: 2px solid;
+            animation: stationPulse 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        @keyframes stationPulse {
+            0% { transform: scale(0.6); opacity: 0.9; }
+            100% { transform: scale(2.4); opacity: 0; }
+        }
+        .leaflet-popup-content-wrapper {
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            color: #f8fafc !important;
+            border-radius: 12px !important;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4) !important;
+            padding: 2px !important;
+        }
+        .leaflet-popup-content {
+            margin: 12px 14px !important;
+            line-height: 1.4 !important;
+        }
+        .leaflet-popup-tip {
+            background: rgba(15, 23, 42, 0.95) !important;
+        }
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased flex h-screen overflow-hidden">
+
+<div class="flex-1 min-w-0 flex flex-col bg-surface h-screen">
+    <!-- Top Navigation Header -->
+    {% include "dashboard/_header.html" %}
+
+    <!-- APWRS Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="sensors" %}
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 transition-all duration-300 ease-in-out lg:ml-60">
+        <div class="max-w-7xl mx-auto space-y-6">
+
+            <!-- Page Header & Action Bar -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-2xl">sensors</span>
+                            </span>
+                            <div>
+                                <h1 class="font-headline font-bold text-2xl text-primary flex items-center gap-2">
+                                    {% trans "Sensor Network & Telemetry Infrastructure" %}
+                                    <span class="text-xs font-label font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                                        {{ stats.online_count }}/{{ stats.total_sensors }} {% trans "reporting" %}
+                                    </span>
+                                </h1>
+                                <p class="text-xs text-on-surface-variant mt-0.5">
+                                    {% trans "Real-time geographical station mapping, multi-depth soil moisture probes, automated weather stations (AWS), and hydrology sensors." %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-stretch gap-2 shrink-0 w-full lg:w-auto">
+                        <a href="#telemetry-graphs-section"
+                           class="flex-1 lg:flex-none justify-center h-9 px-3 sm:px-3.5 rounded-lg bg-surface-container-low border border-outline-variant text-xs font-semibold text-on-surface hover:text-primary hover:border-primary transition-colors flex items-center gap-1.5 whitespace-nowrap">
+                            <span class="material-symbols-outlined text-base text-secondary">monitoring</span>
+                            <span>{% trans "View Telemetry Graphs" %}</span>
+                        </a>
+                        <button type="button" onclick="openRegisterSensorModal()"
+                                class="flex-1 lg:flex-none justify-center h-9 px-3 sm:px-3.5 rounded-lg bg-primary text-on-primary border border-primary text-xs font-semibold hover:bg-primary-container transition-colors shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+                            <span class="material-symbols-outlined text-base">add_circle</span>
+                            <span>{% trans "Register New Station" %}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: KPI Fleet Statistics Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <!-- Total Sensors -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-label uppercase text-on-surface-variant font-bold">{% trans "Active Fleet" %}</span>
+                        <span class="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">sensors</span>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-headline font-bold text-primary">{{ stats.total_sensors }}</div>
+                    <div class="text-[11px] text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        {{ stats.online_count }} {% trans "reporting in the last 48 h" %}
+                    </div>
+                </div>
+
+                <!-- Weather Stations (AWS) -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-label uppercase text-on-surface-variant font-bold">{% trans "Weather AWS" %}</span>
+                        <span class="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">air</span>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-headline font-bold text-cyan-700">{{ stats.aws_count }}</div>
+                    <div class="text-[11px] text-on-surface-variant mt-1">
+                        {% trans "Rain, Temp, Wind, Solar" %}
+                    </div>
+                </div>
+
+                <!-- Soil Moisture Probes -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-label uppercase text-on-surface-variant font-bold">{% trans "Soil Probes" %}</span>
+                        <span class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">eco</span>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-headline font-bold text-emerald-700">{{ stats.soil_count }}</div>
+                    <div class="text-[11px] text-on-surface-variant mt-1">
+                        {% trans "Moisture by depth" %}
+                    </div>
+                </div>
+
+                <!-- Hydrology Gauges -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-label uppercase text-on-surface-variant font-bold">{% trans "Water Gauges" %}</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">water_drop</span>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-headline font-bold text-blue-700">{{ stats.water_count }}</div>
+                    <div class="text-[11px] text-on-surface-variant mt-1">
+                        {% trans "Lake Level & Inflow" %}
+                    </div>
+                </div>
+
+                <!-- Battery & Telemetry Health -->
+                <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-label uppercase text-on-surface-variant font-bold">{% trans "Readings stored" %}</span>
+                        <span class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-base">database</span>
+                        </span>
+                    </div>
+                    <div class="text-2xl font-headline font-bold text-primary">{{ stats.readings_total }}</div>
+                    <div class="text-[11px] text-emerald-600 font-medium mt-1">
+                        {% trans "Real measurements" %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 1: MAP OF SENSOR LOCATIONS -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 shadow-sm space-y-3">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-outline-variant/50">
+                    <div>
+                        <h2 class="font-headline font-bold text-lg text-primary flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">explore</span>
+                            {% trans "Sensor Locations" %}
+                        </h2>
+                        <p class="text-xs text-on-surface-variant">
+                            {% trans "Click a sensor to see its last reading and coordinates." %}
+                        </p>
+                    </div>
+
+                    <!-- Map Filter Buttons -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[11px] font-bold text-on-surface-variant mr-1">{% trans "Filter" %}:</span>
+                        <button onclick="filterMapType('all')" class="map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-primary text-on-primary shadow-sm" data-type="all">
+                            {% trans "All" %} ({{ stats.total_sensors }})
+                        </button>
+                        <button onclick="filterMapType('aws')" class="map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-surface-container-low text-on-surface hover:text-cyan-600 border border-outline-variant/60" data-type="aws">
+                            🌦️ {% trans "AWS" %} ({{ stats.aws_count }})
+                        </button>
+                        <button onclick="filterMapType('soil')" class="map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-surface-container-low text-on-surface hover:text-emerald-600 border border-outline-variant/60" data-type="soil">
+                            🌱 {% trans "Soil" %} ({{ stats.soil_count }})
+                        </button>
+                        <button onclick="filterMapType('water')" class="map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-surface-container-low text-on-surface hover:text-blue-600 border border-outline-variant/60" data-type="water">
+                            💧 {% trans "Water" %} ({{ stats.water_count }})
+                        </button>
+                        <button onclick="filterMapType('custom')" class="map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-surface-container-low text-on-surface hover:text-amber-600 border border-outline-variant/60" data-type="custom">
+                            🛰️ {% trans "Tower" %} ({{ stats.custom_count }})
+                        </button>
+
+                        <!-- Layer Variant Toggle (Map / Satellite) -->
+                        <div class="flex items-center gap-1 bg-surface-container-low p-0.5 rounded-md border border-outline-variant/60 ml-2">
+                            <button id="sensor-layer-map-btn" onclick="setMapLayer('map')" class="px-2 py-0.5 text-[11px] font-bold rounded bg-primary text-on-primary shadow-sm" type="button">
+                                {% trans "Map" %}
+                            </button>
+                            <button id="sensor-layer-sat-btn" onclick="setMapLayer('satellite')" class="px-2 py-0.5 text-[11px] font-bold rounded text-on-surface-variant hover:text-primary" type="button">
+                                {% trans "Satellite" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leaflet Map Container -->
+                <div class="relative w-full h-[520px] rounded-lg overflow-hidden border border-outline-variant shadow-inner">
+                    <div id="sensor-network-map" class="w-full h-full"></div>
+
+                    <!-- Floating Map Legend Overlay -->
+                    <div class="absolute bottom-4 left-4 z-[1000] bg-slate-900/90 backdrop-blur-md text-white p-3 rounded-lg border border-white/10 shadow-xl text-xs space-y-1.5">
+                        <div class="font-bold text-[11px] uppercase tracking-wider text-slate-300 mb-1">{% trans "Sensor Types & Radii" %}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#00677d] border border-white"></span>
+                            <span>{% trans "Weather AWS (15-20 km)" %}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#16a34a] border border-white"></span>
+                            <span>{% trans "Soil Moisture Array (8-10 km)" %}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#2563eb] border border-white"></span>
+                            <span>{% trans "Hydrology Level Station (12-14 km)" %}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-[#d97706] border border-white"></span>
+                            <span>{% trans "Ground Truth Flux Tower (25 km)" %}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: SENSOR TYPES & DETAILED STATION INVENTORY -->
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-outline-variant/50">
+                    <div>
+                        <h2 class="font-headline font-bold text-lg text-primary flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary">view_list</span>
+                            {% trans "Types of Sensors & Station Inventory" %}
+                        </h2>
+                        <p class="text-xs text-on-surface-variant">
+                            {% trans "Installed sensors, where they are and what they measure." %}
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-on-surface-variant">
+                            {% trans "Total Stations" %}: <span class="text-primary font-mono font-bold">{{ stats.total_sensors }}</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Station Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="sensor-cards-container">
+                    {% for s in sensors %}
+                    <div class="sensor-card border border-outline-variant/80 rounded-xl p-4 bg-surface hover:border-primary transition-all duration-200 hover:shadow-md flex flex-col justify-between space-y-3"
+                         data-sensor-id="{{ s.id }}"
+                         data-sensor-type="{{ s.sensor_type }}"
+                         data-lat="{{ s.latitude }}"
+                         data-lng="{{ s.longitude }}">
+
+                        <div>
+                            <!-- Header with Badge -->
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div>
+                                    <h3 class="font-headline font-bold text-sm text-primary leading-tight">{{ s.name }}</h3>
+                                    <span class="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+                                        <span class="material-symbols-outlined text-[13px] text-secondary">location_on</span>
+                                        {{ s.region_name }} &middot; <span class="font-mono text-[10px]">{{ s.latitude|floatformat:4 }}, {{ s.longitude|floatformat:4 }}</span>
+                                    </span>
+                                </div>
+                                <span class="text-[10px] font-label font-bold uppercase px-2 py-0.5 rounded-full border {{ s.type_bg }} whitespace-nowrap">
+                                    {{ s.type_short }}
+                                </span>
+                            </div>
+
+                            <!-- Description / Scope -->
+                            <p class="text-xs text-on-surface-variant line-clamp-2 leading-relaxed mb-3">
+                                {{ s.description }}
+                            </p>
+
+                            <!-- Measured Metrics Provided -->
+                            <div class="p-2 rounded-lg bg-surface-container-low text-[11px] text-on-surface space-y-1">
+                                <div class="font-bold text-primary flex items-center gap-1 text-[10px] uppercase font-label">
+                                    <span class="material-symbols-outlined text-xs text-secondary">analytics</span>
+                                    {% trans "Telemetry Provided" %}:
+                                </div>
+                                <div class="text-[11px] text-on-surface-variant font-medium">
+                                    {{ s.metrics_measured }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer: Live Telemetry Status & Actions -->
+                        <div class="pt-3 border-t border-outline-variant/40 space-y-2.5">
+                            <div class="flex items-center justify-between text-[11px]">
+                                {% if s.is_real %}
+                                <span class="flex items-center gap-1 text-emerald-700 font-label font-bold">
+                                    <span class="material-symbols-outlined text-xs">verified</span>
+                                    {% trans "Real data · SmartFarm" %}
+                                </span>
+                                {% else %}
+                                <span class="flex items-center gap-1 text-on-surface-variant font-label">
+                                    <span class="material-symbols-outlined text-xs">cloud_off</span>
+                                    {% trans "No data connected" %}
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button onclick="flyToSensorMarker({{ s.id }}, {{ s.latitude }}, {{ s.longitude }})"
+                                        class="flex-1 py-1.5 px-2 bg-surface-container-high hover:bg-surface-container rounded-lg text-xs font-semibold text-primary transition-colors flex items-center justify-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">my_location</span>
+                                    <span>{% trans "Locate on Map" %}</span>
+                                </button>
+                                <button onclick="selectSensorForTelemetry({{ s.id }}, '{{ s.name|escapejs }}')"
+                                        class="flex-1 py-1.5 px-2 bg-primary hover:bg-primary-container text-on-primary rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1 shadow-sm">
+                                    <span class="material-symbols-outlined text-sm">monitoring</span>
+                                    <span>{% trans "View Graphs" %}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- SECTION 3: GRAPHS SHOWING DATA THEY ARE PROVIDING -->
+            <div id="telemetry-graphs-section" class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm space-y-6">
+
+                <!-- Graphs Toolbar: Sensor Selector & Time-Range Buttons -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-outline-variant/60">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-xl">insights</span>
+                            </span>
+                            <h2 class="font-headline font-bold text-xl text-primary">
+                                {% trans "Live Telemetry Graphs & Data Streams" %}
+                            </h2>
+                        </div>
+                        <p class="text-xs text-on-surface-variant mt-1" id="active-graph-station-label">
+                            {% trans "Displaying real-time sensor streams for" %}: <strong class="text-primary font-semibold" id="current-station-title">{% if sensors %}{{ sensors.0.name }}{% else %}—{% endif %}</strong>
+                            <span class="text-on-surface-variant/80" id="current-station-type"></span>
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <!-- Sensor Picker Dropdown -->
+                        <div class="relative min-w-[240px]">
+                            <select id="telemetry-sensor-select"
+                                    onchange="onSensorSelectChanged(this.value)"
+                                    class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-xs font-semibold text-on-surface focus:ring-1 focus:ring-secondary focus:outline-none">
+                                {% for s in sensors %}
+                                <option value="{{ s.id }}">{{ s.type_short }}: {{ s.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Time Horizon Buttons -->
+                        <div class="flex items-center rounded-lg bg-surface-container-low p-1 border border-outline-variant/60">
+                            <button onclick="setGraphRange('24h')" id="btn-range-24h" class="range-btn px-3 py-1 text-xs font-bold rounded-md bg-primary text-on-primary shadow-sm transition-all">
+                                24h
+                            </button>
+                            <button onclick="setGraphRange('7d')" id="btn-range-7d" class="range-btn px-3 py-1 text-xs font-bold rounded-md text-on-surface-variant hover:text-primary transition-all">
+                                7d
+                            </button>
+                            <button onclick="setGraphRange('30d')" id="btn-range-30d" class="range-btn px-3 py-1 text-xs font-bold rounded-md text-on-surface-variant hover:text-primary transition-all">
+                                30d
+                            </button>
+                        </div>
+
+                        <!-- Refresh Live Stream Button -->
+                        <button onclick="reloadTelemetryData()"
+                                class="p-2 rounded-lg border border-outline-variant hover:bg-surface-container-low text-on-surface-variant hover:text-primary transition-colors"
+                                title="{% trans 'Refresh Live Stream' %}">
+                            <span class="material-symbols-outlined text-base">refresh</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live SmartFarm soil probe: latest reading (real hardware) -->
+                <div id="smartfarm-panel" class="border border-outline-variant/80 rounded-xl p-5 bg-surface space-y-4" data-configured="{{ smartfarm_configured|yesno:'1,0' }}">
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <span class="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-xl">sensors</span>
+                            </span>
+                            <div>
+                                <h2 class="font-headline font-bold text-lg text-primary flex items-center gap-2 flex-wrap">
+                                    {% trans "Soil probe" %} <span class="text-on-surface-variant font-semibold">· S.Sensor</span>
+                                    <span id="sf-live-badge" class="hidden items-center gap-1 text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                                        <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span></span>
+                                        {% trans "Real data" %}
+                                    </span>
+                                </h2>
+                                <p id="sf-subtitle" class="text-xs text-on-surface-variant mt-0.5">{% trans "SmartFarm capacitive probe: soil moisture at three depths and soil temperature, about one reading a day." %}</p>
+                            </div>
+                        </div>
+                        <button id="sf-sync-btn" onclick="smartfarmSync()" type="button" class="hidden items-center gap-1.5 self-start px-3 py-1.5 rounded-lg border border-outline-variant text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-low transition-colors">
+                            <span id="sf-sync-icon" class="material-symbols-outlined text-base">sync</span>
+                            <span>{% trans "Fetch now" %}</span>
+                        </button>
+                    </div>
+
+                    <!-- State message: not configured / loading / error -->
+                    <div id="sf-message" class="text-sm text-on-surface-variant flex items-center gap-2">
+                        <span class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+                        <span>{% trans "Reading the probe…" %}</span>
+                    </div>
+
+                    <!-- Data -->
+                    <div id="sf-data" class="hidden space-y-4">
+                        <div id="sf-tiles" class="grid grid-cols-2 lg:grid-cols-5 gap-3"></div>
+                        <p id="sf-error" class="hidden text-[11px] text-amber-700"></p>
+                    </div>
+                </div>
+
+
+                <!-- TELEMETRY GRAPHS GRID (built from the selected sensor's real metrics) -->
+                <div id="telemetry-charts-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="col-span-full flex items-center justify-center py-12 text-on-surface-variant text-xs font-mono gap-2">
+                        <span class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
+                        <span>Loading telemetry streams…</span>
+                    </div>
+                </div>            </div>
+
+        </div>
+    {% include 'dashboard/_partners.html' %}
+    {% include "dashboard/_agroai_chat.html" %}
+    </main>
+</div>
+
+<!-- ========================================================================= -->
+<!-- Modal: Register New Sensor Station                                        -->
+<!-- ========================================================================= -->
+<div id="registerSensorModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 transition-all">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95">
+        <div class="flex justify-between items-center mb-5 border-b border-outline-variant/50 pb-3">
+            <h2 class="font-headline font-bold text-on-surface text-lg flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">add_location_alt</span>
+                {% trans "Register New Station Node" %}
+            </h2>
+            <button onclick="closeRegisterSensorModal()" class="text-on-surface-variant hover:text-on-surface p-1 rounded-lg">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <form id="registerSensorForm" onsubmit="handleSensorSubmit(event)" class="space-y-4 text-xs font-body">
+            {% csrf_token %}
+            <div>
+                <label class="block font-bold text-on-surface uppercase tracking-wider mb-1.5">{% trans "Station Name & Identifier" %}</label>
+                <input id="new-sensor-name" type="text" placeholder="e.g. AWS-03: Mateur Valley Station" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none" required/>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-on-surface uppercase tracking-wider mb-1.5">{% trans "Sensor Type" %}</label>
+                    <select id="new-sensor-type" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none">
+                        <option value="aws">🌦️ Weather Station (AWS)</option>
+                        <option value="soil">🌱 Soil Moisture Probe</option>
+                        <option value="water">💧 Hydrology Gauge</option>
+                        <option value="custom">🛰️ Ground Flux Tower</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block font-bold text-on-surface uppercase tracking-wider mb-1.5">{% trans "Latitude" %}</label>
+                    <input id="new-sensor-lat" type="number" step="0.0001" placeholder="37.1420" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none" required/>
+                </div>
+                <div>
+                    <label class="block font-bold text-on-surface uppercase tracking-wider mb-1.5">{% trans "Longitude" %}</label>
+                    <input id="new-sensor-lng" type="number" step="0.0001" placeholder="9.6840" class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none" required/>
+                </div>
+            </div>
+
+            <div>
+                <label class="block font-bold text-on-surface uppercase tracking-wider mb-1.5">{% trans "Hardware Description & Sensor Model" %}</label>
+                <textarea id="new-sensor-desc" rows="3" placeholder="Telemetry array details, transmission interval, calibration constants..." class="w-full bg-surface-container-low border border-outline-variant rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:outline-none resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-3 pt-4 border-t border-outline-variant/50">
+                <button type="button" onclick="closeRegisterSensorModal()" class="flex-1 bg-surface-container-high text-on-surface font-semibold py-2 rounded-lg hover:bg-surface-container transition-colors">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="submit" class="flex-1 bg-primary text-on-primary font-semibold py-2 rounded-lg hover:bg-primary-container transition-colors shadow-sm">
+                    {% trans "Register Station" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- Interactive Map & Charts JavaScript Logic                                 -->
+<!-- ========================================================================= -->
+<script>
+    // ── Global Sensors Data from Django ─────────────────────────────────
+    var SENSORS_DATA = {{ sensors_json|safe }};
+    window.SENSORS_DATA = SENSORS_DATA;
+    // ── SmartFarm soil probe (real hardware) ────────────────────────────
+    var SF_T = {
+        notConfigured: "{% filter escapejs %}{% trans 'The SmartFarm probe is not connected yet. An administrator must add SMARTFARM_EMAIL and SMARTFARM_PASSWORD to the server settings.' %}{% endfilter %}",
+        unreachable: "{% filter escapejs %}{% trans 'SmartFarm could not be reached right now.' %}{% endfilter %}",
+        noReading: "{% filter escapejs %}{% trans 'The probe has not sent a reading from the soil yet.' %}{% endfilter %}",
+        deep: "{% filter escapejs %}{% trans 'cm deep' %}{% endfilter %}",
+        soilTemp: "{% filter escapejs %}{% trans 'Soil temperature' %}{% endfilter %}",
+        rootZone: "{% filter escapejs %}{% trans 'Root zone (average)' %}{% endfilter %}",
+        lastReading: "{% filter escapejs %}{% trans 'Last reading' %}{% endfilter %}",
+        readings: "{% filter escapejs %}{% trans 'readings stored' %}{% endfilter %}",
+        synced: "{% filter escapejs %}{% trans 'synced' %}{% endfilter %}",
+        lastSyncFailed: "{% filter escapejs %}{% trans 'Last sync failed; showing stored readings.' %}{% endfilter %}",
+        dry: "{% filter escapejs %}{% trans 'Dry' %}{% endfilter %}",
+        good: "{% filter escapejs %}{% trans 'Good' %}{% endfilter %}",
+        wet: "{% filter escapejs %}{% trans 'Wet' %}{% endfilter %}",
+        noSensorData: "{% filter escapejs %}{% trans 'No readings from this sensor yet. Only sensors connected to a real data source show graphs.' %}{% endfilter %}"
+    };
+    var SF_LEVEL = {
+        dry: { label: SF_T.dry, cls: 'bg-amber-500/10 text-amber-700 border-amber-500/30', bar: '#E7A83B' },
+        good: { label: SF_T.good, cls: 'bg-emerald-500/10 text-emerald-700 border-emerald-500/30', bar: '#10b981' },
+        wet: { label: SF_T.wet, cls: 'bg-sky-500/10 text-sky-700 border-sky-500/30', bar: '#0ea5e9' }
+    };
+    var SF_COLORS = ['#10b981', '#047857', '#06b6d4'];
+    var SF_LOCALE = (document.documentElement.lang || 'en') === 'ar' ? 'ar-TN' : (document.documentElement.lang || 'en');
+
+    function sfFmt(iso) {
+        return new Date(iso).toLocaleString(SF_LOCALE, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Tunis' });
+    }
+    function sfEsc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; });
+    }
+    function sfMessage(text, icon) {
+        var el = document.getElementById('sf-message');
+        el.classList.remove('hidden');
+        el.innerHTML = '<span class="material-symbols-outlined text-lg">' + (icon || 'info') + '</span><span>' + sfEsc(text) + '</span>';
+        document.getElementById('sf-data').classList.add('hidden');
+    }
+    function sfTile(label, color, value, level) {
+        var lv = level && SF_LEVEL[level];
+        var pct = value == null ? null : Math.max(0, Math.min(100, value));
+        return '<div class="rounded-xl border border-outline-variant/70 px-4 py-3 space-y-2">' +
+            '<div class="flex items-center justify-between gap-2"><span class="flex items-center gap-1.5 text-[12px] text-on-surface-variant">' +
+            (color ? '<span class="w-2.5 h-2.5 rounded-full" style="background:' + color + '"></span>' : '') + sfEsc(label) + '</span>' +
+            (lv ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ' + lv.cls + '">' + sfEsc(lv.label) + '</span>' : '') + '</div>' +
+            '<div class="text-2xl font-bold text-primary tabular-nums">' + (value == null ? '—' : Math.round(value) + '%') + '</div>' +
+            '<div class="h-1.5 rounded-full bg-surface-container-high overflow-hidden"><div class="h-full rounded-full" style="width:' + (pct || 0) + '%;background:' + (lv ? lv.bar : '#94a3b8') + '"></div></div>' +
+            '</div>';
+    }
+
+    function sfRender(d) {
+        var badge = document.getElementById('sf-live-badge');
+        var btn = document.getElementById('sf-sync-btn');
+        if (!d.configured) { sfMessage(SF_T.notConfigured, 'link_off'); return; }
+        btn.classList.remove('hidden'); btn.classList.add('flex');
+        if (!d.sensor) { sfMessage(d.error ? SF_T.unreachable + ' (' + d.error + ')' : SF_T.noReading, 'cloud_off'); return; }
+        if (!d.latest) { sfMessage(SF_T.noReading, 'hourglass_empty'); return; }
+
+        // The probe was just created by the first sync: reload once so the map and cards include it.
+        if (!(window.SENSORS_DATA || []).some(function(s) { return s.id === d.sensor.id; }) && !sessionStorage.getItem('sf-reloaded')) {
+            sessionStorage.setItem('sf-reloaded', '1');
+            location.reload();
+            return;
+        }
+
+        badge.classList.remove('hidden'); badge.classList.add('inline-flex');
+        document.getElementById('sf-message').classList.add('hidden');
+        document.getElementById('sf-data').classList.remove('hidden');
+        document.getElementById('sf-subtitle').textContent =
+            (d.sensor.field || d.sensor.code) + ' · ' + SF_T.lastReading + ' ' + sfFmt(d.latest.time) +
+            (d.sensor.last_synced_at ? ' · ' + SF_T.synced + ' ' + sfFmt(d.sensor.last_synced_at) : '');
+
+        var html = '';
+        d.depths.forEach(function(depth, i) {
+            html += sfTile(depth + ' ' + SF_T.deep, SF_COLORS[i], d.latest.m[i], d.levels[i]);
+        });
+        html += sfTile(SF_T.rootZone, null, d.root_zone, d.root_level);
+        html += '<div class="rounded-xl border border-outline-variant/70 px-4 py-3 space-y-2">' +
+            '<div class="flex items-center gap-1.5 text-[12px] text-on-surface-variant"><span class="material-symbols-outlined text-sm">device_thermostat</span>' + sfEsc(SF_T.soilTemp) + '</div>' +
+            '<div class="text-2xl font-bold text-primary tabular-nums">' + (d.latest.soil_temp == null ? '—' : d.latest.soil_temp.toFixed(1) + '°C') + '</div></div>';
+        document.getElementById('sf-tiles').innerHTML = html;
+
+        var err = document.getElementById('sf-error');
+        if (d.error) { err.textContent = SF_T.lastSyncFailed + ' (' + d.error + ')'; err.classList.remove('hidden'); }
+        else { err.classList.add('hidden'); }
+    }
+
+    async function sfLoad(method) {
+        try {
+            var opts = { method: method || 'GET', headers: { 'X-CSRFToken': (document.cookie.match(/csrftoken=([^;]+)/) || [])[1] || '' } };
+            var res = await fetch('/api/sensors/smartfarm/', opts);
+            if (!res.ok) throw new Error(res.status);
+            sfRender(await res.json());
+        } catch (e) {
+            sfMessage(SF_T.unreachable, 'cloud_off');
+        }
+    }
+
+    window.smartfarmSync = async function() {
+        var icon = document.getElementById('sf-sync-icon');
+        icon.classList.add('animate-spin');
+        await sfLoad('POST');
+        if (window.reloadTelemetryData) window.reloadTelemetryData();
+        icon.classList.remove('animate-spin');
+    };
+
+    document.addEventListener('DOMContentLoaded', function() { sfLoad('GET'); });
+
+
+    var activeSensorId = null;
+    var activeRange = '24h';
+    var sensorMap = null;
+    var markersLayerGroup = null;
+    var circlesLayerGroup = null;
+
+    // Chart instances
+    var chartSoil = null;
+    var chartWeather = null;
+    var chartHydrology = null;
+    var chartNode = null;
+
+    // ── Color and Icon mapping ──────────────────────────────────────────
+    var TYPE_STYLES = {
+        'aws': { color: '#00677d', icon: 'air', label: 'AWS Weather' },
+        'soil': { color: '#16a34a', icon: 'eco', label: 'Soil Moisture' },
+        'water': { color: '#2563eb', icon: 'water_drop', label: 'Hydrology Gauge' },
+        'custom': { color: '#d97706', icon: 'radar', label: 'Ground Tower' }
+    };
+
+    var currentMapVariant = 'map';
+    var activeTileLayer = null;
+
+    function makeSensorTileLayer(variant) {
+        if (!window.MapTiles) {
+            return L.tileLayer('/api/tiles/{z}/{x}/{y}.png?layer=' + (variant || 'map'), {
+                maxZoom: 19,
+                attribution: '&copy; Esri, Maxar, Earthstar Geographics'
+            });
+        }
+        return window.MapTiles.createTileLayer(L, sensorMap, {
+            variant: variant || 'map',
+            maxZoom: 19
+        });
+    }
+
+    window.setMapLayer = function(variant) {
+        if (currentMapVariant === variant && activeTileLayer) return;
+        currentMapVariant = variant;
+        if (activeTileLayer && sensorMap) {
+            sensorMap.removeLayer(activeTileLayer);
+        }
+        activeTileLayer = makeSensorTileLayer(variant).addTo(sensorMap);
+        activeTileLayer.bringToBack();
+
+        var mapBtn = document.getElementById('sensor-layer-map-btn');
+        var satBtn = document.getElementById('sensor-layer-sat-btn');
+        if (mapBtn && satBtn) {
+            if (variant === 'map') {
+                mapBtn.className = 'px-2 py-0.5 text-[11px] font-bold rounded bg-primary text-on-primary shadow-sm';
+                satBtn.className = 'px-2 py-0.5 text-[11px] font-bold rounded text-on-surface-variant hover:text-primary';
+            } else {
+                satBtn.className = 'px-2 py-0.5 text-[11px] font-bold rounded bg-primary text-on-primary shadow-sm';
+                mapBtn.className = 'px-2 py-0.5 text-[11px] font-bold rounded text-on-surface-variant hover:text-primary';
+            }
+        }
+    };
+
+    // ── Initialize Leaflet Map ──────────────────────────────────────────
+    function initSensorMap() {
+        var mapContainer = document.getElementById('sensor-network-map');
+        if (!mapContainer || typeof L === 'undefined') return;
+
+        // Default center: Ichkeul / Northern Tunisia (approx 37.12, 9.68)
+        var defaultCenter = [37.13, 9.68];
+        if (SENSORS_DATA.length > 0) {
+            defaultCenter = [SENSORS_DATA[0].latitude, SENSORS_DATA[0].longitude];
+        }
+
+        sensorMap = L.map('sensor-network-map', {
+            center: defaultCenter,
+            zoom: 11,
+            zoomControl: true,
+            fadeAnimation: false
+        });
+
+        // Use the resilient server-side proxy layer instead of blocked public tile hosts
+        activeTileLayer = makeSensorTileLayer('map').addTo(sensorMap);
+
+        markersLayerGroup = L.layerGroup().addTo(sensorMap);
+        circlesLayerGroup = L.layerGroup().addTo(sensorMap);
+
+        renderMapMarkers('all');
+    }
+
+    // ── Render Markers on Map ───────────────────────────────────────────
+    function renderMapMarkers(filterType) {
+        if (!sensorMap || !markersLayerGroup) return;
+
+        markersLayerGroup.clearLayers();
+        circlesLayerGroup.clearLayers();
+
+        var bounds = [];
+
+        SENSORS_DATA.forEach(function(s) {
+            if (filterType !== 'all' && s.sensor_type !== filterType) return;
+
+            var style = TYPE_STYLES[s.sensor_type] || TYPE_STYLES['custom'];
+
+            // Custom Pulsing Badge Marker
+            var html = '<div class="station-marker-container">' +
+                '<div class="station-radar-ripple" style="border-color: ' + style.color + '"></div>' +
+                '<div class="station-marker-badge" style="background-color: ' + style.color + '">' +
+                '<span class="material-symbols-outlined" style="font-size: 16px;">' + style.icon + '</span>' +
+                '</div>' +
+                '</div>';
+
+            var icon = L.divIcon({
+                className: 'custom-station-icon',
+                html: html,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -18]
+            });
+
+            var marker = L.marker([s.latitude, s.longitude], { icon: icon });
+
+            // Popup content
+            var popupContent = '<div class="space-y-2 text-xs text-white" style="min-width: 200px;">' +
+                '<div class="flex items-center justify-between gap-2 border-b border-white/20 pb-1.5">' +
+                '<strong class="text-sm font-bold text-white">' + s.name + '</strong>' +
+                '<span class="px-2 py-0.5 rounded text-[10px] font-bold" style="background:' + style.color + '">' + s.type_short + '</span>' +
+                '</div>' +
+                '<div class="space-y-1 text-slate-300 text-[11px] font-mono">' +
+                '<div>Region: <span class="text-white">' + s.region_name + '</span></div>' +
+                '<div>Coords: ' + s.latitude.toFixed(4) + ', ' + s.longitude.toFixed(4) + '</div>' +
+                (s.last_reading
+                    ? '<div class="' + (s.status_online ? 'text-emerald-400' : 'text-amber-300') + ' font-bold flex items-center gap-1 mt-1">● Last reading ' + s.last_reading + '</div>'
+                    : '<div class="text-slate-400 font-bold flex items-center gap-1 mt-1">● No data connected</div>') +
+                '</div>' +
+                '<button onclick="selectSensorForTelemetry(' + s.id + ', \'' + s.name.replace(/'/g, "\\'") + '\')" ' +
+                'class="mt-2 w-full py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition-colors shadow flex items-center justify-center gap-1">' +
+                '<span class="material-symbols-outlined text-sm">monitoring</span> View Telemetry Graphs' +
+                '</button>' +
+                '</div>';
+
+            marker.bindPopup(popupContent);
+            markersLayerGroup.addLayer(marker);
+            bounds.push([s.latitude, s.longitude]);
+        });
+
+        if (bounds.length > 0) {
+            sensorMap.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+        }
+    }
+
+    // ── Filter Map Type ─────────────────────────────────────────────────
+    window.filterMapType = function(type) {
+        document.querySelectorAll('.map-type-filter-btn').forEach(function(btn) {
+            if (btn.getAttribute('data-type') === type) {
+                btn.className = 'map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-primary text-on-primary shadow-sm';
+            } else {
+                btn.className = 'map-type-filter-btn px-2.5 py-1 text-xs font-semibold rounded-md bg-surface-container-low text-on-surface hover:text-primary border border-outline-variant/60';
+            }
+        });
+
+        // Filter cards in inventory
+        document.querySelectorAll('.sensor-card').forEach(function(card) {
+            if (type === 'all' || card.getAttribute('data-sensor-type') === type) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        renderMapMarkers(type);
+    };
+
+    // ── Fly to Sensor Marker ────────────────────────────────────────────
+    window.flyToSensorMarker = function(id, lat, lng) {
+        if (!sensorMap) return;
+        sensorMap.flyTo([lat, lng], 13, { duration: 1.2 });
+        // Scroll to map
+        var mapEl = document.getElementById('sensor-network-map');
+        if (mapEl) mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    // ── Select Sensor for Telemetry Graphs ──────────────────────────────
+    window.selectSensorForTelemetry = function(sensorId, sensorName) {
+        activeSensorId = sensorId;
+        var selectEl = document.getElementById('telemetry-sensor-select');
+        if (selectEl) selectEl.value = sensorId || '';
+
+        var titleEl = document.getElementById('current-station-title');
+        if (titleEl) titleEl.textContent = sensorName || '—';
+
+        loadTelemetryData(activeSensorId, activeRange);
+
+        // Scroll to graphs
+        var graphSection = document.getElementById('telemetry-graphs-section');
+        if (graphSection) {
+            graphSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    window.onSensorSelectChanged = function(val) {
+        var sensorId = val ? parseInt(val) : null;
+        var sensor = SENSORS_DATA.find(function(s) { return s.id === sensorId; });
+        var name = sensor ? sensor.name : '—';
+        selectSensorForTelemetry(sensorId, name);
+    };
+
+    window.setGraphRange = function(range) {
+        activeRange = range;
+        ['24h', '7d', '30d'].forEach(function(r) {
+            var btn = document.getElementById('btn-range-' + r);
+            if (btn) {
+                if (r === range) {
+                    btn.className = 'range-btn px-3 py-1 text-xs font-bold rounded-md bg-primary text-on-primary shadow-sm transition-all';
+                } else {
+                    btn.className = 'range-btn px-3 py-1 text-xs font-bold rounded-md text-on-surface-variant hover:text-primary transition-all';
+                }
+            }
+        });
+        loadTelemetryData(activeSensorId, activeRange);
+    };
+
+    window.reloadTelemetryData = function() {
+        loadTelemetryData(activeSensorId, activeRange);
+    };
+
+        // ── Telemetry profile lookup (mirrors TELEMETRY_PROFILES in views) ──
+    var TYPE_CHART_DEFINITIONS = {
+        aws: {
+            climate: { title: "Atmospheric Temperature & Humidity", icon: "thermostat", datasets: ["temperature", "humidity"] },
+            rain_wind: { title: "Rainfall & Wind Dynamics", icon: "rainy", datasets: ["rainfall", "wind_speed"] },
+            energy: { title: "Solar Energy & Reference ET₀", icon: "wb_sunny", datasets: ["solar_radiation", "et0"] },
+            node_health: { title: "Node Hardware Health & Wireless Link", icon: "battery_charging_full", datasets: ["battery_voltage", "rssi_signal"] }
+        },
+        soil: {
+            moisture: { title: "Soil Moisture by Depth", icon: "eco", datasets: ["soil_moisture_10", "soil_moisture_30", "soil_moisture_60"] },
+            thermal: { title: "Soil Temperature & Salinity", icon: "device_thermostat", datasets: ["soil_temperature", "soil_salinity"] },
+            ph: { title: "Soil pH & Agronomic Window", icon: "science", datasets: ["soil_ph"] },
+            node_health: { title: "Node Hardware Health & Wireless Link", icon: "battery_charging_full", datasets: ["battery_voltage", "rssi_signal"] }
+        },
+        water: {
+            level: { title: "Water Level & Stage", icon: "waves", datasets: ["water_level"] },
+            flow: { title: "River Discharge & Flow", icon: "speed", datasets: ["water_discharge"] },
+            salinity: { title: "Water Salinity & Conductivity", icon: "opacity", datasets: ["water_salinity"] },
+            node_health: { title: "Node Hardware Health & Wireless Link", icon: "battery_charging_full", datasets: ["battery_voltage", "rssi_signal"] }
+        },
+        custom: {
+            ndvi: { title: "NDVI: Ground Truth vs Satellite", icon: "satellite_alt", datasets: ["ndvi_ground", "ndvi_satellite"] },
+            canopy: { title: "Canopy vs Air Temperature", icon: "heat", datasets: ["canopy_temperature", "temperature"] },
+            custom_soil: { title: "Soil Moisture Cross-Check", icon: "eco", datasets: ["soil_moisture_10", "soil_moisture_30"] },
+            node_health: { title: "Node Hardware Health & Wireless Link", icon: "battery_charging_full", datasets: ["battery_voltage", "rssi_signal"] }
+        },
+        smartfarm: {
+            probe_moisture: { title: "Soil Moisture by Depth (real readings)", icon: "eco", datasets: ["probe_moisture_1", "probe_moisture_2", "probe_moisture_3"] },
+            probe_temp: { title: "Soil Temperature (real readings)", icon: "device_thermostat", datasets: ["soil_temperature"] }
+        },
+        aggregate: {
+            agg_soil: { title: "Soil Moisture — Fleet Average", icon: "eco", datasets: ["soil_moisture_10", "soil_moisture_30"] },
+            agg_weather: { title: "Weather — Fleet Average", icon: "air", datasets: ["temperature", "humidity", "rainfall"] },
+            agg_water: { title: "Hydrology — Fleet Average", icon: "water_drop", datasets: ["water_level", "water_salinity"] },
+            agg_ndvi: { title: "Vegetation Index — Fleet Average", icon: "satellite_alt", datasets: ["ndvi_ground", "ndvi_satellite"] },
+            node_health: { title: "Node Hardware Health & Wireless Link", icon: "battery_charging_full", datasets: ["battery_voltage", "rssi_signal"] }
+        }
+    };
+
+    // ── Map sensor type to its metric chip labels ──
+    var TYPE_METRIC_LABELS = {
+        aws: ["Air Temp (°C)", "Rel. Humidity (%)", "Rainfall (mm)", "Wind (km/h)", "Solar (W/m²)", "ET₀ (mm/day)"],
+        soil: ["VWC 10cm (%)", "VWC 30cm (%)", "VWC 60cm (%)", "Soil Temp (°C)", "Soil Salinity (dS/m)", "Soil pH"],
+        water: ["Water Level (m)", "Discharge (m³/s)", "Salinity (g/L)"],
+        custom: ["NDVI Ground Truth", "NDVI Satellite", "Canopy Temp (°C)", "Air Temp (°C)", "Soil VWC 10cm (%)"],
+        aggregate: ["Avg VWC 10cm (%)", "Avg Temp (°C)", "Avg Rainfall (mm)", "Avg Water Level (m)", "Avg Salinity (g/L)", "Avg NDVI"]
+    };
+
+    // ── Build metric chips HTML ──
+    function buildMetricChips(sensorType, activeMetricIdx) {
+        var labels = (sensorType === 'smartfarm' && window._lastTelemetry && window._lastTelemetry.metrics_measured)
+            || TYPE_METRIC_LABELS[sensorType] || TYPE_METRIC_LABELS["aggregate"];
+        var html = '';
+        labels.forEach(function(label, idx) {
+            var active = (idx === activeMetricIdx) ? ' bg-primary text-on-primary' : '';
+            html += '<span class="px-2.5 py-0.5 rounded text-[10px] font-medium' + active + '">' + label + '</span>';
+        });
+        return html;
+    }
+
+    // ── Render charts based on sensor profile ──
+    function renderChartsFromProfile(data) {
+        if (data.no_data || !(data.timestamps || []).length) {
+            var chips = document.getElementById('telemetry-metric-chips');
+            if (chips) chips.innerHTML = '';
+            var g = document.getElementById('telemetry-charts-grid');
+            if (g) g.innerHTML = '<div class="col-span-full flex items-center justify-center gap-2 py-12 text-on-surface-variant text-sm">' +
+                '<span class="material-symbols-outlined text-lg">cloud_off</span><span>' + SF_T.noSensorData + '</span></div>';
+            return;
+        }
+        var sensorType = data.sensor_type || "aggregate";
+        var chartsDef = TYPE_CHART_DEFINITIONS[sensorType] || TYPE_CHART_DEFINITIONS["aggregate"];
+        var timestamps = data.timestamps || [];
+        var series = data.series || {};
+        var activeMetricIdx = data.active_metric_idx !== undefined ? data.active_metric_idx : 0;
+
+        // Build metric chips
+        var chipsEl = document.getElementById('telemetry-metric-chips');
+        if (chipsEl) {
+            chipsEl.innerHTML = buildMetricChips(sensorType, activeMetricIdx);
+            // Add click handlers to chips
+            var chipSpans = chipsEl.querySelectorAll('span');
+            chipSpans.forEach(function(span, idx) {
+                span.onclick = function() {
+                    // Update active visual
+                    chipSpans.forEach(function(s) { s.classList.remove('bg-primary', 'text-on-primary'); });
+                    span.classList.add('bg-primary', 'text-on-primary');
+                    // Re-render with new dataset focus (same chart, highlighted dataset)
+                    renderChartsFromProfile(data);
+                };
+            });
+        }
+
+        // Clear existing charts in the grid
+        var grid = document.getElementById('telemetry-charts-grid');
+        if (grid) {
+            grid.innerHTML = '';
+        }
+
+        // Render each chart definition for this sensor type
+        var chartCount = 0;
+        for (var chartKey in chartsDef) {
+            if (!chartsDef.hasOwnProperty(chartKey)) continue;
+            var def = chartsDef[chartKey];
+            chartCount++;
+
+            // Determine which datasets to plot for this chart
+            var datasetKeys = def.datasets;
+            var datasets = [];
+
+            datasetKeys.forEach(function(dsKey, dsIdx) {
+                var seriesData = series[dsKey] || [];
+                var colorMap = {
+                    temperature: "#ef4444",
+                    humidity: "#06b6d4",
+                    rainfall: "#2563eb",
+                    wind_speed: "#0ea5e9",
+                    solar_radiation: "#f59e0b",
+                    et0: "#16a34a",
+                    soil_moisture_10: "#10b981",
+                    soil_moisture_30: "#047857",
+                    soil_moisture_60: "#06b6d4",
+                    soil_temperature: "#f97316",
+                    soil_salinity: "#8b5cf6",
+                    soil_ph: "#7c3aed",
+                    water_level: "#2563eb",
+                    water_discharge: "#0891b2",
+                    water_salinity: "#f59e0b",
+                    ndvi_ground: "#16a34a",
+                    ndvi_satellite: "#0ea5e9",
+                    canopy_temperature: "#dc2626",
+                    battery_voltage: "#10b981",
+                    rssi_signal: "#6366f1",
+                    probe_moisture_1: "#10b981",
+                    probe_moisture_2: "#047857",
+                    probe_moisture_3: "#06b6d4"
+                };
+                var depthIdx = { probe_moisture_1: 0, probe_moisture_2: 1, probe_moisture_3: 2 }[dsKey];
+                var dsLabel = (depthIdx !== undefined && data.depths)
+                    ? 'moisture ' + data.depths[depthIdx] + ' cm (%)'
+                    : (dsKey === 'soil_temperature' && data.real ? 'soil temperature (°C)' : dsKey.replace(/_/g, ' '));
+
+                var color = colorMap[dsKey] || "#64748b";
+                var isBar = (dsKey === "rainfall" || dsKey === "water_discharge");
+
+                datasets.push({
+                    label: dsLabel,
+                    data: seriesData,
+                    borderColor: color,
+                    backgroundColor: isBar ? 'rgba(37, 99, 235, 0.55)' : 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: isBar ? 1 : 2,
+                    tension: 0.35,
+                    fill: !isBar,
+                    yAxisID: dsIdx === datasetKeys.length - 1 && dsKey.includes('right') ? 'yRight' : undefined
+                });
+            });
+
+            // Create the chart HTML card
+            var chartCard = document.createElement('div');
+            chartCard.className = 'border border-outline-variant/80 rounded-xl p-5 bg-surface-container-lowest shadow-sm space-y-3';
+
+            var cardHeader = document.createElement('div');
+            cardHeader.className = 'flex items-center justify-between pb-2 border-b border-outline-variant/40';
+            cardHeader.innerHTML = '<div class="flex items-center gap-2"><span class="material-symbols-outlined ' + def.icon + ' text-emerald-600"></span><h3 class="font-headline font-bold text-sm text-primary">' + def.title + '</h3></div>' +
+                '<span class="text-[10px] font-label font-bold px-2 py-0.5 rounded bg-secondary/10 text-secondary flex items-center justify-center">' + (sensorType === 'smartfarm' ? 'SmartFarm · live' : (sensorType === 'soil' ? 'TDR Capacitive' : (sensorType === 'water' ? 'Ultrasonic Stage' : '—'))) + '</span>';
+
+            chartCard.appendChild(cardHeader);
+
+            var chartCanvasWrapper = document.createElement('div');
+            chartCanvasWrapper.className = 'relative h-64 w-full';
+            var canvas = document.createElement('canvas');
+            canvas.id = 'telemetry-chart-' + sensorType + '-' + chartKey;
+            canvas.width = 400;
+            canvas.height = 250;
+            chartCanvasWrapper.appendChild(canvas);
+            chartCard.appendChild(chartCanvasWrapper);
+
+            // Render the chart
+            var ctx = canvas.getContext('2d');
+            if (window['chart' + sensorType + chartKey]) {
+                window['chart' + sensorType + chartKey].destroy();
+            }
+            window['chart' + sensorType + chartKey] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 8 } } }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, title: { display: false } }
+                    }
+                }
+            });
+
+            grid.appendChild(chartCard);
+        }
+
+        // If no charts were rendered, show a placeholder
+        if (chartCount === 0) {
+            var placeholder = document.createElement('div');
+            placeholder.className = 'col-span-full flex items-center justify-center py-12 text-on-surface-variant text-xs font-mono';
+            placeholder.innerHTML = '<span class="material-symbols-outlined text-lg">info</span><span>No chart data available for this sensor type</span>';
+            if (grid) grid.appendChild(placeholder);
+        }
+    }
+
+    // ── Fetch Telemetry API and Update Charts ───────────────────────────
+    async function loadTelemetryData(sensorId, range) {
+        var url = '/api/sensors/telemetry/?range=' + range;
+        if (sensorId) {
+            url = '/api/sensors/' + sensorId + '/telemetry/?range=' + range;
+        }
+
+        try {
+            var res = await fetch(url);
+            if (!res.ok) return;
+            var data = await res.json();
+            window._lastTelemetry = data;
+
+            // Remember the last selected metric index (stored on the select element or default 0)
+            var selectEl = document.getElementById('telemetry-sensor-select');
+            var activeIdx = 0;
+            if (selectEl && selectEl.value) {
+                // Find the sensor in the original SENSORS_DATA and store its index
+                var allSensors = window.SENSORS_DATA || [];
+                var selectedSensor = allSensors.find(function(s) { return s.id == selectEl.value; });
+                if (selectedSensor && selectedSensor.sensor_type) {
+                    activeIdx = 0; // default to first metric for this type
+                }
+            }
+
+            renderChartsFromProfile(data);
+        } catch (e) {
+            console.error('Failed to load sensor telemetry', e);
+        }
+    }
+
+    // ── Handle sensor selector change ──
+    window.onSensorSelectChanged = function(val) {
+        var sensorId = val ? parseInt(val) : null;
+        var sensor = SENSORS_DATA.find(function(s) { return s.id === sensorId; });
+        var name = sensor ? sensor.name : '—';
+        var sensorType = sensor ? sensor.sensor_type : 'aggregate';
+
+        // Store the sensor type so renderChartsFromProfile can use it
+        window.activeSensorType = sensorType;
+
+        selectSensorForTelemetry(sensorId, name);
+    };
+
+    // ── Handle range button change ──
+    window.setGraphRange = function(range) {
+        activeRange = range;
+        ['24h', '7d', '30d'].forEach(function(r) {
+            var btn = document.getElementById('btn-range-' + r);
+            if (btn) {
+                if (r === range) {
+                    btn.className = 'range-btn px-3 py-1 text-xs font-bold rounded-md bg-primary text-on-primary shadow-sm transition-all';
+                } else {
+                    btn.className = 'range-btn px-3 py-1 text-xs font-bold rounded-md text-on-surface-variant hover:text-primary transition-all';
+                }
+            }
+        });
+        var selectEl = document.getElementById('telemetry-sensor-select');
+        loadTelemetryData(selectEl ? selectEl.value : null, activeRange);
+    };
+
+    // ── Refresh Live Stream Button ──
+    window.reloadTelemetryData = function() {
+        var selectEl = document.getElementById('telemetry-sensor-select');
+        loadTelemetryData(selectEl ? selectEl.value : null, activeRange);
+    };
+
+    // ── Initialise on DOMContentLoaded ──
+    document.addEventListener('DOMContentLoaded', function() {
+        initSensorMap();
+        var selectEl = document.getElementById('telemetry-sensor-select');
+        if (selectEl) {
+            loadTelemetryData(selectEl.value, '24h');
+        } else {
+            loadTelemetryData(null, '24h');
+        }
+    });// ── Render Chart.js Graphs ──────────────────────────────────────────
+    function renderCharts(data) {
+        var timestamps = data.timestamps || [];
+        var soil = data.soil || {};
+        var weather = data.weather || {};
+        var hydrology = data.hydrology || {};
+        var node = data.node_health || {};
+
+        // 1. Soil Moisture Chart
+        var ctxSoil = document.getElementById('soilMoistureChart');
+        if (ctxSoil) {
+            if (chartSoil) chartSoil.destroy();
+            chartSoil = new Chart(ctxSoil, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: [
+                        {
+                            label: 'VWC 10cm (%)',
+                            data: soil.moisture_10cm || [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.35,
+                            fill: false,
+                        },
+                        {
+                            label: 'VWC 30cm (%)',
+                            data: soil.moisture_30cm || [],
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.35,
+                            fill: false,
+                        },
+                        {
+                            label: 'VWC 60cm (%)',
+                            data: soil.moisture_60cm || [],
+                            borderColor: '#047857',
+                            backgroundColor: 'rgba(4, 120, 87, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.35,
+                            fill: false,
+                        },
+                        {
+                            label: 'Field Capacity (32%)',
+                            data: Array(timestamps.length).fill(32),
+                            borderColor: '#3b82f6',
+                            borderWidth: 1.5,
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: false,
+                        },
+                        {
+                            label: 'Wilting Point (14%)',
+                            data: Array(timestamps.length).fill(14),
+                            borderColor: '#ef4444',
+                            borderWidth: 1.5,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            fill: false,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        y: {
+                            min: 5,
+                            max: 45,
+                            title: { display: true, text: 'Volumetric Water Content (%)', font: { size: 10 } },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // 2. Weather Dynamics Chart (Dual Axis: Line Temp & Bar Rain)
+        var ctxWeather = document.getElementById('weatherDynamicsChart');
+        if (ctxWeather) {
+            if (chartWeather) chartWeather.destroy();
+            chartWeather = new Chart(ctxWeather, {
+                data: {
+                    labels: timestamps,
+                    datasets: [
+                        {
+                            type: 'line',
+                            label: 'Temperature (°C)',
+                            data: weather.temperature || [],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'yTemp',
+                            tension: 0.3,
+                        },
+                        {
+                            type: 'line',
+                            label: 'Humidity (%)',
+                            data: weather.humidity || [],
+                            borderColor: '#06b6d4',
+                            backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                            borderWidth: 2,
+                            yAxisID: 'yHum',
+                            tension: 0.3,
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Precipitation (mm)',
+                            data: weather.rainfall || [],
+                            backgroundColor: 'rgba(59, 130, 246, 0.65)',
+                            borderColor: '#2563eb',
+                            borderWidth: 1,
+                            yAxisID: 'yRain',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        yTemp: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Temp (°C)', font: { size: 10 } },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
+                        },
+                        yHum: {
+                            type: 'linear',
+                            position: 'right',
+                            min: 20,
+                            max: 100,
+                            display: false,
+                            grid: { display: false }
+                        },
+                        yRain: {
+                            type: 'linear',
+                            position: 'right',
+                            min: 0,
+                            max: 20,
+                            title: { display: true, text: 'Rain (mm)', font: { size: 10 } },
+                            grid: { display: false }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // 3. Hydrology Level Chart
+        var ctxHydro = document.getElementById('hydrologyLevelChart');
+        if (ctxHydro) {
+            if (chartHydrology) chartHydrology.destroy();
+            chartHydrology = new Chart(ctxHydro, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: [
+                        {
+                            label: 'Water Elevation (m)',
+                            data: hydrology.water_level || [],
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.15)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.35,
+                            yAxisID: 'yLvl'
+                        },
+                        {
+                            label: 'Water Salinity (g/L)',
+                            data: hydrology.salinity || [],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            tension: 0.3,
+                            yAxisID: 'ySal'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        yLvl: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'Water Stage (m)', font: { size: 10 } },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
+                        },
+                        ySal: {
+                            type: 'linear',
+                            position: 'right',
+                            title: { display: true, text: 'Salinity (g/L)', font: { size: 10 } },
+                            grid: { display: false }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        // 4. Node Health & Signal Chart
+        var ctxNode = document.getElementById('nodeHealthChart');
+        if (ctxNode) {
+            if (chartNode) chartNode.destroy();
+            chartNode = new Chart(ctxNode, {
+                type: 'line',
+                data: {
+                    labels: timestamps,
+                    datasets: [
+                        {
+                            label: 'Battery Voltage (V)',
+                            data: node.battery_voltage || [],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'yVolt'
+                        },
+                        {
+                            label: 'RSSI Signal (dBm)',
+                            data: node.rssi_signal || [],
+                            borderColor: '#6366f1',
+                            backgroundColor: 'transparent',
+                            borderWidth: 1.5,
+                            tension: 0.2,
+                            yAxisID: 'ySig'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 10, font: { size: 10 } } }
+                    },
+                    scales: {
+                        yVolt: {
+                            type: 'linear',
+                            position: 'left',
+                            min: 3.6,
+                            max: 4.4,
+                            title: { display: true, text: 'Battery (V)', font: { size: 10 } },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
+                        },
+                        ySig: {
+                            type: 'linear',
+                            position: 'right',
+                            min: -90,
+                            max: -40,
+                            title: { display: true, text: 'Signal (dBm)', font: { size: 10 } },
+                            grid: { display: false }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
+
+    // ── Modal Handlers ──────────────────────────────────────────────────
+    window.openRegisterSensorModal = function() {
+        var modal = document.getElementById('registerSensorModal');
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeRegisterSensorModal = function() {
+        var modal = document.getElementById('registerSensorModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    window.handleSensorSubmit = async function(event) {
+        event.preventDefault();
+        var name = document.getElementById('new-sensor-name').value.trim();
+        var type = document.getElementById('new-sensor-type').value;
+        var lat = parseFloat(document.getElementById('new-sensor-lat').value);
+        var lng = parseFloat(document.getElementById('new-sensor-lng').value);
+        var desc = document.getElementById('new-sensor-desc').value.trim();
+
+        if (!name || isNaN(lat) || isNaN(lng)) {
+            alert('Please provide valid name and coordinates');
+            return;
+        }
+
+        try {
+            var res = await fetch('/api/ingest/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    sensor_type: type,
+                    coverage_radius_km: 0,
+                    latitude: lat,
+                    longitude: lng,
+                    description: desc
+                })
+            });
+
+            if (res.ok) {
+                closeRegisterSensorModal();
+                window.location.reload();
+            } else {
+                var err = await res.json();
+                alert(err.error || 'Failed to register sensor');
+            }
+        } catch (e) {
+            alert('Error communicating with sensor API');
+        }
+    };
+
+    // ── Boot Initialization ─────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        initSensorMap();
+        loadTelemetryData(null, '24h');
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,913 @@
+{% load i18n static %}
+<!-- ========================================================================= -->
+<!-- APWRS Global Sidebar Component                                            -->
+<!-- Items: Overview, Sensors, Analyse, Data, Forcast, Calander, History, -->
+<!--        Users and Roles                                               -->
+<!-- ========================================================================= -->
+
+<!-- Mobile Backdrop Overlay -->
+<div id="sidebar-backdrop" 
+     onclick="closeSidebarMobile()" 
+     class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[2000] lg:hidden hidden transition-opacity duration-300">
+</div>
+
+<!-- Main Sidebar Container -->
+<aside id="app-sidebar" 
+       class="fixed top-16 left-0 bottom-0 z-[2100] w-60 bg-surface-container-lowest dark:bg-surface-dim border-r border-outline-variant flex flex-col justify-between transition-all duration-300 ease-in-out select-none shadow-[1px_0_10px_rgba(0,0,0,0.03)] overflow-hidden -translate-x-full lg:translate-x-0">
+    
+    <!-- Top Navigation Area -->
+    <div class="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden scrollbar-thin py-3 px-3 space-y-5">
+        
+        <!-- Section: Intelligence & Operations -->
+        <div>
+            <div class="sidebar-section-title px-3 mb-2 flex items-center justify-between">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant/70 sidebar-text-label">
+                    {% trans "Operations" %}
+                </span>
+            </div>
+            
+            <nav class="space-y-1">
+                <!-- 1. OVERVIEW -->
+                <a href="{% url 'dashboard:dashboard' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'overview' or not active_page and request.resolver_match.url_name == 'dashboard' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Overview' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'overview' or not active_page and request.resolver_match.url_name == 'dashboard' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        dashboard
+                    </span>
+                    <span class="sidebar-text-label truncate">{% trans "Overview" %}</span>
+                    
+                    <!-- Floating Tooltip for collapsed state -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Overview" %}
+                    </span>
+                </a>
+
+                <!-- 2. SENSORS -->
+                <a href="{% url 'dashboard:sensors' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'sensors' or request.resolver_match.url_name == 'sensors' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Sensors' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'sensors' or request.resolver_match.url_name == 'sensors' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        sensors
+                    </span>
+                    <span class="sidebar-text-label truncate flex-1">{% trans "Sensors" %}</span>
+                    <span id="sidebar-sensor-badge" class="sidebar-badge text-[10px] font-label font-bold px-1.5 py-0.5 rounded-full {% if active_page == 'sensors' or request.resolver_match.url_name == 'sensors' %}bg-on-primary/20 text-on-primary{% else %}bg-surface-container-high text-on-surface-variant{% endif %}">
+                        {{ sidebar_sensor_count }}
+                    </span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Sensors, Map & Telemetry" %}
+                    </span>
+                </a>
+
+                <!-- 3. ANALYSE -->
+                <a href="{% url 'dashboard:analysis' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'analyse' or request.resolver_match.url_name == 'analysis' or request.resolver_match.url_name == 'calculations' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Analyse' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'analyse' or request.resolver_match.url_name == 'analysis' or request.resolver_match.url_name == 'calculations' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        insights
+                    </span>
+                    <span class="sidebar-text-label truncate">{% trans "Analyse" %}</span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Analyse & Correlation" %}
+                    </span>
+                </a>
+
+                <!-- 4. DATA -->
+                <a href="{% url 'dashboard:data_ingestion' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'data' or request.resolver_match.url_name == 'data_ingestion' or request.resolver_match.url_name == 'metrics_browser' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Data' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'data' or request.resolver_match.url_name == 'data_ingestion' or request.resolver_match.url_name == 'metrics_browser' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        dataset
+                    </span>
+                    <span class="sidebar-text-label truncate">{% trans "Data" %}</span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Data & Ingestion" %}
+                    </span>
+                </a>
+
+                <!-- 5. FORCAST -->
+                <a href="{% url 'dashboard:spei_outlook' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'forcast' or request.resolver_match.url_name == 'spei_outlook' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Forcast' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'forcast' or request.resolver_match.url_name == 'spei_outlook' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        online_prediction
+                    </span>
+                    <span class="sidebar-text-label truncate flex-1">{% trans "Forcast" %}</span>
+                    <span class="sidebar-badge text-[9px] font-label font-bold uppercase px-1.5 py-0.5 rounded {% if active_page == 'forcast' or request.resolver_match.url_name == 'spei_outlook' %}bg-on-primary/20 text-on-primary{% else %}bg-secondary/15 text-secondary{% endif %}">
+                        SPEI
+                    </span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "SPEI Drought Forcast" %}
+                    </span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Section: Agronomy & Time -->
+        <div>
+            <div class="sidebar-section-title px-3 mb-2 flex items-center justify-between">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant/70 sidebar-text-label">
+                    {% trans "Agronomy & Logs" %}
+                </span>
+            </div>
+            
+            <nav class="space-y-1">
+                <!-- 6. CALANDER -->
+                <a href="{% url 'dashboard:calendar' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'calander' or request.resolver_match.url_name == 'calendar' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Calander' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'calander' or request.resolver_match.url_name == 'calendar' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        calendar_month
+                    </span>
+                    <span class="sidebar-text-label truncate flex-1">{% trans "Calander" %}</span>
+                    <span class="sidebar-badge text-[9px] font-label font-bold uppercase px-1.5 py-0.5 rounded {% if active_page == 'calander' or request.resolver_match.url_name == 'calendar' %}bg-on-primary/20 text-on-primary{% else %}bg-primary/10 text-primary{% endif %}">
+                        APWRS
+                    </span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Planting Window Calander" %}
+                    </span>
+                </a>
+
+                <!-- 7. HISTORY -->
+                <a href="{% url 'dashboard:historical' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'history' or request.resolver_match.url_name == 'historical' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'History' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'history' or request.resolver_match.url_name == 'historical' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        history
+                    </span>
+                    <span class="sidebar-text-label truncate">{% trans "History" %}</span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Historical Climate Data" %}
+                    </span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Section: Administration & System -->
+        <div>
+            <div class="sidebar-section-title px-3 mb-2 flex items-center justify-between">
+                <span class="text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant/70 sidebar-text-label">
+                    {% trans "Administration" %}
+                </span>
+            </div>
+            
+            <nav class="space-y-1">
+                <!-- 8. OUR FARMERS -->
+                <a href="{% url 'dashboard:admin_farms' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'our_farmers' or request.resolver_match.url_name == 'admin_farms' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Our Farmers' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'our_farmers' or request.resolver_match.url_name == 'admin_farms' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        agriculture
+                    </span>
+                    <span class="sidebar-text-label truncate flex-1">{% trans "Our Farmers" %}</span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Farmer Lands & Plantings" %}
+                    </span>
+                </a>
+
+                <!-- 9. USERS AND ROLES (superadmins only) -->
+                {% if user.is_superuser or user.profile.role == 'superadmin' %}
+                <a href="{% url 'dashboard:admin_panel' %}" 
+                   class="sidebar-nav-item group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 {% if active_page == 'users_and_roles' or request.resolver_match.url_name == 'admin_panel' or request.resolver_match.url_name == 'admin_edit_user' %}bg-primary text-on-primary font-semibold shadow-sm{% else %}text-on-surface-variant hover:text-primary hover:bg-surface-container-low font-medium{% endif %}"
+                   title="{% trans 'Users and Roles' %}">
+                    <span class="material-symbols-outlined text-[20px] shrink-0 transition-transform group-hover:scale-110 {% if active_page == 'users_and_roles' or request.resolver_match.url_name == 'admin_panel' or request.resolver_match.url_name == 'admin_edit_user' %}text-on-primary{% else %}text-secondary{% endif %}">
+                        manage_accounts
+                    </span>
+                    <span class="sidebar-text-label truncate flex-1">{% trans "Users and Roles" %}</span>
+                    <span class="sidebar-badge text-[9px] font-label font-bold uppercase px-1.5 py-0.5 rounded {% if active_page == 'users_and_roles' or request.resolver_match.url_name == 'admin_panel' %}bg-on-primary/20 text-on-primary{% else %}bg-surface-variant text-on-surface-variant{% endif %}">
+                        RBAC
+                    </span>
+                    
+                    <!-- Floating Tooltip -->
+                    <span class="sidebar-tooltip hidden absolute left-full ml-3 px-2.5 py-1 bg-surface-container-highest text-on-surface text-xs rounded-md shadow-lg pointer-events-none whitespace-nowrap z-50 border border-outline-variant/60 font-body">
+                        {% trans "Users and Roles" %}
+                    </span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+
+    <!-- Bottom Sidebar Controls & Status -->
+    <div class="p-3 border-t border-outline-variant/60 bg-surface-container-lowest/80 dark:bg-surface-dim/80 space-y-2">
+        <!-- Live System Node indicator -->
+        <div class="sidebar-node-status flex items-center justify-between px-2.5 py-1.5 rounded-DEFAULT bg-surface-container-low text-[11px] font-label text-on-surface-variant">
+            <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="sidebar-text-label truncate">APWRS Node</span>
+            </span>
+            <span class="sidebar-text-label text-[10px] font-bold text-primary">v2.4</span>
+        </div>
+
+        <!-- Sidebar Collapse / Expand Toggle Button -->
+        <button type="button" 
+                id="sidebar-collapse-btn" 
+                onclick="toggleSidebar()" 
+                class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-lg transition-colors border border-outline-variant/40"
+                title="{% trans 'Toggle Sidebar' %}">
+            <span class="material-symbols-outlined text-base transition-transform" id="sidebar-collapse-icon">
+                first_page
+            </span>
+            <span class="sidebar-text-label truncate">{% trans "Collapse" %}</span>
+        </button>
+    </div>
+</aside>
+
+<!-- ========================================================================= -->
+<!-- Interactive Planting Calendar Modal (Triggered by 'Calander' in Sidebar) -->
+<!-- ========================================================================= -->
+<div id="plantingCalendarModal" 
+     class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 transition-all duration-300">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-2xl max-w-5xl w-full mx-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[92vh] flex flex-col">
+        
+        <!-- Modal Header -->
+        <div class="flex justify-between items-start p-6 pb-4 border-b border-outline-variant/60 shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-2xl">calendar_month</span>
+                </span>
+                <div>
+                    <h2 class="font-headline font-bold text-on-surface text-lg md:text-xl flex items-center gap-2">
+                        {% trans "Planting Window Calendar" %}
+                        <span class="text-[11px] font-label font-bold uppercase px-2 py-0.5 rounded-full bg-secondary/15 text-secondary">APWRS</span>
+                    </h2>
+                    <p class="text-xs text-on-surface-variant mt-0.5">
+                        {% trans "Select a crop to see its full lifecycle timeline. Enter your conditions to get recommendations." %}
+                    </p>
+                </div>
+            </div>
+            <button onclick="closePlantingCalendarModal()" 
+                    class="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors">
+                <span class="material-symbols-outlined text-xl">close</span>
+            </button>
+        </div>
+
+        <!-- Scrollable body -->
+        <div class="flex-1 overflow-y-auto p-6 pt-5 space-y-6">
+
+            <!-- ── TAB SWITCHER ── -->
+            <div class="flex rounded-xl bg-surface-container-low p-1 border border-outline-variant/50 gap-1">
+                <button id="cal-tab-crops" onclick="switchCalTab('crops')" class="flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">eco</span> {% trans "Crop Lifecycle" %}
+                </button>
+                <button id="cal-tab-recommend" onclick="switchCalTab('recommend')" class="flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all text-on-surface-variant hover:text-primary flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-base">psychiatry</span> {% trans "Smart Recommend" %}
+                </button>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- TAB 1: CROP LIFECYCLE SELECTOR & TIMELINE                     -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <div id="cal-panel-crops">
+
+                <!-- Crop Icon Grid -->
+                <div class="mb-5">
+                    <p class="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-3">{% trans "Select a Crop" %}</p>
+                    <div id="crop-icon-grid" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-9 gap-2">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+
+                <!-- Selected Crop Detail Card -->
+                <div id="crop-detail-card" class="hidden bg-surface-container-low border border-outline-variant rounded-xl p-5 space-y-5 transition-all">
+                    
+                    <!-- Crop header -->
+                    <div class="flex items-center gap-3">
+                        <span id="crop-detail-icon" class="text-4xl"></span>
+                        <div class="flex-1">
+                            <h3 id="crop-detail-name" class="font-headline font-bold text-lg text-primary"></h3>
+                            <div class="flex items-center gap-3 mt-1 flex-wrap">
+                                <span id="crop-detail-water" class="text-[10px] font-label font-bold uppercase px-2 py-0.5 rounded-full"></span>
+                                <span id="crop-detail-season" class="text-[10px] font-label text-on-surface-variant"></span>
+                                <span id="crop-detail-duration" class="text-[10px] font-label text-on-surface-variant"></span>
+                            </div>
+                        </div>
+                        <div id="crop-detail-temp" class="text-right">
+                            <div class="text-[10px] font-label text-on-surface-variant uppercase">{% trans "Ideal Temp" %}</div>
+                            <div class="font-headline font-bold text-sm text-primary" id="crop-detail-temp-val"></div>
+                        </div>
+                    </div>
+
+                    <!-- 12-Month Gantt Timeline -->
+                    <div>
+                        <p class="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-2">{% trans "Annual Lifecycle Timeline" %}</p>
+                        <!-- Month headers -->
+                        <div class="grid grid-cols-12 gap-0.5 mb-1">
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Jan</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Feb</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Mar</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Apr</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">May</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Jun</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Jul</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Aug</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Sep</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Oct</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Nov</div>
+                            <div class="text-center text-[10px] font-label font-bold text-on-surface-variant">Dec</div>
+                        </div>
+                        <!-- Planting row -->
+                        <div class="flex items-center gap-2 mb-1">
+                            <div id="timeline-plant" class="flex-1 grid grid-cols-12 gap-0.5 h-7"></div>
+                            <span class="text-[10px] font-label font-bold text-emerald-600 w-16 text-right shrink-0">🌱 {% trans "Plant" %}</span>
+                        </div>
+                        <!-- Growing row -->
+                        <div class="flex items-center gap-2 mb-1">
+                            <div id="timeline-grow" class="flex-1 grid grid-cols-12 gap-0.5 h-7"></div>
+                            <span class="text-[10px] font-label font-bold text-blue-600 w-16 text-right shrink-0">🌿 {% trans "Grow" %}</span>
+                        </div>
+                        <!-- Harvest row -->
+                        <div class="flex items-center gap-2">
+                            <div id="timeline-harvest" class="flex-1 grid grid-cols-12 gap-0.5 h-7"></div>
+                            <span class="text-[10px] font-label font-bold text-amber-600 w-16 text-right shrink-0">🌾 {% trans "Harvest" %}</span>
+                        </div>
+                        <!-- Legend -->
+                        <div class="flex flex-wrap gap-3 mt-3 text-[10px] font-label text-on-surface-variant">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-emerald-500"></span> {% trans "Planting / Sowing" %}</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-blue-400"></span> {% trans "Vegetative Growth" %}</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-amber-500"></span> {% trans "Harvest Window" %}</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-sm bg-red-400"></span> {% trans "Critical Phase" %}</span>
+                        </div>
+                    </div>
+
+                    <!-- Agronomic Recommendations -->
+                    <div class="border-t border-outline-variant/50 pt-4">
+                        <p class="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-2">{% trans "Agronomic Recommendations" %}</p>
+                        <ul id="crop-detail-recs" class="space-y-1.5 text-xs text-on-surface-variant"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <!-- TAB 2: SOIL/CLIMATE RECOMMENDATION ENGINE                     -->
+            <!-- ══════════════════════════════════════════════════════════════ -->
+            <div id="cal-panel-recommend" class="hidden">
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <!-- Input Form -->
+                    <div class="bg-surface-container-low border border-outline-variant rounded-xl p-5 space-y-4">
+                        <h3 class="font-headline font-bold text-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-lg">tune</span>
+                            {% trans "Enter Your Conditions" %}
+                        </h3>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] font-label font-bold uppercase text-on-surface-variant block mb-1">{% trans "Soil Type" %}</label>
+                                <select id="rec-soil" class="w-full text-xs border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:ring-2 focus:ring-secondary/40 focus:outline-none">
+                                    <option value="clay">{% trans "Clay" %}</option>
+                                    <option value="loam" selected>{% trans "Loam" %}</option>
+                                    <option value="sandy">{% trans "Sandy" %}</option>
+                                    <option value="silt">{% trans "Silty" %}</option>
+                                    <option value="chalky">{% trans "Chalky / Calcareous" %}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-label font-bold uppercase text-on-surface-variant block mb-1">{% trans "Climate Zone" %}</label>
+                                <select id="rec-climate" class="w-full text-xs border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:ring-2 focus:ring-secondary/40 focus:outline-none">
+                                    <option value="semi-arid" selected>{% trans "Semi-Arid" %}</option>
+                                    <option value="mediterranean">{% trans "Mediterranean" %}</option>
+                                    <option value="arid">{% trans "Arid" %}</option>
+                                    <option value="sub-humid">{% trans "Sub-Humid" %}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] font-label font-bold uppercase text-on-surface-variant block mb-1">{% trans "Avg Annual Rain (mm)" %}</label>
+                                <input id="rec-rain" type="number" value="400" min="50" max="1500" step="50"
+                                       class="w-full text-xs border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:ring-2 focus:ring-secondary/40 focus:outline-none font-mono"/>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-label font-bold uppercase text-on-surface-variant block mb-1">{% trans "Avg Temp (°C)" %}</label>
+                                <input id="rec-temp" type="number" value="19" min="0" max="50" step="1"
+                                       class="w-full text-xs border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:ring-2 focus:ring-secondary/40 focus:outline-none font-mono"/>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="text-[10px] font-label font-bold uppercase text-on-surface-variant block mb-1">{% trans "Irrigation Available" %}</label>
+                                <select id="rec-irrigation" class="w-full text-xs border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:ring-2 focus:ring-secondary/40 focus:outline-none">
+                                    <option value="none">{% trans "None (Rainfed)" %}</option>
+                                    <option value="drip" selected>{% trans "Drip Irrigation" %}</option>
+                                    <option value="sprinkler">{% trans "Sprinkler" %}</option>
+                                    <option value="flood">{% trans "Flood / Furrow" %}</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-label font-bold uppercase text-on-surface-variant block mb-1">{% trans "Soil pH" %}</label>
+                                <input id="rec-ph" type="number" value="7.2" min="4.0" max="9.0" step="0.1"
+                                       class="w-full text-xs border border-outline-variant rounded-lg px-3 py-2 bg-surface-container-lowest focus:ring-2 focus:ring-secondary/40 focus:outline-none font-mono"/>
+                            </div>
+                        </div>
+
+                        <button onclick="runCropRecommendation()" 
+                                class="w-full py-2.5 bg-primary text-on-primary rounded-lg text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-sm">
+                            <span class="material-symbols-outlined text-base">search</span>
+                            {% trans "Find Compatible Crops" %}
+                        </button>
+                    </div>
+
+                    <!-- Results Panel -->
+                    <div class="bg-surface-container-low border border-outline-variant rounded-xl p-5 space-y-4">
+                        <h3 class="font-headline font-bold text-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-lg">checklist</span>
+                            {% trans "Recommended Crops" %}
+                        </h3>
+                        <div id="rec-results" class="space-y-3">
+                            <div class="text-xs text-on-surface-variant text-center py-8">
+                                <span class="material-symbols-outlined text-3xl text-outline mb-2 block">psychiatry</span>
+                                {% trans "Enter your soil and climate conditions, then click 'Find Compatible Crops' to get recommendations." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Condition-based Recommendations -->
+                <div id="rec-advice-panel" class="hidden bg-gradient-to-br from-primary/5 to-secondary/5 border border-outline-variant rounded-xl p-5 space-y-3">
+                    <h3 class="font-headline font-bold text-sm text-on-surface flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-lg">tips_and_updates</span>
+                        {% trans "Condition-Based Advice" %}
+                    </h3>
+                    <ul id="rec-advice-list" class="space-y-1.5 text-xs text-on-surface-variant"></ul>
+                </div>
+            </div>
+
+        </div><!-- end scrollable body -->
+    </div>
+</div>
+
+<!-- Planting Calendar Interactive JS -->
+<script>
+(function() {
+    /* ═══════════════════════════════════════════════════════════════════════
+       CROP DATABASE — Tunisia-specific with full lifecycle data
+       ═══════════════════════════════════════════════════════════════════════ */
+    var CROPS = [
+        { id:'tomato',  icon:'🍅', name:'Tomato',  water:'high',   tempMin:18, tempMax:30, phMin:5.8, phMax:7.0, rain:400, soils:['loam','silt','clay'], climates:['mediterranean','sub-humid'], irrigation:['drip','sprinkler','flood'],
+          plant:[2,3,9,10], grow:[3,4,5,6,7,10,11,0], harvest:[5,6,7,8,11,0], critical:[4,5], criticalLabel:'Flowering & fruit set',
+          duration:'90–120 days', season:'Spring/Autumn',
+          recs:['Mulch beds to conserve soil moisture during fruit set.','Reduce watering 1 week before harvest to concentrate sugars.','Use drip irrigation to prevent foliar disease.','Stake or cage plants for airflow — reduces blight risk.'] },
+        { id:'pepper',  icon:'🌶️', name:'Pepper',  water:'high',   tempMin:20, tempMax:32, phMin:6.0, phMax:7.0, rain:450, soils:['loam','silt'], climates:['mediterranean','sub-humid'], irrigation:['drip','sprinkler'],
+          plant:[3,4], grow:[4,5,6,7,8], harvest:[7,8,9], critical:[5,6], criticalLabel:'Flowering & fruit enlargement',
+          duration:'100–140 days', season:'Spring → Summer',
+          recs:['Start transplants indoors 8 weeks before last frost.','Apply calcium to prevent blossom end rot.','Harvest regularly to encourage continuous fruiting.'] },
+        { id:'olive',   icon:'🫒', name:'Olive',   water:'low',    tempMin:10, tempMax:38, phMin:6.5, phMax:8.5, rain:200, soils:['loam','sandy','chalky','clay','silt'], climates:['semi-arid','mediterranean','arid'], irrigation:['none','drip'],
+          plant:[1,2,3,11,12], grow:[3,4,5,6,7,8,9], harvest:[10,11,12], critical:[5,6], criticalLabel:'Pit hardening (early summer)',
+          duration:'Perennial (harvest yr 4+)', season:'Year-round tree',
+          recs:['Prune after harvest (Jan–Feb) to open canopy.','Apply deficit irrigation in summer — improves oil quality.','Drought-resilient: ideal for semi-arid Tunisia.','Harvest early for green oil, late for ripe black fruit.'] },
+        { id:'citrus',  icon:'🍊', name:'Citrus',  water:'high',   tempMin:13, tempMax:35, phMin:5.5, phMax:7.5, rain:500, soils:['loam','silt','sandy'], climates:['mediterranean','sub-humid'], irrigation:['drip','sprinkler','flood'],
+          plant:[2,3,4,10,11], grow:[4,5,6,7,8,9], harvest:[11,12,1,2], critical:[4,5], criticalLabel:'Flowering & fruit enlargement',
+          duration:'Perennial (harvest yr 3+)', season:'Year-round tree',
+          recs:['Protect young trees from frost (cover or wind-break).','Consistent irrigation during fruit enlargement is critical.','Apply micronutrient foliar spray (Zn, Mn) in spring.'] },
+        { id:'wheat',   icon:'🌾', name:'Wheat',   water:'medium', tempMin:5,  tempMax:25, phMin:6.0, phMax:8.0, rain:300, soils:['loam','clay','silt','chalky'], climates:['semi-arid','mediterranean','sub-humid'], irrigation:['none','sprinkler','flood'],
+          plant:[11,12], grow:[1,2,3,4], harvest:[5,6], critical:[3,4], criticalLabel:'Tillering & grain filling',
+          duration:'120–150 days', season:'Winter crop',
+          recs:['Sow after first autumn rains for best germination.','Apply nitrogen top-dress at tillering stage (Feb–Mar).','Avoid waterlogging — wheat is sensitive to standing water.','Harvest at 12–14% grain moisture.'] },
+        { id:'barley',  icon:'🌾', name:'Barley',  water:'low',    tempMin:3,  tempMax:28, phMin:6.0, phMax:8.5, rain:200, soils:['loam','sandy','clay','chalky','silt'], climates:['semi-arid','mediterranean','arid','sub-humid'], irrigation:['none','sprinkler'],
+          plant:[11,12], grow:[1,2,3,4], harvest:[5,6], critical:[3,4], criticalLabel:'Tillering & grain filling',
+          duration:'90–120 days', season:'Winter crop',
+          recs:['Extremely drought-tolerant — ideal for rainfed arid zones.','Can succeed with as little as 200mm annual rainfall.','Excellent rotational crop before legumes.','Harvest slightly earlier than wheat for feed barley.'] },
+        { id:'alfalfa', icon:'🌿', name:'Alfalfa', water:'high',   tempMin:10, tempMax:35, phMin:6.5, phMax:8.0, rain:500, soils:['loam','silt','clay'], climates:['mediterranean','sub-humid'], irrigation:['flood','sprinkler','drip'],
+          plant:[2,3,10,11], grow:[3,4,5,6,7,8,9,10], harvest:[4,5,6,7,8,9], critical:[4,7], criticalLabel:'Each regrowth after cutting',
+          duration:'Perennial (3–5 yr stand)', season:'Multi-cut',
+          recs:['Inoculate seed with Rhizobium bacteria before sowing.','Cut at 10% bloom for best protein content.','Allow 4–6 week regrowth between cuts.','Deep-rooted: tolerates moderate drought once established.'] },
+        { id:'potato',  icon:'🥔', name:'Potato',  water:'medium', tempMin:10, tempMax:25, phMin:5.0, phMax:6.5, rain:400, soils:['loam','sandy','silt'], climates:['mediterranean','sub-humid'], irrigation:['drip','sprinkler'],
+          plant:[2,3,9], grow:[3,4,5,6,10,11], harvest:[6,7,12,1], critical:[4,5], criticalLabel:'Tuber initiation & bulking',
+          duration:'90–120 days', season:'Spring/Autumn',
+          recs:['Hill soil around stems as plants grow for better tuber yield.','Stop irrigation 2 weeks before harvest for skin set.','Store in dark, cool (4–8°C) conditions to prevent greening.'] },
+        { id:'chickpea',icon:'🫘', name:'Chickpea',water:'low',    tempMin:10, tempMax:30, phMin:6.0, phMax:9.0, rain:250, soils:['loam','sandy','chalky','silt'], climates:['semi-arid','mediterranean','arid'], irrigation:['none','drip'],
+          plant:[11,12,1], grow:[1,2,3,4], harvest:[5,6], critical:[3,4], criticalLabel:'Flowering & pod fill',
+          duration:'100–130 days', season:'Winter/Spring',
+          recs:['Excellent nitrogen fixer — improves soil for next crop.','Very drought-tolerant once established.','Avoid excess moisture during flowering (causes flower drop).','Good rotation partner with wheat and barley.'] }
+    ];
+
+    var selectedCropId = null;
+
+    /* ── Build crop icon grid ── */
+    function buildCropGrid() {
+        var container = document.getElementById('crop-icon-grid');
+        if (!container) return;
+        var html = '';
+        for (var i = 0; i < CROPS.length; i++) {
+            var c = CROPS[i];
+            html += '<button onclick="window._selectCrop(\'' + c.id + '\')" '
+                + 'id="crop-btn-' + c.id + '" '
+                + 'class="crop-icon-btn flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all cursor-pointer hover:shadow-md '
+                + 'border-outline-variant/50 bg-surface-container-lowest hover:border-secondary/60" '
+                + 'title="' + c.name + '">'
+                + '<span class="text-2xl">' + c.icon + '</span>'
+                + '<span class="text-[10px] font-label font-bold text-on-surface-variant truncate w-full text-center">' + c.name + '</span>'
+                + '</button>';
+        }
+        container.innerHTML = html;
+    }
+
+    /* ── Select a crop ── */
+    window._selectCrop = function(cropId) {
+        selectedCropId = cropId;
+        var crop = null;
+        for (var i = 0; i < CROPS.length; i++) {
+            if (CROPS[i].id === cropId) { crop = CROPS[i]; break; }
+        }
+        if (!crop) return;
+
+        // Highlight selected button
+        var btns = document.querySelectorAll('.crop-icon-btn');
+        for (var b = 0; b < btns.length; b++) {
+            btns[b].className = btns[b].className
+                .replace(/border-primary/g, 'border-outline-variant/50')
+                .replace(/bg-primary\/10/g, 'bg-surface-container-lowest')
+                .replace(/shadow-md/g, '')
+                .replace(/ring-2 ring-primary\/30/g, '');
+        }
+        var selBtn = document.getElementById('crop-btn-' + cropId);
+        if (selBtn) {
+            selBtn.className = selBtn.className
+                .replace(/border-outline-variant\/50/g, 'border-primary')
+                .replace(/bg-surface-container-lowest/g, 'bg-primary/10');
+            selBtn.className += ' shadow-md ring-2 ring-primary/30';
+        }
+
+        // Fill detail card
+        document.getElementById('crop-detail-icon').textContent = crop.icon;
+        document.getElementById('crop-detail-name').textContent = crop.name;
+        document.getElementById('crop-detail-season').textContent = '\u{1F4C5} ' + crop.season;
+        document.getElementById('crop-detail-duration').textContent = '\u{23F1} ' + crop.duration;
+        document.getElementById('crop-detail-temp-val').textContent = crop.tempMin + '–' + crop.tempMax + '\u00B0C';
+
+        var waterEl = document.getElementById('crop-detail-water');
+        var wMap = { high: ['High Water Need','bg-red-100 text-red-700 border border-red-200'], medium: ['Medium Water Need','bg-amber-100 text-amber-700 border border-amber-200'], low: ['Low Water Need','bg-emerald-100 text-emerald-700 border border-emerald-200'] };
+        var wInfo = wMap[crop.water] || wMap.medium;
+        waterEl.textContent = wInfo[0];
+        waterEl.className = 'text-[10px] font-label font-bold uppercase px-2 py-0.5 rounded-full ' + wInfo[1];
+
+        // Build timeline rows
+        buildTimelineRow('timeline-plant', crop.plant, 'bg-emerald-500', 'bg-emerald-100');
+        buildTimelineRow('timeline-grow', crop.grow, 'bg-blue-400', 'bg-blue-50');
+        buildTimelineRow('timeline-harvest', crop.harvest, 'bg-amber-500', 'bg-amber-50');
+
+        // Mark critical months
+        var plantRow = document.getElementById('timeline-grow');
+        if (plantRow && crop.critical) {
+            for (var ci = 0; ci < crop.critical.length; ci++) {
+                var mIdx = crop.critical[ci] - 1;
+                if (mIdx < 0) mIdx = 11;
+                var cell = plantRow.children[mIdx];
+                if (cell) {
+                    cell.className = cell.className.replace(/bg-blue-400/g, 'bg-red-400');
+                    cell.title = crop.criticalLabel;
+                }
+            }
+        }
+
+        // Recommendations
+        var recsEl = document.getElementById('crop-detail-recs');
+        var recsHtml = '';
+        for (var r = 0; r < crop.recs.length; r++) {
+            recsHtml += '<li class="flex items-start gap-2 leading-relaxed"><span class="material-symbols-outlined text-secondary text-sm mt-0.5 shrink-0">check_circle</span><span>' + crop.recs[r] + '</span></li>';
+        }
+        recsEl.innerHTML = recsHtml;
+
+        document.getElementById('crop-detail-card').classList.remove('hidden');
+    };
+
+    function buildTimelineRow(containerId, months, activeBg, inactiveBg) {
+        var container = document.getElementById(containerId);
+        if (!container) return;
+        var html = '';
+        for (var m = 0; m < 12; m++) {
+            var monthNum = m + 1;
+            var active = months.indexOf(monthNum) !== -1 || months.indexOf(monthNum - 12) !== -1;
+            // also handle 0-indexed months stored as 0 for January
+            if (!active && months.indexOf(0) !== -1 && m === 0) active = true;
+            html += '<div class="rounded ' + (active ? activeBg + ' shadow-sm' : (inactiveBg || 'bg-surface-variant/40')) + ' flex items-center justify-center transition-all" title="' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m] + '">';
+            if (active) {
+                html += '<span class="text-white text-[9px] font-bold">\u2022</span>';
+            }
+            html += '</div>';
+        }
+        container.innerHTML = html;
+    }
+
+    /* ── Tab switching ── */
+    window.switchCalTab = function(tab) {
+        var cropsPanel = document.getElementById('cal-panel-crops');
+        var recPanel = document.getElementById('cal-panel-recommend');
+        var cropsTab = document.getElementById('cal-tab-crops');
+        var recTab = document.getElementById('cal-tab-recommend');
+        var activeClass = 'flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
+        var inactiveClass = 'flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all text-on-surface-variant hover:text-primary flex items-center justify-center gap-1.5';
+
+        if (tab === 'crops') {
+            cropsPanel.classList.remove('hidden');
+            recPanel.classList.add('hidden');
+            cropsTab.className = activeClass;
+            recTab.className = inactiveClass;
+        } else {
+            cropsPanel.classList.add('hidden');
+            recPanel.classList.remove('hidden');
+            cropsTab.className = inactiveClass;
+            recTab.className = activeClass;
+        }
+    };
+
+    /* ── Smart Recommendation Engine ── */
+    window.runCropRecommendation = function() {
+        var soil = document.getElementById('rec-soil').value;
+        var climate = document.getElementById('rec-climate').value;
+        var rain = parseFloat(document.getElementById('rec-rain').value) || 400;
+        var temp = parseFloat(document.getElementById('rec-temp').value) || 19;
+        var irrigation = document.getElementById('rec-irrigation').value;
+        var ph = parseFloat(document.getElementById('rec-ph').value) || 7.0;
+
+        var results = [];
+        for (var i = 0; i < CROPS.length; i++) {
+            var c = CROPS[i];
+            var score = 0;
+            var reasons = [];
+
+            // Soil match
+            if (c.soils.indexOf(soil) !== -1) { score += 25; reasons.push('Soil type compatible'); }
+            else { score -= 10; }
+
+            // Climate match
+            if (c.climates.indexOf(climate) !== -1) { score += 25; reasons.push('Climate zone match'); }
+            else { score -= 15; }
+
+            // Rainfall
+            if (rain >= c.rain) { score += 20; reasons.push('Sufficient rainfall'); }
+            else if (rain >= c.rain * 0.7) { score += 10; reasons.push('Marginal rainfall — irrigation needed'); }
+            else { score -= 10; }
+
+            // Temperature
+            if (temp >= c.tempMin && temp <= c.tempMax) { score += 15; reasons.push('Temperature in ideal range'); }
+            else if (temp >= c.tempMin - 3 && temp <= c.tempMax + 3) { score += 5; reasons.push('Temperature marginal'); }
+            else { score -= 20; }
+
+            // pH
+            if (ph >= c.phMin && ph <= c.phMax) { score += 10; reasons.push('pH compatible'); }
+            else { score -= 5; }
+
+            // Irrigation
+            if (c.irrigation.indexOf(irrigation) !== -1) { score += 5; reasons.push('Irrigation method suitable'); }
+            if (c.water === 'high' && irrigation === 'none') { score -= 20; reasons.push('\u26A0 High water need but no irrigation'); }
+
+            results.push({ crop: c, score: Math.max(0, Math.min(100, score)), reasons: reasons });
+        }
+
+        // Sort by score descending
+        results.sort(function(a, b) { return b.score - a.score; });
+
+        // Render results
+        var container = document.getElementById('rec-results');
+        var html = '';
+        for (var j = 0; j < results.length; j++) {
+            var r = results[j];
+            var scoreColor = r.score >= 70 ? 'text-emerald-600 bg-emerald-100 border-emerald-200' : r.score >= 40 ? 'text-amber-600 bg-amber-100 border-amber-200' : 'text-red-500 bg-red-100 border-red-200';
+            var scoreLabel = r.score >= 70 ? 'Excellent' : r.score >= 40 ? 'Possible' : 'Poor';
+            var barColor = r.score >= 70 ? 'bg-emerald-500' : r.score >= 40 ? 'bg-amber-500' : 'bg-red-400';
+
+            html += '<div class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 bg-surface-container-lowest hover:border-secondary/40 transition-colors cursor-pointer" onclick="switchCalTab(\'crops\'); window._selectCrop(\'' + r.crop.id + '\')">'
+                + '<span class="text-2xl shrink-0">' + r.crop.icon + '</span>'
+                + '<div class="flex-1 min-w-0">'
+                + '<div class="flex items-center gap-2">'
+                + '<span class="font-headline font-bold text-sm text-on-surface">' + r.crop.name + '</span>'
+                + '<span class="text-[9px] font-label font-bold px-1.5 py-0.5 rounded-full border ' + scoreColor + '">' + scoreLabel + '</span>'
+                + '</div>'
+                + '<div class="w-full bg-surface-container-high rounded-full h-1.5 mt-1.5 overflow-hidden"><div class="' + barColor + ' h-full rounded-full transition-all duration-500" style="width:' + r.score + '%"></div></div>'
+                + '<div class="text-[10px] text-on-surface-variant mt-1 truncate">' + r.reasons.slice(0, 3).join(' · ') + '</div>'
+                + '</div>'
+                + '<span class="font-headline font-extrabold text-lg shrink-0 ' + (r.score >= 70 ? 'text-emerald-600' : r.score >= 40 ? 'text-amber-600' : 'text-red-400') + '">' + r.score + '</span>'
+                + '</div>';
+        }
+        container.innerHTML = html;
+
+        // Build condition advice
+        var advicePanel = document.getElementById('rec-advice-panel');
+        var adviceList = document.getElementById('rec-advice-list');
+        var advice = [];
+        if (rain < 250) advice.push('Very low rainfall: prioritize drought-tolerant crops (barley, chickpea, olive) or invest in irrigation.');
+        if (rain < 400 && irrigation === 'none') advice.push('Consider deficit irrigation techniques — even 50mm supplemental at critical growth stages doubles yield.');
+        if (climate === 'arid') advice.push('Arid zone: mulching reduces evaporation by 30–50%. Use straw or plastic mulch.');
+        if (soil === 'sandy') advice.push('Sandy soil: add organic matter (compost/manure) to improve water retention. Split fertilizer applications.');
+        if (soil === 'clay') advice.push('Clay soil: ensure good drainage. Raised beds help prevent waterlogging in wet seasons.');
+        if (ph > 8.0) advice.push('Alkaline soil (pH > 8): apply sulfur or acidifying fertilizers. Iron chlorosis is common — use chelated iron.');
+        if (ph < 5.5) advice.push('Acidic soil (pH < 5.5): lime application recommended. Most vegetables prefer pH 6.0–7.0.');
+        if (temp > 35) advice.push('Very high temperatures: use shade nets (30–40% shade) during peak summer for sensitive crops.');
+        if (irrigation === 'drip') advice.push('Drip irrigation is ideal for water efficiency. Combine with fertigation for optimal nutrient delivery.');
+        if (advice.length === 0) advice.push('Your conditions are well-balanced for Mediterranean agriculture. Consider crop rotation for soil health.');
+
+        var advHtml = '';
+        for (var a = 0; a < advice.length; a++) {
+            advHtml += '<li class="flex items-start gap-2 leading-relaxed"><span class="material-symbols-outlined text-primary text-sm mt-0.5 shrink-0">lightbulb</span><span>' + advice[a] + '</span></li>';
+        }
+        adviceList.innerHTML = advHtml;
+        advicePanel.classList.remove('hidden');
+    };
+
+    /* ── Init on DOMContentLoaded ── */
+    document.addEventListener('DOMContentLoaded', function() {
+        buildCropGrid();
+    });
+})();
+</script>
+
+<!-- ========================================================================= -->
+<!-- Sidebar Interactive JavaScript Logic                                      -->
+<!-- ========================================================================= -->
+<script>
+(function() {
+    // ── Local Storage Key ───────────────────────────────────────────────
+    var STORAGE_KEY = 'apwrs_sidebar_collapsed';
+
+    // ── Toggle Sidebar Function ─────────────────────────────────────────
+    window.toggleSidebar = function() {
+        var sidebar = document.getElementById('app-sidebar');
+        var mainContent = document.getElementById('main-content');
+        var collapseIcon = document.getElementById('sidebar-collapse-icon');
+        var backdrop = document.getElementById('sidebar-backdrop');
+        if (!sidebar) return;
+
+        var isMobile = window.innerWidth < 1024;
+
+        if (isMobile) {
+            // Mobile slide-over toggle
+            var isOpen = !sidebar.classList.contains('-translate-x-full');
+            if (isOpen) {
+                sidebar.classList.add('-translate-x-full');
+                if (backdrop) backdrop.classList.add('hidden');
+            } else {
+                sidebar.classList.remove('-translate-x-full');
+                if (backdrop) backdrop.classList.remove('hidden');
+            }
+            return;
+        }
+
+        // Desktop collapse / expand toggle
+        var isCollapsed = sidebar.classList.contains('sidebar-collapsed');
+        if (isCollapsed) {
+            // Expand
+            sidebar.classList.remove('sidebar-collapsed');
+            sidebar.classList.remove('w-[68px]');
+            sidebar.classList.add('w-60');
+            if (mainContent) {
+                mainContent.classList.remove('lg:ml-[68px]');
+                mainContent.classList.add('lg:ml-60');
+            }
+            if (collapseIcon) collapseIcon.textContent = 'first_page';
+            localStorage.setItem(STORAGE_KEY, 'false');
+            hideTooltips(false);
+        } else {
+            // Collapse
+            sidebar.classList.add('sidebar-collapsed');
+            sidebar.classList.remove('w-60');
+            sidebar.classList.add('w-[68px]');
+            if (mainContent) {
+                mainContent.classList.remove('lg:ml-60');
+                mainContent.classList.add('lg:ml-[68px]');
+            }
+            if (collapseIcon) collapseIcon.textContent = 'last_page';
+            localStorage.setItem(STORAGE_KEY, 'true');
+            hideTooltips(true);
+        }
+
+        // Invalidate Leaflet Map Viewport smoothly
+        if (window._dashboardMap && typeof window._dashboardMap.invalidateSize === 'function') {
+            setTimeout(function() {
+                window._dashboardMap.invalidateSize();
+            }, 320);
+        }
+    };
+
+    // ── Close Mobile Sidebar ────────────────────────────────────────────
+    window.closeSidebarMobile = function() {
+        var sidebar = document.getElementById('app-sidebar');
+        var backdrop = document.getElementById('sidebar-backdrop');
+        if (sidebar) sidebar.classList.add('-translate-x-full');
+        if (backdrop) backdrop.classList.add('hidden');
+    };
+
+    // ── Helper: Tooltips and Labels on Collapse ─────────────────────────
+    function hideTooltips(collapsed) {
+        var labels = document.querySelectorAll('#app-sidebar .sidebar-text-label');
+        var badges = document.querySelectorAll('#app-sidebar .sidebar-badge');
+        var titles = document.querySelectorAll('#app-sidebar .sidebar-section-title');
+        var tooltips = document.querySelectorAll('#app-sidebar .sidebar-tooltip');
+
+        labels.forEach(function(el) {
+            if (collapsed) el.classList.add('hidden');
+            else el.classList.remove('hidden');
+        });
+        badges.forEach(function(el) {
+            if (collapsed) el.classList.add('hidden');
+            else el.classList.remove('hidden');
+        });
+        titles.forEach(function(el) {
+            if (collapsed) el.classList.add('hidden');
+            else el.classList.remove('hidden');
+        });
+        tooltips.forEach(function(el) {
+            if (collapsed) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        });
+    }
+
+    // ── Focus Sensor Section & Pulse Glow ───────────────────────────────
+    window.focusSensors = function(event) {
+        if (event) event.preventDefault();
+        var sensorCard = document.getElementById('sensor-network-card');
+        if (sensorCard) {
+            sensorCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Expand list if not already open
+            var sensorPanel = document.getElementById('sensor-list-panel');
+            if (sensorPanel && sensorPanel.classList.contains('hidden') && typeof window.toggleSensorList === 'function') {
+                window.toggleSensorList();
+            }
+            // Flash accent border
+            sensorCard.classList.add('ring-2', 'ring-secondary', 'border-secondary');
+            setTimeout(function() {
+                sensorCard.classList.remove('ring-2', 'ring-secondary', 'border-secondary');
+            }, 2500);
+        }
+    };
+
+    // ── Planting Calendar Modal ─────────────────────────────────────────
+    window.openPlantingCalendarModal = function() {
+        var modal = document.getElementById('plantingCalendarModal');
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closePlantingCalendarModal = function() {
+        var modal = document.getElementById('plantingCalendarModal');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    // ── Sync Sensor Badge from Dashboard Counter ────────────────────────
+    function syncSensorCount() {
+        var countEl = document.getElementById('sensor-count-badge');
+        var sidebarBadge = document.getElementById('sidebar-sensor-badge');
+        if (countEl && sidebarBadge) {
+            sidebarBadge.textContent = countEl.textContent.trim() || '0';
+        }
+    }
+
+    // ── Initialize on DOMContentLoaded ──────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        var isMobile = window.innerWidth < 1024;
+        var sidebar = document.getElementById('app-sidebar');
+        var mainContent = document.getElementById('main-content');
+        var collapseIcon = document.getElementById('sidebar-collapse-icon');
+
+        if (!isMobile && localStorage.getItem(STORAGE_KEY) === 'true' && sidebar) {
+            sidebar.classList.add('sidebar-collapsed');
+            sidebar.classList.remove('w-60');
+            sidebar.classList.add('w-[68px]');
+            if (mainContent) {
+                mainContent.classList.remove('lg:ml-60');
+                mainContent.classList.add('lg:ml-[68px]');
+            }
+            if (collapseIcon) collapseIcon.textContent = 'last_page';
+            hideTooltips(true);
+        }
+
+        // Sync sensors
+        syncSensorCount();
+        setTimeout(syncSensorCount, 800);
+        setTimeout(syncSensorCount, 2500);
+
+        // Close calendar modal on ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.closePlantingCalendarModal();
+                window.closeSidebarMobile();
+            }
+        });
+
+        // Close calendar modal on backdrop click
+        var calModal = document.getElementById('plantingCalendarModal');
+        if (calModal) {
+            calModal.addEventListener('click', function(e) {
+                if (e.target === calModal) {
+                    window.closePlantingCalendarModal();
+                }
+            });
+        }
+    });
+})();
+</script>

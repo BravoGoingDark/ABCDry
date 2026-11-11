@@ -1,0 +1,44 @@
+/* Gridded drought forecast map (spei_outlook.html → #drought-grid). */
+#drought-grid .dg-map-box { height: 520px; }
+@media (max-width: 640px) { #drought-grid .dg-map-box { height: 380px; } }
+#drought-grid #dg-map { background: #0b1a22; }
+#drought-grid .leaflet-container .leaflet-tile { opacity: 1 !important; }
+
+#drought-grid .dg-seg {
+    padding: 6px 12px; border-radius: 6px; border: 0; background: transparent;
+    font: 600 12px Inter, sans-serif; color: #414844; cursor: pointer; white-space: nowrap;
+}
+#drought-grid .dg-seg:hover { color: #012d1d; }
+#drought-grid .dg-seg.on { background: #012d1d; color: #fff; }
+
+#drought-grid .dg-lead {
+    display: inline-flex; flex-direction: column; align-items: center; min-width: 58px;
+    padding: 5px 9px; border-radius: 7px; border: 1px solid #c1c8c2; background: #fff;
+    font: 600 11px Inter, sans-serif; color: #151c27; cursor: pointer; line-height: 1.15;
+}
+#drought-grid .dg-lead small { font: 500 10px "JetBrains Mono", monospace; color: #717973; }
+#drought-grid .dg-lead:hover:not(:disabled) { border-color: #012d1d; }
+#drought-grid .dg-lead.on { background: #012d1d; border-color: #012d1d; color: #fff; }
+#drought-grid .dg-lead.on small { color: #c1ecd4; }
+#drought-grid .dg-lead.dg-current:not(.on) { border-color: #00677d; box-shadow: inset 0 0 0 1px #00677d; }
+#drought-grid .dg-lead:disabled {
+    cursor: not-allowed; color: #9aa19c;
+    background: repeating-linear-gradient(135deg, #f4f5f7 0 6px, #eceef1 6px 12px);
+}
+#drought-grid .dg-lead:disabled small { color: #9aa19c; }
+
+#drought-grid .dg-swatch { display: inline-block; width: 18px; height: 10px; border-radius: 2px; }
+
+#drought-grid .dg-bar-track { position: relative; height: 8px; background: #eef0f4; border-radius: 4px; overflow: hidden; }
+#drought-grid .dg-bar-mid { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: #9aa19c; }
+#drought-grid .dg-bar { position: absolute; top: 0; bottom: 0; border-radius: 4px; }
+
+#drought-grid .dg-skillcol .dg-col { display: flex; align-items: flex-end; gap: 6px; height: 110px; position: relative; }
+#drought-grid .dg-skillcol .dg-thr { position: absolute; left: 0; right: 0; border-top: 1px dashed #ba1a1a; }
+#drought-grid .dg-skillcol .dg-colbar { flex: 1; border-radius: 3px 3px 0 0; position: relative; min-width: 0; }
+#drought-grid .dg-skillcol .dg-colbar span {
+    position: absolute; top: -15px; left: 0; right: 0; text-align: center;
+    font: 600 9px "JetBrains Mono", monospace; color: #414844;
+}
+
+.leaflet-tooltip.dg-tip { font: 500 11px Inter, sans-serif; padding: 4px 8px; border-radius: 6px; }

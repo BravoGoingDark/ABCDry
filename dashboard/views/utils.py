@@ -1,9 +1,6 @@
 import math
 import datetime
-from decimal import Decimal
-from django.conf import settings
 from django.contrib import messages
-from django.db.models import Avg
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -19,7 +16,6 @@ from ..forms import (
 )
 from ..models import (
     CropType,
-    EnvironmentalSnapshot,
     IrrigationMethod,
     ObservationYear,
     Region,
@@ -244,7 +240,6 @@ METRIC_BROWSER_CONFIGS = {
 def _seed_reference_data():
     """Seed reference data regions, crops, irrigation methods, and observation years."""
     from django.contrib.auth.models import User
-    from django.db.models import Q
 
     # Seed reference regions
     for region_name in ["Tunisia", "Morocco", "Algeria", "Bizerte"]:
@@ -273,7 +268,9 @@ def _seed_reference_data():
 # ============== RBAC HELPERS ==============
 
 def _is_admin_user(user):
-    """Check if user is a superadmin."""
+    """Check if user is a superadmin (Django superusers always are)."""
+    if getattr(user, 'is_superuser', False) and user.is_active:
+        return True
     profile = getattr(user, 'profile', None)
     if profile:
         return profile.role == "superadmin"
@@ -325,6 +322,8 @@ def _check_data_permission(request, region_id=None):
     """
     if not request.user.is_authenticated:
         return False
+    if _is_admin_user(request.user):
+        return True
     profile = getattr(request.user, 'profile', None)
     if not profile:
         return False
@@ -485,7 +484,7 @@ def assess_drought_risk(region, crop_name, irrigation_name, as_of=None):
     irrigation only rescale it. Returns a dict so callers can surface the SPEI,
     the score, the reading date, and whether that reading is still current.
     """
-    from ..services.assistant_brain import _level_from_score, _score_from_spei, _spei_level
+    from ..services.assistant_brain import _level_from_score, _score_from_spei
 
     as_of = as_of or timezone.now().date()
     result = {
@@ -898,20 +897,16 @@ def _get_region_stations(region, year=None):
 
         spei_val = float(di.spei_3month) if di and di.spei_3month is not None else None
         spi_val = float(di.spi_3month) if di and di.spi_3month is not None else None
-        if spei_val is not None:
-            st_risk = max(5, min(95, round(50 - (spei_val * 20))))
-        elif spi_val is not None:
-            st_risk = max(5, min(95, round(50 - (spi_val * 20))))
-        else:
-            st_risk = 50
+        # Same SPEI/SPI -> 0-100 scale as every other risk figure (Normal <= 20 ... Extreme > 80).
+        from ..services.assistant_brain import _score_from_spei
+        index_val = spei_val if spei_val is not None else spi_val
+        st_risk = _score_from_spei(index_val) if index_val is not None else None
 
         temp_c = float(cm.temperature_mean_c) if cm and cm.temperature_mean_c is not None else None
         rain_mm = float(cm.rainfall_mm) if cm and cm.rainfall_mm is not None else None
         humidity = int(cm.relative_humidity_percent) if cm and cm.relative_humidity_percent is not None else None
         wind_ms = float(cm.wind_speed_ms) if cm and cm.wind_speed_ms is not None else None
-        severity = str(di.drought_severity_class) if di and di.drought_severity_class else (
-            'Severe Drought' if st_risk >= 75 else ('Moderate Drought' if st_risk >= 50 else 'Normal / Safe')
-        )
+        severity = str(di.drought_severity_class) if di and di.drought_severity_class else 'Unknown'
         date_str = cm.measurement_date.strftime('%Y-%m-%d') if cm and cm.measurement_date else None
 
         stations.append({

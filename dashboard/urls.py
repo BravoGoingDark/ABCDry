@@ -1,5 +1,7 @@
 from django.urls import path
 
+from .views import farmer_views
+from .views import sentinel_views
 from .views import (
     dashboard_view, 
     live_metrics_api,
@@ -10,12 +12,15 @@ from .views import (
     sensor_history_api,
     sensor_edit_api,
     sensor_delete_api,
+    sensor_network_view,
+    sensor_telemetry_api,
+    smartfarm_probe_api,
     data_ingestion,
     api_submit_metrics,
-    parameter_review,
     analysis_results,
     analysis_export_csv,
     historical_export_excel,
+    historical_observations_api,
     calculations_view,
     calculations_data,
     calculations_chart_api,
@@ -23,9 +28,14 @@ from .views import (
     landing_view,
     login_view,
     logout_view,
+    signup_view,
     drought_prediction_api,
     spei_forecast_api,
+    drought_grid_api,
+    crop_recommendation_api,
     spei_outlook_view,
+    weather_forecast_api,
+    planting_calendar_view,
     assistant_page_view,
     assistant_chat_api,
     soil_metrics_view,
@@ -53,6 +63,8 @@ from .views import (
     admin_panel,
     admin_edit_user,
     admin_delete_user,
+    admin_confirm_user,
+    admin_farms,
     map_tile_proxy,
 )
 
@@ -65,7 +77,11 @@ urlpatterns = [
     path("api/live-metrics/", live_metrics_api, name="live_metrics"),
     path("api/resolve-region/", resolve_region_api, name="resolve_region"),
     path("api/chart-data/", chart_data_api, name="chart_data"),
+    path("sensors/", sensor_network_view, name="sensors"),
     path("api/sensors/", sensor_list_api, name="sensor_list"),
+    path("api/sensors/telemetry/", sensor_telemetry_api, name="sensor_telemetry_all"),
+    path("api/sensors/smartfarm/", smartfarm_probe_api, name="smartfarm_probe"),
+    path("api/sensors/<int:pk>/telemetry/", sensor_telemetry_api, name="sensor_telemetry"),
     path("api/sensors/<int:pk>/history/", sensor_history_api, name="sensor_history"),
     path("api/sensors/<int:pk>/edit/", sensor_edit_api, name="sensor_edit"),
     path("api/sensors/<int:pk>/delete/", sensor_delete_api, name="sensor_delete"),
@@ -74,23 +90,36 @@ urlpatterns = [
     # Data Ingestion
     path("data-ingestion/", data_ingestion, name="data_ingestion"),
     path("api/submit-metrics/", api_submit_metrics, name="api_submit_metrics"),
-    path("parameters/", parameter_review, name="parameter_review"),
     path("analysis/", analysis_results, name="analysis"),
     path("analysis/calculations/", calculations_view, name="calculations"),
     path("analysis/calculations/data/", calculations_data, name="calculations_data"),
     path("analysis/calculations/chart-data/", calculations_chart_api, name="calculations_chart_api"),
     path("historical/", historical_view, name="historical"),
     path("login/", login_view, name="login"),
+    path("signup/", signup_view, name="signup"),
     path("logout/", logout_view, name="logout"),
     # Compatibility: Django's default login redirect
     path("accounts/login/", login_view, name="accounts_login"),
     path("api/drought-prediction/", drought_prediction_api, name="drought_prediction_api"),
     path("api/spei-forecast/", spei_forecast_api, name="spei_forecast_api"),
+    path("api/drought-grid/", drought_grid_api, name="drought_grid_api"),
+    path("api/crop-recommendations/", crop_recommendation_api, name="crop_recommendation_api"),
+    path("api/weather-forecast/", weather_forecast_api, name="weather_forecast_api"),
     path("analysis/spei-outlook/", spei_outlook_view, name="spei_outlook"),
+    path("calendar/", planting_calendar_view, name="calendar"),
     path("assistant/", assistant_page_view, name="assistant_page"),
     path("assistant/chat/", assistant_chat_api, name="assistant_chat"),
+
+    # Farmer space (role "farmer")
+    path("farmer/", farmer_views.farmer_home, name="farmer_home"),
+    path("farmer/api/farms/", farmer_views.farms_api, name="farmer_farms"),
+    path("farmer/api/farms/<int:farm_id>/", farmer_views.farm_detail_api, name="farmer_farm"),
+    path("farmer/api/farms/<int:farm_id>/advice/", farmer_views.farm_advice_api, name="farmer_farm_advice"),
+    path("farmer/api/farms/<int:farm_id>/crop-plan/", farmer_views.farm_crop_plan_api, name="farmer_farm_crop_plan"),
+    path("farmer/api/farms/<int:farm_id>/weather/", farmer_views.farm_weather_api, name="farmer_farm_weather"),
     path("api/analysis-export/", analysis_export_csv, name="analysis_export_csv"),
     path("api/historical-export/", historical_export_excel, name="historical_export_excel"),
+    path("api/historical/observations/", historical_observations_api, name="historical_observations_api"),
     
     # View Metrics
     path("metrics/soil/", soil_metrics_view, name="soil_metrics"),
@@ -125,9 +154,14 @@ urlpatterns = [
     # Map tiles, proxied server-side: the public tile hosts answer 403 to
     # direct browser requests on some networks
     path("api/tiles/<int:z>/<int:x>/<int:y>.png", map_tile_proxy, name="map_tile"),
+    path("api/s2/legend/", sentinel_views.s2_legend_api, name="s2_legend"),
+    path("api/s2/<str:index>/value/", sentinel_views.s2_value_api, name="s2_value"),
+    path("api/s2/<str:index>/<int:z>/<int:x>/<int:y>.png", sentinel_views.s2_tile, name="s2_tile"),
 
     # Admin / RBAC (prefix must not clash with django.contrib.admin at /admin/)
     path("manage/users/", admin_panel, name="admin_panel"),
     path("manage/users/<int:user_id>/edit/", admin_edit_user, name="admin_edit_user"),
     path("manage/users/<int:user_id>/delete/", admin_delete_user, name="admin_delete_user"),
+    path("manage/users/<int:user_id>/confirm/", admin_confirm_user, name="admin_confirm_user"),
+    path("manage/farms/", admin_farms, name="admin_farms"),
 ]

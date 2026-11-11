@@ -1,5 +1,5 @@
 import os
-from datetime import date, timedelta
+from datetime import date
 from decimal import Decimal
 
 import numpy as np
@@ -14,8 +14,6 @@ from dashboard.models import (
     ObservationYear, Region, RemoteSensingMetrics, SoilMetrics,
 )
 from dashboard.data_ingestion_utils import create_reference_data
-from dashboard.prediction_engine.physical_helpers import calculate_et0
-from scripts.generate_sample_drought_data import generate_sample_drought_data
 
 
 class Command(BaseCommand):
@@ -66,7 +64,6 @@ class Command(BaseCommand):
 
         # 4. Generate synthetic data for the past 365 days
         end = date.today()
-        start = end - timedelta(days=365)
         days = 365
 
         rng = np.random.default_rng(42)

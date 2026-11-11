@@ -27,7 +27,7 @@ from django.db.models import Avg, Count, Max, Min
 from dashboard.models import (ClimateMetrics, DroughtIndices, Region,
                               RemoteSensingMetrics, SpeiForecast)
 from dashboard.services import assistant_nlu as nlu
-from dashboard.services.crop_kb import CROP_KB, LOW_WATER_CROPS, find_crop
+from dashboard.services.crop_kb import CROP_KB, LOW_WATER_CROPS
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ def detect_language(text):
 def llm_config():
     """Assistant LLM settings, read from Django settings / environment."""
     return {
-        'url': getattr(settings, 'ASSISTANT_LLM_URL', 'http://localhost:11434'),
+        'url': getattr(settings, 'ASSISTANT_LLM_URL', 'http://127.0.0.1:11434'),
         'model': getattr(settings, 'ASSISTANT_LLM_MODEL', '') or '',
         'timeout': int(getattr(settings, 'ASSISTANT_LLM_TIMEOUT', 60)),
         'keep_alive': getattr(settings, 'ASSISTANT_LLM_KEEP_ALIVE', '30m'),
@@ -148,10 +148,6 @@ def resolve_model(force=False):
                        'will answer from deterministic templates only')
     cache.set(MODEL_CACHE_KEY, chosen, MODEL_CACHE_TTL)
     return chosen
-
-
-def llm_available():
-    return bool(resolve_model())
 
 
 # --------------------------------------------------------------------------- #
@@ -1112,19 +1108,16 @@ _WG = {
         "(4) قائمة لاختيار المنطقة والتنقل بين الأحواض الزراعية فوراً.",
     ),
     'spei_outlook': (
-        "The SPEI Outlook page (/analysis/spei-outlook/) provides machine-learning drought forecasts "
-        "from 1 to 6 months ahead. It shows multi-scale SPEI curves (SPEI-1 meteorological, SPEI-3 "
-        "agricultural, SPEI-6, SPEI-12 hydrological, SPEI-24 deep groundwater), the next-month drought "
-        "probability, and the top driving factors (rainfall deficit, temperature anomaly, humidity). "
-        "The ML ensemble combines Random Forest, LightGBM, and XGBoost models trained on 30 years of data.",
-        "La page Prévisions SPEI (/analysis/spei-outlook/) fournit des prévisions de sécheresse ML "
-        "de 1 à 6 mois. Elle affiche les courbes SPEI multi-échelles (SPEI-1 météo, SPEI-3 agricole, "
-        "SPEI-6, SPEI-12 hydrologique, SPEI-24 eaux souterraines), la probabilité de sécheresse "
-        "et les facteurs déterminants. L'ensemble ML combine Random Forest, LightGBM et XGBoost.",
-        "صفحة توقعات SPEI (/analysis/spei-outlook/) تقدم تنبؤات التعلم الآلي للجفاف من شهر إلى 6 أشهر. "
-        "تعرض منحنيات SPEI متعددة المقاييس (SPEI-1 الجوي، SPEI-3 الزراعي، SPEI-12 الهيدرولوجي)، "
-        "واحتمالية الجفاف للشهر القادم، وأهم العوامل المحركة للخطر. "
-        "يجمع النظام نماذج Random Forest وLightGBM وXGBoost مدربة على 30 عاماً من البيانات.",
+        "The Prediction & Climate Forecasting page (/analysis/spei-outlook/) provides full predictive forecasts: "
+        "7-day daily weather outlook, 12-month precipitation forecasts (rain) with drought thresholds, 12-month "
+        "temperature curves and thermal stress heatmaps, and multi-horizon SPEI-3 drought risk predictions (T+1 to T+6) "
+        "powered by XGBoost models and verified against ground truth.",
+        "La page de Prévision et Climat (/analysis/spei-outlook/) regroupe l'ensemble des prédictions : météo sur 7 jours, "
+        "prévisions de précipitations sur 12 mois (pluie) avec seuil de sécheresse, courbes de température et carte thermique, "
+        "ainsi que le risque de sécheresse SPEI-3 multi-horizons (T+1 à T+6) via modèles XGBoost.",
+        "صفحة التنبؤات وتوقعات المناخ (/analysis/spei-outlook/) تقدم التنبؤات الكاملة: شريط طقس لـ 7 أيام، "
+        "توقعات هطول الأمطار لـ 12 شهراً مع خط عتبة الجفاف، منحنيات درجات الحرارة وخريطة الإجهاد الحراري، "
+        "وتوقعات خطر الجفاف SPEI-3 المتعددة الآفاق (T+1 إلى T+6) عبر نماذج XGBoost.",
     ),
     'upload': (
         "To upload data, go to Data Ingestion (/data-ingestion/). "
@@ -1219,16 +1212,27 @@ _WG = {
         "انقر على أيقونة الميكروفون للسؤال بالصوت.",
     ),
     'sensors': (
-        "The IoT Sensor Network (/api/sensors/) shows active ground sensors, their GPS coordinates, "
-        "battery status, and telemetry history (temperature, soil moisture, rainfall). "
-        "Automated telemetry loggers (LoRaWAN, 4G, Campbell Scientific) push data via the REST "
-        "ingestion endpoint at /api/ingest/.",
-        "Le réseau de capteurs IoT (/api/sensors/) affiche les capteurs actifs, leurs coordonnées GPS, "
-        "l'état de la batterie et l'historique de télémétrie. Les enregistreurs automatiques "
-        "(LoRaWAN, 4G, Campbell Scientific) envoient les données via /api/ingest/.",
-        "شبكة مستشعرات إنترنت الأشياء (/api/sensors/) تعرض المستشعرات النشطة وإحداثياتها "
-        "وحالة البطارية وسجل القياسات (حرارة، رطوبة تربة، أمطار). "
-        "أجهزة التسجيل الآلي (LoRaWAN، 4G) ترسل البيانات عبر /api/ingest/.",
+        "The dedicated IoT Sensors page (/sensors/) provides real-time telemetry curves, multi-depth soil "
+        "moisture (10cm, 30cm, 60cm), AWS weather station metrics, water hydrology, and sensor node health "
+        "(battery and signal). You can also register and manage sensors across agricultural basins. Ground loggers "
+        "(LoRaWAN, 4G, Campbell Scientific) can stream telemetry via /api/sensors/ingest/.",
+        "La page dédiée aux capteurs IoT (/sensors/) propose des courbes de télémétrie en temps réel, l'humidité du "
+        "sol multi-profondeurs (10cm, 30cm, 60cm), la météo AWS, l'hydrologie et l'état des nœuds (batterie et signal). "
+        "Vous pouvez également enregistrer et gérer les capteurs sur les bassins agricoles. Les enregistreurs "
+        "(LoRaWAN, 4G, Campbell Scientific) transmettent les données via /api/sensors/ingest/.",
+        "توفر صفحة أجهزة الاستشعار (/sensors/) منحنيات القياس عن بُعد في الوقت الفعلي، رطوبة التربة على أعماق متعددة "
+        "(10، 30، 60 سم)، محطة الطقس، الهيدرولوجيا وصحة العقد (البطارية والإشارة). "
+        "يمكن لأجهزة القياس عن بعد (LoRaWAN، 4G) نقل البيانات عبر /api/sensors/ingest/.",
+    ),
+    'calendar': (
+        "The Adaptive Planting Window Calendar (/calendar/) focuses on crop phenological lifecycles (sowing, "
+        "growth, critical water periods, harvest) for 9 key Tunisian crops, accompanied by a smart sowing recommender "
+        "tailored to soil texture, irrigation system, and drought tolerance.",
+        "Le calendrier des semis adaptatif (/calendar/) est dédié aux cycles phénologiques des cultures (semis, "
+        "croissance, périodes critiques, récolte) pour 9 cultures tunisiennes clés, avec un moteur de recommandation "
+        "de semis adapté à la texture du sol et à l'irrigation.",
+        "يركز تقويم مواعيد الزراعة التكيفي (/calendar/) على دورة الحياة الفينولوجية للمحاصيل (البذر، النمو، الفترات الحساسة، "
+        "الحصاد) لـ 9 محاصيل رئيسية، مع محرك توصيات ذكي لمواعيد البذر وفق قوام التربة ونظام الري.",
     ),
     'map': (
         "The interactive Leaflet map on the Dashboard (/dashboard/) colour-codes each Tunisian "
@@ -1308,6 +1312,8 @@ _WG_RULES = [
     ('assistant', ['assistant', 'chatbot', 'agroai', 'chat', 'voice', 'microphone',
                    'مساعد', 'دردشة', 'صوت']),
     ('sensors', ['sensor', 'iot', 'capteur', 'telemetry', 'lorawan', 'مستشعر', 'حساس']),
+    ('calendar', ['calendar', 'calendrier', 'sowing', 'planting', 'crop lifecycle', 'semis', 'date de semis',
+                  'recommender', 'تقويم', 'بذر', 'مواعيد الزراعة', 'غراسة']),
     ('historical', ['history', 'historical', 'historique', 'past', 'trend', '1996',
                     '30 year', '30-year', 'تاريخي', 'السجلات', 'ماضي']),
     ('login', ['login', 'account', 'user', 'role', 'admin', 'connexion', 'compte',

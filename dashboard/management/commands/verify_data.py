@@ -3,7 +3,7 @@ from dashboard.models import (
     Region, ObservationYear, CropType, IrrigationMethod,
     SoilMetrics, ClimateMetrics, DroughtIndices, AgriculturalMetrics,
     RemoteSensingMetrics, HydrologyMetrics, EnvironmentalSnapshot,
-    DroughtPrediction, DataImportLog, RiskAssessment,
+    DroughtPrediction, DataImportLog,
 )
 
 

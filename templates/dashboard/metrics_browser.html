@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>View All Metrics | Ag-Intel</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;800;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "tertiary-container": "#4a382d",
+                "on-tertiary-fixed": "#27180f",
+                "secondary": "#00677d",
+                "on-secondary-fixed-variant": "#004e5f",
+                "error-container": "#ffdad6",
+                "tertiary": "#322319",
+                "surface": "#f9f9ff",
+                "on-surface": "#151c27",
+                "on-secondary-container": "#006075",
+                "on-primary-fixed": "#002114",
+                "outline-variant": "#c1c8c2",
+                "background": "#f9f9ff",
+                "secondary-fixed-dim": "#69d4f4",
+                "inverse-surface": "#2a313d",
+                "surface-bright": "#f9f9ff",
+                "primary-fixed": "#c1ecd4",
+                "on-background": "#151c27",
+                "secondary-container": "#72ddfd",
+                "on-tertiary-container": "#baa193",
+                "on-tertiary": "#ffffff",
+                "on-secondary": "#ffffff",
+                "tertiary-fixed-dim": "#dcc1b2",
+                "on-error-container": "#93000a",
+                "surface-container-lowest": "#ffffff",
+                "on-surface-variant": "#414844",
+                "tertiary-fixed": "#f9ddce",
+                "primary-fixed-dim": "#a5d0b9",
+                "error": "#ba1a1a",
+                "surface-container": "#e7eefe",
+                "on-primary-container": "#86af99",
+                "secondary-fixed": "#b2ebff",
+                "on-tertiary-fixed-variant": "#554338",
+                "on-primary-fixed-variant": "#274e3d",
+                "surface-container-low": "#f0f3ff",
+                "outline": "#717973",
+                "on-error": "#ffffff",
+                "inverse-on-surface": "#ebf1ff",
+                "on-primary": "#ffffff",
+                "surface-container-highest": "#dce2f3",
+                "primary": "#012d1d",
+                "surface-variant": "#dce2f3",
+                "inverse-primary": "#a5d0b9",
+                "surface-tint": "#3f6653",
+                "surface-dim": "#d3daea",
+                "primary-container": "#1b4332",
+                "surface-container-high": "#e2e8f8",
+                "on-secondary-fixed": "#001f27"
+              },
+              borderRadius: {
+                DEFAULT: "0.125rem",
+                lg: "0.25rem",
+                xl: "0.5rem",
+                full: "0.75rem"
+              },
+              fontFamily: {
+                headline: ["Hanken Grotesk"],
+                display: ["Hanken Grotesk"],
+                body: ["Inter"],
+                label: ["JetBrains Mono"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(165, 208, 185, 0.18), transparent 28%),
+                radial-gradient(circle at top right, rgba(114, 221, 253, 0.14), transparent 24%),
+                #f9f9ff;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .metric-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            backdrop-filter: blur(8px);
+        }
+        .filter-pill-active {
+            background: #012d1d;
+            color: #ffffff;
+            border-color: #012d1d;
+        }
+        .metric-row:hover {
+            background: rgba(165, 208, 185, 0.08);
+        }
+        .table-scroll-shell {
+            position: relative;
+            overflow: auto;
+            max-height: min(72vh, 820px);
+            border-radius: 1rem;
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(113, 121, 115, 0.2);
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(1, 45, 29, 0.4) rgba(240, 243, 255, 0.65);
+        }
+        .table-scroll-shell::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        .table-scroll-shell::-webkit-scrollbar-track {
+            background: rgba(240, 243, 255, 0.75);
+        }
+        .table-scroll-shell::-webkit-scrollbar-thumb {
+            background: rgba(1, 45, 29, 0.38);
+            border-radius: 999px;
+        }
+        .table-scroll-shell:hover .table-scroll-hint {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .table-scroll-hint {
+            position: sticky;
+            left: 0;
+            top: 0;
+            z-index: 10;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-left: 0.75rem;
+            margin-top: 0.5rem;
+            padding: 0.35rem 0.7rem;
+            border-radius: 999px;
+            border: 1px solid rgba(1, 45, 29, 0.12);
+            background: rgba(255, 255, 255, 0.88);
+            color: #012d1d;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            pointer-events: none;
+        }
+        .themed-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(21, 28, 39, 0.58);
+            backdrop-filter: blur(10px);
+        }
+        .themed-modal-panel {
+            width: min(100%, 28rem);
+            border: 1px solid rgba(193, 200, 194, 0.95);
+            border-radius: 1rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f0f3ff 100%);
+            box-shadow: 0 24px 70px rgba(21, 28, 39, 0.24);
+            overflow: hidden;
+        }
+        .themed-modal-accent {
+            height: 0.375rem;
+            background: linear-gradient(90deg, #012d1d 0%, #00677d 52%, #1b4332 100%);
+        }
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen">
+<div id="browser-confirm-modal" class="themed-modal-backdrop hidden" aria-hidden="true">
+    <div class="themed-modal-panel" role="dialog" aria-modal="true" aria-labelledby="browser-confirm-title">
+        <div class="themed-modal-accent"></div>
+        <div class="p-6">
+            <div class="flex items-start gap-3 mb-4">
+                <div id="browser-confirm-icon" class="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-primary shrink-0">
+                    <span class="material-symbols-outlined text-[22px]">delete_forever</span>
+                </div>
+                <div class="min-w-0">
+                    <h2 id="browser-confirm-title" class="font-headline text-lg font-extrabold text-primary">Confirm delete</h2>
+                    <p id="browser-confirm-message" class="mt-1 text-sm leading-6 text-on-surface-variant"></p>
+                </div>
+            </div>
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button type="button" id="browser-confirm-cancel" class="rounded-lg border border-outline-variant bg-surface-container-low px-4 py-2 text-sm font-semibold text-on-surface hover:bg-surface-container">Cancel</button>
+                <button type="button" id="browser-confirm-accept" class="rounded-lg bg-error px-4 py-2 text-sm font-bold text-on-error hover:opacity-90">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "dashboard/_header.html" %}
+
+<!-- APWRS Global Navigation Sidebar -->
+{% include "dashboard/_sidebar.html" with active_page="data" %}
+
+<main id="main-content" class="pt-24 px-4 md:px-8 pb-10 max-w-[1600px] mx-auto space-y-8 transition-all duration-300 ease-in-out lg:ml-60">
+    {% include "dashboard/_page_toolbar.html" with page_actions="dashboard/_page_actions_metrics_browser.html" %}
+    {% if messages %}
+    <div class="space-y-3">
+        {% for message in messages %}
+        <div class="rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm px-4 py-3 text-sm {% if message.tags == 'success' %}text-primary{% elif message.tags == 'error' %}text-error{% else %}text-secondary{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+        <div class="lg:col-span-2 bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-sm relative overflow-hidden">
+            <div class="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#012d1d_0%,#00677d_52%,#1b4332_100%)]"></div>
+            <div class="flex flex-col gap-4">
+                <div>
+                    <p class="text-[11px] font-bold font-label uppercase tracking-[0.22em] text-secondary mb-2">Browse entered data</p>
+                    <h1 class="text-3xl md:text-4xl font-headline font-black text-primary tracking-tight">View All Metrics</h1>
+                    <p class="mt-3 text-sm md:text-base text-on-surface-variant max-w-3xl leading-7">Inspect every metrics table in one place, filter records instantly, and edit or delete entries without leaving the themed dashboard.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'dashboard:data_ingestion' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary font-bold text-sm hover:bg-primary-container transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                        Back to Data Entry
+                    </a>
+                    <a href="{% url 'dashboard:import_logs' %}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-low text-on-surface font-semibold text-sm hover:bg-surface-container transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">history</span>
+                        Import Logs
+                    </a>
+                    {% if user.is_authenticated and user.profile.role != 'viewer' %}
+                    <form id="delete-all-form" method="post" action="{% url 'dashboard:delete_all_metrics' %}">
+                        {% csrf_token %}
+                        <button type="button" data-confirm-action="all" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error font-bold text-sm hover:bg-error-container/40 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">delete_sweep</span>
+                            Delete All Data
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm">
+                <p class="text-[11px] font-bold font-label uppercase tracking-[0.2em] text-secondary mb-2">Tables</p>
+                <p class="text-4xl font-headline font-black text-primary">{{ section_count }}</p>
+            </div>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm">
+                <p class="text-[11px] font-bold font-label uppercase tracking-[0.2em] text-secondary mb-2">Rows</p>
+                <p class="text-4xl font-headline font-black text-primary">{{ total_rows }}</p>
+            </div>
+            <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm">
+                <p class="text-[11px] font-bold font-label uppercase tracking-[0.2em] text-secondary mb-2">Theme</p>
+                <p class="text-4xl font-headline font-black text-primary">Live</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+                <p class="text-[11px] font-bold font-label uppercase tracking-[0.2em] text-secondary">Filters</p>
+                <h2 class="font-headline font-extrabold text-2xl text-primary">Browse and narrow entries</h2>
+            </div>
+            <button type="button" onclick="resetFilters()" class="px-4 py-2 rounded-lg border border-outline-variant bg-surface-container-low text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors">Reset Filters</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
+            <div>
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Metric Type</label>
+                <select id="metric-filter" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="all">All Tables</option>
+                    {% for section in sections %}
+                    <option value="{{ section.key }}">{{ section.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Region</label>
+                <select id="region-filter" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Regions</option>
+                    {% for region in regions %}
+                    <option value="{{ region.id }}">{{ region.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div id="subregion-filter" style="display: none;">
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Sub-Region</label>
+                <select id="subregion-filter-select" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Sub-Regions</option>
+                    <option value="v8_st_humide_inf">V8 St Humide Inf</option>
+                    <option value="v8_st_sub_humide">V8 St Sub Humide</option>
+                </select>
+            </div>
+            <div id="point-filter" style="display: none;">
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Point</label>
+                <select id="point-filter-select" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Points</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Year</label>
+                <select id="year-filter" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Years</option>
+                    {% for year in years %}
+                    <option value="{{ year.id }}">{{ year.label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Crop</label>
+                <select id="crop-filter" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary">
+                    <option value="">All Crops</option>
+                    {% for crop in crops %}
+                    <option value="{{ crop.id }}">{{ crop.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-outline uppercase mb-1">Search</label>
+                <input id="search-filter" type="search" placeholder="Search every field" class="w-full rounded-lg border border-outline-variant bg-white px-3 py-2 text-sm focus:ring-1 focus:ring-secondary focus:border-secondary"/>
+            </div>
+        </div>
+    </section>
+
+    <div class="space-y-6">
+        {% for section in sections %}
+        <section id="{{ section.key }}" class="metric-section bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-sm overflow-hidden" data-section-key="{{ section.key }}">
+            <div class="px-5 py-4 border-b border-outline-variant bg-surface-container-low flex items-center justify-between gap-4">
+                <div class="min-w-0">
+                    <p class="text-[11px] font-bold font-label uppercase tracking-[0.2em] text-secondary">{{ section.model_name }}</p>
+                    <h3 class="font-headline font-black text-xl text-primary">{{ section.title }}</h3>
+                    <p class="text-xs text-on-surface-variant mt-1">{% if section.display_count < section.count %}Showing {{ section.display_count }} of {{ section.count }} records{% else %}{{ section.count }} record(s){% endif %}</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <a href="{{ section.add_url }}" class="px-3 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold uppercase tracking-widest hover:bg-primary-container transition-colors">Add New</a>
+                    <a href="{{ section.export_url }}" class="px-3 py-2 rounded-lg border border-outline-variant bg-white text-xs font-bold uppercase tracking-widest text-on-surface hover:bg-surface-container transition-colors">Export</a>
+                    {% if user.is_authenticated and user.profile.role != 'viewer' %}
+                    <form method="post" action="{% url 'dashboard:delete_metric_table' section.key %}">
+                        {% csrf_token %}
+                        <button type="button" data-confirm-action="table" data-section="{{ section.title|escapejs }}" class="px-3 py-2 rounded-lg border border-error/40 bg-error-container/20 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container/40 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                            Delete Table
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="table-scroll-shell p-4" id="metric-table-scroll">
+                <div class="table-scroll-hint">
+                    <span class="material-symbols-outlined" style="font-size: 12px;">open_with</span>
+                    hover &amp; scroll
+                </div>
+                <table class="metric-table min-w-full border-collapse text-sm">
+                    <thead>
+                        <tr class="text-left text-[10px] uppercase tracking-widest text-outline bg-surface-container-low/80">
+                            {% for header in section.headers %}
+                            <th class="border-b border-outline-variant px-3 py-3 whitespace-nowrap">{{ header }}</th>
+                            {% endfor %}
+                            <th class="border-b border-outline-variant px-3 py-3 whitespace-nowrap">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in section.rows %}
+                        <tr class="metric-row border-b border-outline-variant/40" data-metric-type="{{ section.key }}" data-region-id="{{ row.filters.region_id }}" data-year-id="{{ row.filters.year_id }}" data-crop-id="{{ row.filters.crop_id }}" data-subregion-id="{{ row.filters.subregion_id }}" data-point-key="{{ row.filters.point_key|default:''|escape }}" data-search="{{ row.search_text|escape }}">
+                            {% for value in row.values %}
+                            <td class="px-3 py-3 align-top text-on-surface-variant whitespace-nowrap">{{ value }}</td>
+                            {% endfor %}
+                            <td class="px-3 py-3 align-top whitespace-nowrap">
+                                <div class="flex flex-wrap gap-2">
+                                    <a href="{% url 'dashboard:edit_metric_entry' section.key row.pk %}" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-secondary-container/15 text-secondary text-xs font-bold uppercase tracking-widest hover:bg-secondary-container/25 transition-colors">
+                                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                                        Edit
+                                    </a>
+                                    <form method="post" action="{% url 'dashboard:delete_metric_entry' section.key row.pk %}">
+                                        {% csrf_token %}
+                                        <button type="button" data-confirm-action="entry" data-section="{{ section.title|escapejs }}" data-label="{{ row.values.0|escapejs }}" class="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-error-container/70 text-error text-xs font-bold uppercase tracking-widest hover:bg-error-container transition-colors">
+                                            <span class="material-symbols-outlined text-[16px]">delete</span>
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ section.headers|length|add:1 }}" class="px-4 py-10 text-center text-on-surface-variant">
+                                No data available for this table.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endfor %}
+    </div>
+{% include 'dashboard/_partners.html' %}
+</main>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const CSRF_TOKEN = getCookie('csrftoken') || '{{ csrf_token }}';
+    const browserConfirmModal = document.getElementById('browser-confirm-modal');
+    const browserConfirmTitle = document.getElementById('browser-confirm-title');
+    const browserConfirmMessage = document.getElementById('browser-confirm-message');
+    const browserConfirmAccept = document.getElementById('browser-confirm-accept');
+    const browserConfirmCancel = document.getElementById('browser-confirm-cancel');
+
+    function showBrowserConfirm({ title, message, confirmLabel = 'Delete', cancelLabel = 'Cancel' }) {
+        if (!browserConfirmModal || !browserConfirmTitle || !browserConfirmMessage || !browserConfirmAccept || !browserConfirmCancel) {
+            return new Promise(function (resolve) { resolve(window.confirm(message)); });
+        }
+        return new Promise(resolve => {
+            browserConfirmTitle.textContent = title;
+            browserConfirmMessage.textContent = message;
+            browserConfirmAccept.textContent = confirmLabel;
+            browserConfirmCancel.textContent = cancelLabel;
+
+            const closeModal = (result) => {
+                browserConfirmModal.classList.add('hidden');
+                browserConfirmModal.setAttribute('aria-hidden', 'true');
+                browserConfirmAccept.onclick = null;
+                browserConfirmCancel.onclick = null;
+                browserConfirmModal.onclick = null;
+                document.removeEventListener('keydown', onKeyDown);
+                resolve(result);
+            };
+
+            function onKeyDown(event) {
+                if (event.key === 'Escape') closeModal(false);
+            }
+
+            browserConfirmAccept.onclick = () => closeModal(true);
+            browserConfirmCancel.onclick = () => closeModal(false);
+            browserConfirmModal.onclick = (event) => {
+                if (event.target === browserConfirmModal) closeModal(false);
+            };
+
+            document.addEventListener('keydown', onKeyDown);
+            browserConfirmModal.classList.remove('hidden');
+            browserConfirmModal.setAttribute('aria-hidden', 'false');
+        });
+    }
+
+    async function requestDelete(form, { title, message, confirmLabel }) {
+        let allow = false;
+        try {
+            allow = await showBrowserConfirm({ title, message, confirmLabel });
+        } catch (err) {
+            allow = window.confirm(message);
+        }
+        if (allow) {
+            form.submit();
+        }
+    }
+
+    async function confirmDelete(form, sectionTitle, itemLabel) {
+        await requestDelete(form, {
+            title: `Delete ${sectionTitle}?`,
+            message: `This will permanently delete the record ${itemLabel}.`,
+            confirmLabel: 'Delete',
+        });
+    }
+
+    async function confirmDeleteTable(form, sectionTitle) {
+        await requestDelete(form, {
+            title: `Delete entire ${sectionTitle} table?`,
+            message: `This will permanently delete ALL records in the ${sectionTitle} table. This action cannot be undone.`,
+            confirmLabel: 'Delete All',
+        });
+    }
+
+    async function confirmDeleteAll(form) {
+        await requestDelete(form, {
+            title: 'Delete ALL metric data?',
+            message: 'This will permanently delete ALL records across every metrics table. This action cannot be undone.',
+            confirmLabel: 'Delete Everything',
+        });
+    }
+
+    function updatePointFilterOptions() {
+        const region = document.getElementById('region-filter').value;
+        const pointSelect = document.getElementById('point-filter-select');
+        const pointContainer = document.getElementById('point-filter');
+        const points = new Set();
+
+        document.querySelectorAll('.metric-row').forEach(row => {
+            if (!region || row.dataset.regionId === region) {
+                const key = (row.dataset.pointKey || '').trim();
+                if (key) points.add(key);
+            }
+        });
+
+        const values = Array.from(points).sort();
+        pointSelect.innerHTML = '<option value="">All Points</option>' + values.map(value => '<option value="' + value + '">' + value.replace(',', ', ') + '</option>').join('');
+        const showPointFilter = Boolean(values.length && (!region || region === document.getElementById('region-filter').value));
+        pointContainer.style.display = showPointFilter ? 'block' : 'none';
+        if (!values.length) {
+            pointSelect.value = '';
+        }
+    }
+
+    function applyFilters() {
+        const metricType = document.getElementById('metric-filter').value;
+        const region = document.getElementById('region-filter').value;
+        const year = document.getElementById('year-filter').value;
+        const crop = document.getElementById('crop-filter').value;
+        const search = document.getElementById('search-filter').value.trim().toLowerCase();
+        const subregion = document.getElementById('subregion-filter-select').value;
+        const point = document.getElementById('point-filter-select').value;
+
+        const subregionFilterDiv = document.getElementById('subregion-filter');
+        if (region) {
+            const activeRows = Array.from(document.querySelectorAll('.metric-row')).filter(row => row.dataset.regionId === region);
+            const hasSubregionData = activeRows.some(row => (row.dataset.subregionId || '').trim());
+            subregionFilterDiv.style.display = hasSubregionData ? 'block' : 'none';
+        } else {
+            subregionFilterDiv.style.display = 'none';
+        }
+
+        updatePointFilterOptions();
+
+        document.querySelectorAll('.metric-section').forEach(section => {
+            const sectionKey = section.dataset.sectionKey;
+            let visibleRows = 0;
+            let sectionMatchesType = metricType === 'all' || sectionKey === metricType;
+
+            section.querySelectorAll('.metric-row').forEach(row => {
+                const matchesType = metricType === 'all' || row.dataset.metricType === metricType;
+                const matchesRegion = !region || row.dataset.regionId === region;
+                const matchesYear = !year || row.dataset.yearId === year;
+                const matchesCrop = !crop || row.dataset.cropId === crop;
+                const matchesSearch = !search || row.dataset.search.includes(search);
+                const matchesSubRegion = !subregion || row.dataset.subregionId === subregion || row.dataset.subregionId === '';
+                const matchesPoint = !point || row.dataset.pointKey === point;
+                const showRow = sectionMatchesType && matchesType && matchesRegion && matchesYear && matchesCrop && matchesSearch && matchesSubRegion && matchesPoint;
+
+                row.classList.toggle('hidden', !showRow);
+                if (showRow) visibleRows += 1;
+            });
+
+            section.classList.toggle('hidden', !sectionMatchesType || visibleRows === 0);
+        });
+    }
+
+    function resetFilters() {
+        document.getElementById('metric-filter').value = 'all';
+        document.getElementById('region-filter').value = '';
+        document.getElementById('year-filter').value = '';
+        document.getElementById('crop-filter').value = '';
+        document.getElementById('search-filter').value = '';
+        document.getElementById('subregion-filter-select').value = '';
+        document.getElementById('point-filter-select').value = '';
+        applyFilters();
+    }
+
+    const bindIf = (id, evt, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener(evt, fn);
+    };
+    // ---- Delegated delete confirmations (independent of inline JS handlers) ----
+    function handleDeleteClick(button) {
+        const form = button.closest('form');
+        if (!form) return;
+        const action = button.getAttribute('data-confirm-action');
+        const sectionTitle = button.getAttribute('data-section') || 'record';
+        const label = button.getAttribute('data-label') || '';
+        let opts;
+        if (action === 'entry') {
+            opts = { title: 'Delete ' + sectionTitle + '?', message: 'This will permanently delete the record ' + label + '.', confirmLabel: 'Delete' };
+        } else if (action === 'table') {
+            opts = { title: 'Delete entire ' + sectionTitle + ' table?', message: 'This will permanently delete ALL records in the ' + sectionTitle + ' table. This action cannot be undone.', confirmLabel: 'Delete All' };
+        } else {
+            opts = { title: 'Delete ALL metric data?', message: 'This will permanently delete ALL records across every metrics table. This action cannot be undone.', confirmLabel: 'Delete Everything' };
+        }
+        requestDelete(form, opts);
+    }
+
+    document.addEventListener('click', function (event) {
+        const button = event.target.closest ? event.target.closest('[data-confirm-action]') : null;
+        if (!button) return;
+        event.preventDefault();
+        try {
+            handleDeleteClick(button);
+        } catch (err) {
+            console.error('Delete confirmation failed:', err);
+            const form = button.closest('form');
+            if (form) {
+                form.removeAttribute('onsubmit');
+                if (window.confirm('Delete this data? This cannot be undone.')) form.submit();
+            }
+        }
+    });
+
+    bindIf('metric-filter', 'change', applyFilters);
+    bindIf('region-filter', 'change', applyFilters);
+    bindIf('year-filter', 'change', applyFilters);
+    bindIf('crop-filter', 'change', applyFilters);
+    bindIf('search-filter', 'input', applyFilters);
+    bindIf('subregion-filter-select', 'change', applyFilters);
+    bindIf('point-filter-select', 'change', applyFilters);
+
+    try {
+        applyFilters();
+    } catch (e) {
+        console.warn('applyFilters failed:', e);
+    }
+  </script>
+  {% include "dashboard/_agroai_chat.html" %}
+  </body>
+  </html>
+

@@ -4,7 +4,7 @@ from decimal import Decimal
 import numpy as np
 import pandas as pd
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from dashboard.models import (
     AgriculturalMetrics,

@@ -99,6 +99,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'agri_dashboard.middleware.LoginRequiredMiddleware',
+    'agri_dashboard.middleware.FarmerScopeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -175,7 +176,20 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 # Scheduled tasks
+from celery.schedules import crontab  # noqa: E402
 CELERY_BEAT_SCHEDULE = {
+    # Two Ichkeul stations: new ERA5-Land / CHIRPS days, provisional rain replaced (daily 05:30 UTC)
+    'update-station-climate-daily': {
+        'task': 'dashboard.tasks.update_station_climate',
+        'schedule': crontab(hour=5, minute=30),
+        'options': {'expires': 6 * 3600}
+    },
+    # SmartFarm soil probe: reports ~once a day; poll every 3 hours
+    'sync-smartfarm-probe': {
+        'task': 'dashboard.tasks.sync_smartfarm_probe',
+        'schedule': crontab(minute=15, hour='*/3'),
+        'options': {'expires': 3600}
+    },
     'refresh-materialized-views': {
         'task': 'dashboard.tasks.refresh_materialized_views',
         'schedule': 3600.0,  # Every hour
@@ -280,6 +294,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'dashboard.context_processors.navbar',
             ],
         },
     },

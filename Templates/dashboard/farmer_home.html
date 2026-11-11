@@ -1,0 +1,1021 @@
+{% load static i18n %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#012d1d">
+<title>{% trans "My farms" %} — APWRS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet/leaflet.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard/vendor/leaflet-draw/leaflet.draw.css' %}">
+<style>
+  /* Tokens shared with the main APWRS dashboard (Tailwind config in dashboard.html) */
+  :root {
+    --primary:#012d1d; --primary-c:#1b4332; --on-primary:#fff; --secondary:#00677d; --secondary-fixed:#69d4f4;
+    --surface:#f9f9ff; --surface-low:#f0f3ff; --surface-high:#e2e8f8; --card:#fff; --outline:#c1c8c2; --outline-soft:#e3e8e4;
+    --text:#151c27; --muted:#414844; --subtle:#717973; --mint:#d8f3e3; --leaf:#2d6a4f;
+    --s1:#15803d; --s1-bg:#dcfce7; --s2:#4d7c0f; --s2-bg:#ecfccb; --s3:#b45309; --s3-bg:#fef3c7; --n:#b91c1c; --n-bg:#fee2e2;
+    --info:#00677d; --info-bg:#e0f5fb; --warn:#9a5b00; --warn-bg:#fff4d6; --danger:#b3261e; --danger-bg:#ffe4e1;
+    --radius:14px; --shadow:0 1px 2px rgba(1,45,29,.06), 0 4px 16px rgba(1,45,29,.06);
+  }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; font-family:Inter, "Segoe UI", system-ui, sans-serif; background:var(--surface); color:var(--text); font-size:14px; -webkit-font-smoothing:antialiased; }
+  h1, h2, h3, .hl { font-family:"Hanken Grotesk", Inter, sans-serif; letter-spacing:-.01em; }
+  .ms { font-family:'Material Symbols Outlined'; font-weight:normal; font-style:normal; font-size:20px; line-height:1; display:inline-block; vertical-align:middle;
+        font-variation-settings:'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24; -webkit-font-smoothing:antialiased; }
+  .ms.fill { font-variation-settings:'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+  button { font:inherit; }
+  :focus-visible { outline:3px solid var(--secondary-fixed); outline-offset:2px; }
+
+  /* ---------- header ---------- */
+  .appbar { position:sticky; top:0; z-index:1000; height:64px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+         padding:0 20px; background:var(--card); border-bottom:1px solid var(--outline); box-shadow:0 1px 6px rgba(0,0,0,.04); }
+  .brand { display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--primary); min-width:0; }
+  .brand img { width:40px; height:40px; border-radius:50%; object-fit:contain; box-shadow:0 0 0 2px #fff, 0 0 0 4px rgba(0,103,125,.35); }
+  .brand b { font-family:"Hanken Grotesk"; font-size:17px; font-weight:800; display:block; line-height:1.1; }
+  .brand small { color:var(--subtle); font-size:11px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .top-right { display:flex; align-items:center; gap:10px; }
+  .lang { display:flex; align-items:center; gap:2px; padding:3px; border-radius:10px; background:var(--surface-low); border:1px solid var(--outline-soft); }
+  .lang .ms { font-size:18px; color:var(--subtle); margin:0 4px 0 5px; }
+  .lang button { border:0; background:transparent; padding:6px 10px; border-radius:7px; cursor:pointer; font:700 12px "Hanken Grotesk"; color:var(--muted); }
+  .lang button:hover { color:var(--primary); }
+  .lang button.on { background:var(--primary); color:#fff; cursor:default; }
+  .who { display:flex; align-items:center; gap:8px; padding-left:12px; border-left:1px solid var(--outline); }
+  .avatar { width:34px; height:34px; border-radius:50%; background:var(--primary-c); color:#fff; display:grid; place-items:center; font:700 14px "Hanken Grotesk"; }
+  .who .name { font-size:13px; font-weight:600; line-height:1.1; }
+  .who .role { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--leaf); }
+  .icon-link { width:36px; height:36px; display:grid; place-items:center; border-radius:10px; color:var(--muted); text-decoration:none; }
+  .icon-link:hover { background:var(--surface-low); color:var(--danger); }
+
+  /* ---------- layout ---------- */
+  .layout { display:grid; grid-template-columns:minmax(340px, 42%) 1fr; gap:16px; padding:16px; height:calc(100vh - 64px); }
+  .col { min-height:0; min-width:0; display:flex; flex-direction:column; gap:12px; }
+  .panel { background:var(--card); border:1px solid var(--outline-soft); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+
+  /* farm switcher */
+  .farms { display:flex; gap:10px; overflow-x:auto; padding:2px 2px 6px; scrollbar-width:thin; }
+  .farm-card { flex:0 0 auto; min-width:150px; display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:12px; cursor:pointer;
+               background:var(--card); border:1.5px solid var(--outline-soft); box-shadow:var(--shadow); text-align:left; color:var(--text); transition:.15s; }
+  .farm-card:hover { border-color:var(--leaf); }
+  .farm-card.active { border-color:var(--primary); background:var(--primary); color:#fff; }
+  .farm-card .emoji { font-size:24px; width:38px; height:38px; display:grid; place-items:center; background:var(--surface-low); border-radius:10px; }
+  .farm-card.active .emoji { background:rgba(255,255,255,.14); }
+  .farm-card b { display:block; font:700 14px "Hanken Grotesk"; max-width:150px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .farm-card small { font-size:11px; opacity:.75; }
+  .farm-card.add { border-style:dashed; color:var(--leaf); box-shadow:none; background:transparent; }
+  .farm-card.add .emoji { background:var(--mint); color:var(--leaf); }
+
+  /* map */
+  .map-wrap { position:relative; flex:1; min-height:320px; }
+  #map { position:absolute; inset:0; }
+  .map-tools { position:absolute; top:12px; right:12px; z-index:500; display:flex; flex-direction:column; gap:8px; }
+  .map-btn { width:42px; height:42px; display:grid; place-items:center; border:0; border-radius:12px; background:#fff; color:var(--primary);
+             box-shadow:0 2px 10px rgba(0,0,0,.18); cursor:pointer; }
+  .map-btn:hover { background:var(--surface-low); }
+  .draw-cta { position:absolute; left:12px; bottom:16px; z-index:500; }
+  .draw-banner { position:absolute; left:12px; right:66px; top:12px; z-index:600; display:none; align-items:center; gap:10px; flex-wrap:wrap;
+                 background:rgba(1,45,29,.94); color:#fff; padding:10px 12px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,.25); }
+  .draw-banner.on { display:flex; }
+  .draw-banner p { margin:0; flex:1 1 180px; font-size:13px; line-height:1.4; }
+  .draw-banner .btn { padding:7px 11px; font-size:12px; }
+  .leaflet-tooltip.farm-label { background:rgba(1,45,29,.88); color:#fff; border:0; border-radius:8px; font:600 12px Inter; padding:4px 8px; box-shadow:none; }
+  .leaflet-tooltip.farm-label:before { display:none; }
+
+  /* buttons */
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:0; border-radius:10px; padding:10px 14px; cursor:pointer;
+         font:600 13px Inter; background:var(--primary); color:#fff; text-decoration:none; transition:.15s; }
+  .btn:hover { background:var(--primary-c); }
+  .btn.light { background:#fff; color:var(--primary); border:1px solid var(--outline); }
+  .btn.light:hover { background:var(--surface-low); }
+  .btn.ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.4); }
+  .btn.danger { background:#fff; color:var(--danger); border:1px solid #f1b8b2; }
+  .btn.big { padding:13px 18px; font-size:14px; border-radius:12px; box-shadow:0 4px 14px rgba(1,45,29,.3); }
+  .btn:disabled { opacity:.55; cursor:default; }
+
+  /* right column */
+  .hero { padding:16px 18px; display:flex; gap:14px; align-items:flex-start; }
+  .hero .emoji { font-size:34px; width:58px; height:58px; display:grid; place-items:center; background:var(--mint); border-radius:16px; flex:0 0 auto; }
+  .hero h1 { margin:0; font-size:22px; font-weight:800; color:var(--primary); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; background:var(--surface-low); color:var(--muted); font-size:12px; font-weight:500; }
+  .chip .ms { font-size:15px; color:var(--leaf); }
+  .glance { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:10px; padding:0 18px 16px; }
+  .tile { background:var(--surface-low); border-radius:12px; padding:10px 12px; min-height:84px; display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .tile .lbl { font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--subtle); display:flex; align-items:center; gap:4px; }
+  .tile .val { font:800 20px "Hanken Grotesk"; color:var(--primary); display:flex; align-items:center; gap:6px; }
+  .tile .sub { font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tile.clickable { cursor:pointer; } .tile.clickable:hover { background:var(--surface-high); }
+
+  .tabs { display:flex; gap:4px; padding:6px; background:var(--surface-low); border-top:1px solid var(--outline-soft); border-bottom:1px solid var(--outline-soft); overflow-x:auto; }
+  .tab { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 12px; border:0; border-radius:10px; background:transparent;
+         color:var(--muted); font:600 13px Inter; cursor:pointer; white-space:nowrap; }
+  .tab:hover { background:var(--card); }
+  .tab.active { background:var(--card); color:var(--primary); box-shadow:0 1px 4px rgba(0,0,0,.08); }
+  .tab.active .ms { color:var(--leaf); font-variation-settings:'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+  .right { display:flex; flex-direction:column; min-height:0; }
+  .tab-body { flex:1; overflow:auto; padding:18px; min-height:0; }
+
+  /* generic content */
+  .section { margin-bottom:22px; }
+  .section-h { display:flex; align-items:center; gap:8px; margin:0 0 10px; font-size:16px; font-weight:700; color:var(--primary); }
+  .section-h .ms { color:var(--leaf); }
+  .section-h .aside { margin-left:auto; font:500 12px Inter; color:var(--subtle); }
+  .muted { color:var(--subtle); font-size:12px; }
+  .callout { display:flex; gap:10px; align-items:flex-start; border-radius:12px; padding:11px 13px; font-size:13px; line-height:1.45; margin-bottom:10px; }
+  .callout .ms { font-size:20px; margin-top:1px; }
+  .callout b { display:block; margin-bottom:1px; }
+  .callout.info { background:var(--info-bg); color:#004e5f; } .callout.warning { background:var(--warn-bg); color:var(--warn); }
+  .callout.danger { background:var(--danger-bg); color:var(--danger); } .callout.ok { background:var(--s1-bg); color:#14532d; }
+  .toolbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  select.input, input.input { padding:9px 11px; border:1px solid var(--outline); border-radius:10px; font:500 14px Inter; background:#fff; color:var(--text); }
+
+  /* crop recommendation cards */
+  .rec-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:12px; }
+  .rec { border:1px solid var(--outline-soft); border-radius:14px; padding:14px; background:#fff; display:flex; flex-direction:column; gap:8px; position:relative; }
+  .rec.best { border:2px solid var(--s1); padding:13px; }
+  .rec-head { display:flex; align-items:center; gap:10px; }
+  .rec-head .emoji { font-size:28px; }
+  .rec-head b { font:700 16px "Hanken Grotesk"; display:block; text-transform:capitalize; }
+  .ring { --p:0; --c:var(--s1); margin-left:auto; width:52px; height:52px; border-radius:50%; flex:0 0 auto; display:grid; place-items:center;
+          background:conic-gradient(var(--c) calc(var(--p) * 1%), #eef1ef 0); }
+  .ring span { width:42px; height:42px; border-radius:50%; background:#fff; display:grid; place-items:center; font:800 14px "Hanken Grotesk"; color:var(--c); }
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700; width:max-content; }
+  .b-S1 { background:var(--s1-bg); color:var(--s1); } .b-S2 { background:var(--s2-bg); color:var(--s2); }
+  .b-S3 { background:var(--s3-bg); color:var(--s3); } .b-N { background:var(--n-bg); color:var(--n); }
+  .facts { display:flex; flex-direction:column; gap:5px; font-size:12.5px; color:var(--muted); }
+  .facts div { display:flex; align-items:center; gap:6px; } .facts .ms { font-size:17px; color:var(--leaf); }
+  .rec .btn { margin-top:auto; }
+  .rows { border:1px solid var(--outline-soft); border-radius:14px; overflow:hidden; background:#fff; }
+  .row { display:grid; grid-template-columns:36px minmax(0,1.3fr) minmax(0,1fr) 100px; gap:10px; align-items:center; padding:10px 14px; border-top:1px solid var(--outline-soft); font-size:13px; }
+  .row:first-child { border-top:0; }
+  .row .emoji { font-size:22px; }
+  .row b { text-transform:capitalize; }
+  .meter { height:8px; border-radius:6px; background:#eef1ef; overflow:hidden; }
+  .meter i { display:block; height:100%; border-radius:6px; }
+
+  /* timeline */
+  .timeline { position:relative; padding-left:26px; }
+  .timeline:before { content:""; position:absolute; left:9px; top:6px; bottom:6px; width:2px; background:var(--outline-soft); }
+  .ev { position:relative; padding:0 0 14px; }
+  .ev .dot { position:absolute; left:-26px; top:2px; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; color:#fff; font-size:13px; }
+  .ev .dot .ms { font-size:13px; }
+  .ev.k-stage .dot { background:var(--leaf); } .ev.k-fertilizer .dot { background:#7c3aed; } .ev.k-protection .dot { background:#c2410c; }
+  .ev.past { opacity:.5; }
+  .ev .when { font-size:11px; font-weight:700; color:var(--subtle); text-transform:uppercase; letter-spacing:.04em; }
+  .ev .what { font-weight:600; font-size:14px; }
+  .ev .detail { font-size:12.5px; color:var(--muted); }
+  .ev.next { background:var(--mint); border-radius:12px; padding:10px 12px; margin:0 0 14px -6px; }
+  .ev.next .dot { left:-20px; top:12px; }
+  .next-tag { display:inline-block; background:var(--primary); color:#fff; font-size:10px; font-weight:700; border-radius:6px; padding:2px 6px; margin-left:6px; vertical-align:middle; }
+  .legend { display:flex; gap:12px; flex-wrap:wrap; font-size:12px; color:var(--muted); margin-bottom:12px; }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+
+  /* fertilizer */
+  .nutrients { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+  .nutrient { flex:1 1 110px; border-radius:12px; padding:10px 12px; background:var(--surface-low); }
+  .nutrient .el { font:800 18px "Hanken Grotesk"; color:var(--primary); }
+  .nutrient .amt { font-size:13px; color:var(--muted); }
+  .apps { display:grid; gap:8px; }
+  .app { display:grid; grid-template-columns:44px 1fr; gap:10px; align-items:center; border:1px solid var(--outline-soft); border-radius:12px; padding:10px 12px; }
+  .app .n { width:36px; height:36px; border-radius:10px; background:#ede9fe; color:#6d28d9; display:grid; place-items:center; font:800 15px "Hanken Grotesk"; }
+  .app b { display:block; font-size:14px; }
+  .app span { font-size:12.5px; color:var(--muted); }
+
+  /* protection accordion */
+  details.threat { border:1px solid var(--outline-soft); border-radius:12px; margin-bottom:8px; background:#fff; overflow:hidden; }
+  details.threat summary { list-style:none; cursor:pointer; padding:12px 14px; display:flex; align-items:center; gap:10px; }
+  details.threat summary::-webkit-details-marker { display:none; }
+  details.threat summary .chev { margin-left:auto; transition:.2s; color:var(--subtle); }
+  details.threat[open] summary .chev { transform:rotate(180deg); }
+  .t-icon { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; flex:0 0 auto; }
+  .t-pest { background:#ffedd5; color:#c2410c; } .t-disease { background:#fce7f3; color:#be185d; } .t-weeds { background:#dcfce7; color:#15803d; }
+  details.threat .t-name { font-weight:600; font-size:14px; }
+  details.threat .t-when { font-size:11.5px; color:var(--subtle); }
+  .t-body { padding:0 14px 12px 58px; display:grid; gap:8px; font-size:13px; line-height:1.45; }
+  .t-body div { display:flex; gap:8px; } .t-body .ms { font-size:18px; flex:0 0 auto; }
+  .t-body .w .ms { color:var(--secondary); } .t-body .p .ms { color:var(--leaf); } .t-body .c .ms { color:#c2410c; }
+
+  /* weather */
+  .wx-today { display:flex; align-items:center; gap:18px; flex-wrap:wrap; padding:16px; border-radius:16px;
+              background:linear-gradient(135deg, #0b4f6c 0%, #1b4332 100%); color:#fff; margin-bottom:14px; }
+  .wx-today .big { font-size:64px; }
+  .wx-today .t { font:800 40px "Hanken Grotesk"; line-height:1; }
+  .wx-today .c { font-size:14px; opacity:.85; margin-top:4px; }
+  .wx-stats { display:grid; grid-template-columns:repeat(2, auto); gap:6px 18px; margin-left:auto; font-size:13px; }
+  .wx-stats span { opacity:.75; margin-right:6px; }
+  .wx-days { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; }
+  .wx-day { flex:0 0 84px; border:1px solid var(--outline-soft); border-radius:14px; padding:10px 6px; text-align:center; background:#fff; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .wx-day.today { border-color:var(--secondary); box-shadow:0 0 0 1px var(--secondary) inset; }
+  .wx-day .d { font-size:11.5px; font-weight:600; color:var(--subtle); }
+  .wx-day .ms { font-size:30px; }
+  .wx-day .tt { font:700 14px "Hanken Grotesk"; } .wx-day .tt small { color:var(--subtle); font-weight:500; }
+  .rainbar { width:100%; height:38px; display:flex; align-items:flex-end; justify-content:center; }
+  .rainbar i { width:22px; border-radius:5px 5px 2px 2px; background:#60a5fa; min-height:2px; }
+  .wx-day .r { font-size:11px; color:#2563eb; font-weight:600; }
+
+  /* chat */
+  .chat-wrap { display:flex; flex-direction:column; height:100%; min-height:420px; }
+  /* Chat header: same identity as the floating "AI Agronomist" button */
+  .ai-head { display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:14px 14px 0 0; background:var(--primary); color:#fff; border-bottom:2px solid rgba(105,212,244,.4); }
+  .ai-avatar { position:relative; display:grid; place-items:center; color:#b2ebff; }
+  .ai-avatar .ms { font-size:24px; animation:ai-pulse 2s cubic-bezier(.4,0,.6,1) infinite; }
+  .ai-ping { position:absolute; top:-3px; right:-4px; width:10px; height:10px; }
+  .ai-ping i, .ai-ping b { position:absolute; inset:0; border-radius:50%; background:#b2ebff; }
+  .ai-ping i { opacity:.75; animation:ai-ping 1s cubic-bezier(0,0,.2,1) infinite; }
+  .ai-title { font:700 13px "Hanken Grotesk", "Noto Kufi Arabic", sans-serif; letter-spacing:.025em; display:flex; align-items:center; gap:6px; }
+  .ai-live { font-size:9px; font-weight:700; text-transform:uppercase; background:#69d4f4; color:#002114; padding:0 6px; border-radius:4px; }
+  .ai-sub { font-size:10.5px; font-weight:500; color:#86af99; }
+  .ai-head select { margin-left:auto; padding:5px 8px; border-radius:8px; border:1px solid rgba(255,255,255,.25); background:rgba(255,255,255,.1); color:#fff; font:600 12px Inter; }
+  .ai-head select option { color:var(--text); }
+  @keyframes ai-ping { 75%, 100% { transform:scale(2); opacity:0; } }
+  @keyframes ai-pulse { 50% { opacity:.5; } }
+  html[dir=rtl] .ai-head select { margin-left:0; margin-right:auto; }
+  html[dir=rtl] .ai-ping { right:auto; left:-4px; }
+  .chat-ctx { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:0 0 12px 12px; background:var(--surface-low); font-size:12.5px; color:var(--muted); margin-bottom:10px; }
+  .chat { flex:1; overflow:auto; padding:4px 2px; display:flex; flex-direction:column; gap:12px; }
+  .bubble-row { display:flex; gap:8px; align-items:flex-end; }
+  .bubble-row.user { justify-content:flex-end; }
+  .bot-av { width:30px; height:30px; flex:0 0 30px; border-radius:50%; background:var(--primary-c); color:var(--secondary-fixed); display:grid; place-items:center; }
+  .bot-av .ms { font-size:17px; }
+  .bubble { max-width:80%; padding:10px 13px; border-radius:16px; white-space:pre-wrap; line-height:1.5; font-size:13.5px; }
+  .bubble-row.user .bubble { background:var(--primary); color:#fff; border-bottom-right-radius:4px; }
+  .bubble-row.bot .bubble { background:var(--surface-low); border:1px solid var(--outline-soft); border-bottom-left-radius:4px; }
+  .bubble .meta { display:block; margin-top:6px; font-size:10.5px; color:var(--secondary); font-weight:600; white-space:normal; }
+  .typing { display:inline-flex; gap:4px; } .typing i { width:6px; height:6px; border-radius:50%; background:var(--subtle); animation:blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay:.2s; } .typing i:nth-child(3) { animation-delay:.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity:.25; } 40% { opacity:1; } }
+  .suggest { display:flex; gap:6px; overflow-x:auto; padding:8px 0 4px; }
+  .suggest button { flex:0 0 auto; border:1px solid var(--outline); background:#fff; border-radius:999px; padding:6px 12px; font-size:12px; cursor:pointer; color:var(--primary); }
+  .suggest button:hover { background:var(--mint); border-color:var(--leaf); }
+  .composer { display:flex; gap:8px; padding-top:8px; border-top:1px solid var(--outline-soft); }
+  .composer input { flex:1; padding:12px 14px; border-radius:12px; border:1px solid var(--outline); font:14px Inter; }
+  .composer .btn { width:46px; padding:0; }
+
+  /* empty / onboarding */
+  .onboard { padding:28px 22px; text-align:center; }
+  .onboard h2 { margin:6px 0 4px; font-size:22px; color:var(--primary); }
+  .onboard p { color:var(--muted); margin:0 auto 18px; max-width:440px; line-height:1.5; }
+  .steps { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; text-align:left; margin-bottom:20px; }
+  .step { background:var(--surface-low); border-radius:14px; padding:14px; }
+  .step .num { width:28px; height:28px; border-radius:50%; background:var(--primary); color:#fff; display:grid; place-items:center; font:800 13px "Hanken Grotesk"; margin-bottom:8px; }
+  .step b { display:block; font-size:14px; margin-bottom:3px; } .step span { font-size:12.5px; color:var(--muted); }
+
+  /* skeleton */
+  .sk { background:linear-gradient(90deg, #eef1f3 25%, #f6f8f9 50%, #eef1f3 75%); background-size:200% 100%; animation:sk 1.2s infinite; border-radius:10px; }
+  @keyframes sk { to { background-position:-200% 0; } }
+
+  /* modal */
+  .modal { position:fixed; inset:0; z-index:3000; background:rgba(1,20,13,.45); display:none; align-items:center; justify-content:center; padding:16px; backdrop-filter:blur(2px); }
+  .modal.open { display:flex; }
+  .sheet { background:#fff; border-radius:18px; width:100%; max-width:460px; max-height:92vh; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+  .sheet-h { display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--outline-soft); }
+  .sheet-h h3 { margin:0; font-size:18px; color:var(--primary); flex:1; }
+  .sheet-b { padding:16px 18px; display:grid; gap:14px; }
+  .sheet-f { display:flex; gap:8px; padding:14px 18px; border-top:1px solid var(--outline-soft); flex-wrap:wrap; }
+  .field label { display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:5px; }
+  .field .input { width:100%; }
+  .field .help { font-size:11.5px; color:var(--subtle); margin-top:4px; }
+  .seg { display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--surface-low); padding:4px; border-radius:12px; }
+  .seg button { border:0; background:transparent; padding:10px; border-radius:9px; cursor:pointer; font-weight:600; font-size:13px; color:var(--muted); display:flex; align-items:center; justify-content:center; gap:6px; }
+  .seg button.on { background:#fff; color:var(--primary); box-shadow:0 1px 4px rgba(0,0,0,.1); }
+  .err { color:var(--danger); font-size:12.5px; min-height:16px; }
+
+  /* floating "AI Agronomist" button — same look as the dashboard widget trigger */
+  .ai-fab { position:fixed; bottom:16px; inset-inline-end:16px; z-index:2500; display:flex; align-items:center; gap:10px; padding:10px 16px;
+            border-radius:999px; border:2px solid rgba(105,212,244,.4); background:var(--primary); color:#fff; cursor:pointer;
+            box-shadow:0 25px 50px -12px rgba(0,0,0,.25); transition:transform .3s, background .3s; text-align:start; }
+  .ai-fab:hover { background:var(--primary-c); transform:scale(1.05); }
+  .ai-fab:active { transform:scale(.95); }
+  .ai-fab.hidden { display:none; }
+  .ai-fab .ai-sub { font-size:10px; }
+  .ai-fab .ai-title { font-size:12px; }
+  /* toast */
+  .toast { position:fixed; left:50%; bottom:24px; transform:translate(-50%, 20px); z-index:4000; opacity:0; pointer-events:none; transition:.25s;
+           background:var(--primary); color:#fff; padding:11px 16px; border-radius:12px; font-size:13px; box-shadow:0 10px 30px rgba(0,0,0,.25); display:flex; gap:8px; align-items:center; }
+  .toast.show { opacity:1; transform:translate(-50%, 0); }
+  .toast.error { background:var(--danger); }
+
+  [dir=rtl] { text-align:right; }
+  /* Arabic / RTL: mirror the custom pieces; shared rules live in css/rtl.css */
+  html[lang=ar] body, html[lang=ar] button, html[lang=ar] input, html[lang=ar] select { font-family:Inter, "Noto Sans Arabic", "Segoe UI", sans-serif; }
+  html[lang=ar] h1, html[lang=ar] h2, html[lang=ar] h3, html[lang=ar] .hl, html[lang=ar] .brand b { font-family:"Hanken Grotesk", "Noto Kufi Arabic", sans-serif; letter-spacing:0; }
+  html[lang=ar] .tile .lbl, html[lang=ar] .ev .when, html[lang=ar] .who .role { text-transform:none; letter-spacing:0; }
+  html[dir=rtl] .who { padding-left:0; padding-right:12px; border-left:0; border-right:1px solid var(--outline); }
+  html[dir=rtl] .timeline { padding-left:0; padding-right:26px; }
+  html[dir=rtl] .timeline:before { left:auto; right:9px; }
+  html[dir=rtl] .ev .dot { left:auto; right:-26px; }
+  html[dir=rtl] .ev.next { margin:0 -6px 14px 0; }
+  html[dir=rtl] .ev.next .dot { left:auto; right:-20px; }
+  html[dir=rtl] .next-tag { margin-left:0; margin-right:6px; }
+  html[dir=rtl] .t-body { padding:0 58px 12px 14px; }
+  html[dir=rtl] details.threat summary .chev { margin-left:0; margin-right:auto; }
+  html[dir=rtl] .section-h .aside { margin-left:0; margin-right:auto; }
+  html[dir=rtl] .bubble-row.user .bubble { border-bottom-right-radius:16px; border-bottom-left-radius:4px; }
+  html[dir=rtl] .bubble-row.bot .bubble { border-bottom-left-radius:16px; border-bottom-right-radius:4px; }
+  html[dir=rtl] .farm-card { text-align:right; }
+  html[dir=rtl] .row > div:last-child .muted { text-align:left !important; }
+  html[dir=rtl] .wx-stats { margin-left:0; margin-right:auto; }
+  html[dir=rtl] .map-wrap { direction:ltr; }
+  html[dir=rtl] .draw-banner { direction:rtl; }
+  html[dir=rtl] .composer .btn .ms, html[dir=rtl] .ms.flip { transform:scaleX(-1); }
+
+  @media (max-width: 1100px) { .glance { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns:minmax(0, 1fr); height:auto; padding:12px; }
+    .map-wrap { flex:none; height:52vh; }
+    .right { min-height:80vh; }
+    .tab-body { overflow:visible; }
+    .tabs { position:sticky; top:64px; z-index:20; }
+    .steps { grid-template-columns:1fr; }
+    .brand small, .who .name, .who .role { display:none; }
+    .row { grid-template-columns:30px 1fr 70px; } .row .why { display:none; }
+  }
+  @media (max-width: 560px) {
+    .brand b { display:none; }
+    .ai-fab { padding:10px; bottom:12px; inset-inline-end:12px; }
+    .ai-fab > span:not(.ai-avatar) { display:none; }
+    .tab { padding:10px 8px; font-size:13px; }
+  }
+</style>
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body>
+{% include "dashboard/_lang_switch.html" %}
+{% csrf_token %}
+<header class="appbar">
+  <a class="brand" href="{% url 'dashboard:farmer_home' %}">
+    <img src="{% static 'dashboard/img/apwrs-logo.png' %}" alt="APWRS" width="40" height="40">
+    <div><b>APWRS</b><small>{% trans "Farmer space" %} · {% trans "Adaptive Planting Window Recommendation System" %}</small></div>
+  </a>
+  <div class="top-right">
+    <form action="{% url 'set_language' %}" method="post" class="lang" id="lang-form" aria-label="{% trans 'Language' %}">
+      {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+      <span class="ms" aria-hidden="true">language</span>
+      <button type="submit" name="language" value="en" class="{% if LANGUAGE_CODE != 'fr' and LANGUAGE_CODE != 'ar' %}on{% endif %}" title="English" aria-label="English" {% if LANGUAGE_CODE != 'fr' and LANGUAGE_CODE != 'ar' %}aria-pressed="true"{% endif %}>EN</button>
+      <button type="submit" name="language" value="fr" class="{% if LANGUAGE_CODE == 'fr' %}on{% endif %}" title="Français" aria-label="Français" {% if LANGUAGE_CODE == 'fr' %}aria-pressed="true"{% endif %}>FR</button>
+      <button type="submit" name="language" value="ar" lang="ar" class="{% if LANGUAGE_CODE == 'ar' %}on{% endif %}" title="العربية" aria-label="العربية" {% if LANGUAGE_CODE == 'ar' %}aria-pressed="true"{% endif %}>ع</button>
+    </form>
+    <div class="who">
+      <div class="avatar">{{ request.user.username|first|upper }}</div>
+      <div><div class="name">{{ request.user.get_full_name|default:request.user.username }}</div><div class="role">{% trans "Farmer" %}</div></div>
+      <a class="icon-link" href="{% url 'dashboard:logout' %}" title="{% trans 'Log out' %}" aria-label="{% trans 'Log out' %}"><span class="ms">logout</span></a>
+    </div>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="col">
+    <div class="farms" id="farms" aria-label="{% trans 'My farms' %}"></div>
+    <div class="panel map-wrap">
+      <div id="map" aria-label="{% trans 'Farm map' %}"></div>
+      <div class="draw-banner" id="draw-banner" role="status">
+        <span class="ms">touch_app</span>
+        <p id="draw-text">{% trans "Tap each corner of your land. Tap the first point again, or press Finish, to close the shape." %}</p>
+        <button class="btn ghost" id="draw-undo"><span class="ms">undo</span>{% trans "Undo point" %}</button>
+        <button class="btn ghost" id="draw-cancel">{% trans "Cancel" %}</button>
+        <button class="btn light" id="draw-finish"><span class="ms">check</span>{% trans "Finish" %}</button>
+      </div>
+      <div class="map-tools">
+        <button class="map-btn" id="btn-layer" title="{% trans 'Satellite / map' %}" aria-label="{% trans 'Satellite / map' %}"><span class="ms">layers</span></button>
+        <button class="map-btn" id="btn-locate" title="{% trans 'Go to my position' %}" aria-label="{% trans 'Go to my position' %}"><span class="ms">my_location</span></button>
+        <button class="map-btn" id="btn-fit" title="{% trans 'Show all my farms' %}" aria-label="{% trans 'Show all my farms' %}"><span class="ms">zoom_out_map</span></button>
+      </div>
+      <div class="draw-cta"><button class="btn big" id="btn-draw"><span class="ms">draw</span>{% trans "Draw a new farm" %}</button></div>
+    </div>
+  </section>
+
+  <section class="panel right" id="right">
+    <div id="hero"></div>
+    <nav class="tabs" id="tabs" role="tablist">
+      <button class="tab active" data-tab="advice" role="tab"><span class="ms">eco</span>{% trans "What to plant" %}</button>
+      <button class="tab" data-tab="plan" role="tab"><span class="ms">event_note</span>{% trans "Crop plan" %}</button>
+      <button class="tab" data-tab="weather" role="tab"><span class="ms">partly_cloudy_day</span>{% trans "Weather" %}</button>
+      <button class="tab" data-tab="chat" role="tab"><span class="ms">smart_toy</span>{% trans "Assistant" %}</button>
+    </nav>
+    <div class="tab-body" id="tab-body"></div>
+  </section>
+</main>
+
+<div class="modal" id="farm-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="sheet">
+    <div class="sheet-h"><span class="ms fill" style="color:var(--leaf)">agriculture</span><h3 id="modal-title">{% trans "Farm details" %}</h3>
+      <button class="map-btn" id="f-close" style="box-shadow:none;width:36px;height:36px;" aria-label="{% trans 'Close' %}"><span class="ms">close</span></button></div>
+    <div class="sheet-b">
+      <div class="field"><label for="f-name">{% trans "Farm name" %}</label><input class="input" type="text" id="f-name" maxlength="100"></div>
+      <div class="field"><label for="f-crop">{% trans "What is growing there now?" %}</label><select class="input" id="f-crop"></select>
+        <div class="help">{% trans "Leave empty if the land is free: we will recommend a crop." %}</div></div>
+      <div class="field"><label for="f-sowing">{% trans "Sowing / planting date" %}</label><input class="input" type="date" id="f-sowing"></div>
+      <div class="field"><label>{% trans "Water" %}</label>
+        <div class="seg" id="f-water-seg">
+          <button type="button" data-v="0"><span class="ms">rainy</span>{% trans "Rain only" %}</button>
+          <button type="button" data-v="1"><span class="ms">water_drop</span>{% trans "I can irrigate" %}</button>
+        </div></div>
+      <div class="field" id="f-water-box"><label for="f-water">{% trans "Water available per season (mm)" %}</label><input class="input" type="number" id="f-water" min="0" max="5000" step="10">
+        <div class="help">{% trans "Optional. 100 mm = 1 000 m³ per hectare." %}</div></div>
+      <div class="err" id="f-err" role="alert"></div>
+    </div>
+    <div class="sheet-f">
+      <button class="btn danger" id="f-delete"><span class="ms">delete</span>{% trans "Delete" %}</button>
+      <button class="btn light" id="f-redraw"><span class="ms">edit_location_alt</span>{% trans "Redraw border" %}</button>
+      <span style="flex:1"></span>
+      <button class="btn light" id="f-cancel">{% trans "Cancel" %}</button>
+      <button class="btn" id="f-save"><span class="ms">check</span>{% trans "Save" %}</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<button class="ai-fab" id="ai-fab" type="button" aria-label="AI Agronomist">
+  <span class="ai-avatar"><span class="ms">psychology</span><span class="ai-ping"><i></i><b></b></span></span>
+  <span><span class="ai-title">AI Agronomist <span class="ai-live">Live</span></span><span class="ai-sub" style="display:block">Analyse &amp; Diagnostic</span></span>
+</button>
+
+<script src="{% static 'dashboard/vendor/leaflet/leaflet.js' %}"></script>
+<script src="{% static 'dashboard/vendor/leaflet-draw/leaflet.draw.js' %}"></script>
+<script>
+const T = {
+  loading: "{% filter escapejs %}{% trans 'Loading…' %}{% endfilter %}",
+  noFarmTitle: "{% filter escapejs %}{% trans 'Welcome! Let’s map your land' %}{% endfilter %}",
+  noFarmText: "{% filter escapejs %}{% trans 'Draw the border of your land on the map. We will tell you what to plant and when, how to fertilise and protect it, and what the weather will do.' %}{% endfilter %}",
+  step1: "{% filter escapejs %}{% trans 'Draw your land' %}{% endfilter %}", step1t: "{% filter escapejs %}{% trans 'Tap each corner of the field on the satellite map.' %}{% endfilter %}",
+  step2: "{% filter escapejs %}{% trans 'Describe it' %}{% endfilter %}", step2t: "{% filter escapejs %}{% trans 'Give it a name and say if you can irrigate.' %}{% endfilter %}",
+  step3: "{% filter escapejs %}{% trans 'Get advice' %}{% endfilter %}", step3t: "{% filter escapejs %}{% trans 'Crops, calendar, fertiliser, weather and the assistant.' %}{% endfilter %}",
+  startDrawing: "{% filter escapejs %}{% trans 'Start drawing' %}{% endfilter %}",
+  addFarm: "{% filter escapejs %}{% trans 'Add a farm' %}{% endfilter %}", newBorder: "{% filter escapejs %}{% trans 'new border' %}{% endfilter %}",
+  edit: "{% filter escapejs %}{% trans 'Edit' %}{% endfilter %}", noCrop: "{% filter escapejs %}{% trans 'No crop yet' %}{% endfilter %}",
+  irrigated: "{% filter escapejs %}{% trans 'Irrigated' %}{% endfilter %}", rainfed: "{% filter escapejs %}{% trans 'Rain only' %}{% endfilter %}",
+  soilLoading: "{% filter escapejs %}{% trans 'Soil: loading' %}{% endfilter %}", soilNone: "{% filter escapejs %}{% trans 'Soil: no data' %}{% endfilter %}",
+  climate: "{% filter escapejs %}{% trans 'Climate' %}{% endfilter %}",
+  today: "{% filter escapejs %}{% trans 'Today' %}{% endfilter %}", rainWeek: "{% filter escapejs %}{% trans 'Rain this week' %}{% endfilter %}",
+  rainyDays: "{% filter escapejs %}{% trans 'rainy days' %}{% endfilter %}", drought: "{% filter escapejs %}{% trans 'Drought outlook' %}{% endfilter %}",
+  nextTask: "{% filter escapejs %}{% trans 'Next task' %}{% endfilter %}", chooseCrop: "{% filter escapejs %}{% trans 'Choose a crop' %}{% endfilter %}",
+  low: "{% filter escapejs %}{% trans 'Low' %}{% endfilter %}", medium: "{% filter escapejs %}{% trans 'Medium' %}{% endfilter %}", high: "{% filter escapejs %}{% trans 'High' %}{% endfilter %}",
+  chanceDry: "{% filter escapejs %}{% trans 'chance of drought next month' %}{% endfilter %}",
+  recsFor: "{% filter escapejs %}{% trans 'Recommendations for' %}{% endfilter %}",
+  bestNow: "{% filter escapejs %}{% trans 'Best crops to plant this month' %}{% endfilter %}",
+  noneNow: "{% filter escapejs %}{% trans 'No well-suited crop can be sown this month. Look at the list below for the next sowing windows.' %}{% endfilter %}",
+  allCrops: "{% filter escapejs %}{% trans 'All crops for your land' %}{% endfilter %}",
+  useCrop: "{% filter escapejs %}{% trans 'Grow this' %}{% endfilter %}", current: "{% filter escapejs %}{% trans 'Current crop' %}{% endfilter %}",
+  S1: "{% filter escapejs %}{% trans 'Excellent choice' %}{% endfilter %}", S2: "{% filter escapejs %}{% trans 'Good choice' %}{% endfilter %}",
+  S3: "{% filter escapejs %}{% trans 'Possible, with care' %}{% endfilter %}", N: "{% filter escapejs %}{% trans 'Not recommended' %}{% endfilter %}",
+  lim_water: "{% filter escapejs %}{% trans 'needs more water' %}{% endfilter %}", lim_temperature: "{% filter escapejs %}{% trans 'climate not ideal' %}{% endfilter %}",
+  lim_ph: "{% filter escapejs %}{% trans 'soil pH not ideal' %}{% endfilter %}", lim_texture: "{% filter escapejs %}{% trans 'soil type not ideal' %}{% endfilter %}",
+  lim_salinity: "{% filter escapejs %}{% trans 'salty soil' %}{% endfilter %}",
+  sowIn: "{% filter escapejs %}{% trans 'Sow in' %}{% endfilter %}", nextWindow: "{% filter escapejs %}{% trans 'Next sowing window' %}{% endfilter %}",
+  perennial: "{% filter escapejs %}{% trans 'Tree / perennial — plant in' %}{% endfilter %}",
+  rainCovers: "{% filter escapejs %}{% trans 'Rain covers most of its water need' %}{% endfilter %}",
+  irrigation: "{% filter escapejs %}{% trans 'Irrigation' %}{% endfilter %}", perSeason: "{% filter escapejs %}{% trans 'm³/ha per season' %}{% endfilter %}",
+  rainYield: "{% filter escapejs %}{% trans 'Expected harvest without irrigation' %}{% endfilter %}",
+  basis: "{% filter escapejs %}{% trans 'Based on your soil, the climate of' %}{% endfilter %}",
+  guidance: "{% filter escapejs %}{% trans 'This is guidance, not a guarantee.' %}{% endfilter %}",
+  planFor: "{% filter escapejs %}{% trans 'Plan for' %}{% endfilter %}", pickCrop: "{% filter escapejs %}{% trans '— choose a crop —' %}{% endfilter %}",
+  planEmpty: "{% filter escapejs %}{% trans 'Choose a crop to see its calendar, fertiliser and protection plan.' %}{% endfilter %}",
+  calendar: "{% filter escapejs %}{% trans 'Calendar — what to do and when' %}{% endfilter %}", nextTag: "{% filter escapejs %}{% trans 'NEXT' %}{% endfilter %}",
+  kStage: "{% filter escapejs %}{% trans 'Growth stage' %}{% endfilter %}", kFert: "{% filter escapejs %}{% trans 'Fertiliser' %}{% endfilter %}", kProt: "{% filter escapejs %}{% trans 'Watch for pests' %}{% endfilter %}",
+  fertilizer: "{% filter escapejs %}{% trans 'Fertiliser' %}{% endfilter %}", perHa: "{% filter escapejs %}{% trans 'kg per hectare per season' %}{% endfilter %}",
+  protection: "{% filter escapejs %}{% trans 'Pests, diseases and weeds' %}{% endfilter %}",
+  watch: "{% filter escapejs %}{% trans 'Watch for' %}{% endfilter %}", prevent: "{% filter escapejs %}{% trans 'Prevent' %}{% endfilter %}", treat: "{% filter escapejs %}{% trans 'Treat' %}{% endfilter %}",
+  allYear: "{% filter escapejs %}{% trans 'all year' %}{% endfilter %}", sowing: "{% filter escapejs %}{% trans 'Sowing' %}{% endfilter %}",
+  next7: "{% filter escapejs %}{% trans 'Next 7 days' %}{% endfilter %}", forecast16: "{% filter escapejs %}{% trans '16-day forecast' %}{% endfilter %}",
+  fieldAlerts: "{% filter escapejs %}{% trans 'Field alerts' %}{% endfilter %}", humidity: "{% filter escapejs %}{% trans 'Humidity' %}{% endfilter %}",
+  wind: "{% filter escapejs %}{% trans 'Wind' %}{% endfilter %}", rain: "{% filter escapejs %}{% trans 'Rain' %}{% endfilter %}", chance: "{% filter escapejs %}{% trans 'Chance' %}{% endfilter %}",
+  hello: "{% filter escapejs %}{% trans 'Hello! I am your farm assistant. Ask me what to plant, when to irrigate, how the drought looks, or about your crop.' %}{% endfilter %}",
+  askPlaceholder: "{% filter escapejs %}{% trans 'Ask a question about your farm…' %}{% endfilter %}",
+  chatCtx: "{% filter escapejs %}{% trans 'Answers use live data for' %}{% endfilter %}",
+  chatDown: "{% filter escapejs %}{% trans 'The assistant is unavailable right now.' %}{% endfilter %}",
+  risk: "{% filter escapejs %}{% trans 'drought risk' %}{% endfilter %}",
+  newFarm: "{% filter escapejs %}{% trans 'New farm' %}{% endfilter %}", editFarm: "{% filter escapejs %}{% trans 'Edit farm' %}{% endfilter %}",
+  farm: "{% filter escapejs %}{% trans 'Farm' %}{% endfilter %}", none: "{% filter escapejs %}{% trans '— none —' %}{% endfilter %}",
+  saved: "{% filter escapejs %}{% trans 'Farm saved' %}{% endfilter %}", deleted: "{% filter escapejs %}{% trans 'Farm deleted' %}{% endfilter %}",
+  confirmDelete: "{% filter escapejs %}{% trans 'Delete this farm and its data?' %}{% endfilter %}",
+  borderUpdated: "{% filter escapejs %}{% trans 'Border updated' %}{% endfilter %}", cropSet: "{% filter escapejs %}{% trans 'Crop saved to your farm' %}{% endfilter %}",
+  soilReady: "{% filter escapejs %}{% trans 'Soil data loaded for' %}{% endfilter %}",
+  needPoints: "{% filter escapejs %}{% trans 'Add at least three corners first.' %}{% endfilter %}",
+  noLocation: "{% filter escapejs %}{% trans 'Your position is not available.' %}{% endfilter %}",
+  chatNeedsFarm: "{% filter escapejs %}{% trans 'Draw your farm first, then ask the assistant about it.' %}{% endfilter %}",
+};
+</script>
+<script>
+(function () {
+  const CROPS = {{ crops_json|safe }};
+  const ASSISTANT_CROPS = new Set({{ assistant_crops_json|safe }});
+  const LANG = "{{ LANGUAGE_CODE|default:'en'|escapejs }}";
+  const EMOJI = { wheat:'🌾', barley:'🌾', oats:'🌾', faba_bean:'🫘', lentil:'🫘', garlic:'🧄', potato:'🥔', tomato:'🍅',
+                  pepper:'🌶️', alfalfa:'🌿', olive:'🫒', citrus:'🍊', date_palm:'🌴' };
+  CROPS.forEach(c => { c.name = (c.names && c.names[LANG]) || c.name; });
+  const CROP = Object.fromEntries(CROPS.map(c => [c.key, c]));
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const locale = { fr: 'fr-FR', ar: 'ar-TN' }[LANG] || 'en-GB';
+  const MONTHS = [...Array(12)].map((_, i) => new Date(2001, i, 1).toLocaleDateString(locale, { month: 'long' }));
+  const MON = [...Array(12)].map((_, i) => new Date(2001, i, 1).toLocaleDateString(locale, { month: 'short' }));
+  const fmtDate = iso => new Date(iso + 'T00:00:00').toLocaleDateString(locale, { day: 'numeric', month: 'short', year: 'numeric' });
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const cropEmoji = k => EMOJI[k] || '🌱';
+  const cropName = k => (CROP[k] && CROP[k].name) || k;
+  const CLS_COLOR = { S1: 'var(--s1)', S2: 'var(--s2)', S3: 'var(--s3)', N: 'var(--n)' };
+
+  let farms = [], current = null, tab = 'advice', pendingGeometry = null, editingId = null, irrigatedChoice = false;
+  const layers = {}, cache = {}, soilPolls = {};
+
+  // ---------------- helpers ----------------
+  async function api(url, opts = {}) {
+    const r = await fetch(url, Object.assign({ headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf } }, opts));
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || ('Error ' + r.status));
+    return d;
+  }
+  function cached(key, url) {
+    if (!cache[key]) cache[key] = api(url).catch(err => { delete cache[key]; throw err; });
+    return cache[key];
+  }
+  function dropCache(id) { Object.keys(cache).forEach(k => { if (k.startsWith(id + ':')) delete cache[k]; }); }
+  let toastTimer;
+  function toast(msg, isError) {
+    const t = $('toast');
+    t.className = 'toast show' + (isError ? ' error' : '');
+    t.innerHTML = `<span class="ms">${isError ? 'error' : 'check_circle'}</span>${esc(msg)}`;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = 'toast', 3200);
+  }
+  const skeleton = n => [...Array(n)].map(() => '<div class="sk" style="height:96px;margin-bottom:12px;"></div>').join('');
+  const failed = (el, err) => { el.innerHTML = `<div class="callout danger"><span class="ms">error</span><div>${esc(err.message)}</div></div>`; };
+
+  // ---------------- map ----------------
+  const map = L.map('map', { zoomControl: false, fadeAnimation: false }).setView([36.9, 9.8], 8);
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  const base = {
+    satellite: L.tileLayer('/api/tiles/{z}/{x}/{y}.png?layer=satellite', { maxZoom: 19, attribution: '&copy; Esri, Maxar, Earthstar Geographics' }),
+    map: L.tileLayer('/api/tiles/{z}/{x}/{y}.png?layer=map', { maxZoom: 19, attribution: '&copy; Esri, OpenStreetMap' }),
+  };
+  let baseName = 'satellite';
+  base.satellite.addTo(map);
+  $('btn-layer').onclick = () => { map.removeLayer(base[baseName]); baseName = baseName === 'satellite' ? 'map' : 'satellite'; base[baseName].addTo(map); };
+  $('btn-locate').onclick = () => map.locate({ setView: true, maxZoom: 16 });
+  map.on('locationerror', () => toast(T.noLocation, true));
+  $('btn-fit').onclick = fitAll;
+
+  const drawer = new L.Draw.Polygon(map, { allowIntersection: false, showArea: true, shapeOptions: { color: '#facc15', weight: 3, fillOpacity: .2 } });
+  function startDraw(forId) {
+    editingId = forId || null;
+    $('draw-banner').classList.add('on');
+    $('btn-draw').style.display = 'none';
+    drawer.enable();
+  }
+  function stopDrawUi() { $('draw-banner').classList.remove('on'); $('btn-draw').style.display = ''; }
+  $('btn-draw').onclick = () => startDraw(null);
+  $('draw-cancel').onclick = () => { drawer.disable(); editingId = null; stopDrawUi(); };
+  $('draw-undo').onclick = () => drawer.deleteLastVertex();
+  $('draw-finish').onclick = () => {
+    if (!drawer._markers || drawer._markers.length < 3) return toast(T.needPoints, true);
+    drawer.completeShape();
+  };
+  map.on(L.Draw.Event.DRAWSTOP, stopDrawUi);
+  map.on(L.Draw.Event.CREATED, async (e) => {
+    stopDrawUi();
+    const geometry = e.layer.toGeoJSON().geometry;
+    if (editingId) {
+      const id = editingId; editingId = null;
+      try {
+        const d = await api('/farmer/api/farms/' + id + '/', { method: 'PATCH', body: JSON.stringify({ boundary: geometry }) });
+        upsertFarm(d.farm); select(d.farm.id, true); toast(T.borderUpdated);
+      } catch (err) { toast(err.message, true); }
+      return;
+    }
+    pendingGeometry = geometry;
+    openModal(null);
+  });
+
+  function drawFarm(f) {
+    if (layers[f.id]) map.removeLayer(layers[f.id]);
+    const active = current && current.id === f.id;
+    layers[f.id] = L.geoJSON(f.boundary, { style: { color: active ? '#facc15' : '#ffffff', weight: active ? 3 : 2, dashArray: active ? null : '6 4',
+                                                    fillColor: active ? '#facc15' : '#4ade80', fillOpacity: active ? .22 : .12 } })
+      .bindTooltip(`${cropEmoji(f.crop)} ${esc(f.name)} · ${f.area_ha} ha`, { permanent: active, direction: 'center', className: 'farm-label' })
+      .on('click', () => select(f.id))
+      .addTo(map);
+  }
+  function fitAll() {
+    const ls = Object.values(layers);
+    if (ls.length) map.fitBounds(L.featureGroup(ls).getBounds(), { padding: [30, 30], maxZoom: 16 });
+  }
+
+  // ---------------- farm switcher ----------------
+  function renderFarms() {
+    const box = $('farms');
+    box.innerHTML = farms.map(f => `
+      <button class="farm-card ${current && current.id === f.id ? 'active' : ''}" data-id="${f.id}">
+        <span class="emoji">${cropEmoji(f.crop)}</span>
+        <span><b>${esc(f.name)}</b><small>${f.area_ha} ha · ${esc(f.crop ? cropName(f.crop) : T.noCrop)}</small></span>
+      </button>`).join('') +
+      `<button class="farm-card add" id="add-farm"><span class="emoji"><span class="ms">add</span></span><span><b>${esc(T.addFarm)}</b><small>${esc(T.newBorder)}</small></span></button>`;
+    box.querySelectorAll('[data-id]').forEach(b => b.onclick = () => select(+b.dataset.id, true));
+    $('add-farm').onclick = () => startDraw(null);
+    farms.forEach(drawFarm);
+  }
+  function upsertFarm(f) {
+    const i = farms.findIndex(x => x.id === f.id);
+    if (i >= 0) farms[i] = f; else farms.push(f);
+    if (current && current.id === f.id) current = f;
+    dropCache(f.id);
+  }
+  async function loadFarms() {
+    farms = (await api('/farmer/api/farms/')).farms;
+    renderFarms();
+    if (farms.length) { fitAll(); select(farms[0].id); } else renderEmpty();
+  }
+
+  function select(id, zoom) {
+    current = farms.find(f => f.id === id) || null;
+    renderFarms();
+    if (!current) return renderEmpty();
+    if (!current.soil) pollSoil(current.id);
+    if (zoom && layers[id]) map.fitBounds(layers[id].getBounds(), { padding: [40, 40], maxZoom: 17 });
+    $('tabs').style.display = '';
+    renderHero();
+    showTab(tab);
+  }
+
+  function pollSoil(id) {
+    if ((soilPolls[id] || 0) >= 4) return;
+    soilPolls[id] = (soilPolls[id] || 0) + 1;
+    setTimeout(async () => {
+      try {
+        const d = await api('/farmer/api/farms/' + id + '/');
+        if (d.farm.soil) {
+          upsertFarm(d.farm);
+          if (!d.farm.soil.unavailable) toast(T.soilReady + ' ' + d.farm.name);
+          if (current && current.id === id) { renderHero(); showTab(tab); }
+        } else pollSoil(id);
+      } catch (err) {}
+    }, 20000);
+  }
+
+  // ---------------- empty / onboarding ----------------
+  function renderEmpty() {
+    $('hero').innerHTML = '';
+    $('tabs').style.display = 'none';
+    $('tab-body').innerHTML = `<div class="onboard">
+      <div style="font-size:52px;">🌱</div>
+      <h2>${esc(T.noFarmTitle)}</h2><p>${esc(T.noFarmText)}</p>
+      <div class="steps">
+        <div class="step"><div class="num">1</div><b>${esc(T.step1)}</b><span>${esc(T.step1t)}</span></div>
+        <div class="step"><div class="num">2</div><b>${esc(T.step2)}</b><span>${esc(T.step2t)}</span></div>
+        <div class="step"><div class="num">3</div><b>${esc(T.step3)}</b><span>${esc(T.step3t)}</span></div>
+      </div>
+      <button class="btn big" id="ob-draw"><span class="ms">draw</span>${esc(T.startDrawing)}</button></div>`;
+    $('ob-draw').onclick = () => { startDraw(null); document.getElementById('map').scrollIntoView({ behavior: 'smooth' }); };
+  }
+
+  // ---------------- hero + today at a glance ----------------
+  function renderHero() {
+    const f = current;
+    const soil = !f.soil ? T.soilLoading : f.soil.unavailable ? T.soilNone : `pH ${(+f.soil.ph).toFixed(1)} · ${Math.round(f.soil.clay)}% clay`;
+    $('hero').innerHTML = `
+      <div class="hero">
+        <div class="emoji">${cropEmoji(f.crop)}</div>
+        <div style="flex:1;min-width:0;">
+          <h1>${esc(f.name)}</h1>
+          <div class="chips">
+            <span class="chip"><span class="ms">straighten</span>${f.area_ha} ha</span>
+            <span class="chip"><span class="ms">spa</span>${esc(f.crop ? cropName(f.crop) : T.noCrop)}</span>
+            <span class="chip"><span class="ms">${f.irrigated ? 'water_drop' : 'rainy'}</span>${esc(f.irrigated ? T.irrigated : T.rainfed)}</span>
+            <span class="chip"><span class="ms">landslide</span>${esc(soil)}</span>
+            <span class="chip"><span class="ms">thermostat</span>${esc(T.climate)}: ${esc(f.region || '—')}</span>
+          </div>
+        </div>
+        <button class="btn light" id="btn-edit"><span class="ms">edit</span>${esc(T.edit)}</button>
+      </div>
+      <div class="glance" id="glance">${[0, 1, 2, 3].map(() => '<div class="tile sk"></div>').join('')}</div>`;
+    $('btn-edit').onclick = () => openModal(current);
+    renderGlance(f);
+  }
+
+  async function renderGlance(f) {
+    const month = new Date().getMonth() + 1;
+    const [wx, adv, plan] = await Promise.all([
+      cached(f.id + ':weather', `/farmer/api/farms/${f.id}/weather/`).catch(() => null),
+      cached(f.id + ':advice:' + month, `/farmer/api/farms/${f.id}/advice/?month=${month}`).catch(() => null),
+      f.crop ? cached(f.id + ':plan:' + f.crop, `/farmer/api/farms/${f.id}/crop-plan/?crop=${f.crop}`).catch(() => null) : null,
+    ]);
+    if (!current || current.id !== f.id || !$('glance')) return;
+    const tiles = [];
+    const days = wx && wx.forecast && !wx.forecast.error ? wx.forecast.days || [] : [];
+    const d0 = days[0];
+    tiles.push(d0 ? `<div class="tile clickable" data-go="weather"><span class="lbl"><span class="ms" style="font-size:15px">today</span>${esc(T.today)}</span>
+        <span class="val"><span class="ms" style="color:${esc(d0.condition.color)};font-size:26px">${esc(d0.condition.icon)}</span>${d0.tmax ?? '—'}°<small style="font-size:13px;color:var(--subtle)">/${d0.tmin ?? '—'}°</small></span>
+        <span class="sub">${esc(d0.condition.label)}</span></div>` : `<div class="tile"><span class="lbl">${esc(T.today)}</span><span class="val">—</span></div>`);
+    const s = wx && wx.forecast && wx.forecast.summary;
+    tiles.push(`<div class="tile clickable" data-go="weather"><span class="lbl"><span class="ms" style="font-size:15px">rainy</span>${esc(T.rainWeek)}</span>
+        <span class="val">${s ? s.total_rain_mm + ' mm' : '—'}</span><span class="sub">${s ? s.rain_days + ' ' + esc(T.rainyDays) : ''}</span></div>`);
+    const o = adv && adv.drought_outlook_t1;
+    if (o && o.prob_drought != null) {
+      const p = Math.round(o.prob_drought * 100);
+      const [lvl, col] = p >= 55 ? [T.high, 'var(--n)'] : p >= 35 ? [T.medium, 'var(--s3)'] : [T.low, 'var(--s1)'];
+      tiles.push(`<div class="tile"><span class="lbl"><span class="ms" style="font-size:15px">water_loss</span>${esc(T.drought)}</span>
+        <span class="val" style="color:${col}">${esc(lvl)}</span><span class="sub">${p}% ${esc(T.chanceDry)}</span></div>`);
+    } else tiles.push(`<div class="tile"><span class="lbl">${esc(T.drought)}</span><span class="val">—</span></div>`);
+    const next = plan && plan.calendar.events.find(e => e.date >= todayIso);
+    tiles.push(next ? `<div class="tile clickable" data-go="plan"><span class="lbl"><span class="ms" style="font-size:15px">task_alt</span>${esc(T.nextTask)}</span>
+        <span class="val" style="font-size:16px">${fmtDate(next.date)}</span><span class="sub" title="${esc(next.title)}">${esc(next.title)}</span></div>`
+      : `<div class="tile clickable" data-go="advice"><span class="lbl"><span class="ms" style="font-size:15px">task_alt</span>${esc(T.nextTask)}</span>
+        <span class="val" style="font-size:16px">${esc(T.chooseCrop)}</span><span class="sub">🌱</span></div>`);
+    $('glance').innerHTML = tiles.join('');
+    $('glance').querySelectorAll('[data-go]').forEach(t => t.onclick = () => showTab(t.dataset.go));
+  }
+
+  // ---------------- modal ----------------
+  $('f-crop').innerHTML = `<option value="">${esc(T.none)}</option>` + CROPS.map(c => `<option value="${c.key}">${cropEmoji(c.key)}  ${esc(c.name)}</option>`).join('');
+  function setIrrigated(v) {
+    irrigatedChoice = v;
+    $('f-water-seg').querySelectorAll('button').forEach(b => b.classList.toggle('on', (b.dataset.v === '1') === v));
+    $('f-water-box').style.display = v ? '' : 'none';
+  }
+  $('f-water-seg').querySelectorAll('button').forEach(b => b.onclick = () => setIrrigated(b.dataset.v === '1'));
+  function openModal(farm) {
+    $('modal-title').textContent = farm ? T.editFarm : T.newFarm;
+    $('f-name').value = farm ? farm.name : T.farm + ' ' + (farms.length + 1);
+    $('f-crop').value = farm && farm.crop ? farm.crop : '';
+    $('f-sowing').value = farm && farm.sowing_date ? farm.sowing_date : '';
+    setIrrigated(!!(farm && farm.irrigated));
+    $('f-water').value = farm && farm.water_supply_mm != null ? farm.water_supply_mm : '';
+    $('f-delete').style.display = farm ? '' : 'none';
+    $('f-redraw').style.display = farm ? '' : 'none';
+    $('f-err').textContent = '';
+    $('farm-modal').dataset.farmId = farm ? farm.id : '';
+    $('farm-modal').classList.add('open');
+    setTimeout(() => $('f-name').focus(), 50);
+  }
+  function closeModal() { $('farm-modal').classList.remove('open'); pendingGeometry = null; }
+  $('f-cancel').onclick = closeModal; $('f-close').onclick = closeModal;
+  $('farm-modal').addEventListener('click', e => { if (e.target.id === 'farm-modal') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('farm-modal').classList.contains('open')) closeModal(); });
+  $('f-redraw').onclick = () => { const id = +$('farm-modal').dataset.farmId; closeModal(); startDraw(id); };
+  $('f-delete').onclick = async () => {
+    const id = +$('farm-modal').dataset.farmId;
+    if (!confirm(T.confirmDelete)) return;
+    try { await api('/farmer/api/farms/' + id + '/', { method: 'DELETE' }); } catch (err) { $('f-err').textContent = err.message; return; }
+    if (layers[id]) map.removeLayer(layers[id]); delete layers[id];
+    farms = farms.filter(f => f.id !== id); dropCache(id); closeModal(); toast(T.deleted);
+    current = null; farms.length ? select(farms[0].id) : (renderFarms(), renderEmpty());
+  };
+  $('f-save').onclick = async () => {
+    const id = $('farm-modal').dataset.farmId;
+    const body = { name: $('f-name').value, crop: $('f-crop').value, sowing_date: $('f-sowing').value || null,
+                   irrigated: irrigatedChoice, water_supply_mm: irrigatedChoice ? ($('f-water').value || null) : null };
+    if (!id) body.boundary = pendingGeometry;
+    $('f-save').disabled = true; $('f-err').textContent = '';
+    try {
+      const d = id ? await api('/farmer/api/farms/' + id + '/', { method: 'PATCH', body: JSON.stringify(body) })
+                   : await api('/farmer/api/farms/', { method: 'POST', body: JSON.stringify(body) });
+      upsertFarm(d.farm); closeModal(); select(d.farm.id, true); toast(T.saved);
+    } catch (err) { $('f-err').textContent = err.message; }
+    $('f-save').disabled = false;
+  };
+
+  // ---------------- tabs ----------------
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => showTab(t.dataset.tab));
+  function showTab(name) {
+    tab = name;
+    document.querySelectorAll('.tab').forEach(t => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+    $('ai-fab').classList.toggle('hidden', name === 'chat' && !!current);
+    if (!current) return renderEmpty();
+    ({ advice: renderAdvice, plan: renderPlan, weather: renderWeather, chat: renderChat })[name]($('tab-body'));
+  }
+
+  // ---- What to plant ----
+  async function renderAdvice(el, month) {
+    month = month || (new Date().getMonth() + 1);
+    el.innerHTML = skeleton(3);
+    const f = current;
+    let d;
+    try { d = await cached(f.id + ':advice:' + month, `/farmer/api/farms/${f.id}/advice/?month=${month}`); }
+    catch (err) { return failed(el, err); }
+    if (tab !== 'advice' || current !== f) return;
+
+    const when = r => r.perennial ? `${T.perennial} ${CROP[r.crop].planting_months.map(m => MON[m - 1]).join(', ')}`
+      : r.plantable_now ? `${T.sowIn} ${MONTHS[r.sow_month - 1]}` : `${T.nextWindow}: ${MONTHS[(r.next_planting_month || r.sow_month) - 1]}`;
+    const water = r => (d.mode === 'irrigated' || r.factors.water < 0.9)
+      ? `${T.irrigation} ≈ ${r.water_balance.gross_irrigation_m3_per_ha.toLocaleString(locale)} ${T.perSeason}` : T.rainCovers;
+    // A factor at 0.99 is not worth a warning; only name limits that cost >5%.
+    const limit = r => r.limiting_factor && r.factors[r.limiting_factor] < 0.95 ? (T['lim_' + r.limiting_factor] || r.limiting_factor) : '';
+    const card = (r, top) => `
+      <div class="rec ${top ? 'best' : ''}">
+        <div class="rec-head"><span class="emoji">${cropEmoji(r.crop)}</span>
+          <div><b>${esc(cropName(r.crop))}</b><span class="badge b-${r.class}">${esc(T[r.class])}</span></div>
+          <div class="ring" style="--p:${Math.max(2, r.score)};--c:${CLS_COLOR[r.class]}"><span>${Math.round(r.score)}</span></div></div>
+        <div class="facts">
+          <div><span class="ms">event</span>${esc(when(r))}</div>
+          <div><span class="ms">water_drop</span>${esc(water(r))}</div>
+          ${d.mode === 'rainfed' ? `<div><span class="ms">agriculture</span>${esc(T.rainYield)}: ${Math.round(r.water_balance.rainfed_relative_yield * 100)}%</div>` : ''}
+          ${limit(r) ? `<div><span class="ms" style="color:var(--s3)">info</span>${esc(limit(r))}</div>` : ''}
+        </div>
+        ${current.crop === r.crop ? `<span class="badge b-S1"><span class="ms" style="font-size:14px">check</span>${esc(T.current)}</span>`
+          : `<button class="btn light" data-use="${r.crop}" data-sow="${r.sow_month || ''}"><span class="ms">add_task</span>${esc(T.useCrop)}</button>`}
+      </div>`;
+    const row = r => `
+      <div class="row"><span class="emoji">${cropEmoji(r.crop)}</span>
+        <div><b>${esc(cropName(r.crop))}</b><div class="muted">${esc(when(r))}</div></div>
+        <div class="why muted">${esc(limit(r) || T[r.class])}</div>
+        <div><div class="meter"><i style="width:${Math.max(2, r.score)}%;background:${CLS_COLOR[r.class]}"></i></div>
+          <div class="muted" style="text-align:right;margin-top:3px;"><b style="color:${CLS_COLOR[r.class]}">${Math.round(r.score)}</b>/100</div></div>
+      </div>`;
+    const opts = MONTHS.map((m, i) => `<option value="${i + 1}" ${i + 1 === month ? 'selected' : ''}>${esc(m)}</option>`).join('');
+    el.innerHTML = `
+      <div class="toolbar"><span class="hl" style="font-weight:700">${esc(T.recsFor)}</span>
+        <select class="input" id="adv-month">${opts}</select>
+        <span class="chip"><span class="ms">${d.mode === 'irrigated' ? 'water_drop' : 'rainy'}</span>${esc(d.mode === 'irrigated' ? T.irrigated : T.rainfed)}</span></div>
+      ${d.notes.map(n => `<div class="callout info"><span class="ms">info</span><div>${esc(n)}</div></div>`).join('')}
+      <div class="section"><h2 class="section-h"><span class="ms fill">star</span>${esc(T.bestNow)}</h2>
+        ${d.plant_now.length ? `<div class="rec-grid">${d.plant_now.slice(0, 6).map((r, i) => card(r, i === 0)).join('')}</div>`
+          : `<div class="callout warning"><span class="ms">event_busy</span><div>${esc(T.noneNow)}</div></div>`}</div>
+      <div class="section"><h2 class="section-h"><span class="ms">format_list_numbered</span>${esc(T.allCrops)}</h2>
+        <div class="rows">${d.ranking.map(row).join('')}</div></div>
+      <p class="muted">${esc(T.basis)} ${esc(d.climate_region)} (${esc(d.climate_period)}) · FAO-56. ${esc(T.guidance)}</p>`;
+    $('adv-month').onchange = e => renderAdvice(el, +e.target.value);
+    el.querySelectorAll('[data-use]').forEach(b => b.onclick = () => useCrop(b.dataset.use, +b.dataset.sow));
+  }
+
+  async function useCrop(crop, sowMonth) {
+    let sowing = null;
+    if (sowMonth) {
+      const t = new Date(); let y = t.getFullYear();
+      if (sowMonth < t.getMonth() + 1) y += 1;
+      sowing = `${y}-${String(sowMonth).padStart(2, '0')}-15`;
+    }
+    try {
+      const d = await api('/farmer/api/farms/' + current.id + '/', { method: 'PATCH', body: JSON.stringify({ crop, sowing_date: sowing }) });
+      upsertFarm(d.farm); renderFarms(); renderHero(); toast(T.cropSet); showTab('plan');
+    } catch (err) { toast(err.message, true); }
+  }
+
+  // ---- Crop plan ----
+  async function renderPlan(el, crop) {
+    crop = crop || current.crop;
+    const picker = `<select class="input" id="plan-crop"><option value="">${esc(T.pickCrop)}</option>${CROPS.map(c =>
+      `<option value="${c.key}" ${c.key === crop ? 'selected' : ''}>${cropEmoji(c.key)}  ${esc(c.name)}</option>`).join('')}</select>`;
+    const bind = () => { const s = $('plan-crop'); if (s) s.onchange = e => renderPlan(el, e.target.value); };
+    if (!crop) {
+      el.innerHTML = `<div class="toolbar"><span class="hl" style="font-weight:700">${esc(T.planFor)}</span>${picker}</div>
+        <div class="onboard"><div style="font-size:44px;">🗓️</div><p>${esc(T.planEmpty)}</p></div>`;
+      return bind();
+    }
+    el.innerHTML = skeleton(4);
+    const f = current;
+    let d;
+    try { d = await cached(f.id + ':plan:' + crop, `/farmer/api/farms/${f.id}/crop-plan/?crop=${crop}`); }
+    catch (err) { return failed(el, err); }
+    if (tab !== 'plan' || current !== f) return;
+
+    const nextIdx = d.calendar.events.findIndex(e => e.date >= todayIso);
+    const icon = { stage: 'spa', fertilizer: 'science', protection: 'bug_report' };
+    const timeline = d.calendar.events.map((e, i) => `
+      <div class="ev k-${e.kind} ${e.date < todayIso ? 'past' : ''} ${i === nextIdx ? 'next' : ''}">
+        <span class="dot"><span class="ms">${icon[e.kind]}</span></span>
+        <div class="when">${fmtDate(e.date)}${i === nextIdx ? `<span class="next-tag">${esc(T.nextTag)}</span>` : ''}</div>
+        <div class="what">${esc(e.title)}</div>${e.detail ? `<div class="detail">${esc(e.detail)}</div>` : ''}
+      </div>`).join('');
+    const fz = d.fertilizer;
+    const nutrients = fz ? Object.entries(fz.totals).map(([k, v]) =>
+      `<div class="nutrient"><div class="el">${esc(k)}</div><div class="amt">${v[0]}–${v[1]} ${esc(T.perHa)}</div></div>`).join('') : '';
+    const apps = fz ? fz.schedule.map((s, i) => `<div class="app"><span class="n">${i + 1}</span>
+      <div><b>${esc(s.stage)}</b><span>${esc(s.product)} — ${esc(s.rate)}</span></div></div>`).join('') : '';
+    const tIcon = { pest: 'pest_control', disease: 'coronavirus', weeds: 'grass' };
+    const threats = d.protection.map((p, i) => `
+      <details class="threat" ${i === 0 ? 'open' : ''}>
+        <summary><span class="t-icon t-${p.type}"><span class="ms">${tIcon[p.type] || 'bug_report'}</span></span>
+          <div><div class="t-name">${esc(p.name)}</div><div class="t-when">${p.months.length === 12 ? esc(T.allYear) : p.months.map(m => MON[m - 1]).join(' · ')}</div></div>
+          <span class="ms chev">expand_more</span></summary>
+        <div class="t-body">
+          <div class="w"><span class="ms">visibility</span><div><b>${esc(T.watch)}:</b> ${esc(p.watch)}</div></div>
+          <div class="p"><span class="ms">shield</span><div><b>${esc(T.prevent)}:</b> ${esc(p.prevent)}</div></div>
+          <div class="c"><span class="ms">medication</span><div><b>${esc(T.treat)}:</b> ${esc(p.control)}</div></div>
+        </div></details>`).join('');
+
+    el.innerHTML = `
+      <div class="toolbar"><span class="hl" style="font-weight:700">${esc(T.planFor)}</span>${picker}
+        ${d.calendar.sowing_date ? `<span class="chip"><span class="ms">event</span>${esc(T.sowing)} ${fmtDate(d.calendar.sowing_date)}</span>` : ''}</div>
+      <div class="section"><h2 class="section-h"><span class="ms">calendar_month</span>${esc(T.calendar)}</h2>
+        <div class="legend"><span><i style="background:var(--leaf)"></i>${esc(T.kStage)}</span><span><i style="background:#7c3aed"></i>${esc(T.kFert)}</span><span><i style="background:#c2410c"></i>${esc(T.kProt)}</span></div>
+        <div class="timeline">${timeline}</div></div>
+      <div class="section"><h2 class="section-h"><span class="ms">science</span>${esc(T.fertilizer)}</h2>
+        <div class="nutrients">${nutrients}</div>
+        <div class="apps">${apps}</div>
+        ${fz && fz.note ? `<p class="muted" style="margin:10px 0">${esc(fz.note)}</p>` : ''}
+        <div class="callout info"><span class="ms">lab_profile</span><div>${esc(d.fertilizer_notice)}</div></div></div>
+      <div class="section"><h2 class="section-h"><span class="ms">bug_report</span>${esc(T.protection)}</h2>
+        ${threats}
+        <div class="callout warning"><span class="ms">health_and_safety</span><div>${esc(d.protection_notice)}</div></div></div>`;
+    bind();
+  }
+
+  // ---- Weather ----
+  async function renderWeather(el) {
+    el.innerHTML = '<div class="sk" style="height:130px;margin-bottom:14px;"></div>' + skeleton(2);
+    const f = current;
+    let d;
+    try { d = await cached(f.id + ':weather', `/farmer/api/farms/${f.id}/weather/`); }
+    catch (err) { return failed(el, err); }
+    if (tab !== 'weather' || current !== f) return;
+    const fc = d.forecast || {};
+    if (fc.error) { el.innerHTML = `<div class="callout warning"><span class="ms">cloud_off</span><div>${esc(fc.error)}</div></div>`; return; }
+    const days = fc.days || [], s = fc.summary || {}, t0 = days[0] || {};
+    const maxRain = Math.max(5, ...days.map(x => x.precip || 0));
+    el.innerHTML = `
+      <div class="wx-today">
+        <span class="ms big" style="color:#fde68a">${esc((t0.condition || {}).icon || 'cloud')}</span>
+        <div><div class="t">${t0.tmax ?? '—'}° <span style="font-size:22px;opacity:.7">/ ${t0.tmin ?? '—'}°</span></div>
+          <div class="c">${esc(T.today)} · ${esc((t0.condition || {}).label || '')}</div></div>
+        <div class="wx-stats">
+          <div><span>${esc(T.rain)}</span><b>${t0.precip ?? 0} mm</b></div><div><span>${esc(T.chance)}</span><b>${t0.precip_prob ?? '—'}%</b></div>
+          <div><span>${esc(T.wind)}</span><b>${t0.wind ?? '—'} km/h</b></div><div><span>${esc(T.humidity)}</span><b>${t0.humidity ?? '—'}%</b></div>
+        </div>
+      </div>
+      <div class="section"><h2 class="section-h"><span class="ms">notifications_active</span>${esc(T.fieldAlerts)}</h2>
+        ${d.alerts.map(a => `<div class="callout ${esc(a.level)}"><span class="ms">${esc(a.icon)}</span><div><b>${esc(a.title)}</b>${esc(a.text)}</div></div>`).join('')}</div>
+      <div class="section"><h2 class="section-h"><span class="ms">date_range</span>${esc(T.forecast16)}
+          <span class="aside">${esc(T.next7)}: ${s.total_rain_mm ?? 0} mm · ${s.min_temp_c ?? '—'}°–${s.max_temp_c ?? '—'}°</span></h2>
+        <div class="wx-days">${days.map((x, i) => `
+          <div class="wx-day ${i === 0 ? 'today' : ''}">
+            <span class="d">${esc(i === 0 ? T.today : x.label)}</span>
+            <span class="ms" style="color:${esc(x.condition.color)}" title="${esc(x.condition.label)}">${esc(x.condition.icon)}</span>
+            <span class="tt">${x.tmax ?? '—'}° <small>${x.tmin ?? '—'}°</small></span>
+            <div class="rainbar"><i style="height:${Math.round(((x.precip || 0) / maxRain) * 100)}%"></i></div>
+            <span class="r">${x.precip ?? 0} mm${x.precip_prob != null ? ' · ' + x.precip_prob + '%' : ''}</span>
+          </div>`).join('')}</div>
+        <p class="muted"><a href="${esc(fc.attribution_url)}" target="_blank" rel="noopener">${esc(fc.attribution)}</a></p></div>`;
+  }
+
+  // ---- Assistant (same AgroAI brain as the dashboard) ----
+  const chatState = {};
+  function renderChat(el) {
+    const f = current;
+    const st = chatState[f.id] = chatState[f.id] || { msgs: [], history: [], lang: ['fr', 'ar'].includes(LANG) ? LANG : 'en' };
+    const crop = f.crop && ASSISTANT_CROPS.has(f.crop) ? f.crop : null;
+    el.innerHTML = `<div class="chat-wrap">
+      <div class="ai-head">
+        <span class="ai-avatar"><span class="ms">psychology</span><span class="ai-ping"><i></i><b></b></span></span>
+        <div><div class="ai-title">AI Agronomist <span class="ai-live">Live</span></div><div class="ai-sub">Analyse &amp; Diagnostic</div></div>
+        <select id="chat-lang" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ar">العربية</option></select>
+      </div>
+      <div class="chat-ctx"><span class="ms" style="color:var(--leaf)">location_on</span>
+        <span style="flex:1">${esc(T.chatCtx)} <b>${esc(f.region || '—')}</b>${crop ? ' · ' + cropEmoji(crop) + ' ' + esc(cropName(crop)) : ''}</span></div>
+      <div class="chat" id="chat" aria-live="polite"></div>
+      <div class="suggest" id="chat-chips"></div>
+      <form class="composer" id="chat-form"><input type="text" id="chat-q" placeholder="${esc(T.askPlaceholder)}" autocomplete="off">
+        <button class="btn" type="submit" aria-label="Send"><span class="ms">send</span></button></form></div>`;
+    $('chat-lang').value = st.lang;
+    const box = $('chat');
+    const add = (text, who, meta) => {
+      const row = document.createElement('div');
+      row.className = 'bubble-row ' + who;
+      if (who === 'bot') row.innerHTML = '<span class="bot-av"><span class="ms">psychology</span></span>';
+      const b = document.createElement('div'); b.className = 'bubble';
+      if (text === null) b.innerHTML = '<span class="typing"><i></i><i></i><i></i></span>';
+      else { b.textContent = text; if (/[؀-ۿ]/.test(text)) b.dir = 'rtl'; }
+      if (meta) { const m = document.createElement('span'); m.className = 'meta'; m.textContent = meta; b.appendChild(m); }
+      row.appendChild(b); box.appendChild(row); box.scrollTop = box.scrollHeight; return row;
+    };
+    add(T.hello, 'bot');
+    st.msgs.forEach(m => add(m.text, m.who, m.meta));
+    const chips = list => {
+      const c = $('chat-chips'); if (!c) return; c.innerHTML = '';
+      (list || []).slice(0, 6).forEach(s => { const x = document.createElement('button'); x.type = 'button'; x.textContent = s;
+        x.onclick = () => { $('chat-q').value = s; $('chat-form').requestSubmit(); }; c.appendChild(x); });
+    };
+    const loadChips = () => fetch('/assistant/chat/?lang=' + st.lang).then(r => r.json()).then(d => chips(d.suggestions)).catch(() => {});
+    loadChips();
+    $('chat-lang').onchange = e => { st.lang = e.target.value; loadChips(); };
+    $('chat-form').onsubmit = async e => {
+      e.preventDefault();
+      const q = $('chat-q').value.trim(); if (!q) return;
+      $('chat-q').value = '';
+      add(q, 'user'); st.msgs.push({ text: q, who: 'user' }); st.history.push({ role: 'user', content: q });
+      const wait = add(null, 'bot');
+      try {
+        const d = await api('/assistant/chat/', { method: 'POST', body: JSON.stringify({
+          question: q, lang: st.lang, region_id: f.region_id, crop,
+          history: st.history.slice(-8), conversation: { crop, region_name: f.region } }) });
+        wait.remove();
+        const meta = d.facts && d.facts.risk_score != null ? `${d.region} · ${T.risk} ${d.facts.risk_score}/100` : '';
+        add(d.answer || '—', 'bot', meta);
+        st.msgs.push({ text: d.answer, who: 'bot', meta }); st.history.push({ role: 'assistant', content: d.answer });
+        st.msgs = st.msgs.slice(-40); st.history = st.history.slice(-16);
+        if (d.suggestions) chips(d.suggestions);
+      } catch (err) { wait.remove(); add(T.chatDown + ' (' + err.message + ')', 'bot'); }
+    };
+  }
+
+  $('ai-fab').onclick = () => {
+    if (!current) { toast(T.chatNeedsFarm); return startDraw(null); }
+    showTab('chat');
+    $('right').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { const q = $('chat-q'); if (q) q.focus(); }, 300);
+  };
+
+  loadFarms().catch(err => toast(err.message, true));
+})();
+</script>
+</body>
+</html>

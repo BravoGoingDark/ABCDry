@@ -33,12 +33,15 @@ from .auth_views import (
     landing_view,
     login_view,
     logout_view,
+    signup_view,
 )
 
 from .admin_views import (
     admin_panel,
     admin_edit_user,
     admin_delete_user,
+    admin_confirm_user,
+    admin_farms,
 )
 
 from .ingestion_views import (
@@ -57,6 +60,7 @@ from .analytics_views import (
     resolve_region_api,
     chart_data_api,
     historical_view,
+    historical_observations_api,
     historical_export_excel,
     metrics_browser,
     edit_metric_entry,
@@ -78,7 +82,6 @@ from .analytics_views import (
 )
 
 from .prediction_views import (
-    parameter_review,
     analysis_results,
     analysis_export_csv,
     calculations_view,
@@ -86,7 +89,11 @@ from .prediction_views import (
     calculations_data,
     drought_prediction_api,
     spei_forecast_api,
+    drought_grid_api,
+    crop_recommendation_api,
     spei_outlook_view,
+    weather_forecast_api,
+    planting_calendar_view,
     assistant_page_view,
     assistant_chat_api,
 )
@@ -96,6 +103,9 @@ from .map_tiles import (
 )
 
 from .sensor_views import (
+    sensor_network_view,
+    sensor_telemetry_api,
+    smartfarm_probe_api,
     sensor_ingest_api,
     sensor_list_api,
     sensor_history_api,
@@ -135,9 +145,12 @@ __all__ = [
     'landing_view',
     'login_view',
     'logout_view',
+    'signup_view',
     'admin_panel',
     'admin_edit_user',
     'admin_delete_user',
+    'admin_confirm_user',
+    'admin_farms',
     'data_ingestion',
     'api_submit_metrics',
     'import_excel_metrics',
@@ -167,7 +180,6 @@ __all__ = [
     'add_agricultural_metrics',
     'add_remote_sensing_metrics',
     'add_hydrology_metrics',
-    'parameter_review',
     'analysis_results',
     'analysis_export_csv',
     'calculations_view',
@@ -175,7 +187,11 @@ __all__ = [
     'calculations_data',
     'drought_prediction_api',
     'spei_forecast_api',
+    'drought_grid_api',
+    'crop_recommendation_api',
     'spei_outlook_view',
+    'weather_forecast_api',
+    'planting_calendar_view',
     'assistant_page_view',
     'assistant_chat_api',
     'resolve_region_api',

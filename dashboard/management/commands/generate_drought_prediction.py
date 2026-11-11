@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
 
 from dashboard.models import ObservationYear, Region
 from dashboard.prediction_engine.pipeline import DroughtPredictionPipeline
@@ -9,6 +10,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--region-id', type=int, help='Region primary key')
+        parser.add_argument('--region-name', help='Region name, e.g. Ichkeul')
         parser.add_argument('--year-id', type=int, help='Observation year primary key')
         parser.add_argument('--use-llm', action='store_true', help='Use Ollama explanation if available')
         parser.add_argument('--refresh', action='store_true', help='Force regeneration even if a cached prediction exists')
@@ -20,13 +22,17 @@ class Command(BaseCommand):
 
         if options['region_id']:
             region = Region.objects.filter(pk=options['region_id']).first()
+        elif options['region_name']:
+            region = Region.objects.filter(name__iexact=options['region_name']).first()
         else:
             region = Region.objects.order_by('name').first()
 
         if options['year_id']:
             year = ObservationYear.objects.filter(pk=options['year_id']).first()
         else:
-            year = ObservationYear.objects.order_by('-label').first()
+            # The current calendar year (labels can run ahead, e.g. a "2027" row).
+            year = (ObservationYear.objects.filter(label=str(timezone.localdate().year)).first()
+                    or ObservationYear.objects.order_by('-label').first())
 
         if region is None or year is None:
             raise CommandError('A valid region and year are required.')

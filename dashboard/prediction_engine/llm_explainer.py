@@ -2,7 +2,7 @@ import requests
 
 
 class DroughtLLMExplainer:
-    def __init__(self, ollama_url='http://localhost:11434', model_name='llama3.2:3b'):
+    def __init__(self, ollama_url='http://127.0.0.1:11434', model_name='llama3.2:3b'):
         self.ollama_url = ollama_url
         self.model_name = model_name
         self.available = self._check_availability()

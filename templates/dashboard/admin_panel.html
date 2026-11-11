@@ -1,0 +1,313 @@
+{% load static i18n %}
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>{% trans "Admin Panel — APWRS" %}</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;800;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "on-secondary": "#ffffff",
+                "primary-container": "#1b4332",
+                "on-tertiary": "#ffffff",
+                "error-container": "#ffdad6",
+                "tertiary": "#322319",
+                "tertiary-container": "#4a382d",
+                "surface": "#f9f9ff",
+                "on-error": "#ffffff",
+                "on-tertiary-fixed-variant": "#554338",
+                "secondary-fixed-dim": "#69d4f4",
+                "on-secondary-container": "#006075",
+                "on-secondary-fixed-variant": "#004e5f",
+                "inverse-on-surface": "#ebf1ff",
+                "secondary": "#00677d",
+                "primary": "#012d1d",
+                "surface-variant": "#dce2f3",
+                "outline-variant": "#c1c8c2",
+                "surface-container-low": "#f0f3ff",
+                "surface-container": "#e7eefe",
+                "surface-tint": "#3f6653",
+                "on-secondary-fixed": "#001f27",
+                "primary-fixed": "#c1ecd4",
+                "inverse-surface": "#2a313d",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed": "#002114",
+                "inverse-primary": "#a5d0b9",
+                "surface-container-high": "#e2e8f8",
+                "surface-bright": "#f9f9ff",
+                "secondary-container": "#72ddfd",
+                "on-primary": "#ffffff",
+                "on-primary-fixed-variant": "#274e3d",
+                "tertiary-fixed": "#f9ddce",
+                "on-primary-container": "#86af99",
+                "on-surface-variant": "#414844",
+                "surface-container-highest": "#dce2f3",
+                "secondary-fixed": "#b2ebff",
+                "background": "#f9f9ff",
+                "primary-fixed-dim": "#a5d0b9",
+                "surface-dim": "#d3daea",
+                "tertiary-fixed-dim": "#dcc1b2",
+                "error": "#ba1a1a",
+                "on-tertiary-container": "#baa193",
+                "on-surface": "#151c27",
+                "on-error-container": "#93000a",
+                "on-tertiary-fixed": "#27180f",
+                "on-background": "#151c27",
+                "outline": "#717973"
+              },
+              borderRadius: {
+                DEFAULT: "0.125rem",
+                lg: "0.25rem",
+                xl: "0.5rem",
+                full: "0.75rem"
+              },
+              fontFamily: {
+                headline: ["Hanken Grotesk"],
+                display: ["Hanken Grotesk"],
+                body: ["Inter"],
+                label: ["Jetbrains Mono"]
+              }
+            },
+          },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+{% include "dashboard/_navbar_theme.html" %}
+<link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
+</head>
+<body class="bg-background text-on-surface font-body antialiased min-h-screen">
+<div class="flex-1 flex flex-col bg-surface min-h-screen overflow-hidden">
+    <!-- Top Navigation Header -->
+    {% include "dashboard/_header.html" %}
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="fixed top-20 right-8 z-40 space-y-2 max-w-sm">
+        {% for message in messages %}
+        <div class="px-5 py-3 rounded-xl text-sm font-medium shadow-lg border backdrop-blur-sm
+            {% if message.tags == 'error' %}bg-error-container/95 text-on-error-container border-error/20
+            {% elif message.tags == 'success' %}bg-secondary-container/95 text-on-secondary-container border-secondary/20
+            {% else %}bg-surface-container-lowest/95 text-on-surface border-outline-variant/30{% endif %}">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm
+                    {% if message.tags == 'error' %}text-error
+                    {% elif message.tags == 'success' %}text-secondary
+                    {% else %}text-on-surface-variant{% endif %}">
+                    {% if message.tags == 'error' %}error{% elif message.tags == 'success' %}check_circle{% else %}info{% endif %}
+                </span>
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- APWRS Global Navigation Sidebar -->
+    {% include "dashboard/_sidebar.html" with active_page="users_and_roles" %}
+
+    <!-- Main Content -->
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 transition-all duration-300 ease-in-out lg:ml-60">
+        <div class="max-w-7xl mx-auto px-8 py-8">
+            <!-- Page Header -->
+            <div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <h1 class="font-headline font-black text-2xl text-primary tracking-tight">{% trans "User Management" %}</h1>
+                    <p class="text-sm text-on-surface-variant mt-1">{% trans "Create, edit, and manage user roles and regional access." %}</p>
+                </div>
+                <a href="{% url 'dashboard:admin_farms' %}"
+                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity">
+                    <span class="material-symbols-outlined text-[18px]">agriculture</span>
+                    {% trans "Our Farmers" %}
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Create User Form -->
+                <section class="lg:col-span-1">
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6">
+                            <span class="material-symbols-outlined text-primary">person_add</span>
+                            <h2 class="font-headline font-bold text-lg text-primary">{% trans "Create User" %}</h2>
+                        </div>
+                        <form method="post" class="space-y-5">
+                            {% csrf_token %}
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-outline" for="id_username">{% trans "Username" %}</label>
+                                <div class="relative group">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">person</span>
+                                    {{ form.username }}
+                                </div>
+                                {% if form.username.errors %}<p class="text-error text-xs mt-1">{{ form.username.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-outline" for="id_email">{% trans "Email" %}</label>
+                                <div class="relative group">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">mail</span>
+                                    {{ form.email }}
+                                </div>
+                                {% if form.email.errors %}<p class="text-error text-xs mt-1">{{ form.email.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-outline" for="id_password">{% trans "Password" %}</label>
+                                <div class="relative group">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">lock</span>
+                                    {{ form.password }}
+                                </div>
+                                {% if form.password.errors %}<p class="text-error text-xs mt-1">{{ form.password.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-outline" for="id_role">{% trans "Role" %}</label>
+                                <div class="relative group">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">badge</span>
+                                    {{ form.role }}
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm pointer-events-none">arrow_drop_down</span>
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold uppercase tracking-widest text-outline" for="id_region">{% trans "Region" %}</label>
+                                <div class="relative group">
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm">public</span>
+                                    {{ form.region }}
+                                    <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant group-focus-within:text-secondary transition-colors text-sm pointer-events-none">arrow_drop_down</span>
+                                </div>
+                                <p class="text-[10px] text-on-surface-variant mt-1">{% trans "Only used for subadmin role restriction." %}</p>
+                            </div>
+                            <button type="submit" class="w-full bg-primary text-on-primary py-3.5 rounded-lg font-headline font-bold text-sm uppercase tracking-widest shadow-md hover:shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-sm">add</span>
+                                {% trans "Create User" %}
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Users List -->
+                <section class="lg:col-span-2">
+                    <div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-primary">group</span>
+                                <h2 class="font-headline font-bold text-lg text-primary">{% trans "Manage Users" %}</h2>
+                            </div>
+                            <span class="text-xs text-on-surface-variant bg-surface-variant px-2.5 py-1 rounded-full font-medium">{{ users|length }} {% trans "total" %}</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-outline-variant text-left text-xs font-bold uppercase tracking-widest text-outline">
+                                        <th class="pb-3 pr-4">{% trans "User" %}</th>
+                                        <th class="pb-3 pr-4">{% trans "Email" %}</th>
+                                        <th class="pb-3 pr-4">{% trans "Role" %}</th>
+                                        <th class="pb-3 pr-4">{% trans "Status" %}</th>
+                                        <th class="pb-3 pr-4">{% trans "Region" %}</th>
+                                        <th class="pb-3 text-right">{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for u in users %}
+                                    <tr class="border-b border-outline-variant/40 hover:bg-surface-container-low/50 transition-colors">
+                                        <td class="py-3.5 pr-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-xs font-bold text-on-surface-variant shrink-0">
+                                                    {{ u.username|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <span class="font-medium text-on-surface">{{ u.username }}</span>
+                                                    <span class="block text-[10px] text-on-surface-variant">{{ u.date_joined|date:"M d, Y" }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-3.5 pr-4 text-on-surface-variant text-xs">{{ u.email|default:"—" }}</td>
+                                        <td class="py-3.5 pr-4">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider
+                                                {% if u.profile.role == 'superadmin' %}bg-primary-container/30 text-primary
+                                                {% elif u.profile.role == 'subadmin' %}bg-secondary-container/40 text-on-secondary-container
+                                                {% else %}bg-surface-variant text-on-surface-variant{% endif %}">
+                                                <span class="material-symbols-outlined text-[14px]
+                                                    {% if u.profile.role == 'superadmin' %}text-primary
+                                                    {% elif u.profile.role == 'subadmin' %}text-secondary
+                                                    {% else %}text-on-surface-variant{% endif %}">
+                                                    {% if u.profile.role == 'superadmin' %}admin_panel_settings{% elif u.profile.role == 'subadmin' %}manage_accounts{% elif u.profile.role == 'farmer' %}agriculture{% else %}visibility{% endif %}
+                                                </span>
+                                                {{ u.profile.get_role_display }}
+                                            </span>
+                                            {% if not u.is_active %}
+                                            <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-error-container/20 text-error text-[10px] font-bold uppercase tracking-wider">
+                                                <span class="material-symbols-outlined text-[11px]">pending</span>
+                                                {% trans "Pending" %}
+                                            </span>
+                                            {% else %}
+                                            <span class="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container text-[10px] font-bold uppercase tracking-wider">
+                                                <span class="material-symbols-outlined text-[11px]">check_circle</span>
+                                                {% trans "Active" %}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="py-3.5 pr-4">
+                                            {% if u.profile.region %}
+                                            <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant">
+                                                <span class="material-symbols-outlined text-[14px]">pin_drop</span>
+                                                {{ u.profile.region.name }}
+                                            </span>
+                                            {% else %}
+                                            <span class="text-xs text-on-surface-variant/50">—</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="py-3.5 text-right">
+                                            <div class="flex gap-2 justify-end">
+                                                <a href="{% url 'dashboard:admin_edit_user' u.id %}" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-surface-container-low border border-outline-variant rounded-lg hover:bg-surface-variant hover:border-outline transition-all">
+                                                    <span class="material-symbols-outlined text-[14px]">edit</span>
+                                                    {% trans "Edit" %}
+                                                </a>
+                                                {% if not u.is_active and u != request.user %}
+                                                <form method="post" action="{% url 'dashboard:admin_confirm_user' u.id %}">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-secondary-container/70 text-on-secondary-container border border-secondary/30 rounded-lg hover:bg-secondary-container hover:border-secondary/50 transition-all">
+                                                        <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                                                        {% trans "Confirm" %}
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                                {% if u != request.user %}
+                                                <form method="post" action="{% url 'dashboard:admin_delete_user' u.id %}" onsubmit="return confirm('{% trans "Delete user" %} &quot;{{ u.username }}&quot;? {% trans "This action cannot be undone." %}')">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-error-container/60 text-on-error-container border border-error/20 rounded-lg hover:bg-error-container hover:border-error/40 transition-all">
+                                                        <span class="material-symbols-outlined text-[14px]">delete</span>
+                                                        {% trans "Delete" %}
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="py-12 text-center">
+                                            <span class="material-symbols-outlined text-4xl text-outline-variant block mb-3">group_off</span>
+                                            <p class="text-on-surface-variant text-sm">{% trans "No users found." %}</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+      {% include 'dashboard/_partners.html' %}
+      </main>
+  </div>
+  {% include "dashboard/_agroai_chat.html" %}
+  </body>
+  </html>
+

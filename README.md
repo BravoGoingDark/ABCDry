@@ -10,12 +10,13 @@ This project is a Django-based agricultural risk monitoring and forecasting appl
 ├── dashboard/             # Main application logic, models, services, views
 ├── data/                  # Climate, seasonal, and source data assets
 ├── database/              # SQL schema definitions and database-related files
-├── docs/                  # Project documentation and technical guides
+├── docs/                  # Documentation: guides (QUICKSTART, AUTOMATION_SETUP, …) and reference PDFs
 ├── scripts/               # Utility scripts grouped by purpose
 │   ├── automation/        # Startup and automation helpers
 │   ├── etl/               # ETL / data preparation scripts
 │   ├── reports/           # Reporting and PDF generation scripts
 │   ├── validation/        # Data quality and system validation checks
+│   ├── daily_update.bat   # Daily data update (station climate + SmartFarm), for Windows Task Scheduler
 │   └── ...
 ├── tests/                 # Automated test files
 ├── templates/             # Django HTML templates
@@ -33,9 +34,6 @@ This project is a Django-based agricultural risk monitoring and forecasting appl
 ├── .env                   # Local environment configuration
 ├── .env.example           # Template for environment configuration
 ├── .gitignore             # Git ignore rules
-├── QUICKSTART.md          # Quick-start guide
-├── QUICK_START_AUTOMATION.md
-├── AUTOMATION_SETUP.md
 └── render.yaml            # Deployment config
 ```
 
@@ -53,4 +51,7 @@ This project is a Django-based agricultural risk monitoring and forecasting appl
 python manage.py migrate
 python manage.py runserver
 python manage.py collectstatic
+python manage.py update_station_climate   # new daily climate for the two Ichkeul stations
+python manage.py sync_smartfarm           # new SmartFarm soil-probe readings
+python manage.py warm_map_layers          # prepare today's analysis-map layers (NDVI, NDWI, temperature, rain, SPI)
 ```

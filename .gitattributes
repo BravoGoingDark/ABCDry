@@ -1,2 +1,3 @@
 # Treat fixture as binary to preserve encoding
 fixture.json -text diff
+graphify-out/graph.json merge=graphify

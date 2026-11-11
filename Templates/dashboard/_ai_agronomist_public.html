@@ -1,0 +1,22 @@
+{% load i18n %}
+{# Public pages (no session): same "AI Agronomist" button as _agroai_chat.html, #}
+{# but the chat API needs a signed-in user, so it leads to sign-in instead.   #}
+<div class="fixed bottom-3 right-3 sm:bottom-4 sm:right-4 z-[9998]" style="inset-inline-end:1rem; right:auto;">
+  <a href="{% url 'dashboard:login' %}" title="{% trans 'Sign in to APWRS' %}"
+     class="group flex items-center gap-2.5 px-4 py-2.5 bg-primary text-on-primary rounded-full shadow-2xl hover:bg-primary-container transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-secondary-fixed-dim/40 no-underline">
+    <div class="relative flex items-center justify-center">
+      <span class="material-symbols-outlined text-[22px] text-secondary-fixed animate-pulse">psychology</span>
+      <span class="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary-fixed opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-secondary-fixed"></span>
+      </span>
+    </div>
+    <div class="flex flex-col items-start text-left">
+      <span class="font-headline font-bold text-xs tracking-wide flex items-center gap-1.5">
+        AI Agronomist
+        <span class="text-[9px] bg-secondary-fixed-dim text-on-primary-fixed px-1.5 py-0.2 rounded font-bold uppercase">Live</span>
+      </span>
+      <span class="text-[10px] text-on-primary-container font-medium">Analyse &amp; Diagnostic</span>
+    </div>
+  </a>
+</div>

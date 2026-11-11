@@ -1,0 +1,126 @@
+/*
+ * Arabic / right-to-left support for every APWRS page.
+ *
+ * Pages set <html lang="ar" dir="rtl"> when Arabic is active (see
+ * LANGUAGE_BIDI in each template). Every rule below is scoped to that, so
+ * English and French pages are untouched.
+ *
+ * The layout is built with Tailwind physical classes (left-0, lg:ml-60,
+ * border-r ...), so instead of editing every template the shared shell is
+ * mirrored here: sidebar on the right, content offset on the right, collapsed
+ * tooltips opening to the left.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@500;600;700;800&display=swap");
+
+/* ---------- Arabic typography ----------
+ * Arabic fonts are appended as fallbacks: Latin text (numbers, units, crop
+ * codes) keeps the brand fonts and only Arabic glyphs use Noto. Icon fonts
+ * declare their own family and are not affected. */
+html[lang="ar"] body,
+html[lang="ar"] .font-body,
+html[lang="ar"] input,
+html[lang="ar"] select,
+html[lang="ar"] textarea,
+html[lang="ar"] button {
+    font-family: Inter, "Noto Sans Arabic", "Segoe UI", Tahoma, sans-serif;
+}
+html[lang="ar"] .font-headline,
+html[lang="ar"] .font-display,
+html[lang="ar"] h1, html[lang="ar"] h2, html[lang="ar"] h3, html[lang="ar"] h4 {
+    font-family: "Hanken Grotesk", "Noto Kufi Arabic", "Noto Sans Arabic", sans-serif;
+    letter-spacing: 0;
+}
+html[lang="ar"] .font-label {
+    font-family: "Jetbrains Mono", "Noto Sans Arabic", monospace;
+}
+/* Arabic script must not be tracked or uppercased (breaks letter joining). */
+html[lang="ar"] .uppercase { text-transform: none; }
+html[lang="ar"] [class*="tracking-"] { letter-spacing: 0 !important; }
+html[lang="ar"] body { line-height: 1.6; }
+
+/* ---------- things that must stay left-to-right ---------- */
+html[dir="rtl"] .leaflet-container,
+html[dir="rtl"] canvas,
+html[dir="rtl"] input[type="number"],
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="date"],
+html[dir="rtl"] code, html[dir="rtl"] pre,
+html[dir="rtl"] .ltr {
+    direction: ltr;
+}
+html[dir="rtl"] input[type="number"] { text-align: right; }
+
+/* ---------- shared shell: sidebar + main content ---------- */
+html[dir="rtl"] #app-sidebar {
+    left: auto;
+    right: 0;
+    border-right-width: 0;
+    border-left-width: 1px;
+    box-shadow: -1px 0 10px rgba(0, 0, 0, 0.03);
+}
+/* Mobile: the hidden sidebar slides out to the right, not the left. */
+@media (max-width: 1023.98px) {
+    html[dir="rtl"] #app-sidebar.-translate-x-full { --tw-translate-x: 100%; }
+}
+@media (min-width: 1024px) {
+    html[dir="rtl"] #main-content.lg\:ml-60 { margin-left: 0; margin-right: 15rem; }
+    html[dir="rtl"] #main-content.lg\:ml-\[68px\] { margin-left: 0; margin-right: 68px; }
+}
+/* Collapsed-sidebar tooltips open towards the content (left in RTL). */
+html[dir="rtl"] #app-sidebar .sidebar-tooltip {
+    left: auto;
+    right: 100%;
+    margin-left: 0;
+    margin-right: 0.75rem;
+}
+/* Directional arrows/chevrons point the other way. */
+html[dir="rtl"] .rtl-flip,
+html[dir="rtl"] .material-symbols-outlined[data-icon="chevron_right"],
+html[dir="rtl"] .material-symbols-outlined[data-icon="chevron_left"],
+html[dir="rtl"] .material-symbols-outlined[data-icon="arrow_forward"],
+html[dir="rtl"] .material-symbols-outlined[data-icon="arrow_back"] {
+    transform: scaleX(-1);
+}
+
+/* ---------- small language switcher used on login / home ---------- */
+.lang-float {
+    position: fixed;
+    top: 14px;
+    inset-inline-end: 14px;
+    z-index: 60;
+    display: flex;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #c1c8c2;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(4px);
+}
+.lang-float button {
+    border: 0;
+    background: transparent;
+    padding: 6px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font: 700 12px "Hanken Grotesk", "Noto Kufi Arabic", sans-serif;
+    color: #414844;
+}
+.lang-float button:hover { color: #012d1d; }
+.lang-float button.on { background: #012d1d; color: #fff; cursor: default; }
+/* login / signup: sits in the top bar next to "Back to home" instead of floating over it */
+.lang-float.lang-inline {
+    position: static;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+/* ---------- Basemap tiles (all languages) ----------
+ * Leaflet fades each tile in through requestAnimationFrame. If the window is
+ * occluded or backgrounded that frame never runs, so the inline opacity stays
+ * at 0 and a fully downloaded basemap looks blank. Tiles do not need an
+ * entrance animation, so always show them. */
+.leaflet-container .leaflet-tile {
+    opacity: 1 !important;
+}

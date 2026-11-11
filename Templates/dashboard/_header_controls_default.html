@@ -1,0 +1,58 @@
+{% load i18n %}
+{% comment %}
+Region / Lake selectors shown in the navbar on every page except the overview.
+They look exactly like the overview's; picking a region or lake opens the
+overview focused on it (dashboard.js reads ?region=<pk>&lake=<key>).
+{% endcomment %}
+<!-- Region Selector Dropdown -->
+<div class="relative">
+    <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">public</span>
+    <select class="pl-7 sm:pl-8 pr-5 sm:pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-xs sm:text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24 sm:w-32" id="nav-region-selector" aria-label="{% trans 'Region' %}">
+        {% for option in navbar_regions %}
+        <option value="{{ option.pk }}" {% if option.pk == navbar_default_region.pk %}selected{% endif %}>{{ option.name }}</option>
+        {% endfor %}
+    </select>
+</div>
+<!-- Lake Selector Dropdown -->
+<div class="relative">
+    <span class="material-symbols-outlined absolute left-2 top-1.5 text-on-surface-variant text-sm">water</span>
+    <select class="pl-7 sm:pl-8 pr-5 sm:pr-8 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-xs sm:text-sm focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary text-on-surface w-24 sm:w-36" id="nav-lake-selector" aria-label="{% trans 'Lake' %}">
+    </select>
+</div>
+<script id="nav-lakes-json" type="application/json">{{ navbar_lakes_json|safe }}</script>
+<script>
+(function () {
+    var regionSel = document.getElementById("nav-region-selector");
+    var lakeSel = document.getElementById("nav-lake-selector");
+    if (!regionSel || !lakeSel) return;
+    var lakesByRegion = {};
+    try { lakesByRegion = JSON.parse(document.getElementById("nav-lakes-json").textContent); } catch (e) {}
+
+    // Same region-name → lake-group mapping as dashboard.js getSelectedRegionKey().
+    var regionKey = function () {
+        var text = (regionSel.options[regionSel.selectedIndex] || {}).textContent || "";
+        text = text.toLowerCase();
+        if (text.indexOf("morocco") !== -1) return "morocco";
+        if (text.indexOf("algeria") !== -1) return "algeria";
+        return "tunisia";
+    };
+    var fillLakes = function () {
+        lakeSel.innerHTML = "";
+        (lakesByRegion[regionKey()] || []).forEach(function (lake) {
+            var opt = document.createElement("option");
+            opt.value = lake.key;
+            opt.textContent = lake.label;
+            lakeSel.appendChild(opt);
+        });
+    };
+    var openOverview = function () {
+        var params = new URLSearchParams({ region: regionSel.value });
+        if (lakeSel.value) params.set("lake", lakeSel.value);
+        window.location.href = "{% url 'dashboard:dashboard' %}?" + params.toString();
+    };
+
+    fillLakes();
+    regionSel.addEventListener("change", function () { fillLakes(); openOverview(); });
+    lakeSel.addEventListener("change", openOverview);
+})();
+</script>

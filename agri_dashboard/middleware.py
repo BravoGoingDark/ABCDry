@@ -45,6 +45,7 @@ class LoginRequiredMiddleware:
         logout_url = getattr(settings, 'LOGOUT_URL', '/logout/')
         self.exact_exempt.add(login_url)
         self.exact_exempt.add(logout_url)
+        self.exact_exempt.add('/signup/')
         self.exact_exempt.add('/api/drought-prediction/')
         self.exact_exempt.add('/api/live-metrics/')
         self.exact_exempt.add('/api/submit-metrics/')
@@ -68,3 +69,35 @@ class LoginRequiredMiddleware:
 
         # Otherwise redirect to login page
         return redirect(getattr(settings, 'LOGIN_URL', '/login/'))
+
+
+class FarmerScopeMiddleware:
+    """Keep accounts with the "farmer" role inside the farmer space.
+
+    Farmers get their own simplified pages (/farmer/) and the assistant chat
+    endpoint; the analyst dashboard, data ingestion, admin and regional APIs
+    are not theirs to see. Pages redirect to /farmer/, API calls get 403.
+    Runs after LoginRequiredMiddleware, so request.user is resolved.
+    """
+
+    ALLOWED_PREFIXES = ('/farmer/', '/assistant/chat/', '/logout/', '/i18n/',
+                        '/api/tiles/', '/favicon.ico')
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, 'user', None)
+        if user is not None and user.is_authenticated and not user.is_superuser:
+            profile = getattr(user, 'profile', None)
+            if profile is not None and profile.role == 'farmer':
+                path = request.path
+                allowed = path.startswith(self.ALLOWED_PREFIXES) or (
+                    settings.STATIC_URL and path.startswith(settings.STATIC_URL))
+                if not allowed:
+                    if path.startswith('/api/'):
+                        from django.http import JsonResponse
+                        return JsonResponse({'error': 'Not available for farmer accounts.'},
+                                            status=403)
+                    return redirect('/farmer/')
+        return self.get_response(request)
