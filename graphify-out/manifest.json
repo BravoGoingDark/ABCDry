@@ -1558,5 +1558,17 @@
     "seen": 1794389127.148786,
     "ast_hash": "adb24b760dcbf57017506c8976002efb",
     "semantic_hash": ""
+  },
+  "database/database_schema_simplified.sql": {
+    "mtime": 1779875009.652603,
+    "seen": 1794389527.318049,
+    "ast_hash": "6bf4d1b69b26cfa57f7f53b5dd3cb55b",
+    "semantic_hash": ""
+  },
+  "database/database_schema_timescaledb.sql": {
+    "mtime": 1779815670.8702636,
+    "seen": 1794389527.318049,
+    "ast_hash": "75164220d68f048f9b730f655a7db005",
+    "semantic_hash": ""
   }
 }

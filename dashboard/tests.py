@@ -504,7 +504,11 @@ class RetrievalIndexTests(SimpleTestCase):
 		block = retrieval.prompt_block(context)
 
 		self.assertIn('LIVE DATA', block)
-		self.assertIn('REFERENCE 1 (source: docs/SPEI_NOTES.md', block)
+		self.assertIn('[Context 1]: chunk text', block)
+		# Source paths and relevance scores stay out of the prompt, so the
+		# model cannot echo them; the UI gets them from sources_for().
+		self.assertNotIn('docs/SPEI_NOTES.md', block)
+		self.assertNotIn('REFERENCE', block)
 
 	def test_prompt_block_is_empty_without_context(self):
 		self.assertEqual(retrieval.prompt_block({'documents': [], 'data': []}), '')
@@ -518,7 +522,10 @@ class RetrievalIndexTests(SimpleTestCase):
 
 		with tempfile.TemporaryDirectory() as docs, tempfile.TemporaryDirectory() as index_dir:
 			retrieval.reset_index_cache()
-			with override_settings(RAG_DOCS_DIR=docs, RAG_INDEX_DIR=index_dir):
+			# No embedding server either: without this the test passes or fails
+			# depending on whether Ollama happens to be running on the machine.
+			with override_settings(RAG_DOCS_DIR=docs, RAG_INDEX_DIR=index_dir,
+			                       RAG_OLLAMA_URL='http://127.0.0.1:1', RAG_EMBED_TIMEOUT=1):
 				context = retrieval.gather('what are the tomato sowing months?')
 		retrieval.reset_index_cache()
 
