@@ -1546,7 +1546,7 @@ class FarmerTranslationTests(SimpleTestCase):
     def test_every_template_text_is_translated(self):
         import polib
         root = Path(__file__).resolve().parents[1]
-        t = (root / 'Templates' / 'dashboard' / 'farmer_home.html').read_text(encoding='utf-8')
+        t = (root / 'templates' / 'dashboard' / 'farmer_home.html').read_text(encoding='utf-8')
         ids = set(re.findall(r"\{% trans '([^']*)' %\}", t)) | set(re.findall(r'\{% trans "([^"]*)" %\}', t))
         for lang in ('fr', 'ar'):
             po = {e.msgid: e.msgstr for e in polib.pofile(str(root / 'locale' / lang / 'LC_MESSAGES' / 'django.po'))}
@@ -1637,7 +1637,7 @@ class MobileTokenLoginTests(TestCase):
 
     def test_reminder_texts_match_the_web_page(self):
         from .services.task_text_msgids import TEXTS
-        page = (Path(__file__).resolve().parents[1] / 'Templates' / 'dashboard' / 'farmer_home.html').read_text(encoding='utf-8')
+        page = (Path(__file__).resolve().parents[1] / 'templates' / 'dashboard' / 'farmer_home.html').read_text(encoding='utf-8')
         found = dict((k, a or b) for k, a, b in re.findall(
             r"\b((?:tk|tip)_[a-z_]+): \"\{% filter escapejs %\}\{% trans (?:'([^']*)'|\"([^\"]*)\") %\}", page))
         self.assertEqual(TEXTS, found)   # regenerate task_text_msgids.py when the page texts change

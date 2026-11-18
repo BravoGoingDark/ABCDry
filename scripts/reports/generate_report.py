@@ -766,7 +766,7 @@ for i, (rng, cls) in enumerate(vci_data):
 pdf.ln(5)
 pdf.set_font('Helvetica', '', 9)
 pdf.set_text_color(60, 60, 60)
-pdf.cell(0, 5, 'Source: Templates/dashboard/analysis.html', 0, 1)
+pdf.cell(0, 5, 'Source: templates/dashboard/analysis.html', 0, 1)
 
 # ============================================================
 # SECTION 14

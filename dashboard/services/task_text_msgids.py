@@ -1,5 +1,5 @@
 """English msgids of the reminder texts (same texts and translations as the
-farmer web page, Templates/dashboard/farmer_home.html, keys tk_* and tip_*).
+farmer web page, templates/dashboard/farmer_home.html, keys tk_* and tip_*).
 Generated from the page; dashboard.tests checks they stay in sync."""
 
 TEXTS = {

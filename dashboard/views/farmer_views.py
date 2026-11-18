@@ -182,7 +182,7 @@ def farmer_service_worker(request):
     from pathlib import Path
     from django.template.loader import render_to_string
     assets = _app_assets()
-    source = Path(__file__).resolve().parents[2] / 'Templates' / 'dashboard' / 'farmer_sw.js'
+    source = Path(__file__).resolve().parents[2] / 'templates' / 'dashboard' / 'farmer_sw.js'
     try:
         stamp = source.read_bytes()
     except OSError:
