@@ -4,7 +4,7 @@ services:
     env: python
     plan: free
     buildCommand: bash build.sh
-    startCommand: gunicorn agri_dashboard.wsgi:application --workers 1 --timeout 120
+    startCommand: bash -c "python manage.py migrate --noinput && python manage.py verify_data && exec gunicorn agri_dashboard.wsgi:application --workers 1 --timeout 120"
     envVars:
       - key: DEBUG
         value: "False"
