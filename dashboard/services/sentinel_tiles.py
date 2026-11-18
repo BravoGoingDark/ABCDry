@@ -6,13 +6,17 @@
   ndwi  Same, (B8 - B11) / (B8 + B11), Gao's form: water held in vegetation
         and topsoil, which falls ahead of NDVI as a drought sets in. 20 m.
   temp  ERA5-Land (Copernicus), mean daily 2 m temperature over the last 30
-        days available (~1 week behind real time). ~9 km, smoothed.
-  rain  NASA GPM IMERG, total rainfall over the last 30 days (~1-2 days
-        behind). ~10 km, smoothed.
-  spi   SPI-3 from CHIRPS (the station dataset's rain source): the last 90
-        days of rain ranked against the same 90 days in each of the 30
-        previous years (Gringorten plotting position -> standard normal), the
-        non-parametric SPI. Matches SPI-3 computed from the station series.
+        days available (~1 week behind real time), downscaled to the 90 m
+        SRTM terrain with a lapse rate: T = T_era5 + LAPSE * (z_90m - z_cell),
+        z_cell = mean SRTM height of the ERA5-Land cell. The 0.1° field is
+        interpolated bilinearly first, so cell edges do not show.
+  rain  ERA5-Land total precipitation summed over the same last 30 days,
+        interpolated bilinearly between the 0.1° (~9 km) cell centres. No
+        finer rain exists: the smoothing is display only, not extra detail.
+  spi   SPI-3 from ERA5-Land rain: the last 90 days ranked against the same
+        90 days in each of the 30 previous years (Gringorten plotting position
+        -> standard normal), the non-parametric SPI. Same rain and window as
+        the drought layer's SPI-3 input. Smoothed like rain.
   drought  Combined Drought Indicator, after the European Drought Observatory:
         0 none, 1 watch (SPI-3 < -1), 2 warning (+ root-zone soil moisture
         anomaly < -1), 3 alert (+ vegetation anomaly < -1). Rain and soil
@@ -47,8 +51,9 @@ NO_VALUE = -9999
 _R = 20037508.342789244
 S2_DAYS, CLIMATE_DAYS, SPI_DAYS, SPI_YEARS = 30, 30, 90, 30
 MODIS_FIRST_YEAR = 2001
+LAPSE_C_PER_M = -0.0065   # standard environmental lapse rate, -6.5 °C per km
 DROUGHT_CLASSES = ('none', 'watch', 'warning', 'alert')
-META_VERSION = 2   # bump when day_meta() gains fields, so a cached day is recomputed
+META_VERSION = 4   # bump when day_meta() or a layer changes: a cached day (meta + tiles) is recomputed
 
 # Colour ramps (low -> high), scales and display. A domain of None is stretched
 # each day over the basin's 2nd-98th percentile (rain from 0).
@@ -61,13 +66,13 @@ LAYERS = {
              'source': 'Sentinel-2 L2A · least-cloud mosaic'},
     'temp': {'ramp': ['#FFF3B0', '#FDC46B', '#F98C4A', '#E0663F', '#B8282E'],
              'domain': None, 'ends': ('Cooler', 'Hotter'), 'unit': '°C', 'decimals': 1, 'max_zoom': 12,
-             'source': 'ERA5-Land (Copernicus) · mean daily temperature'},
+             'source': 'ERA5-Land (Copernicus) · mean daily temperature · terrain-corrected 90 m'},
     'rain': {'ramp': ['#F7FBFF', '#C6DBEF', '#6BAED6', '#2F7FD1', '#08306B'],
              'domain': None, 'ends': ('Less', 'More'), 'unit': 'mm', 'decimals': 0, 'max_zoom': 12,
-             'source': 'NASA GPM IMERG · total rainfall'},
+             'source': 'ERA5-Land (Copernicus) · total rainfall · smoothed from 9 km'},
     'spi':  {'ramp': ['#B2182B', '#EF8A62', '#F7F7F7', '#67A9CF', '#2166AC'],
              'domain': (-2.0, 2.0), 'ends': ('Drier', 'Wetter'), 'unit': '', 'decimals': 2, 'max_zoom': 12,
-             'source': 'SPI-3 · CHIRPS rainfall vs 30 previous years'},
+             'source': 'SPI-3 · ERA5-Land rainfall vs 30 previous years · smoothed from 9 km'},
     'drought': {'ramp': ['#38A88A', '#E7A83B', '#EE8434', '#D96565'],
                 'domain': (0, 3), 'ends': ('No drought', 'Alert'), 'unit': '', 'decimals': 0, 'max_zoom': 13,
                 'source': 'Combined Drought Indicator · ERA5-Land + MODIS'},
@@ -241,27 +246,30 @@ def _build(ee, layer, windows):
         return _s2(ee, geom, ('B8', 'B4'), frm, to)
     if layer == 'ndwi':
         return _s2(ee, geom, ('B8', 'B11'), frm, to)
+    era = ee.ImageCollection('ECMWF/ERA5_LAND/DAILY_AGGR')
+    # A composite (mean/sum) forgets the 0.1° grid; pin it back on before
+    # bilinear resampling, or Earth Engine would interpolate on a 1° grid.
+    grid = era.first().select('temperature_2m').projection()
+
+    def smooth(img):
+        return img.setDefaultProjection(grid).resample('bilinear')
+
     if layer == 'temp':
-        return (ee.ImageCollection('ECMWF/ERA5_LAND/DAILY_AGGR').filterDate(frm.isoformat(), end)
-                .select('temperature_2m').map(lambda i: i.resample('bilinear')).mean()
-                .subtract(273.15).rename('v'))
+        t = smooth(era.filterDate(frm.isoformat(), end).select('temperature_2m').mean().subtract(273.15))
+        dem = ee.Image('CGIAR/SRTM90_V4').select('elevation')
+        cell_z = dem.reduceResolution(ee.Reducer.mean(), maxPixels=65535).reproject(grid)
+        # Terrain height above / below the cell's mean, times the lapse rate.
+        return t.add(dem.subtract(smooth(cell_z)).multiply(LAPSE_C_PER_M)).rename('v')
     if layer == 'rain':
-        # half-hourly rate (mm/h) x 0.5 h, summed
-        return (ee.ImageCollection('NASA/GPM_L3/IMERG_V07').filterDate(frm.isoformat(), end)
-                .select('precipitation').map(lambda i: i.resample('bilinear')).sum().multiply(0.5).rename('v'))
+        # daily total in metres -> mm, summed over the window
+        return smooth(era.filterDate(frm.isoformat(), end).select('total_precipitation_sum')
+                      .sum().multiply(1000)).rename('v')
     if layer == 'spi':
-        chirps = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY').select('precipitation')
-        s, e = ee.Date(frm.isoformat()), ee.Date(end)
-        current = chirps.filterDate(s, e).sum()
-        past = ee.ImageCollection(ee.List.sequence(1, SPI_YEARS).map(
-            lambda k: chirps.filterDate(s.advance(ee.Number(k).multiply(-1), 'year'),
-                                        e.advance(ee.Number(k).multiply(-1), 'year')).sum()))
-        below = past.map(lambda h: h.lt(current)).sum()
-        equal = past.map(lambda h: h.eq(current)).sum()
-        # Gringorten position among the n+1 windows (ties take the mid rank);
-        # converted to SPI with the inverse normal in _finish().
-        n = SPI_YEARS + 1
-        return below.add(equal.multiply(0.5)).add(1 - 0.44).divide(n + 0.12).resample('bilinear').rename('v')
+        rain = era.select('total_precipitation_sum')
+        a, b = frm.isoformat(), end
+        # Gringorten position among the n+1 windows; inverse normal in _finish().
+        return smooth(_rank_p(rain.filterDate(a, b).sum(), _past(ee, rain, a, b, SPI_YEARS, lambda c: c.sum()),
+                              SPI_YEARS)).rename('v')
     raise ValueError(layer)
 
 
@@ -280,8 +288,12 @@ def _finish(layer, vals):
 
 # ── Daily metadata: each layer's window and the stretched scales ────────
 
+def _day_key(day):
+    return f'{day.isoformat()}_v{META_VERSION}'
+
+
 def _day_dir(day):
-    return os.path.join(CACHE_DIR, day.isoformat())
+    return os.path.join(CACHE_DIR, _day_key(day))
 
 
 def _drop_old_days(day):
@@ -289,7 +301,7 @@ def _drop_old_days(day):
     if not os.path.isdir(CACHE_DIR):
         return
     for name in os.listdir(CACHE_DIR):
-        if name != day.isoformat():
+        if name != _day_key(day):
             shutil.rmtree(os.path.join(CACHE_DIR, name), ignore_errors=True)
 
 
@@ -317,15 +329,13 @@ def day_meta(day=None):
         try:
             since = day - dt.timedelta(days=120)
             era = _latest_day(ee, 'ECMWF/ERA5_LAND/DAILY_AGGR', since)
-            imerg = _latest_day(ee, 'NASA/GPM_L3/IMERG_V07', since) - dt.timedelta(days=1)  # last whole day
-            chirps = _latest_day(ee, 'UCSB-CHG/CHIRPS/DAILY', since)
             modis = _latest_day(ee, 'MODIS/061/MOD13Q1', since)   # start of the newest 16-day composite
             s2_from, s2_to = window(day)
             windows = {
                 'ndvi': (s2_from, s2_to), 'ndwi': (s2_from, s2_to),
                 'temp': (era - dt.timedelta(days=CLIMATE_DAYS - 1), era),
-                'rain': (imerg - dt.timedelta(days=CLIMATE_DAYS - 1), imerg),
-                'spi': (chirps - dt.timedelta(days=SPI_DAYS - 1), chirps),
+                'rain': (era - dt.timedelta(days=CLIMATE_DAYS - 1), era),
+                'spi': (era - dt.timedelta(days=SPI_DAYS - 1), era),
                 'drought': (era - dt.timedelta(days=SPI_DAYS - 1), era),
                 'drought_soil': (era - dt.timedelta(days=CLIMATE_DAYS - 1), era),
                 'drought_veg': (modis - dt.timedelta(days=16), modis),   # the two newest composites
@@ -458,6 +468,31 @@ def _drought_detail(day, lat, lon):
             'soil': None if v.get('soil') is None else round(v['soil'], 2),
             'vegetation': None if v.get('veg') is None else round(v['veg'], 2),
             'water': bool(v.get('water'))}
+
+
+def basin_anomalies(day=None):
+    """Basin-mean root-zone soil water and vegetation anomalies (z) of the
+    drought layer's windows, worked out once a day and kept with the tiles."""
+    day = day or today()
+    path = os.path.join(_day_dir(day), 'anomalies.json')
+    if os.path.exists(path):
+        with open(path, encoding='utf-8') as f:
+            return json.load(f)
+    meta = day_meta(day)
+    ee = _ee()
+    _, sm_z, veg_z, water = drought_components(ee, meta['windows'])
+    try:
+        v = ee.Image.cat([sm_z.rename('soil'), veg_z.rename('veg')]).updateMask(water.Not()).reduceRegion(
+            ee.Reducer.mean(), ee.Geometry(basin_outline()), 1000, maxPixels=1e9).getInfo()
+    except Exception as exc:
+        raise SentinelUnavailable(f'Earth Engine: {str(exc)[:200]}') from exc
+    out = {'soil_z': None if v.get('soil') is None else round(v['soil'], 2),
+           'veg_z': None if v.get('veg') is None else round(v['veg'], 2),
+           'soil_window': meta['windows']['drought_soil'], 'veg_window': meta['windows']['drought_veg']}
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(out, f)
+    return out
 
 
 def drought_detail(lat, lon):

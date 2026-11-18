@@ -8,6 +8,8 @@ import sys
 import polib
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from agronomy_pairs import AGRO_PAIRS  # noqa: E402
+from assistant_pairs import ASSISTANT_PAIRS  # noqa: E402
 from farmer_fr import FARMER_PAIRS  # noqa: E402
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -134,7 +136,11 @@ def main() -> None:
         "Content-Transfer-Encoding": "8bit",
     }
     seen = set()
-    for msgid, msgstr in PAIRS + FARMER_PAIRS:
+    pairs = PAIRS + FARMER_PAIRS + [(en, fr) for en, fr, _ in AGRO_PAIRS] + [(en, fr) for en, fr, _ in ASSISTANT_PAIRS]
+    # {% trans %} looks a text containing "%" up with the "%" doubled, while
+    # gettext() in Python uses it as is: register both spellings.
+    pairs += [(m.replace('%', '%%'), s.replace('%', '%%')) for m, s in pairs if '%' in m and '%%' not in m]
+    for msgid, msgstr in pairs:
         if msgid in seen:  # first translation wins (shared words like "Humidity")
             continue
         seen.add(msgid)

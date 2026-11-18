@@ -289,6 +289,68 @@
             vertical-align: 1px;
             background: var(--farm-accent, #f59e0b);
         }
+
+        /* ── Farmer lands table ── */
+        .farms-filter-control {
+            height: 2.5rem;
+            font-size: 0.875rem;
+            border-radius: 0.5rem;
+        }
+        .farms-filter-control:focus { outline: none; }
+        .farms-table th,
+        .farms-table td {
+            padding: 0.875rem 0.75rem;
+            vertical-align: middle;
+        }
+        .farms-table th { padding-top: 0; }
+        .farms-table th:first-child,
+        .farms-table td:first-child { padding-inline-start: 0; }
+        .farms-table th:last-child,
+        .farms-table td:last-child { padding-inline-end: 0; }
+        .farms-table .tabular-nums { font-variant-numeric: tabular-nums; }
+        .crop-badge {
+            width: 2rem;
+            height: 2rem;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            background: var(--crop-tint);
+            color: var(--crop-color);
+            box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--crop-color) 25%, transparent);
+        }
+        .crop-badge .material-symbols-outlined { font-size: 18px; }
+        .area-bar {
+            width: 4.5rem;
+            height: 4px;
+            border-radius: 9999px;
+            background: rgba(100, 116, 139, 0.18);
+            overflow: hidden;
+        }
+        .area-bar > span {
+            display: block;
+            height: 100%;
+            min-width: 2px;
+            border-radius: inherit;
+            background: #0f766e;
+        }
+        .irrigation-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            background: rgba(100, 116, 139, 0.12);
+            color: #64748b;
+        }
+        .irrigation-chip.irrigated { background: rgba(14, 165, 233, 0.14); color: #0369a1; }
+        .irrigation-chip .material-symbols-outlined { font-size: 14px; }
+        html.dark .irrigation-chip.irrigated { color: #7dd3fc; }
+        html.dark .area-bar > span { background: #2dd4bf; }
     </style>
 {% include "dashboard/_navbar_theme.html" %}
 <link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
@@ -341,7 +403,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-[10px] font-label font-bold uppercase text-on-surface-variant mb-1">{% trans "Total Farms" %}</p>
-                            <h3 class="font-headline font-bold text-2xl text-on-surface">{{ total_farms }}</h3>
+                            <h3 id="stat-total-farms" class="font-headline font-bold text-2xl text-on-surface">{{ total_farms }}</h3>
                         </div>
                         <span class="material-symbols-outlined text-primary text-2xl">agriculture</span>
                     </div>
@@ -350,7 +412,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-[10px] font-label font-bold uppercase text-on-surface-variant mb-1">{% trans "Farmers" %}</p>
-                            <h3 class="font-headline font-bold text-2xl text-on-surface">{{ farmers_count }}</h3>
+                            <h3 id="stat-farmers" class="font-headline font-bold text-2xl text-on-surface">{{ farmers_count }}</h3>
                         </div>
                         <span class="material-symbols-outlined text-secondary text-2xl">person</span>
                     </div>
@@ -359,7 +421,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-[10px] font-label font-bold uppercase text-on-surface-variant mb-1">{% trans "Total Area (ha)" %}</p>
-                            <h3 class="font-headline font-bold text-2xl text-on-surface">{{ total_area }}</h3>
+                            <h3 id="stat-total-area" class="font-headline font-bold text-2xl text-on-surface">{{ total_area }}</h3>
                         </div>
                         <span class="material-symbols-outlined text-on-surface-variant text-2xl">terrain</span>
                     </div>
@@ -368,7 +430,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-[10px] font-label font-bold uppercase text-on-surface-variant mb-1">{% trans "Irrigated Farms" %}</p>
-                            <h3 class="font-headline font-bold text-2xl text-on-surface">{{ irrigated_count }}</h3>
+                            <h3 id="stat-irrigated" class="font-headline font-bold text-2xl text-on-surface">{{ irrigated_count }}</h3>
                         </div>
                         <span class="material-symbols-outlined text-secondary text-2xl">water_drop</span>
                     </div>
@@ -469,33 +531,108 @@
                             <span class="material-symbols-outlined text-primary">map</span>
                             <h2 class="font-headline font-bold text-lg text-primary">{% trans "Farmer Lands & Plantings" %}</h2>
                         </div>
-                        <span class="text-xs text-on-surface-variant bg-surface-variant px-2.5 py-1 rounded-full font-medium">{{ farms|length }} {% trans "lands" %}</span>
+                        <span class="text-xs text-on-surface-variant bg-surface-variant px-2.5 py-1 rounded-full font-medium"><span id="farms-visible-count">{{ matching_count }}</span> {% trans "lands" %}</span>
                     </div>
 
+                    <!-- Filter bar: farmer name, crop, irrigation, ordering by surface -->
+                    <form method="get" id="farms-filter-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 mb-6 items-end" role="search">
+                        <div class="lg:col-span-4">
+                            <label for="farmer-filter" class="block text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-1">{% trans "Farmer" %}</label>
+                            <div class="relative">
+                                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg pointer-events-none">person_search</span>
+                                <input id="farmer-filter" name="farmer" type="search" list="farmer-names"
+                                       value="{{ farmer_query }}"
+                                       placeholder="{% trans 'Filter by farmer name' %}"
+                                       class="farms-filter-control border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary w-full pl-10 pr-3">
+                                <datalist id="farmer-names">
+                                    {% for name in farmer_names %}<option value="{{ name }}">{% endfor %}
+                                </datalist>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <label for="crop-filter" class="block text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-1">{% trans "Crop" %}</label>
+                            <select id="crop-filter" name="crop" class="farms-filter-control border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary w-full px-3">
+                                <option value="">{% trans "All crops" %}</option>
+                                {% for c in crop_choices %}
+                                <option value="{{ c.key }}" {% if crop_filter == c.key %}selected{% endif %}>{{ c.label }}</option>
+                                {% endfor %}
+                                {% if has_unplanted %}
+                                <option value="none" {% if crop_filter == 'none' %}selected{% endif %}>{% trans "Not planted" %}</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <label for="irrigation-filter" class="block text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-1">{% trans "Irrigation" %}</label>
+                            <select id="irrigation-filter" name="irrigation" class="farms-filter-control border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary w-full px-3">
+                                <option value="">{% trans "All" %}</option>
+                                <option value="irrigated" {% if irrigation_filter == 'irrigated' %}selected{% endif %}>{% trans "Irrigated" %}</option>
+                                <option value="rainfed" {% if irrigation_filter == 'rainfed' %}selected{% endif %}>{% trans "Rainfed" %}</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2">
+                            <label for="sort-filter" class="block text-[10px] font-label font-bold uppercase tracking-wider text-on-surface-variant mb-1">{% trans "Order by" %}</label>
+                            <select id="sort-filter" name="sort" class="farms-filter-control border border-outline-variant bg-surface-container-lowest text-on-surface focus:border-primary w-full px-3">
+                                <option value="area_desc" {% if sort == 'area_desc' %}selected{% endif %}>{% trans "Largest surface first" %}</option>
+                                <option value="area_asc" {% if sort == 'area_asc' %}selected{% endif %}>{% trans "Smallest surface first" %}</option>
+                                <option value="farmer_area" {% if sort == 'farmer_area' %}selected{% endif %}>{% trans "Farmer total surface" %}</option>
+                                <option value="newest" {% if sort == 'newest' %}selected{% endif %}>{% trans "Recently added" %}</option>
+                            </select>
+                        </div>
+                        <div class="lg:col-span-2 flex gap-2">
+                            <!-- Filters apply live; this button only matters if JavaScript is off. -->
+                            <noscript>
+                                <button type="submit" class="h-10 px-4 text-sm font-semibold rounded-lg bg-primary text-on-primary">{% trans "Filter" %}</button>
+                            </noscript>
+                            <a href="{{ request.path }}" id="farms-filter-clear"
+                               class="{% if not filters_active %}hidden {% endif %}w-full h-10 px-3 inline-flex items-center justify-center gap-1.5 text-sm rounded-lg border border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-colors">
+                                <span class="material-symbols-outlined text-lg">filter_alt_off</span>
+                                {% trans "Clear" %}
+                            </a>
+                        </div>
+                    </form>
+
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm">
+                        <table class="farms-table w-full min-w-[980px] table-fixed text-sm">
+                            <colgroup>
+                                <col style="width: 20%">
+                                <col style="width: 15%">
+                                <col style="width: 12%">
+                                <col style="width: 17%">
+                                <col style="width: 12%">
+                                <col style="width: 9%">
+                                <col style="width: 7%">
+                                <col style="width: 8%">
+                            </colgroup>
                             <thead>
-                                <tr class="border-b border-outline-variant text-left text-xs font-bold uppercase tracking-widest text-outline">
-                                    <th class="pb-3 pr-4">{% trans "Farm Name" %}</th>
-                                    <th class="pb-3 pr-4">{% trans "Farmer" %}</th>
-                                    <th class="pb-3 pr-4">{% trans "Region" %}</th>
-                                    <th class="pb-3 pr-4">{% trans "Crop Planted" %}</th>
-                                    <th class="pb-3 pr-4">{% trans "Area (ha)" %}</th>
-                                    <th class="pb-3 pr-4">{% trans "Sowing Date" %}</th>
-                                    <th class="pb-3 pr-4">{% trans "Irrigation" %}</th>
-                                    <th class="pb-3 text-right">{% trans "Added" %}</th>
+                                <tr class="border-b border-outline-variant text-[11px] font-bold uppercase tracking-widest text-outline">
+                                    <th class="text-left">{% trans "Farm Name" %}</th>
+                                    <th class="text-left">{% trans "Farmer" %}</th>
+                                    <th class="text-left">{% trans "Region" %}</th>
+                                    <th class="text-left">{% trans "Crop Planted" %}</th>
+                                    <th class="text-right">{% trans "Area (ha)" %}</th>
+                                    <th class="text-right">{% trans "Sowing Date" %}</th>
+                                    <th class="text-center">{% trans "Irrigation" %}</th>
+                                    <th class="text-right">{% trans "Added" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for farm in farms %}
-                                <tr class="border-b border-outline-variant/40 hover:bg-surface-container-low/50 transition-colors">
-                                    <td class="py-3.5 pr-4">
-                                        <div class="flex items-center gap-3">
+                                <tr class="farm-row border-b border-outline-variant/40 hover:bg-surface-container-low/50 transition-colors{% if not farm.match %} hidden{% endif %}"
+                                    data-farm-id="{{ farm.pk }}"
+                                    data-owner-id="{{ farm.owner_id }}"
+                                    data-owner="{{ farm.owner.username|lower }}"
+                                    data-farmer-search="{{ farm.farmer_search }}"
+                                    data-crop="{{ farm.crop }}"
+                                    data-irrigated="{% if farm.irrigated %}1{% else %}0{% endif %}"
+                                    data-area="{{ farm.area_ha|stringformat:'s' }}"
+                                    data-created="{{ farm.created_at|date:'U' }}">
+                                    <td>
+                                        <div class="flex items-center gap-3 min-w-0">
                                             <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                                                 {{ farm.name|first|upper }}
                                             </div>
-                                            <div>
-                                                <span class="font-medium text-on-surface">{{ farm.name }}</span>
+                                            <div class="min-w-0">
+                                                <span class="block font-medium text-on-surface truncate" title="{{ farm.name }}">{{ farm.name }}</span>
                                                 {% if farm.boundary %}
                                                 <span class="block text-[10px] text-on-surface-variant/70">{% trans "Mapped on satellite" %}</span>
                                                 {% else %}
@@ -504,77 +641,91 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3.5 pr-4">
-                                        <div class="flex items-center gap-3">
+                                    <td>
+                                        <div class="flex items-center gap-3 min-w-0">
                                             <div class="w-8 h-8 rounded-full bg-surface-variant flex items-center justify-center text-xs font-bold text-on-surface-variant shrink-0">
                                                 {{ farm.owner.username|first|upper }}
                                             </div>
-                                            <div>
-                                                <span class="font-medium text-on-surface">{{ farm.owner.username }}</span>
-                                                <span class="block text-[10px] text-on-surface-variant">{{ farm.owner.profile.get_role_display }}</span>
+                                            <div class="min-w-0">
+                                                <span class="block font-medium text-on-surface truncate" title="{{ farm.owner.username }}">{{ farm.owner.username }}</span>
+                                                <span class="owner-total block text-[10px] text-on-surface-variant tabular-nums{% if sort != 'farmer_area' %} hidden{% endif %}"><span class="owner-total-value">{{ farm.owner_total_ha|floatformat:2 }}</span> ha {% trans "in total" %}</span>
+                                                <span class="owner-role block text-[10px] text-on-surface-variant{% if sort == 'farmer_area' %} hidden{% endif %}">{{ farm.owner.profile.get_role_display }}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-3.5 pr-4">
+                                    <td>
                                         {% if farm.pk in ichkeul_farm_ids %}
-                                        <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant">
-                                            <span class="material-symbols-outlined text-[14px]">pin_drop</span>
-                                            {{ ichkeul_region_name }}
+                                        <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant min-w-0">
+                                            <span class="material-symbols-outlined text-[14px] shrink-0">pin_drop</span>
+                                            <span class="truncate">{{ ichkeul_region_name }}</span>
                                         </span>
                                         {% elif farm.region %}
-                                        <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant">
-                                            <span class="material-symbols-outlined text-[14px]">pin_drop</span>
-                                            {{ farm.region.name }}
+                                        <span class="inline-flex items-center gap-1 text-xs text-on-surface-variant min-w-0">
+                                            <span class="material-symbols-outlined text-[14px] shrink-0">pin_drop</span>
+                                            <span class="truncate">{{ farm.region.name }}</span>
                                         </span>
                                         {% else %}
                                         <span class="text-xs text-on-surface-variant/50">—</span>
                                         {% endif %}
                                     </td>
-                                    <td class="py-3.5 pr-4">
-                                        {% if farm.crop %}
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider
-                                            {% if farm.irrigated %}bg-secondary-container/40 text-on-secondary-container
-                                            {% else %}bg-surface-variant text-on-surface-variant{% endif %}">
-                                            <span class="material-symbols-outlined text-[14px] text-secondary">sprout</span>
-                                            {{ farm.crop_name|default:farm.crop }}
-                                        </span>
+                                    <td>
+                                        {% if farm.crop_info %}
+                                        <div class="flex items-center gap-2.5 min-w-0">
+                                            <span class="crop-badge" style="--crop-color: {{ farm.crop_info.color }}; --crop-tint: {{ farm.crop_info.tint }};">
+                                                <span class="material-symbols-outlined">{{ farm.crop_info.icon }}</span>
+                                            </span>
+                                            <div class="min-w-0">
+                                                <span class="block font-medium text-on-surface truncate">{{ farm.crop_info.label }}</span>
+                                                <span class="block text-[10px] text-on-surface-variant">{{ farm.crop_info.family_label }}</span>
+                                            </div>
+                                        </div>
                                         {% else %}
-                                        <span class="text-xs text-on-surface-variant/50">—</span>
+                                        <span class="inline-flex items-center gap-1.5 text-xs text-on-surface-variant/60 italic">
+                                            <span class="material-symbols-outlined text-[16px] not-italic">block</span>
+                                            {% trans "Not planted" %}
+                                        </span>
                                         {% endif %}
                                     </td>
-                                    <td class="py-3.5 pr-4">
-                                        <span class="font-mono text-xs text-on-surface">{{ farm.area_ha }}</span>
+                                    <td class="text-right">
+                                        <span class="font-mono text-xs text-on-surface tabular-nums">{{ farm.area_ha|floatformat:2 }}</span>
+                                        {% if max_area %}
+                                        <div class="area-bar ml-auto mt-1"><span style="width: {% if farm.match %}{% widthratio farm.area_ha max_area 100 %}{% else %}0{% endif %}%"></span></div>
+                                        {% endif %}
                                     </td>
-                                    <td class="py-3.5 pr-4">
+                                    <td class="text-right">
                                         {% if farm.sowing_date %}
-                                        <span class="font-mono text-xs text-on-surface">{{ farm.sowing_date|date:"M d, Y" }}</span>
+                                        <span class="font-mono text-xs text-on-surface tabular-nums">{{ farm.sowing_date|date:"M d, Y" }}</span>
                                         {% else %}
                                         <span class="text-xs text-on-surface-variant/50">—</span>
                                         {% endif %}
                                     </td>
-                                    <td class="py-3.5 pr-4 text-center">
+                                    <td class="text-center">
                                         {% if farm.irrigated %}
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-secondary-container/40 text-on-secondary-container">
-                                            <span class="material-symbols-outlined text-[14px] text-secondary">water_drop</span>
-                                            {% trans "Yes" %}
+                                        <span class="irrigation-chip irrigated" title="{% trans 'Irrigated' %}">
+                                            <span class="material-symbols-outlined">water_drop</span>{% trans "Yes" %}
                                         </span>
                                         {% else %}
-                                        <span class="text-xs text-on-surface-variant/50">{% trans "Rainfed" %}</span>
+                                        <span class="irrigation-chip" title="{% trans 'Rainfed' %}">
+                                            <span class="material-symbols-outlined">rainy</span>{% trans "Rainfed" %}
+                                        </span>
                                         {% endif %}
                                     </td>
-                                    <td class="py-3.5 text-right">
-                                        <span class="font-mono text-xs text-on-surface-variant">{{ farm.created_at|date:"M d, Y" }}</span>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="8" class="py-12 text-center">
-                                        <span class="material-symbols-outlined text-4xl text-outline-variant block mb-3">agriculture</span>
-                                        <p class="text-on-surface-variant text-sm">{% trans "No farmer lands found." %}</p>
-                                        <p class="text-[10px] text-on-surface-variant/50">{% trans "When a farmer adds their land from the farmer space, it will appear here." %}</p>
+                                    <td class="text-right">
+                                        <span class="font-mono text-xs text-on-surface-variant tabular-nums">{{ farm.created_at|date:"M d, Y" }}</span>
                                     </td>
                                 </tr>
                                 {% endfor %}
+                                <tr id="farms-empty-row"{% if matching_count %} class="hidden"{% endif %}>
+                                    <td colspan="8" class="py-12 text-center">
+                                        <span class="material-symbols-outlined text-4xl text-outline-variant block mb-3">agriculture</span>
+                                        {% if farms %}
+                                        <p class="text-on-surface-variant text-sm">{% trans "No lands match these filters." %}</p>
+                                        {% else %}
+                                        <p class="text-on-surface-variant text-sm">{% trans "No farmer lands found." %}</p>
+                                        <p class="text-[10px] text-on-surface-variant/50">{% trans "When a farmer adds their land from the farmer space, it will appear here." %}</p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -612,6 +763,150 @@
 <script defer src="{% static 'dashboard/js/map-tiles.js' %}"></script>
 
 <script defer src="{% static 'dashboard/js/dashboard.js' %}?v=20261110b"></script>
+
+<script>
+    // Live filtering for the farmer lands table: filters and ordering apply in
+    // the browser (no page reload). The URL is kept in sync so the current view
+    // can still be bookmarked or shared; the server renders that same state.
+    (function () {
+        var form = document.getElementById('farms-filter-form');
+        var tbody = document.querySelector('.farms-table tbody');
+        if (!form || !tbody) return;
+
+        var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr.farm-row'));
+        var emptyRow = document.getElementById('farms-empty-row');
+        var clearBtn = document.getElementById('farms-filter-clear');
+        var nameInput = form.elements.farmer;
+        var cropSelect = form.elements.crop;
+        var irrSelect = form.elements.irrigation;
+        var sortSelect = form.elements.sort;
+
+        var stats = {
+            farms: document.getElementById('stat-total-farms'),
+            farmers: document.getElementById('stat-farmers'),
+            area: document.getElementById('stat-total-area'),
+            irrigated: document.getElementById('stat-irrigated'),
+            count: document.getElementById('farms-visible-count')
+        };
+
+        rows.forEach(function (row, i) {
+            row._area = parseFloat(row.dataset.area) || 0;
+            row._created = parseInt(row.dataset.created, 10) || 0;
+            row._index = i;
+        });
+
+        function fmtArea(n) {
+            return (Math.round(n * 100) / 100).toFixed(2);
+        }
+
+        function apply(fromUser) {
+            var needle = nameInput.value.trim().toLowerCase();
+            var crop = cropSelect.value;
+            var irr = irrSelect.value;
+            var sort = sortSelect.value;
+
+            var visible = rows.filter(function (row) {
+                if (needle && row.dataset.farmerSearch.indexOf(needle) === -1) return false;
+                if (crop === 'none' ? row.dataset.crop !== '' : (crop && row.dataset.crop !== crop)) return false;
+                if (irr && row.dataset.irrigated !== (irr === 'irrigated' ? '1' : '0')) return false;
+                return true;
+            });
+
+            // Per-farmer surface among the visible farms.
+            var ownerTotal = {};
+            visible.forEach(function (row) {
+                ownerTotal[row.dataset.ownerId] = (ownerTotal[row.dataset.ownerId] || 0) + row._area;
+            });
+
+            var ordered = rows.slice();
+            ordered.sort(function (a, b) {
+                if (sort === 'area_asc') return a._area - b._area || a._index - b._index;
+                if (sort === 'newest') return b._created - a._created || a._index - b._index;
+                if (sort === 'farmer_area') {
+                    var ta = ownerTotal[a.dataset.ownerId] || 0;
+                    var tb = ownerTotal[b.dataset.ownerId] || 0;
+                    if (tb !== ta) return tb - ta;
+                    if (a.dataset.owner !== b.dataset.owner) return a.dataset.owner < b.dataset.owner ? -1 : 1;
+                    return b._area - a._area;
+                }
+                return b._area - a._area || a._index - b._index;
+            });
+
+            var maxArea = 0, totalArea = 0, irrigated = 0, owners = {};
+            visible.forEach(function (row) {
+                maxArea = Math.max(maxArea, row._area);
+                totalArea += row._area;
+                if (row.dataset.irrigated === '1') irrigated++;
+                owners[row.dataset.ownerId] = true;
+            });
+
+            var shown = new Set(visible);
+            ordered.forEach(function (row) {
+                var on = shown.has(row);
+                row.classList.toggle('hidden', !on);
+                var bar = row.querySelector('.area-bar > span');
+                if (bar) bar.style.width = (on && maxArea ? Math.round(row._area / maxArea * 100) : 0) + '%';
+                var total = row.querySelector('.owner-total');
+                var role = row.querySelector('.owner-role');
+                if (total) {
+                    total.classList.toggle('hidden', sort !== 'farmer_area');
+                    total.querySelector('.owner-total-value').textContent =
+                        (ownerTotal[row.dataset.ownerId] || 0).toFixed(2);
+                }
+                if (role) role.classList.toggle('hidden', sort === 'farmer_area');
+                tbody.insertBefore(row, emptyRow);
+            });
+
+            if (emptyRow) emptyRow.classList.toggle('hidden', visible.length > 0);
+            if (stats.farms) stats.farms.textContent = visible.length;
+            if (stats.count) stats.count.textContent = visible.length;
+            if (stats.farmers) stats.farmers.textContent = Object.keys(owners).length;
+            if (stats.irrigated) stats.irrigated.textContent = irrigated;
+            if (stats.area) stats.area.textContent = fmtArea(totalArea);
+
+            var active = !!(needle || crop || irr);
+            if (clearBtn) clearBtn.classList.toggle('hidden', !active);
+
+            // Keep the address bar in step without reloading.
+            var params = new URLSearchParams();
+            if (nameInput.value.trim()) params.set('farmer', nameInput.value.trim());
+            if (crop) params.set('crop', crop);
+            if (irr) params.set('irrigation', irr);
+            if (sort && sort !== 'area_desc') params.set('sort', sort);
+            var qs = params.toString();
+            try {
+                history.replaceState(null, '', window.location.pathname + (qs ? '?' + qs : ''));
+            } catch (e) { /* ignore */ }
+
+            // Map: show only the visible farms.
+            var ids = visible.map(function (row) { return row.dataset.farmId; });
+            window.__farmsVisibleIds = ids;
+            if (window.FarmsMap) window.FarmsMap.setVisible(ids, fromUser);
+        }
+
+        var typingTimer = null;
+        nameInput.addEventListener('input', function () {
+            window.clearTimeout(typingTimer);
+            typingTimer = window.setTimeout(function () { apply(true); }, 150);
+        });
+        [cropSelect, irrSelect, sortSelect].forEach(function (el) {
+            el.addEventListener('change', function () { apply(true); });
+        });
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            apply(true);
+        });
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                nameInput.value = '';
+                cropSelect.value = '';
+                irrSelect.value = '';
+                apply(true);
+            });
+        }
+    })();
+</script>
 
 <script>
     // Overlay every farmer land on the shared dashboard map. dashboard.js owns
@@ -749,14 +1044,13 @@
                 return;
             }
 
-            var drawn = 0;
-            var farmBounds = L.latLngBounds([]);
-
-            // The centroid dots only help at the wide basin view: once you zoom
-            // in, the field fills the screen and the dot sits on top of the
-            // crops, so the whole pin group is hidden from PIN_MAX_ZOOM upward.
+            // Colours follow each farm's position in the full list, so a farm
+            // keeps its colour while the table filters change.
             var PIN_MAX_ZOOM = 13;
+            var fields = L.layerGroup().addTo(farmsMap);
             var pins = L.layerGroup();
+            var entries = {};
+            var drawn = 0;
 
             farms.forEach(function (farm, i) {
                 // Places drawn without a boundary cannot be shown on the map.
@@ -773,7 +1067,7 @@
                         fillColor: color,
                         fillOpacity: 0.28
                     }
-                }).addTo(farmsMap);
+                });
 
                 // Leaflet's bindPopup only attaches to the layer it is called on
                 // and a GeoJSON group never receives clicks itself, so bind the
@@ -793,20 +1087,18 @@
                     );
                 });
 
-                farmBounds.extend(layer.getBounds());
-                farmBounds.extend(layer.getBounds());
-
                 // A visible pin at the middle of the field, so even a very small
                 // plot can be spotted from the default basin zoom level.
                 var centroid = farm.centroid || [layer.getBounds().getCenter().lat, layer.getBounds().getCenter().lng];
-                L.circleMarker([centroid[0], centroid[1]], {
+                var pin = L.circleMarker([centroid[0], centroid[1]], {
                     radius: 5,
                     color: '#ffffff',
                     weight: 2,
                     fillColor: color,
                     fillOpacity: 1
-                }).addTo(pins).bindPopup(popup, POPUP_OPTS);
+                }).bindPopup(popup, POPUP_OPTS);
 
+                entries[String(farm.id)] = { layer: layer, pin: pin };
                 drawn++;
             });
 
@@ -815,6 +1107,9 @@
                 return;
             }
 
+            // The centroid dots only help at the wide basin view: once you zoom
+            // in, the field fills the screen and the dot sits on top of the
+            // crops, so the whole pin group is hidden from PIN_MAX_ZOOM upward.
             var syncPins = function () {
                 var wideView = farmsMap.getZoom() < PIN_MAX_ZOOM;
                 if (wideView) {
@@ -824,18 +1119,43 @@
                 }
             };
             farmsMap.on('zoomend', syncPins);
-            syncPins();
 
-            // Zoom the shared map onto the fields instead of the whole basin.
-            // animate:false matters: dashboard.js calls invalidateSize() shortly
-            // after load, which would otherwise cancel an in-flight zoom.
-            var applyFit = function () {
+            var visibleBounds = L.latLngBounds([]);
+
+            // Zoom the shared map onto the visible fields instead of the whole
+            // basin. animate:false matters on first load: dashboard.js calls
+            // invalidateSize() shortly after, which would cancel a running zoom.
+            var applyFit = function (animate) {
+                if (!visibleBounds.isValid()) return;
                 farmsMap.invalidateSize();
-                farmsMap.fitBounds(farmBounds, { padding: [48, 48], maxZoom: 16, animate: false });
+                farmsMap.fitBounds(visibleBounds, { padding: [48, 48], maxZoom: 16, animate: !!animate });
             };
-            applyFit();
+
+            // Show only the given farm ids (strings); called by the table filter.
+            var setVisible = function (ids, animate) {
+                fields.clearLayers();
+                pins.clearLayers();
+                visibleBounds = L.latLngBounds([]);
+                ids.forEach(function (id) {
+                    var entry = entries[id];
+                    if (!entry) return;
+                    fields.addLayer(entry.layer);
+                    pins.addLayer(entry.pin);
+                    visibleBounds.extend(entry.layer.getBounds());
+                });
+                syncPins();
+                applyFit(animate);
+            };
+
+            window.FarmsMap = { setVisible: setVisible };
+
+            var initialIds = window.__farmsVisibleIds || farms
+                .filter(function (f) { return f.match !== false; })
+                .map(function (f) { return String(f.id); });
+            setVisible(initialIds, false);
+
             var refitAfterLayout = function () {
-                window.setTimeout(applyFit, 350);
+                window.setTimeout(function () { applyFit(false); }, 350);
             };
             if (document.readyState === 'complete') {
                 refitAfterLayout();

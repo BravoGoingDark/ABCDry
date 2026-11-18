@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 'django.contrib.gis',  # GeoDjango - uncomment only with PostGIS installed
     'rest_framework',
+    'rest_framework.authtoken',     # login tokens for the farmer mobile app
     'corsheaders',
     'import_export',
     'django_celery_beat',
@@ -63,6 +64,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     # Require login for all views by default (exemptions handled in middleware)
+    'agri_dashboard.middleware.ApiTokenMiddleware',
     'agri_dashboard.middleware.LoginRequiredMiddleware',
     'agri_dashboard.middleware.FarmerScopeMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -250,6 +252,25 @@ ASSISTANT_LLM_ENABLED = os.getenv('ASSISTANT_LLM_ENABLED', '1') not in ('0', 'fa
 # Ask one short question instead of guessing when the region or the topic of a
 # question is missing (ambiguous questions get one clickable follow-up list).
 ASSISTANT_CLARIFY = os.getenv('ASSISTANT_CLARIFY', '1') not in ('0', 'false', 'False')
+
+# Which model writes the free-text answers (documentation questions only:
+# farm and data answers are written by code and never reach a model).
+#   ollama  local model above (default; works offline)
+#   openai  any OpenAI-compatible chat API (Groq, Gemini, OpenRouter, Mistral,
+#           a paid provider...) with the local model as automatic fallback.
+# Only the question and the computed facts are sent, never the farmer's name,
+# account or coordinates. Check the provider's data terms before production.
+ASSISTANT_LLM_PROVIDER = os.getenv('ASSISTANT_LLM_PROVIDER', 'ollama')
+ASSISTANT_API_URL = os.getenv('ASSISTANT_API_URL', '')       # e.g. https://api.groq.com/openai/v1
+ASSISTANT_API_KEY = os.getenv('ASSISTANT_API_KEY', '')
+ASSISTANT_API_MODEL = os.getenv('ASSISTANT_API_MODEL', '')
+ASSISTANT_API_TIMEOUT = int(os.getenv('ASSISTANT_API_TIMEOUT', '20'))
+# A documentation question is only sent to the model when the retrieved
+# passages are at least this relevant (0-1); otherwise the assistant says it
+# has no information instead of guessing. Dense (embedding) and lexical
+# scores live on different scales.
+ASSISTANT_MIN_RELEVANCE_DENSE = float(os.getenv('ASSISTANT_MIN_RELEVANCE_DENSE', '0.55'))
+ASSISTANT_MIN_RELEVANCE_LEXICAL = float(os.getenv('ASSISTANT_MIN_RELEVANCE_LEXICAL', '0.25'))
 
 # ============== AgroAI assistant RAG (docs + live data) ==============
 # Retrieval augments the assistant with chunks of docs/*.md, the crop knowledge

@@ -2795,8 +2795,19 @@ msgstr "هذه الطبقة غير متاحة حاليًا."
 msgid "Zoom in to see this layer."
 msgstr "كبّر الخريطة لرؤية هذه الطبقة."
 
-msgid "About 10 km resolution, smoothed. Click the map for the value."
-msgstr "دقة تقارب 10 كم، مُنعّمة. انقر على الخريطة لمعرفة القيمة."
+msgid ""
+"ERA5-Land rain, smoothed between its 9 km pixels: no finer rain data exists."
+" Click the map for the value."
+msgstr ""
+"أمطار ERA5-Land، مُنعّمة بين بكسلاتها البالغة 9 كم: لا توجد بيانات أمطار "
+"أدق. انقر على الخريطة لمعرفة القيمة."
+
+msgid ""
+"ERA5-Land temperature corrected for terrain height (cooler on hills, warmer "
+"in valleys), about 90 m detail. Click the map for the value."
+msgstr ""
+"حرارة ERA5-Land مصحّحة حسب الارتفاع (أبرد على التلال وأدفأ في الأودية)، بدقة"
+" تقارب 90 م. انقر على الخريطة لمعرفة القيمة."
 
 msgid ""
 "Last 3 months of rain compared with the same months in the 30 previous "
@@ -2897,3 +2908,3257 @@ msgstr "الغطاء النباتي"
 
 msgid "Mild"
 msgstr "خفيف"
+
+msgid "What's driving risk?"
+msgstr "ما الذي يحدد الخطر؟"
+
+msgid "Method"
+msgstr "المنهجية"
+
+msgid "Sets the score"
+msgstr "يحدد الدرجة"
+
+msgid ""
+"Risk comes from SPI-3 alone: 10 when SPI-3 is 0 or above, 40 at −1, 60 at "
+"−1.5, 80 at −2, 100 at −3."
+msgstr ""
+"يأتي الخطر من مؤشر SPI-3 وحده: 10 عندما يكون SPI-3 صفرًا أو أكثر، و40 عند "
+"−1، و60 عند −1.5، و80 عند −2، و100 عند −3."
+
+msgid "Other signals to watch (not in the score)"
+msgstr "إشارات أخرى للمراقبة (خارج الدرجة)"
+
+msgid "wetter / cooler"
+msgstr "أرطب / أبرد"
+
+msgid "normal"
+msgstr "عادي"
+
+msgid "drier / hotter"
+msgstr "أجف / أحر"
+
+msgid "Insight"
+msgstr "خلاصة"
+
+msgid "Rainfall, last 90 days"
+msgstr "الأمطار، آخر 90 يومًا"
+
+msgid "Rainfall, last 30 days"
+msgstr "الأمطار، آخر 30 يومًا"
+
+msgid "Temperature, last 30 days"
+msgstr "الحرارة، آخر 30 يومًا"
+
+msgid "Evaporative demand (ET0), 30 days"
+msgstr "الطلب التبخيري (ET0)، 30 يومًا"
+
+msgid "Soil moisture, 0–28 cm"
+msgstr "رطوبة التربة، 0–28 سم"
+
+msgid "of normal"
+msgstr "من المعدل"
+
+msgid "vs normal"
+msgstr "مقارنة بالمعدل"
+
+msgid "near normal"
+msgstr "قريب من المعدل"
+
+msgid "slightly"
+msgstr "قليلًا"
+
+msgid "clearly"
+msgstr "بوضوح"
+
+msgid "strongly"
+msgstr "بشدة"
+
+msgid "drier"
+msgstr "أجف"
+
+msgid "wetter"
+msgstr "أرطب"
+
+msgid "hotter"
+msgstr "أحر"
+
+msgid "cooler"
+msgstr "أبرد"
+
+msgid "higher"
+msgstr "أعلى"
+
+msgid "lower"
+msgstr "أدنى"
+
+msgid "sd"
+msgstr "انحراف"
+
+msgid "Measured up to"
+msgstr "مقاس حتى"
+
+msgid "Breakdown not available for this prediction."
+msgstr "التفصيل غير متاح لهذا التوقع."
+
+msgid "Soil and vegetation need Earth Engine, which is unreachable right now."
+msgstr "تتطلب التربة والغطاء النباتي Earth Engine، وهو غير متاح حاليًا."
+
+msgid ""
+"Rain over the last 90 days is __PCT__ of normal (SPI-3 __SPI__), so drought "
+"risk is __LEVEL__ (__RISK__/100)."
+msgstr ""
+"بلغت أمطار آخر 90 يومًا __PCT__ من المعدل (SPI-3 __SPI__)، لذا فخطر الجفاف "
+"__LEVEL__ (__RISK__/100)."
+
+msgid "Watch: __LIST__."
+msgstr "للمراقبة: __LIST__."
+
+msgid "No other signal points toward drought."
+msgstr "لا توجد إشارة أخرى تدل على الجفاف."
+
+msgid "Filter by farmer name"
+msgstr "تصفية حسب اسم الفلاح"
+
+msgid "Clear"
+msgstr "مسح"
+
+msgid "No lands match this farmer name."
+msgstr "لا توجد أراضٍ تطابق اسم هذا الفلاح."
+
+msgid "All crops"
+msgstr "كل المحاصيل"
+
+msgid "Not planted"
+msgstr "غير مزروعة"
+
+msgid "Rainfed"
+msgstr "بعلية"
+
+msgid "Order by"
+msgstr "الترتيب حسب"
+
+msgid "Largest surface first"
+msgstr "الأكبر مساحة أولاً"
+
+msgid "Smallest surface first"
+msgstr "الأصغر مساحة أولاً"
+
+msgid "Farmer total surface"
+msgstr "المساحة الإجمالية للفلاح"
+
+msgid "Recently added"
+msgstr "المضافة حديثًا"
+
+msgid "in total"
+msgstr "إجمالاً"
+
+msgid "No lands match these filters."
+msgstr "لا توجد أراضٍ تطابق هذه المرشحات."
+
+msgid "Cereal"
+msgstr "حبوب"
+
+msgid "Legume"
+msgstr "بقوليات"
+
+msgid "Vegetable"
+msgstr "خضر"
+
+msgid "Tree crop"
+msgstr "أشجار مثمرة"
+
+msgid "Other"
+msgstr "أخرى"
+
+msgid "Irrigation method"
+msgstr "طريقة الري"
+
+msgid "Drip"
+msgstr "التنقيط"
+
+msgid "Surface / furrow"
+msgstr "الري السطحي / بالخطوط"
+
+msgid "Water flow for the whole farm (m³/hour)"
+msgstr "تدفق الماء للمزرعة كلها (م³/ساعة)"
+
+msgid "Optional. Lets us tell you how many hours to run the pump."
+msgstr "اختياري. يتيح لنا أن نخبرك بعدد ساعات تشغيل المضخة."
+
+msgid "Next watering"
+msgstr "الري القادم"
+
+msgid "Tomorrow"
+msgstr "غدًا"
+
+msgid "In {n} days"
+msgstr "بعد {n} أيام"
+
+msgid "Method & flow"
+msgstr "الطريقة والتدفق"
+
+msgid "Water to apply"
+msgstr "الماء الواجب إضافته"
+
+msgid "Per hectare"
+msgstr "للهكتار"
+
+msgid "Whole farm"
+msgstr "المزرعة كلها"
+
+msgid "Pump time"
+msgstr "مدة الضخ"
+
+msgid ""
+"{n} mm reach the roots; the rest is lost by the method ({e}% efficient)."
+msgstr "يصل {n} مم إلى الجذور، والباقي تفقده طريقة الري (كفاءة {e}%)."
+
+msgid "Add your water flow in “Method & flow” to get the pump time."
+msgstr "أضف تدفق الماء في «الطريقة والتدفق» لمعرفة مدة الضخ."
+
+msgid ""
+"No watering needed in the next 16 days: the soil and the expected rain cover"
+" the crop."
+msgstr ""
+"لا حاجة للري خلال الأيام الـ16 القادمة: التربة والأمطار المتوقعة تكفي "
+"المحصول."
+
+msgid "Not needed"
+msgstr "غير ضروري"
+
+msgid "next 16 days"
+msgstr "الأيام الـ16 القادمة"
+
+msgid "Water early in the morning (less evaporation)"
+msgstr "اسقِ في الصباح الباكر (تبخر أقل)"
+
+msgid "Windy day: run sprinklers at dawn while the wind is calm"
+msgstr "يوم عاصف: شغّل الرشاشات عند الفجر حين تهدأ الرياح"
+
+msgid "Very hot day: never water at midday"
+msgstr "يوم شديد الحرارة: لا تسقِ أبدًا وقت الظهيرة"
+
+msgid "The crop is already short of water: do not delay"
+msgstr "المحصول يعاني نقص الماء: لا تؤخر الري"
+
+msgid ""
+"Small dose for surface irrigation: you can wait a day or two and give more "
+"at once"
+msgstr ""
+"جرعة صغيرة للري السطحي: يمكنك الانتظار يومًا أو يومين وإعطاء كمية أكبر دفعة "
+"واحدة"
+
+msgid "Water in the soil now"
+msgstr "الماء في التربة الآن"
+
+msgid "water here"
+msgstr "اسقِ هنا"
+
+msgid "crop suffers"
+msgstr "المحصول يعاني"
+
+msgid "of the water the roots can use"
+msgstr "من الماء الذي تستطيع الجذور استعماله"
+
+msgid "Soil has enough water"
+msgstr "في التربة ماء كافٍ"
+
+msgid "Watering due soon"
+msgstr "موعد الري قريب"
+
+msgid "Water today"
+msgstr "اسقِ اليوم"
+
+msgid "The crop is short of water"
+msgstr "المحصول ينقصه الماء"
+
+msgid "No crop in the field now"
+msgstr "لا يوجد محصول في الحقل الآن"
+
+msgid "I watered today"
+msgstr "سقيت اليوم"
+
+msgid "or I last watered on"
+msgstr "أو آخر ري كان في"
+
+msgid "Watering saved: the plan now starts from it"
+msgstr "تم حفظ الري: الخطة تبدأ منه الآن"
+
+msgid "The plan starts from your last watering on"
+msgstr "تبدأ الخطة من آخر ري لك في"
+
+msgid ""
+"The plan starts from sowing (moist soil at sowing) and assumes you followed "
+"it since. Tell us your last watering for exact dates."
+msgstr ""
+"تبدأ الخطة من الزرع (تربة رطبة عند الزرع) وتفترض أنك اتبعتها منذ ذلك الحين. "
+"أخبرنا بآخر ري لتحصل على مواعيد دقيقة."
+
+msgid ""
+"We do not know when you last watered, so we assume you followed this plan. "
+"Tell us your last watering for exact dates."
+msgstr ""
+"لا نعرف متى سقيت آخر مرة، لذلك نفترض أنك اتبعت هذه الخطة. أخبرنا بآخر ري "
+"لتحصل على مواعيد دقيقة."
+
+msgid ""
+"Your farm is marked “rain only”: the soil is followed with rain alone, and "
+"the waterings shown are what a supplemental irrigation would need."
+msgstr ""
+"مزرعتك مسجلة «مطرية فقط»: نتابع التربة بالمطر وحده، والريّات المعروضة هي ما "
+"يحتاجه ري تكميلي."
+
+msgid "Without watering, the crop starts to suffer from"
+msgstr "بدون ري، يبدأ المحصول في المعاناة ابتداءً من"
+
+msgid "Without watering, the crop stays comfortable for the next 16 days."
+msgstr "بدون ري، يبقى المحصول مرتاحًا خلال الأيام الـ16 القادمة."
+
+msgid "Watering plan — next 16 days"
+msgstr "خطة الري — الأيام الـ16 القادمة"
+
+msgid "Day by day"
+msgstr "يومًا بيوم"
+
+msgid "soil water"
+msgstr "ماء التربة"
+
+msgid "watering level"
+msgstr "مستوى الري"
+
+msgid "crop use (mm)"
+msgstr "استهلاك المحصول (مم)"
+
+msgid "Rain expected: watering postponed"
+msgstr "أمطار متوقعة: تأجيل الري"
+
+msgid "Next 16 days"
+msgstr "الأيام الـ16 القادمة"
+
+msgid "Crop water use"
+msgstr "استهلاك المحصول للماء"
+
+msgid "Useful rain"
+msgstr "المطر المفيد"
+
+msgid "Coming months (average year)"
+msgstr "الأشهر القادمة (سنة متوسطة)"
+
+msgid "Month"
+msgstr "الشهر"
+
+msgid "Waterings"
+msgstr "عدد الريّات"
+
+msgid "Every"
+msgstr "كل"
+
+msgid "Dose (mm)"
+msgstr "الجرعة (مم)"
+
+msgid "No crop in the field"
+msgstr "لا يوجد محصول في الحقل"
+
+msgid "Rest of the season"
+msgstr "بقية الموسم"
+
+msgid "you declared"
+msgstr "صرّحت بـ"
+
+msgid ""
+"Your declared water is less than the remaining need: keep it for the most "
+"sensitive stages (flowering and fruit set)."
+msgstr ""
+"الماء الذي صرّحت به أقل من الحاجة المتبقية: احتفظ به للمراحل الأكثر حساسية "
+"(الإزهار والعقد)."
+
+msgid "How this is calculated"
+msgstr "كيف يُحسب هذا"
+
+msgid ""
+"FAO-56 daily soil water balance: crop water use (Kc × reference evaporation)"
+" minus useful rain, from the observed weather of the last 60 days and the "
+"16-day forecast at your parcel."
+msgstr ""
+"الموازنة المائية اليومية للتربة وفق FAO-56: استهلاك المحصول (Kc × التبخر-"
+"النتح المرجعي) ناقص المطر المفيد، من الطقس المرصود خلال آخر 60 يومًا وتوقعات"
+" 16 يومًا في قطعتك."
+
+msgid "Efficiency (water reaching the roots)"
+msgstr "الكفاءة (الماء الذي يصل إلى الجذور)"
+
+msgid "Root depth"
+msgstr "عمق الجذور"
+
+msgid "Water the root zone can hold"
+msgstr "الماء الذي تحفظه منطقة الجذور"
+
+msgid "Easily available water"
+msgstr "الماء الميسّر"
+
+msgid "We water when the crop has used"
+msgstr "نسقي عندما يستهلك المحصول"
+
+msgid "Crop coefficient (Kc)"
+msgstr "المعامل المحصولي (Kc)"
+
+msgid "Soil water capacity"
+msgstr "سعة التربة للماء"
+
+msgid "your parcel soil (SoilGrids)"
+msgstr "تربة قطعتك (SoilGrids)"
+
+msgid "the region soil"
+msgstr "تربة المنطقة"
+
+msgid "typical value for this soil type"
+msgstr "قيمة نموذجية لهذا النوع من التربة"
+
+msgid ""
+"Choose your irrigation method in “Method & flow” for exact amounts "
+"(sprinkler is assumed)."
+msgstr "اختر طريقة الري في «الطريقة والتدفق» لكميات دقيقة (نفترض الري بالرش)."
+
+msgid "Not sown yet: sowing planned on"
+msgstr "لم يُزرع بعد: الزرع مبرمج في"
+
+msgid "The season is over: harvest was expected on"
+msgstr "انتهى الموسم: كان الحصاد متوقعًا في"
+
+msgid "No sowing date given: we assumed"
+msgstr "لم يُحدد تاريخ الزرع: افترضنا"
+
+msgid "Last two weeks before harvest: stop watering so the crop ripens."
+msgstr "آخر أسبوعين قبل الحصاد: أوقف الري لينضج المحصول."
+
+msgid "Tell us what is growing on this farm to get a watering plan."
+msgstr "أخبرنا بما يُزرع في هذه المزرعة لتحصل على خطة ري."
+
+msgid ""
+"Weather data is unavailable right now, so the day-by-day plan cannot be "
+"computed. The monthly guide below still applies."
+msgstr ""
+"بيانات الطقس غير متاحة حاليًا، لذا لا يمكن حساب الخطة اليومية. يبقى الدليل "
+"الشهري أدناه صالحًا."
+
+msgid "Establishment"
+msgstr "التأسيس"
+
+msgid "Growing"
+msgstr "النمو"
+
+msgid "Full canopy (peak need)"
+msgstr "اكتمال الغطاء النباتي (ذروة الحاجة)"
+
+msgid "Maturation"
+msgstr "النضج"
+
+msgid "Tree / perennial"
+msgstr "شجرة / معمّر"
+
+msgid "About these results"
+msgstr "حول هذه النتائج"
+
+msgid "Best now"
+msgstr "الأفضل الآن"
+
+msgid "Calendar"
+msgstr "الرزنامة"
+
+msgid "Pests"
+msgstr "الآفات"
+
+msgid "Now"
+msgstr "الآن"
+
+msgid "16 days"
+msgstr "16 يومًا"
+
+msgid "Months"
+msgstr "الأشهر"
+
+msgid "Details"
+msgstr "التفاصيل"
+
+msgid "Alerts"
+msgstr "التنبيهات"
+
+msgid "Another day"
+msgstr "يوم آخر"
+
+msgid "When did you last water? It makes the dates exact."
+msgstr "متى سقيت آخر مرة؟ يجعل ذلك المواعيد دقيقة."
+
+msgid "Early morning"
+msgstr "صباحًا باكرًا"
+
+msgid "Windy"
+msgstr "رياح"
+
+msgid "Very hot"
+msgstr "حرّ شديد"
+
+msgid "Urgent"
+msgstr "عاجل"
+
+msgid "Small dose"
+msgstr "جرعة صغيرة"
+
+msgid "Nothing urgent today"
+msgstr "لا شيء عاجل اليوم"
+
+msgid "See all"
+msgstr "عرض الكل"
+
+msgid "No alerts this week."
+msgstr "لا توجد تنبيهات هذا الأسبوع."
+
+msgid "Plan"
+msgstr "الخطة"
+
+msgid "Tap any crop to choose it, even outside its season."
+msgstr "اضغط على أي محصول لاختياره، حتى خارج موسمه."
+
+msgid "{m} is not the usual sowing time."
+msgstr "{m} ليس الوقت المعتاد للزراعة."
+
+msgid "Usual sowing months"
+msgstr "أشهر الزراعة المعتادة"
+
+msgid "Here, sowing now scores as well or better in our model."
+msgstr "هنا، الزراعة الآن تعطي نتيجة مماثلة أو أفضل في نموذجنا."
+
+msgid "Sow now"
+msgstr "ازرع الآن"
+
+msgid "Wait for the season"
+msgstr "انتظر الموسم"
+
+msgid "in {n} months"
+msgstr "بعد {n} أشهر"
+
+msgid "next month"
+msgstr "الشهر القادم"
+
+msgid "Best result"
+msgstr "أفضل نتيجة"
+
+msgid "Expected result"
+msgstr "النتيجة المتوقعة"
+
+msgid "about {p}% of a well-timed crop"
+msgstr "حوالي {p}% من محصول مزروع في وقته"
+
+msgid "Main problem"
+msgstr "المشكلة الرئيسية"
+
+msgid "Irrigation water"
+msgstr "مياه الري"
+
+msgid "Very likely to fail: we advise against sowing now."
+msgstr "احتمال الفشل كبير جدًا: لا ننصح بالزراعة الآن."
+
+msgid "Sow today"
+msgstr "ازرع اليوم"
+
+msgid "Plan for {m}"
+msgstr "خطط لشهر {m}"
+
+msgid "Or grow something that fits this month"
+msgstr "أو ازرع محصولًا يناسب هذا الشهر"
+
+msgid ""
+"Trees are best planted in {w}. Planted now, young plants need extra water "
+"and shade to take root."
+msgstr ""
+"يُفضَّل غرس الأشجار في {w}. إذا غُرست الآن، تحتاج الشتلات الصغيرة إلى ماء "
+"وظل إضافيين لتتجذّر."
+
+msgid ""
+"Scores come from the same climate and soil model as the crop list, for an "
+"average year."
+msgstr ""
+"الدرجات مأخوذة من نموذج المناخ والتربة نفسه المستخدم في قائمة المحاصيل، لسنة"
+" متوسطة."
+
+msgid "Best month"
+msgstr "أفضل شهر"
+
+msgid "To do"
+msgstr "المهام"
+
+msgid "Nothing to do on this farm today."
+msgstr "لا شيء للقيام به في هذه الضيعة اليوم."
+
+msgid "Why"
+msgstr "لماذا"
+
+msgid "How"
+msgstr "كيف"
+
+msgid "Question"
+msgstr "سؤال"
+
+msgid "Coming up"
+msgstr "قريبًا"
+
+msgid "{n} days late"
+msgstr "متأخر {n} أيام"
+
+msgid "Answer so we can update your plan"
+msgstr "أجب حتى نحدّث خطتك"
+
+msgid "Yes, I watered"
+msgstr "نعم، سقيت"
+
+msgid "No, not yet"
+msgstr "لا، ليس بعد"
+
+msgid "Done: {mm} mm given"
+msgstr "تم: أعطيت {mm} مم"
+
+msgid "Other amount"
+msgstr "كمية أخرى"
+
+msgid "Not today"
+msgstr "ليس اليوم"
+
+msgid "Yes, done"
+msgstr "نعم، تم"
+
+msgid "No"
+msgstr "لا"
+
+msgid "Done"
+msgstr "تم"
+
+msgid "I checked"
+msgstr "تفقدت الحقل"
+
+msgid "Hide"
+msgstr "إخفاء"
+
+msgid "Yes"
+msgstr "نعم"
+
+msgid "When?"
+msgstr "متى؟"
+
+msgid "Water given (mm = L/m²), empty if you filled the soil"
+msgstr "الماء المعطى (مم = لتر/م²)، اتركه فارغًا إذا ملأت التربة"
+
+msgid "Saved: your plan is updated"
+msgstr "تم الحفظ: خطتك محدّثة"
+
+msgid "Did you water since {since}?"
+msgstr "هل سقيت منذ {since}؟"
+
+msgid "When did you last water this farm?"
+msgstr "متى سقيت هذه الضيعة آخر مرة؟"
+
+msgid "Water {mm} mm ({m3} m³)"
+msgstr "اسقِ {mm} مم ({m3} م³)"
+
+msgid "Did you apply {product}?"
+msgstr "هل وضعت {product}؟"
+
+msgid "Apply {product}"
+msgstr "ضع {product}"
+
+msgid "Check the field for {name}"
+msgstr "تفقّد الحقل بحثًا عن {name}"
+
+msgid "Have you sown? Tell us the date"
+msgstr "هل زرعت؟ أخبرنا بالتاريخ"
+
+msgid "Harvest around {date}"
+msgstr "الحصاد حوالي {date}"
+
+msgid "Have you harvested?"
+msgstr "هل حصدت؟"
+
+msgid ""
+"Watering was due on {due}. We have no watering from you since, so the soil "
+"kept drying: it is at {pct} now (water at {thr})."
+msgstr ""
+"كان السقي مستحقًا يوم {due}. لم تسجّل أي سقي منذ ذلك الحين، لذا استمرت "
+"التربة في الجفاف: هي الآن عند {pct} (السقي عند {thr})."
+
+msgid "If you did not water, the crop has been short of water since {date}."
+msgstr "إذا لم تسقِ، فالمحصول يعاني نقص الماء منذ {date}."
+
+msgid ""
+"We do not know your waterings, so we assume you followed the plan. Your real"
+" dates make every next date and amount exact."
+msgstr ""
+"لا نعرف مواعيد سقيك، لذا نفترض أنك اتبعت الخطة. تواريخك الحقيقية تجعل "
+"المواعيد والكميات القادمة دقيقة."
+
+msgid ""
+"Water in the soil: {pct} of what the roots can use. It reaches the watering "
+"level ({thr}) on {date}."
+msgstr ""
+"الماء في التربة: {pct} مما تستطيع الجذور استعماله. يصل إلى مستوى السقي "
+"({thr}) يوم {date}."
+
+msgid "Growth stage: {stage}. The crop uses about {mm} mm of water a day."
+msgstr "مرحلة النمو: {stage}. يستهلك المحصول حوالي {mm} مم من الماء يوميًا."
+
+msgid ""
+"Water in the soil: {pct} of what the roots can use, already below the "
+"watering level ({thr})."
+msgstr ""
+"الماء في التربة: {pct} مما تستطيع الجذور استعماله، وهو أقل من مستوى السقي "
+"({thr})."
+
+msgid ""
+"You told us the watering due on {due} was not done: this dose catches up."
+msgstr "أخبرتنا أن سقي يوم {due} لم يتم: هذه الكمية تعوّض التأخير."
+
+msgid "Rain is expected on {date}: a watering was moved."
+msgstr "يُتوقع مطر يوم {date}: تم تأجيل سقية."
+
+msgid ""
+"If you skip the waterings, the crop suffers from {date} ({days} days in the "
+"next 16) and about {risk} of the harvest is at risk."
+msgstr ""
+"إذا تخطيت السقي، يعاني المحصول ابتداءً من {date} ({days} أيام خلال الـ16 "
+"يومًا القادمة) ويصبح حوالي {risk} من المحصول في خطر."
+
+msgid "{stage}: the crop takes up this nutrient now."
+msgstr "{stage}: يمتص المحصول هذا العنصر الآن."
+
+msgid "Rainy, mild days are coming: they favour {name}."
+msgstr "أيام ممطرة ومعتدلة قادمة: تساعد على ظهور {name}."
+
+msgid "Warm, humid days are coming: they favour {name}."
+msgstr "أيام دافئة ورطبة قادمة: تساعد على ظهور {name}."
+
+msgid "Hot, dry days are coming: they favour {name}."
+msgstr "أيام حارة وجافة قادمة: تساعد على ظهور {name}."
+
+msgid "Warm days are coming: they favour {name}."
+msgstr "أيام دافئة قادمة: تساعد على ظهور {name}."
+
+msgid ""
+"We assumed sowing around {date}. Your real date sets the crop stage, the "
+"water need and the fertiliser dates."
+msgstr ""
+"افترضنا أن الزرع حوالي {date}. تاريخك الحقيقي يحدد مرحلة المحصول وحاجته "
+"للماء ومواعيد التسميد."
+
+msgid "The crop is ripening."
+msgstr "المحصول في مرحلة النضج."
+
+msgid ""
+"Harvest was expected on {date}. Once you tell us, the watering reminders "
+"stop."
+msgstr "كان الحصاد متوقعًا يوم {date}. بمجرد أن تخبرنا، تتوقف تذكيرات السقي."
+
+msgid "If not, water today: {dose} mm."
+msgstr "إن لم تفعل، اسقِ اليوم: {dose} مم."
+
+msgid ""
+"{mm} L per m², that is {m3ha} m³ per hectare and {m3} m³ for the whole farm."
+msgstr "{mm} لتر لكل م²، أي {m3ha} م³ للهكتار و{m3} م³ للضيعة كلها."
+
+msgid ""
+"Drip: run the lines until the dose is given and check that every dripper "
+"flows."
+msgstr "التنقيط: شغّل الخطوط حتى تكتمل الكمية وتأكد أن كل منقّط يعمل."
+
+msgid ""
+"Sprinkler: water at dawn or in the evening with little wind, and move the "
+"lines so the whole field gets the dose."
+msgstr ""
+"الرش: اسقِ عند الفجر أو المساء مع رياح خفيفة، وانقل الخطوط حتى يأخذ كل الحقل"
+" الكمية."
+
+msgid ""
+"Surface: fill the furrows or basins in one go and stop when the water "
+"reaches the end."
+msgstr ""
+"السقي السطحي: املأ الأخاديد أو الأحواض دفعة واحدة وتوقف عندما يصل الماء إلى "
+"النهاية."
+
+msgid "Run the pump about {h} h."
+msgstr "شغّل المضخة حوالي {h} ساعة."
+
+msgid "Dose: {rate}."
+msgstr "الكمية: {rate}."
+
+msgid ""
+"Heavy rain is expected on {date}: apply after it, not before, or the "
+"nitrogen is washed away."
+msgstr ""
+"يُتوقع مطر غزير يوم {date}: ضع السماد بعده لا قبله، وإلا جرف الماء الآزوت."
+
+msgid ""
+"Light rain is expected on {date}: apply just before it so it dissolves into "
+"the soil."
+msgstr "يُتوقع مطر خفيف يوم {date}: ضع السماد قبله مباشرة ليذوب في التربة."
+
+msgid "Apply just before the watering of {date} so it reaches the roots."
+msgstr "ضع السماد قبل سقية يوم {date} مباشرة ليصل إلى الجذور."
+
+msgid ""
+"No rain expected and the farm is not irrigated: nitrogen on dry soil is not "
+"taken up, so wait for rain if you can."
+msgstr ""
+"لا مطر متوقع والضيعة غير مسقية: الآزوت على تربة جافة لا يُمتص، فانتظر المطر "
+"إن أمكن."
+
+msgid ""
+"If not, it is often still useful within two weeks of this stage: ask your "
+"CRDA office."
+msgstr ""
+"إن لم تفعل، فغالبًا ما يبقى مفيدًا خلال أسبوعين من هذه المرحلة: استشر "
+"المندوبية الجهوية للتنمية الفلاحية."
+
+msgid "Look for: {text}"
+msgstr "ابحث عن: {text}"
+
+msgid "Prevention: {text}"
+msgstr "الوقاية: {text}"
+
+msgid "If you find it: {text}"
+msgstr "إذا وجدته: {text}"
+
+msgid "No more watering: let the crop dry down."
+msgstr "لا مزيد من السقي: اترك المحصول يجف."
+
+msgid "Pick as the fruits ripen and keep watering lightly between pickings."
+msgstr "اقطف الثمار كلما نضجت وواصل السقي الخفيف بين القطفات."
+
+msgid ""
+"Large catch-up dose: split it over 2 or 3 days so the soil can absorb it"
+msgstr "كمية تعويض كبيرة: قسّمها على يومين أو ثلاثة حتى تمتصها التربة"
+
+msgid "Split it"
+msgstr "قسّمها"
+
+msgid "What changes with your choice"
+msgstr "ما الذي يتغير حسب اختيارك"
+
+msgid "If you follow the plan"
+msgstr "إذا اتبعت الخطة"
+
+msgid "If you do not water"
+msgstr "إذا لم تسقِ"
+
+msgid "days of water stress"
+msgstr "أيام إجهاد مائي"
+
+msgid "of the harvest at risk"
+msgstr "من المحصول في خطر"
+
+msgid "water to give"
+msgstr "ماء يجب إعطاؤه"
+
+msgid ""
+"Last {n} days: the crop was short of water {d} days ({s} less water than it "
+"needed), about {r} of the harvest lost."
+msgstr ""
+"آخر {n} يومًا: عانى المحصول من نقص الماء {d} أيام ({s} ماء أقل من حاجته)، "
+"وضاع حوالي {r} من المحصول."
+
+msgid "Last {n} days: thanks to your waterings the crop had enough water."
+msgstr "آخر {n} يومًا: بفضل سقيك حصل المحصول على ما يكفي من الماء."
+
+msgid ""
+"You told us you did not water: the plan follows the soil with rain alone "
+"since then."
+msgstr "أخبرتنا أنك لم تسقِ: الخطة تتابع التربة بالمطر وحده منذ ذلك الحين."
+
+msgid "Log"
+msgstr "السجل"
+
+msgid "Nothing recorded yet. Your answers and waterings appear here."
+msgstr "لا شيء مسجّل بعد. تظهر إجاباتك وسقياتك هنا."
+
+msgid "Undo"
+msgstr "تراجع"
+
+msgid "not done"
+msgstr "لم يتم"
+
+msgid "Watering"
+msgstr "سقي"
+
+msgid "Treatment"
+msgstr "معالجة"
+
+msgid "Field check"
+msgstr "تفقد الحقل"
+
+msgid "For your {area} ha: {kg} kg, that is {bags} bags of {bag} kg."
+msgstr "لـ {area} هكتار: {kg} كغ، أي {bags} أكياس من {bag} كغ."
+
+msgid "Or {name}: {rate} ({kg} kg for the farm)."
+msgstr "أو {name}: {rate} ({kg} كغ للضيعة)."
+
+msgid ""
+"Best day to spray this week: {date} (dry, little wind, not hot). Spray early"
+" in the morning or in the evening."
+msgstr ""
+"أفضل يوم للرش هذا الأسبوع: {date} (جاف، رياح خفيفة، غير حار). رُشّ في الصباح"
+" الباكر أو في المساء."
+
+msgid ""
+"No good spraying day this week (rain, wind or heat): wait before treating."
+msgstr ""
+"لا يوجد يوم مناسب للرش هذا الأسبوع (مطر أو رياح أو حرارة): انتظر قبل "
+"المعالجة."
+
+msgid "Products that help"
+msgstr "منتجات مفيدة"
+
+msgid "In the field"
+msgstr "في الحقل"
+
+msgid "Traps"
+msgstr "مصائد"
+
+msgid "Biological"
+msgstr "بيولوجي"
+
+msgid "Mineral (organic farming)"
+msgstr "معدني (فلاحة بيولوجية)"
+
+msgid "Chemical"
+msgstr "كيميائي"
+
+msgid "For your farm"
+msgstr "لضيعتك"
+
+msgid "in {l} L of water"
+msgstr "في {l} لتر من الماء"
+
+msgid ""
+"Names are active ingredients: buy any registered brand that contains it. "
+"Always read the label (dose, protective equipment, days before harvest) and "
+"alternate the groups (FRAC, IRAC, HRAC) so pests do not become resistant."
+msgstr ""
+"الأسماء هي مواد فعالة: اشترِ أي علامة مرخّصة تحتويها. اقرأ دائمًا الملصق "
+"(الجرعة، معدات الوقاية، المدة قبل الحصاد) وناوب بين المجموعات (FRAC وIRAC "
+"وHRAC) حتى لا تكتسب الآفات مقاومة."
+
+msgid "Contains"
+msgstr "يحتوي على"
+
+msgid "Gives"
+msgstr "يعطي"
+
+msgid "bags of {bag} kg"
+msgstr "أكياس من {bag} كغ"
+
+msgid "Or"
+msgstr "أو"
+
+msgid "per week"
+msgstr "في الأسبوع"
+
+msgid "Label dose"
+msgstr "الجرعة المذكورة على الملصق"
+
+msgid "mm"
+msgstr "مم"
+
+msgid "m³"
+msgstr "م³"
+
+msgid "ha"
+msgstr "هكتار"
+
+msgid "h"
+msgstr "سا"
+
+msgid "kg"
+msgstr "كغ"
+
+msgid "m"
+msgstr "م"
+
+msgid "km/h"
+msgstr "كم/سا"
+
+msgid "mm = L/m²"
+msgstr "مم = لتر/م²"
+
+msgid "Error"
+msgstr "خطأ"
+
+msgid "AI Agronomist"
+msgstr "المهندس الفلاحي الذكي"
+
+msgid "Live"
+msgstr "مباشر"
+
+msgid "Analysis and diagnosis"
+msgstr "تحليل وتشخيص"
+
+msgid "Send"
+msgstr "إرسال"
+
+msgid "Farm log"
+msgstr "سجل الضيعة"
+
+msgid ""
+"Everything you did on this farm. Forgot to record something, or answered by "
+"mistake? Add it or correct it here: the plan is recalculated at once."
+msgstr ""
+"كل ما قمت به في هذه الضيعة. نسيت تسجيل شيء أو أجبت خطأً؟ أضفه أو صحّحه هنا: "
+"يُعاد حساب الخطة فورًا."
+
+msgid "Add something I forgot"
+msgstr "إضافة شيء نسيته"
+
+msgid "What did you do?"
+msgstr "ماذا فعلت؟"
+
+msgid "I did it"
+msgstr "قمت به"
+
+msgid "I did not do it"
+msgstr "لم أقم به"
+
+msgid "Note (optional)"
+msgstr "ملاحظة (اختيارية)"
+
+msgid "Delete this entry? The plan will be recalculated."
+msgstr "حذف هذا التسجيل؟ سيُعاد حساب الخطة."
+
+msgid "Plan updated: the next watering moves from {a} to {b}."
+msgstr "تم تحديث الخطة: السقية القادمة تنتقل من {a} إلى {b}."
+
+msgid "Plan updated: next watering on {b}."
+msgstr "تم تحديث الخطة: السقية القادمة يوم {b}."
+
+msgid "Plan updated: no watering needed in the next 16 days."
+msgstr "تم تحديث الخطة: لا حاجة إلى السقي خلال الـ16 يومًا القادمة."
+
+msgid "Tap a past day to record a watering you forgot."
+msgstr "المس يومًا سابقًا لتسجيل سقية نسيتها."
+
+msgid "Could not load. Check your connection."
+msgstr "تعذّر التحميل. تحقّق من الاتصال."
+
+msgid "Sowing / planting"
+msgstr "الزرع / الغراسة"
+
+msgid "Establishment complete"
+msgstr "اكتمال التجذّر"
+
+msgid "Full canopy - peak water need"
+msgstr "اكتمال الغطاء النباتي - ذروة الحاجة إلى الماء"
+
+msgid "Maturation (reduce irrigation)"
+msgstr "النضج (قلّل السقي)"
+
+msgid "Expected harvest"
+msgstr "الحصاد المتوقع"
+
+msgid "Start watching: {name}"
+msgstr "ابدأ المراقبة: {name}"
+
+msgid "{product}: {rate}"
+msgstr "{product}: {rate}"
+
+msgid ""
+"Use only products registered in Tunisia for this crop, at the label dose, "
+"with protective equipment, and respect the pre-harvest interval. Prefer the "
+"prevention and biological options first and confirm with your CRDA extension"
+" office before treating."
+msgstr ""
+"استعمل فقط المنتجات المرخّصة في تونس لهذا المحصول، بالجرعة المذكورة على "
+"الملصق، مع معدات الوقاية، واحترم المدة قبل الحصاد. فضّل الوقاية والحلول "
+"البيولوجية أولًا واستشر المندوبية الجهوية للتنمية الفلاحية قبل المعالجة."
+
+msgid ""
+"Indicative rates for an average soil. A soil analysis (every 3-4 years) and "
+"your CRDA extension office should set the final dose. Do not apply nitrogen "
+"just before heavy rain (it is washed out) or on dry soil without irrigation "
+"(it is not taken up)."
+msgstr ""
+"كميات تقريبية لتربة متوسطة. يجب أن يحدد تحليل التربة (كل 3-4 سنوات) "
+"والمندوبية الجهوية للتنمية الفلاحية الجرعة النهائية. لا تضع الآزوت قبل مطر "
+"غزير مباشرة (يجرفه الماء) ولا على تربة جافة دون سقي (لا يُمتص)."
+
+msgid "Frost risk"
+msgstr "خطر الصقيع"
+
+msgid ""
+"Minimum down to {t} °C on {days}. Protect seedlings and young trees; "
+"irrigate the day before to store heat in the soil."
+msgstr ""
+"تنخفض الحرارة الدنيا إلى {t} °م يوم {days}. احمِ الشتلات والأشجار الصغيرة، "
+"واسقِ في اليوم السابق لتخزين الحرارة في التربة."
+
+msgid "Heat stress"
+msgstr "إجهاد حراري"
+
+msgid ""
+"Up to {t} °C on {days}. Irrigate early morning or evening; avoid spraying "
+"and fertilising during the heat."
+msgstr ""
+"تصل الحرارة إلى {t} °م يوم {days}. اسقِ في الصباح الباكر أو في المساء، "
+"وتجنّب الرش والتسميد أثناء الحر."
+
+msgid "Heavy rain"
+msgstr "أمطار غزيرة"
+
+msgid "{days}: 20 mm or more. Postpone nitrogen and spraying; check drainage."
+msgstr "{days}: 20 مم أو أكثر. أجّل الآزوت والرش، وتفقّد تصريف المياه."
+
+msgid "Spraying windows"
+msgstr "أوقات مناسبة للرش"
+
+msgid ""
+"Good days to spray (little wind, dry, not too hot): {days}. Spray early "
+"morning or evening."
+msgstr ""
+"أيام مناسبة للرش (رياح خفيفة، جاف، غير حار): {days}. رُشّ في الصباح الباكر "
+"أو في المساء."
+
+msgid "No good spraying day this week (rain, wind or heat)."
+msgstr "لا يوجد يوم مناسب للرش هذا الأسبوع (مطر أو رياح أو حرارة)."
+
+msgid "Water balance (7 days)"
+msgstr "الميزان المائي (7 أيام)"
+
+msgid ""
+"Expected rain {rain} mm against about {et0} mm of reference evaporation."
+msgstr "المطر المتوقع {rain} مم مقابل حوالي {et0} مم من التبخر المرجعي."
+
+msgid "Rain should cover the crop this week."
+msgstr "يُفترض أن يغطي المطر حاجة المحصول هذا الأسبوع."
+
+msgid "Plan irrigation for the difference if the crop is growing."
+msgstr "خطّط للسقي لتعويض الفرق إذا كان المحصول في طور النمو."
+
+msgid "{name}: favourable weather"
+msgstr "{name}: طقس ملائم للإصابة"
+
+msgid "{watch} Prevention: {prevent}"
+msgstr "{watch} الوقاية: {prevent}"
+
+msgid "No region with climate data is available near this farm."
+msgstr "لا توجد منطقة ذات معطيات مناخية قريبة من هذه الضيعة."
+
+msgid "Not enough climate history for {region}."
+msgstr "التاريخ المناخي غير كافٍ لمنطقة {region}."
+
+msgid ""
+"Soil of this parcel is not available (it is still loading): the average soil"
+" of {region} was used instead."
+msgstr ""
+"تربة هذه القطعة غير متوفرة (ما زالت قيد التحميل): استُعملت التربة المتوسطة "
+"لمنطقة {region}."
+
+msgid ""
+"Soil of this parcel is not available: the average soil of {region} was used "
+"instead."
+msgstr "تربة هذه القطعة غير متوفرة: استُعملت التربة المتوسطة لمنطقة {region}."
+
+msgid ""
+"Climate is taken from {region}, {km} km away: treat the water figures as "
+"approximate."
+msgstr "المناخ مأخوذ من {region} على بعد {km} كم: اعتبر أرقام الماء تقريبية."
+
+msgid "Soil data could not be loaded: pH and texture were not scored."
+msgstr "تعذّر تحميل معطيات التربة: لم يُقيَّم الـpH والقوام."
+
+msgid ""
+"The 1-month drought outlook warns of dry conditions: rainfall was set to a "
+"dry year (25th percentile)."
+msgstr ""
+"تنبّه توقعات الجفاف لشهر واحد إلى ظروف جافة: اعتُمدت أمطار سنة جافة (المئين "
+"25)."
+
+msgid "Parcel centre not mapped by SoilGrids; nearest data ~2 km away."
+msgstr "مركز القطعة غير مغطّى في SoilGrids؛ أقرب المعطيات على بعد ~2 كم."
+
+msgid "Farmer account required."
+msgstr "يلزم حساب فلاح."
+
+msgid "Invalid JSON."
+msgstr "بيانات غير صالحة."
+
+msgid "Draw the farm boundary on the map first."
+msgstr "ارسم حدود الضيعة على الخريطة أولًا."
+
+msgid "Farm limit reached (50)."
+msgstr "تم بلوغ الحد الأقصى للضيعات (50)."
+
+msgid "Farm not found."
+msgstr "الضيعة غير موجودة."
+
+msgid "Choose a crop."
+msgstr "اختر محصولًا."
+
+msgid "Activity log is full."
+msgstr "السجل ممتلئ."
+
+msgid "Not found."
+msgstr "غير موجود."
+
+msgid "The farm needs a name."
+msgstr "يجب أن يكون للضيعة اسم."
+
+msgid "Unknown crop."
+msgstr "محصول غير معروف."
+
+msgid "Sowing date must be YYYY-MM-DD."
+msgstr "يجب أن يكون تاريخ الزرع بصيغة سنة-شهر-يوم."
+
+msgid "Water supply must be a number (mm)."
+msgstr "يجب أن تكون كمية الماء المتوفرة رقمًا (مم)."
+
+msgid "Water supply must be between 0 and 5000 mm."
+msgstr "يجب أن تكون كمية الماء المتوفرة بين 0 و5000 مم."
+
+msgid "Unknown irrigation method."
+msgstr "طريقة سقي غير معروفة."
+
+msgid "Flow rate must be a number (m³/h)."
+msgstr "يجب أن يكون الدفق رقمًا (م³/سا)."
+
+msgid "Flow rate must be between 0 and 10 000 m³/h."
+msgstr "يجب أن يكون الدفق بين 0 و10000 م³/سا."
+
+msgid "Last irrigation date must be YYYY-MM-DD."
+msgstr "يجب أن يكون تاريخ آخر سقي بصيغة سنة-شهر-يوم."
+
+msgid "Last irrigation date cannot be in the future."
+msgstr "لا يمكن أن يكون تاريخ آخر سقي في المستقبل."
+
+msgid "Unknown activity."
+msgstr "نشاط غير معروف."
+
+msgid "Status must be done or skipped."
+msgstr "يجب أن تكون الحالة «تم» أو «لم يتم»."
+
+msgid "Date must be YYYY-MM-DD."
+msgstr "يجب أن يكون التاريخ بصيغة سنة-شهر-يوم."
+
+msgid "The date cannot be in the future."
+msgstr "لا يمكن أن يكون التاريخ في المستقبل."
+
+msgid "The date is more than a year ago."
+msgstr "التاريخ أقدم من سنة."
+
+msgid "Amount must be a number (mm)."
+msgstr "يجب أن تكون الكمية رقمًا (مم)."
+
+msgid "Water amount must be between 0 and 500 mm."
+msgstr "يجب أن تكون كمية الماء بين 0 و500 مم."
+
+msgid "month must be 1-12"
+msgstr "يجب أن يكون الشهر بين 1 و12"
+
+msgid "sowing_date must be YYYY-MM-DD"
+msgstr "يجب أن يكون تاريخ الزرع بصيغة سنة-شهر-يوم"
+
+msgid "The boundary must be a polygon."
+msgstr "يجب أن تكون الحدود مضلّعًا."
+
+msgid "The polygon has no coordinates."
+msgstr "المضلّع بلا إحداثيات."
+
+msgid "Invalid coordinate in the polygon."
+msgstr "إحداثية غير صالحة في المضلّع."
+
+msgid "Coordinate out of range."
+msgstr "إحداثية خارج المجال."
+
+msgid "Draw at least three corners."
+msgstr "ارسم ثلاث زوايا على الأقل."
+
+msgid "The polygon has no area."
+msgstr "المضلّع بلا مساحة."
+
+msgid "The parcel is too small (under 100 m2)."
+msgstr "القطعة صغيرة جدًا (أقل من 100 م²)."
+
+msgid "g"
+msgstr "غ"
+
+msgid "L"
+msgstr "ل"
+
+msgid "{v} {unit}/ha"
+msgstr "{v} {unit}/هكتار"
+
+msgid "{v} kg/ha"
+msgstr "{v} كغ/هكتار"
+
+msgid "Clear sky"
+msgstr "سماء صافية"
+
+msgid "Mainly clear"
+msgstr "صافٍ في الغالب"
+
+msgid "Partly cloudy"
+msgstr "غائم جزئيًا"
+
+msgid "Overcast"
+msgstr "غائم كليًا"
+
+msgid "Fog"
+msgstr "ضباب"
+
+msgid "Rime fog"
+msgstr "ضباب متجمّد"
+
+msgid "Light drizzle"
+msgstr "رذاذ خفيف"
+
+msgid "Drizzle"
+msgstr "رذاذ"
+
+msgid "Dense drizzle"
+msgstr "رذاذ كثيف"
+
+msgid "Freezing drizzle"
+msgstr "رذاذ متجمّد"
+
+msgid "Light rain"
+msgstr "مطر خفيف"
+
+msgid "Freezing rain"
+msgstr "مطر متجمّد"
+
+msgid "Light snow"
+msgstr "ثلج خفيف"
+
+msgid "Snow"
+msgstr "ثلج"
+
+msgid "Heavy snow"
+msgstr "ثلج كثيف"
+
+msgid "Snow grains"
+msgstr "حبيبات ثلج"
+
+msgid "Rain showers"
+msgstr "زخات مطر"
+
+msgid "Violent showers"
+msgstr "زخات قوية"
+
+msgid "Snow showers"
+msgstr "زخات ثلج"
+
+msgid "Thunderstorm"
+msgstr "عاصفة رعدية"
+
+msgid "K is rarely needed on the clay soils of the north."
+msgstr "نادرًا ما يحتاج البوتاسيوم في الترب الطينية بالشمال."
+
+msgid "Sowing (incorporated)"
+msgstr "الزرع (مدفون في التربة)"
+
+msgid "DAP 18-46-0"
+msgstr "فوسفات الأمونيوم الثنائي DAP 18-46-0"
+
+msgid "100-150 kg/ha"
+msgstr "100-150 كغ/هكتار"
+
+msgid "Start of tillering"
+msgstr "بداية الإشطاء"
+
+msgid "Ammonium nitrate 33.5%"
+msgstr "الأمونيتر (نترات الأمونيوم) 33.5%"
+
+msgid "Stem elongation"
+msgstr "الصعود (استطالة الساق)"
+
+msgid "100 kg/ha (skip in a very dry year)"
+msgstr "100 كغ/هكتار (لا تضعه في سنة شديدة الجفاف)"
+
+msgid "Too much nitrogen causes lodging."
+msgstr "الإفراط في الآزوت يسبّب رقاد النبات."
+
+msgid "100 kg/ha"
+msgstr "100 كغ/هكتار"
+
+msgid "Tillering"
+msgstr "الإشطاء"
+
+msgid ""
+"Forage oats: a second N dose after the first cut if grazed or cut twice."
+msgstr ""
+"الشوفان العلفي: جرعة آزوت ثانية بعد الحشة الأولى إذا رُعي أو حُشّ مرتين."
+
+msgid ""
+"A legume: it fixes its own nitrogen. Inoculate seed with Rhizobium if beans "
+"were not grown on the field recently."
+msgstr ""
+"بقولية: تثبّت الآزوت بنفسها. لقّح البذور بالريزوبيوم إذا لم يُزرع الفول في "
+"الحقل مؤخرًا."
+
+msgid "Triple superphosphate 45%"
+msgstr "السوبرفوسفات الثلاثي 45%"
+
+msgid "100-130 kg/ha"
+msgstr "100-130 كغ/هكتار"
+
+msgid "A legume: no nitrogen top-dressing needed."
+msgstr "بقولية: لا تحتاج إلى تسميد آزوتي تكميلي."
+
+msgid "90-110 kg/ha"
+msgstr "90-110 كغ/هكتار"
+
+msgid "Well-rotted manure (20 t/ha) before planting improves bulb size."
+msgstr ""
+"السماد العضوي المتحلل جيدًا (20 طن/هكتار) قبل الغراسة يحسّن حجم الرؤوس."
+
+msgid "Planting"
+msgstr "الغراسة"
+
+msgid "NPK 10-20-20 or DAP + potassium sulphate"
+msgstr "NPK 10-20-20 أو DAP + سلفات البوتاسيوم"
+
+msgid "300-400 kg/ha"
+msgstr "300-400 كغ/هكتار"
+
+msgid "Leaf growth"
+msgstr "نمو الأوراق"
+
+msgid "Start of bulbing"
+msgstr "بداية تكوّن الرؤوس"
+
+msgid "Potassium sulphate 50%"
+msgstr "سلفات البوتاسيوم 50%"
+
+msgid "100 kg/ha (stop N now)"
+msgstr "100 كغ/هكتار (أوقف الآزوت الآن)"
+
+msgid ""
+"Manure 30 t/ha before planting is recommended. Potassium improves tuber "
+"quality."
+msgstr ""
+"يُنصح بـ 30 طن/هكتار من السماد العضوي قبل الغراسة. البوتاسيوم يحسّن جودة "
+"الدرنات."
+
+msgid "NPK 10-20-20"
+msgstr "سماد مركّب NPK 10-20-20"
+
+msgid "500-600 kg/ha"
+msgstr "500-600 كغ/هكتار"
+
+msgid "Earthing up"
+msgstr "التحضين (التتريب)"
+
+msgid "150-200 kg/ha"
+msgstr "150-200 كغ/هكتار"
+
+msgid "Tuber initiation"
+msgstr "بداية تكوّن الدرنات"
+
+msgid "150 kg/ha"
+msgstr "150 كغ/هكتار"
+
+msgid ""
+"Best applied by fertigation with drip irrigation, weekly. Manure 30 t/ha "
+"before transplanting."
+msgstr ""
+"الأفضل عبر التسميد مع ماء السقي بالتنقيط أسبوعيًا. 30 طن/هكتار من السماد "
+"العضوي قبل الغراسة."
+
+msgid "Before transplanting"
+msgstr "قبل غراسة الشتلات"
+
+msgid "300 kg/ha"
+msgstr "300 كغ/هكتار"
+
+msgid "Flowering start (weekly fertigation)"
+msgstr "بداية الإزهار (تسميد أسبوعي مع السقي)"
+
+msgid "Calcium nitrate + potassium nitrate"
+msgstr "نترات الكالسيوم + نترات البوتاسيوم"
+
+msgid "10-15 kg/ha per week"
+msgstr "10-15 كغ/هكتار في الأسبوع"
+
+msgid "Fruit enlargement"
+msgstr "تضخّم الثمار"
+
+msgid "Potassium nitrate / sulphate"
+msgstr "نترات / سلفات البوتاسيوم"
+
+msgid "15-20 kg/ha per week"
+msgstr "15-20 كغ/هكتار في الأسبوع"
+
+msgid "Fertigation with drip is best. Manure 25 t/ha before planting."
+msgstr ""
+"التسميد مع السقي بالتنقيط هو الأفضل. 25 طن/هكتار من السماد العضوي قبل "
+"الغراسة."
+
+msgid "Flowering (weekly fertigation)"
+msgstr "الإزهار (تسميد أسبوعي مع السقي)"
+
+msgid "10 kg/ha per week"
+msgstr "10 كغ/هكتار في الأسبوع"
+
+msgid ""
+"A legume: nitrogen only as a small starter at establishment. P and K every "
+"year keep the stand productive."
+msgstr ""
+"بقولية: الآزوت فقط بجرعة صغيرة عند التركيز. الفسفور والبوتاسيوم كل سنة "
+"يحافظان على إنتاجية الفصّة."
+
+msgid "Autumn (each year)"
+msgstr "الخريف (كل سنة)"
+
+msgid "End of winter (each year)"
+msgstr "آخر الشتاء (كل سنة)"
+
+msgid "200 kg/ha"
+msgstr "200 كغ/هكتار"
+
+msgid ""
+"Rainfed groves: about 0.5-1 kg N per tree per year; irrigated groves the "
+"higher values. Manure every 2-3 years."
+msgstr ""
+"الغابات البعلية: حوالي 0.5-1 كغ آزوت للشجرة في السنة؛ المسقية القيم العليا. "
+"سماد عضوي كل 2-3 سنوات."
+
+msgid "End of winter (before bud burst)"
+msgstr "آخر الشتاء (قبل تفتّح البراعم)"
+
+msgid "1.5-3 kg per tree (half the N)"
+msgstr "1.5-3 كغ للشجرة (نصف الآزوت)"
+
+msgid "Before flowering"
+msgstr "قبل الإزهار"
+
+msgid ""
+"1.5 kg per tree (rest of the N; skip in a dry spring without irrigation)"
+msgstr "1.5 كغ للشجرة (بقية الآزوت؛ لا تضعه في ربيع جاف دون سقي)"
+
+msgid "After harvest"
+msgstr "بعد الجني"
+
+msgid "Potassium sulphate 50% + manure"
+msgstr "سلفات البوتاسيوم 50% + سماد عضوي"
+
+msgid "1-2 kg per tree + 20-30 kg manure"
+msgstr "1-2 كغ للشجرة + 20-30 كغ سماد عضوي"
+
+msgid ""
+"Split nitrogen over the season; on calcareous soils watch for iron chlorosis"
+" (yellow leaves with green veins)."
+msgstr ""
+"قسّم الآزوت على الموسم؛ وفي الترب الكلسية راقب اصفرار نقص الحديد (أوراق "
+"صفراء بعروق خضراء)."
+
+msgid "40% of the N"
+msgstr "40% من الآزوت"
+
+msgid "Fruit set"
+msgstr "عقد الثمار"
+
+msgid "Ammonium nitrate or fertigation"
+msgstr "الأمونيتر أو التسميد مع السقي"
+
+msgid "35% of the N + potassium"
+msgstr "35% من الآزوت + البوتاسيوم"
+
+msgid "Fruit growth"
+msgstr "نمو الثمار"
+
+msgid "Fertigation N + K"
+msgstr "تسميد مع السقي آزوت + بوتاسيوم"
+
+msgid "25% of the N"
+msgstr "25% من الآزوت"
+
+msgid ""
+"About 1-1.5 kg N per palm per year plus 50 kg manure per palm in winter."
+msgstr ""
+"حوالي 1-1.5 كغ آزوت للنخلة في السنة، مع 50 كغ سماد عضوي للنخلة في الشتاء."
+
+msgid "Winter"
+msgstr "الشتاء"
+
+msgid "Manure"
+msgstr "سماد عضوي"
+
+msgid "50 kg per palm"
+msgstr "50 كغ للنخلة"
+
+msgid "Before pollination"
+msgstr "قبل التذكير (التلقيح)"
+
+msgid "1.5-2 kg per palm"
+msgstr "1.5-2 كغ للنخلة"
+
+msgid "Ammonium nitrate + potassium sulphate"
+msgstr "الأمونيتر + سلفات البوتاسيوم"
+
+msgid "1.5 kg + 1 kg per palm"
+msgstr "1.5 كغ + 1 كغ للنخلة"
+
+msgid "Weeds (grasses and broadleaf)"
+msgstr "الأعشاب الضارة (النجيليات وعريضة الأوراق)"
+
+msgid "Weed cover between the 3-leaf stage and tillering."
+msgstr "كثافة الأعشاب بين مرحلة 3 أوراق والإشطاء."
+
+msgid "Clean seed, rotation with legumes, stale seedbed before sowing."
+msgstr "بذور نظيفة، تداول مع البقوليات، وحرث كاذب قبل الزرع."
+
+msgid ""
+"Selective post-emergence herbicide registered for durum wheat, applied at 3 "
+"leaves - full tillering."
+msgstr ""
+"مبيد أعشاب انتقائي بعد الإنبات مرخّص للقمح الصلب، يُرش من 3 أوراق إلى تمام "
+"الإشطاء."
+
+msgid "Septoria leaf blotch"
+msgstr "التبقّع السبتوري"
+
+msgid ""
+"Brown blotches with black dots on the lower leaves climbing upward after "
+"rain."
+msgstr "بقع بنية بها نقاط سوداء على الأوراق السفلى تصعد إلى الأعلى بعد المطر."
+
+msgid ""
+"Tolerant varieties, rotation, avoid very early sowing and excess nitrogen."
+msgstr ""
+"أصناف متحمّلة، تداول زراعي، وتجنّب الزرع المبكر جدًا والإفراط في الآزوت."
+
+msgid ""
+"Triazole or strobilurin fungicide when symptoms reach the upper leaves, at "
+"flag-leaf stage."
+msgstr ""
+"مبيد فطري من التريازول أو الستروبيلورين عندما تصل الأعراض إلى الأوراق "
+"العليا، في مرحلة الورقة الأخيرة."
+
+msgid "Yellow and brown rust"
+msgstr "الصدأ الأصفر والبني"
+
+msgid "Yellow stripes or orange pustules that rub off on the fingers."
+msgstr "خطوط صفراء أو بثرات برتقالية تترك مسحوقًا على الأصابع."
+
+msgid "Resistant varieties."
+msgstr "أصناف مقاومة."
+
+msgid "Triazole fungicide at the first pustules on the upper leaves."
+msgstr "مبيد فطري من التريازول عند ظهور أولى البثرات على الأوراق العليا."
+
+msgid "Net blotch and scald"
+msgstr "التبقّع الشبكي واللفحة"
+
+msgid "Net-like brown stripes or pale oval blotches with a dark edge."
+msgstr "خطوط بنية شبكية أو بقع بيضوية شاحبة بحافة داكنة."
+
+msgid "Rotation, certified seed, bury stubble."
+msgstr "تداول زراعي، بذور مصادق عليها، ودفن بقايا المحصول."
+
+msgid "Triazole fungicide if the top two leaves are attacked."
+msgstr "مبيد فطري من التريازول إذا أُصيبت الورقتان العلويتان."
+
+msgid "Weeds"
+msgstr "الأعشاب الضارة"
+
+msgid "Weed cover at 3 leaves - tillering."
+msgstr "كثافة الأعشاب من 3 أوراق إلى الإشطاء."
+
+msgid "Rotation, clean seed."
+msgstr "تداول زراعي، بذور نظيفة."
+
+msgid "Selective herbicide registered for barley."
+msgstr "مبيد أعشاب انتقائي مرخّص للشعير."
+
+msgid "Crown rust"
+msgstr "الصدأ التاجي"
+
+msgid "Orange pustules on the leaves."
+msgstr "بثرات برتقالية على الأوراق."
+
+msgid "Tolerant varieties; cut forage early if heavily attacked."
+msgstr "أصناف متحمّلة؛ احشّ العلف مبكرًا إذا كانت الإصابة شديدة."
+
+msgid "Rarely economic on forage oats; cut early instead."
+msgstr "نادرًا ما يكون مجديًا على الشوفان العلفي؛ احشّ مبكرًا بدلًا من ذلك."
+
+msgid "Broomrape (Orobanche)"
+msgstr "الهالوك (الأوروبانش)"
+
+msgid "Pale flowering stems emerging at the foot of the plants."
+msgstr "سيقان مزهرة شاحبة تخرج عند قاعدة النباتات."
+
+msgid ""
+"Long rotation (4+ years), tolerant varieties, slightly later sowing, pull "
+"and burn the stems before they seed."
+msgstr ""
+"تداول طويل (4 سنوات فأكثر)، أصناف متحمّلة، زرع متأخر قليلًا، واقتلع السيقان "
+"واحرقها قبل أن تبذر."
+
+msgid "No reliable curative option; prevention is essential."
+msgstr "لا يوجد علاج فعّال مضمون؛ الوقاية أساسية."
+
+msgid "Chocolate spot (Botrytis)"
+msgstr "التبقّع الشوكولاتي (البوتريتيس)"
+
+msgid "Small red-brown spots on leaves after humid days."
+msgstr "بقع صغيرة بنية محمرّة على الأوراق بعد أيام رطبة."
+
+msgid "Lower seed density, good drainage."
+msgstr "كثافة بذر أقل، وتصريف جيد للمياه."
+
+msgid "Fungicide registered for faba bean at the first spreading spots."
+msgstr "مبيد فطري مرخّص للفول عند أولى البقع المنتشرة."
+
+msgid "Black bean aphid"
+msgstr "منّ الفول الأسود"
+
+msgid "Black colonies on the shoot tips."
+msgstr "مستعمرات سوداء على أطراف السيقان."
+
+msgid "Ladybirds usually control it; pinch infested tips."
+msgstr "عادة ما تقضي عليه الدعسوقة؛ اقطع الأطراف المصابة."
+
+msgid ""
+"Only if colonies cover many plants; never spray during flowering (bees) - "
+"spray in the evening if needed."
+msgstr ""
+"فقط إذا غطّت المستعمرات نباتات كثيرة؛ لا ترشّ أبدًا أثناء الإزهار (النحل) - "
+"رُشّ في المساء عند الحاجة."
+
+msgid "Ascochyta blight and rust"
+msgstr "لفحة الأسكوكيتا والصدأ"
+
+msgid "Brown lesions on leaves and pods; rust pustules on stems."
+msgstr "آفات بنية على الأوراق والقرون؛ بثرات صدأ على السيقان."
+
+msgid "Healthy treated seed, rotation, tolerant varieties."
+msgstr "بذور سليمة معالجة، تداول زراعي، أصناف متحمّلة."
+
+msgid "Registered fungicide at first symptoms in a wet spring."
+msgstr "مبيد فطري مرخّص عند أولى الأعراض في ربيع رطب."
+
+msgid "Lentil competes poorly in the first 6 weeks."
+msgstr "العدس ضعيف المنافسة في الأسابيع الستة الأولى."
+
+msgid "Clean seedbed, row sowing to allow hoeing."
+msgstr "مهد بذر نظيف، وزرع في سطور لتسهيل العزق."
+
+msgid "Hoeing; herbicide registered for lentil."
+msgstr "العزق؛ مبيد أعشاب مرخّص للعدس."
+
+msgid "Rust"
+msgstr "الصدأ"
+
+msgid "Orange pustules on leaves."
+msgstr "بثرات برتقالية على الأوراق."
+
+msgid "Healthy cloves, avoid dense planting and excess N."
+msgstr "فصوص سليمة، وتجنّب الغراسة الكثيفة والإفراط في الآزوت."
+
+msgid "Registered fungicide at first pustules."
+msgstr "مبيد فطري مرخّص عند أولى البثرات."
+
+msgid "Thrips"
+msgstr "التريبس"
+
+msgid "Silvery streaks on the leaves."
+msgstr "خطوط فضية على الأوراق."
+
+msgid "Blue sticky traps, irrigate to avoid stress."
+msgstr "مصائد زرقاء لاصقة، والسقي لتجنّب الإجهاد."
+
+msgid "Registered insecticide only if heavily infested."
+msgstr "مبيد حشري مرخّص فقط عند الإصابة الشديدة."
+
+msgid "Late blight (mildiou)"
+msgstr "الميلديو (اللفحة المتأخرة)"
+
+msgid "Dark wet patches with white mould under the leaf after humid nights."
+msgstr "بقع داكنة مبلّلة مع عفن أبيض تحت الورقة بعد ليالٍ رطبة."
+
+msgid "Healthy seed, earthing up, destroy volunteer plants and culls."
+msgstr "بذور سليمة، تحضين، وإتلاف النباتات النابتة تلقائيًا وبقايا الفرز."
+
+msgid ""
+"Preventive contact fungicide (e.g. copper or mancozeb-type) before humid "
+"spells; repeat according to the label."
+msgstr ""
+"مبيد فطري وقائي بالملامسة (من نوع النحاس أو المانكوزاب) قبل الفترات الرطبة؛ "
+"يُعاد حسب الملصق."
+
+msgid "Potato tuber moth"
+msgstr "عثة درنات البطاطا"
+
+msgid "Galleries in leaves and tubers; pheromone trap catches."
+msgstr "أنفاق في الأوراق والدرنات؛ ووجود فراشات في مصائد الفيرومون."
+
+msgid ""
+"Good earthing up, irrigate to avoid soil cracks, harvest promptly, never "
+"leave tubers exposed in the field."
+msgstr ""
+"تحضين جيد، سقي لتجنّب تشقّق التربة، قلع سريع، وعدم ترك الدرنات مكشوفة في "
+"الحقل أبدًا."
+
+msgid "Bacillus thuringiensis or registered insecticide if catches rise."
+msgstr "باسيلوس ثورينجينسيس أو مبيد حشري مرخّص إذا ارتفعت الأعداد في المصائد."
+
+msgid "Tomato leaf miner (Tuta absoluta)"
+msgstr "حافرة أوراق الطماطم (توتا أبسولوتا)"
+
+msgid "Pheromone traps (weekly counts); mines in leaves and holes in fruit."
+msgstr "مصائد الفيرومون (عدّ أسبوعي)؛ أنفاق في الأوراق وثقوب في الثمار."
+
+msgid ""
+"Insect-proof nets, mass trapping, remove infested leaves and crop residues."
+msgstr "شباك مانعة للحشرات، صيد مكثّف، وإزالة الأوراق المصابة وبقايا المحصول."
+
+msgid ""
+"Bacillus thuringiensis or spinosad-type products, alternating modes of "
+"action."
+msgstr ""
+"باسيلوس ثورينجينسيس أو منتجات من نوع السبينوزاد، مع المناوبة بين طرق "
+"التأثير."
+
+msgid "Late blight"
+msgstr "الميلديو (اللفحة المتأخرة)"
+
+msgid "Brown greasy patches on leaves and fruit after humid nights."
+msgstr "بقع بنية دهنية على الأوراق والثمار بعد ليالٍ رطبة."
+
+msgid "Drip rather than sprinkler irrigation, airy spacing."
+msgstr "السقي بالتنقيط بدل الرش، وتباعد يسمح بالتهوية."
+
+msgid "Preventive copper-type fungicide before humid spells."
+msgstr "مبيد فطري وقائي من نوع النحاس قبل الفترات الرطبة."
+
+msgid "Powdery mildew"
+msgstr "البياض الدقيقي"
+
+msgid "Yellow patches on top of leaves with white powder underneath."
+msgstr "بقع صفراء على سطح الأوراق مع مسحوق أبيض تحتها."
+
+msgid "Avoid water stress."
+msgstr "تجنّب الإجهاد المائي."
+
+msgid "Sulphur (not above 30 C) or registered fungicide."
+msgstr "الكبريت (ليس فوق 30 °م) أو مبيد فطري مرخّص."
+
+msgid "Whitefly (virus vector)"
+msgstr "الذبابة البيضاء (ناقلة للفيروسات)"
+
+msgid "Yellow sticky traps; small white insects under the leaves."
+msgstr "مصائد صفراء لاصقة؛ حشرات بيضاء صغيرة تحت الأوراق."
+
+msgid "Nets, virus-tolerant varieties, remove weeds around the field."
+msgstr "شباك، أصناف متحمّلة للفيروسات، وإزالة الأعشاب حول الحقل."
+
+msgid "Registered insecticide only when traps rise sharply."
+msgstr "مبيد حشري مرخّص فقط عندما ترتفع الأعداد في المصائد بشدة."
+
+msgid "Aphids"
+msgstr "المنّ"
+
+msgid "Colonies under young leaves."
+msgstr "مستعمرات تحت الأوراق الفتية."
+
+msgid "Encourage natural enemies; avoid excess nitrogen."
+msgstr "شجّع الأعداء الطبيعيين؛ وتجنّب الإفراط في الآزوت."
+
+msgid "Insecticidal soap or registered product if colonies spread."
+msgstr "صابون مبيد للحشرات أو منتج مرخّص إذا انتشرت المستعمرات."
+
+msgid "Pale patches on top, white felt under the leaves."
+msgstr "بقع شاحبة في الأعلى، وطبقة بيضاء تحت الأوراق."
+
+msgid "Regular irrigation."
+msgstr "سقي منتظم."
+
+msgid "Phytophthora root rot"
+msgstr "تعفّن الجذور (الفيتوفثورا)"
+
+msgid "Sudden wilting of plants in wet spots."
+msgstr "ذبول مفاجئ للنباتات في الأماكن الرطبة."
+
+msgid "Raised beds, drip irrigation, never waterlog."
+msgstr "أحواض مرتفعة، سقي بالتنقيط، ولا تُغرق التربة أبدًا."
+
+msgid "Remove dying plants; rotation away from solanaceous crops."
+msgstr "اقلع النباتات الميتة؛ وتداول بعيدًا عن الباذنجانيات."
+
+msgid "Alfalfa weevil"
+msgstr "سوسة الفصّة"
+
+msgid "Leaves eaten into lace at the shoot tips in spring."
+msgstr "أوراق مأكولة كالدانتيل في أطراف السيقان في الربيع."
+
+msgid "An early first cut usually controls it."
+msgstr "عادة ما تكفي حشة أولى مبكرة لمكافحتها."
+
+msgid ""
+"Registered insecticide only if damage is heavy and cutting is not possible."
+msgstr "مبيد حشري مرخّص فقط إذا كانت الأضرار كبيرة وتعذّر الحشّ."
+
+msgid "Dodder (Cuscuta)"
+msgstr "الحامول"
+
+msgid "Orange thread-like stems wrapping the plants."
+msgstr "سيقان برتقالية خيطية تلتف حول النباتات."
+
+msgid "Certified dodder-free seed."
+msgstr "بذور مصادق عليها خالية من الحامول."
+
+msgid "Cut and burn patches early, before it seeds."
+msgstr "احشّ البقع المصابة واحرقها مبكرًا قبل أن تبذر."
+
+msgid "Olive fruit fly (Bactrocera oleae)"
+msgstr "ذبابة الزيتون (باكتروسيرا أولي)"
+
+msgid "Yellow sticky or McPhail traps from July; stings on the fruit."
+msgstr ""
+"مصائد صفراء لاصقة أو مصائد ماكفيل ابتداءً من جويلية؛ لسعات على الثمار."
+
+msgid "Mass trapping, early harvest, collect fallen fruit."
+msgstr "صيد مكثّف، جني مبكر، وجمع الثمار المتساقطة."
+
+msgid ""
+"Bait (attract-and-kill) sprays on part of the canopy when catches and stings"
+" rise; kaolin clay as a barrier."
+msgstr ""
+"رش الطُّعم (جذب وقتل) على جزء من الشجرة عند ارتفاع الأعداد واللسعات؛ وطين "
+"الكاولين كحاجز."
+
+msgid "Peacock spot (oeil de paon)"
+msgstr "عين الطاووس"
+
+msgid "Dark round spots with a yellow halo on leaves; leaf drop."
+msgstr "بقع دائرية داكنة بهالة صفراء على الأوراق؛ وتساقط الأوراق."
+
+msgid "Pruning to open the canopy."
+msgstr "تقليم لتهوية قلب الشجرة."
+
+msgid ""
+"Copper fungicide after harvest and again in late winter before the rains."
+msgstr "مبيد فطري نحاسي بعد الجني ومرة أخرى في آخر الشتاء قبل الأمطار."
+
+msgid "Olive moth (Prays oleae)"
+msgstr "عثة الزيتون (برايس أولي)"
+
+msgid "Larvae in the flower clusters; pheromone traps."
+msgstr "يرقات في عناقيد الأزهار؛ مصائد الفيرومون."
+
+msgid "Natural enemies; traps for monitoring."
+msgstr "الأعداء الطبيعيون؛ ومصائد للمراقبة."
+
+msgid "Bacillus thuringiensis at the start of flowering if traps are high."
+msgstr ""
+"باسيلوس ثورينجينسيس في بداية الإزهار إذا كانت الأعداد في المصائد مرتفعة."
+
+msgid "Mediterranean fruit fly (Ceratitis)"
+msgstr "ذبابة فاكهة البحر المتوسط (سيراتيتيس)"
+
+msgid "Traps; stings and soft spots on ripening fruit."
+msgstr "المصائد؛ لسعات وبقع لينة على الثمار الناضجة."
+
+msgid "Mass trapping, collect and destroy fallen fruit."
+msgstr "صيد مكثّف، وجمع الثمار المتساقطة وإتلافها."
+
+msgid "Bait sprays on part of the canopy when catches rise."
+msgstr "رش الطُّعم على جزء من الشجرة عند ارتفاع الأعداد في المصائد."
+
+msgid "Scale insects"
+msgstr "الحشرات القشرية"
+
+msgid "Scales on twigs and leaves, sooty mould."
+msgstr "قشور على الأغصان والأوراق، وعفن أسود (فوماجين)."
+
+msgid "Pruning for air flow, protect natural enemies."
+msgstr "تقليم للتهوية، وحماية الأعداء الطبيعيين."
+
+msgid "Mineral (summer) oil at crawler stage, not above 32 C."
+msgstr "زيت معدني (صيفي) في مرحلة اليرقات المتحركة، ليس فوق 32 °م."
+
+msgid "Gummosis (Phytophthora)"
+msgstr "التصمّغ (الفيتوفثورا)"
+
+msgid "Gum oozing from cracks at the base of the trunk."
+msgstr "صمغ يسيل من شقوق قاعدة الجذع."
+
+msgid "Keep water away from the trunk, good drainage, tolerant rootstock."
+msgstr "أبعد الماء عن الجذع، تصريف جيد، وأصل مطعّم متحمّل."
+
+msgid "Scrape the lesion and paint with a copper paste."
+msgstr "اكشط الإصابة وادهنها بعجينة نحاسية."
+
+msgid "Date moth (Ectomyelois)"
+msgstr "دودة التمر (إكتوميلويس)"
+
+msgid "Larvae in ripening dates."
+msgstr "يرقات في التمور الناضجة."
+
+msgid "Bag the bunches with nets, collect fallen dates, clean stores."
+msgstr "تغطية العراجين بالناموسيات، جمع التمور المتساقطة، وتنظيف المخازن."
+
+msgid "Bacillus thuringiensis on bunches if needed."
+msgstr "باسيلوس ثورينجينسيس على العراجين عند الحاجة."
+
+msgid "Red palm weevil (alert)"
+msgstr "سوسة النخيل الحمراء (إنذار)"
+
+msgid "Holes with brown ooze in the trunk, wilting central leaves."
+msgstr "ثقوب يسيل منها سائل بني في الجذع، وذبول السعف المركزي."
+
+msgid "Use certified offshoots only."
+msgstr "استعمل فقط فسائل مصادق عليها."
+
+msgid "Report any suspicion to the CRDA immediately (quarantine pest)."
+msgstr ""
+"أبلغ المندوبية الجهوية للتنمية الفلاحية فورًا عن أي اشتباه (آفة حجر صحي)."
+
+msgid ""
+"Bury it in the soil at sowing (it does not move down by itself); keep large "
+"doses out of direct contact with the seed."
+msgstr ""
+"ادفنه في التربة عند الزرع (لا ينزل وحده إلى العمق)؛ وأبعد الجرعات الكبيرة عن"
+" ملامسة البذور مباشرة."
+
+msgid ""
+"Spread on moist soil, just before a light rain or a watering; split large "
+"doses."
+msgstr ""
+"انثره على تربة رطبة، قبل مطر خفيف أو سقية مباشرة؛ وقسّم الجرعات الكبيرة."
+
+msgid "Urea 46%"
+msgstr "اليوريا (الأوريا) 46%"
+
+msgid ""
+"Loses nitrogen to the air if left on the surface: water it in or bury it "
+"within 2 days."
+msgstr "يفقد الآزوت في الهواء إذا بقي على السطح: اسقه أو ادفنه خلال يومين."
+
+msgid "Bury it before sowing or planting, near the future root zone."
+msgstr "ادفنه قبل الزرع أو الغراسة، قرب منطقة الجذور المستقبلية."
+
+msgid "Base dressing: spread and work into the soil before planting."
+msgstr "تسميد أساسي: انثره واخلطه بالتربة قبل الغراسة."
+
+msgid ""
+"Better than potassium chloride for vegetables, potato, citrus and olive (no "
+"chloride, adds sulphur)."
+msgstr ""
+"أفضل من كلورور البوتاسيوم للخضر والبطاطا والقوارص والزيتون (بلا كلور، ويضيف "
+"الكبريت)."
+
+msgid "Calcium nitrate 15.5%"
+msgstr "نترات الكالسيوم 15.5%"
+
+msgid ""
+"Soluble: through the drip line. Calcium prevents blossom-end rot. Never mix "
+"with sulphates or phosphates in the same tank."
+msgstr ""
+"قابل للذوبان: عبر خط التنقيط. الكالسيوم يمنع تعفّن طرف الثمرة. لا تخلطه "
+"أبدًا مع السلفات أو الفوسفات في الخزان نفسه."
+
+msgid "Potassium nitrate 13-0-46"
+msgstr "نترات البوتاسيوم 13-0-46"
+
+msgid "Soluble: through the drip line during fruit growth."
+msgstr "قابل للذوبان: عبر خط التنقيط أثناء نمو الثمار."
+
+msgid "Well-rotted manure"
+msgstr "سماد عضوي متحلل جيدًا"
+
+msgid ""
+"Only well-composted manure (fresh manure burns roots and spreads weeds); "
+"bury it."
+msgstr ""
+"فقط السماد العضوي المتخمّر جيدًا (السماد الطازج يحرق الجذور وينشر الأعشاب)؛ "
+"وادفنه."
+
+msgid "Tribenuron-methyl 75% (WG) — broadleaf weeds"
+msgstr "تريبينورون ميثيل (Tribenuron-methyl) 75% (WG) — الأعشاب عريضة الأوراق"
+
+msgid "15–25 g/ha"
+msgstr "15–25 غ/هكتار"
+
+msgid ""
+"From 3 leaves to the end of tillering, on young growing weeds; no rain for 4"
+" h."
+msgstr ""
+"من 3 أوراق إلى نهاية الإشطاء، على أعشاب فتية في طور النمو؛ دون مطر لمدة 4 "
+"ساعات."
+
+msgid "2,4-D amine — broadleaf weeds"
+msgstr "2,4-D أمين — الأعشاب عريضة الأوراق"
+
+msgid ""
+"End of tillering, before stem elongation. Drift damages vegetables, vines "
+"and trees: never in wind."
+msgstr ""
+"نهاية الإشطاء، قبل الصعود. الرذاذ المنجرف يضرّ الخضر والكروم والأشجار: لا "
+"ترشّ أبدًا مع الرياح."
+
+msgid "Clodinafop-propargyl — wild oats, ryegrass, phalaris"
+msgstr ""
+"كلودينافوب بروبارجيل (Clodinafop-propargyl) — الشوفان البري، الزوان، "
+"الفالاريس"
+
+msgid ""
+"Grass weeds at 2 leaves to tillering. Ryegrass resistance is common: rotate "
+"groups."
+msgstr ""
+"الأعشاب النجيلية من ورقتين إلى الإشطاء. مقاومة الزوان شائعة: ناوب بين "
+"المجموعات."
+
+msgid "Mesosulfuron + iodosulfuron — grasses and broadleaf"
+msgstr ""
+"ميزوسولفورون + يودوسولفورون (Mesosulfuron + iodosulfuron) — النجيليات وعريضة"
+" الأوراق"
+
+msgid "Wide spectrum on durum and bread wheat (not barley)."
+msgstr "طيف واسع على القمح الصلب واللين (ليس على الشعير)."
+
+msgid "Tebuconazole 250 g/L (EW)"
+msgstr "تيبوكونازول (Tebuconazole) 250 غ/ل (EW)"
+
+msgid "1 L/ha (250 g active ingredient/ha)"
+msgstr "1 ل/هكتار (250 غ مادة فعالة/هكتار)"
+
+msgid ""
+"At the first symptoms on the upper leaves. Do not use the same group more "
+"than twice a season."
+msgstr ""
+"عند أولى الأعراض على الأوراق العليا. لا تستعمل المجموعة نفسها أكثر من مرتين "
+"في الموسم."
+
+msgid "Azoxystrobin 250 g/L (SC)"
+msgstr "أزوكسيستروبين (Azoxystrobin) 250 غ/ل (SC)"
+
+msgid "0.8–1 L/ha"
+msgstr "0.8–1 ل/هكتار"
+
+msgid ""
+"Preventive (best at flag leaf on cereals). Max 2 sprays of this group per "
+"season; mix or alternate with a triazole (FRAC 3)."
+msgstr ""
+"وقائي (الأفضل في مرحلة الورقة الأخيرة على الحبوب). رشّتان على الأكثر من هذه "
+"المجموعة في الموسم؛ اخلطه أو ناوبه مع تريازول (FRAC 3)."
+
+msgid "Propiconazole 250 g/L (EC)"
+msgstr "بروبيكونازول (Propiconazole) 250 غ/ل (EC)"
+
+msgid "0.5 L/ha (125 g active ingredient/ha)"
+msgstr "0.5 ل/هكتار (125 غ مادة فعالة/هكتار)"
+
+msgid ""
+"Same group as tebuconazole: alternate with azoxystrobin, not with "
+"tebuconazole."
+msgstr ""
+"من مجموعة التيبوكونازول نفسها: ناوبه مع الأزوكسيستروبين لا مع التيبوكونازول."
+
+msgid "Tolerant varieties, later sowing, long rotation"
+msgstr "أصناف متحمّلة، زرع متأخر، وتداول طويل"
+
+msgid ""
+"Broomrape seeds live 10+ years in the soil: no faba bean, lentil or pea on "
+"infested land for several years."
+msgstr ""
+"تعيش بذور الهالوك أكثر من 10 سنوات في التربة: لا فول ولا عدس ولا جلبان في "
+"أرض مصابة لعدة سنوات."
+
+msgid "Glyphosate at very low dose"
+msgstr "غليفوسات (Glyphosate) بجرعة ضعيفة جدًا"
+
+msgid ""
+"60–80 g active ingredient/ha, 2–3 sprays 10–15 days apart from the start of "
+"flowering"
+msgstr ""
+"60–80 غ مادة فعالة/هكتار، 2–3 رشّات بفارق 10–15 يومًا ابتداءً من بداية "
+"الإزهار"
+
+msgid ""
+"ONLY on faba bean, only at this very low dose and with your CRDA advice: a "
+"normal dose kills the crop."
+msgstr ""
+"على الفول فقط، وبهذه الجرعة الضعيفة جدًا فقط، وبعد استشارة المندوبية الجهوية"
+" للتنمية الفلاحية: الجرعة العادية تقتل المحصول."
+
+msgid "Mancozeb 80% (WP)"
+msgstr "مانكوزاب (Mancozeb) 80% (WP)"
+
+msgid "2–2.5 kg/ha"
+msgstr "2–2.5 كغ/هكتار"
+
+msgid ""
+"Contact, preventive: before rain, renew every 7–10 days in wet weather and "
+"after 25–30 mm of rain. Check it is still registered for your crop."
+msgstr ""
+"بالملامسة، وقائي: قبل المطر، يُعاد كل 7–10 أيام في الطقس الرطب وبعد 25–30 مم"
+" من المطر. تأكّد أنه ما زال مرخّصًا لمحصولك."
+
+msgid "Tebuconazole"
+msgstr "تيبوكونازول (Tebuconazole)"
+
+msgid "From early flowering if wet weather persists."
+msgstr "من بداية الإزهار إذا استمر الطقس الرطب."
+
+msgid "Insecticidal (potassium) soap"
+msgstr "صابون بوتاسي مبيد للحشرات"
+
+msgid "1–2 L per 100 L of water"
+msgstr "1–2 ل لكل 100 ل من الماء"
+
+msgid ""
+"Contact only: wet the colonies, under the leaves too. Spares most beneficial"
+" insects."
+msgstr ""
+"بالملامسة فقط: بلّل المستعمرات، وتحت الأوراق أيضًا. لا يضرّ معظم الحشرات "
+"النافعة."
+
+msgid "Pirimicarb 50% (WG)"
+msgstr "بيريميكارب (Pirimicarb) 50% (WG)"
+
+msgid ""
+"Selective: spares ladybirds, hoverflies and bees. Treat only when colonies "
+"spread."
+msgstr ""
+"انتقائي: لا يضرّ الدعسوقة والذباب الحوّام والنحل. عالج فقط عندما تنتشر "
+"المستعمرات."
+
+msgid "Flonicamid 50% (WG)"
+msgstr "فلونيكاميد (Flonicamid) 50% (WG)"
+
+msgid "Stops aphid feeding within hours."
+msgstr "يوقف تغذّي المنّ خلال ساعات."
+
+msgid "At the first spots; renew after 2 weeks in wet weather."
+msgstr "عند أولى البقع؛ يُعاد بعد أسبوعين في الطقس الرطب."
+
+msgid "Pendimethalin — before emergence"
+msgstr "بنديميثالين (Pendimethalin) — قبل الإنبات"
+
+msgid ""
+"Spray right after sowing on moist, fine soil; lentil competes poorly with "
+"weeds."
+msgstr "رُشّ مباشرة بعد الزرع على تربة ناعمة ورطبة؛ العدس ضعيف أمام الأعشاب."
+
+msgid "At the first orange pustules."
+msgstr "عند أولى البثرات البرتقالية."
+
+msgid "Blue sticky traps"
+msgstr "مصائد زرقاء لاصقة"
+
+msgid "2–4 per ha to watch numbers"
+msgstr "2–4 في الهكتار لمراقبة الأعداد"
+
+msgid "Spinosad"
+msgstr "سبينوزاد (Spinosad)"
+
+msgid ""
+"Natural origin. Spray in the evening (toxic to bees while wet); max 2–3 "
+"sprays a season."
+msgstr ""
+"من أصل طبيعي. رُشّ في المساء (سام للنحل ما دام رطبًا)؛ 2–3 رشّات على الأكثر "
+"في الموسم."
+
+msgid "Metalaxyl-M + mancozeb (WG)"
+msgstr "ميتالاكسيل-م + مانكوزاب (Metalaxyl-M + mancozeb) (WG)"
+
+msgid "2.5 kg/ha"
+msgstr "2.5 كغ/هكتار"
+
+msgid ""
+"Penetrating: when blight starts. Max 2–3 sprays a season (resistance), then "
+"back to a contact fungicide."
+msgstr ""
+"نافذ: عند بداية الميلديو. 2–3 رشّات على الأكثر في الموسم (المقاومة)، ثم "
+"العودة إلى مبيد بالملامسة."
+
+msgid "Cymoxanil + mancozeb (WP)"
+msgstr "سيموكسانيل + مانكوزاب (Cymoxanil + mancozeb) (WP)"
+
+msgid "Stops infections of the last 2–3 days: use right after a wet spell."
+msgstr "يوقف إصابات اليومين أو الثلاثة الأخيرة: استعمله مباشرة بعد فترة رطبة."
+
+msgid "Copper hydroxide"
+msgstr "هيدروكسيد النحاس (Copper hydroxide)"
+
+msgid "Allowed in organic farming. Preventive only; washed off by heavy rain."
+msgstr "مسموح به في الفلاحة البيولوجية. وقائي فقط؛ يجرفه المطر الغزير."
+
+msgid "Pheromone traps (tuber moth lure)"
+msgstr "مصائد الفيرومون (طُعم عثة الدرنات)"
+
+msgid "2–4 traps/ha for monitoring"
+msgstr "2–4 مصائد/هكتار للمراقبة"
+
+msgid "Earth up well and keep the soil from cracking"
+msgstr "حضّن جيدًا وامنع تشقّق التربة"
+
+msgid ""
+"Moths lay on exposed tubers: hill up, water to close cracks, harvest "
+"promptly and never leave tubers in the field overnight."
+msgstr ""
+"تبيض الفراشات على الدرنات المكشوفة: حضّن، واسقِ لغلق الشقوق، واقلع بسرعة، "
+"ولا تترك الدرنات في الحقل ليلًا أبدًا."
+
+msgid "Bacillus thuringiensis kurstaki (Bt)"
+msgstr "باسيلوس ثورينجينسيس كورستاكي (Bt)"
+
+msgid "0.5–1 kg/ha"
+msgstr "0.5–1 كغ/هكتار"
+
+msgid ""
+"Kills young caterpillars only, harmless to bees and people; spray in the "
+"evening (sunlight breaks it down) and renew after 7 days."
+msgstr ""
+"يقتل اليرقات الصغيرة فقط، ولا يضرّ النحل والإنسان؛ رُشّ في المساء (أشعة "
+"الشمس تتلفه) وأعد بعد 7 أيام."
+
+msgid "Deltamethrin"
+msgstr "دلتاميثرين (Deltamethrin)"
+
+msgid "Only when traps catch many moths."
+msgstr "فقط عندما تصطاد المصائد فراشات كثيرة."
+
+msgid "Pheromone water traps (Tuta lure)"
+msgstr "مصائد مائية بالفيرومون (طُعم التوتا)"
+
+msgid "Monitoring: 2–4 traps/ha. Mass trapping: 20–40 traps/ha"
+msgstr "المراقبة: 2–4 مصائد/هكتار. الصيد المكثّف: 20–40 مصيدة/هكتار"
+
+msgid ""
+"Start at transplanting; also put insect-proof nets on greenhouse openings."
+msgstr ""
+"ابدأ عند غراسة الشتلات؛ وضع أيضًا شباكًا مانعة للحشرات على فتحات البيوت "
+"المحمية."
+
+msgid "Chlorantraniliprole"
+msgstr "كلورانترانيليبرول (Chlorantraniliprole)"
+
+msgid "Alternate groups between sprays."
+msgstr "ناوب بين المجموعات من رشّة إلى أخرى."
+
+msgid "Emamectin benzoate"
+msgstr "إيمامكتين بنزوات (Emamectin benzoate)"
+
+msgid "Wettable sulphur 80%"
+msgstr "الكبريت القابل للبلل 80%"
+
+msgid "200–300 g per 100 L of water"
+msgstr "200–300 غ لكل 100 ل من الماء"
+
+msgid ""
+"Allowed in organic farming. Not above 30 °C (leaf burn) and not within 2 "
+"weeks of an oil spray."
+msgstr ""
+"مسموح به في الفلاحة البيولوجية. ليس فوق 30 °م (حرق الأوراق) ولا خلال أسبوعين"
+" من رشّة زيت."
+
+msgid "Penconazole"
+msgstr "بنكونازول (Penconazole)"
+
+msgid "When sulphur is not enough or too hot to use."
+msgstr "عندما لا يكفي الكبريت أو تكون الحرارة مرتفعة جدًا لاستعماله."
+
+msgid "Yellow sticky traps"
+msgstr "مصائد صفراء لاصقة"
+
+msgid "About 1 trap per 20–50 m² in greenhouses"
+msgstr "حوالي مصيدة واحدة لكل 20–50 م² في البيوت المحمية"
+
+msgid "Beauveria bassiana (fungus)"
+msgstr "بوفيريا باسيانا (فطر نافع)"
+
+msgid "Needs humid conditions; spray in the evening."
+msgstr "يحتاج إلى رطوبة؛ رُشّ في المساء."
+
+msgid "Pyriproxyfen"
+msgstr "بيريبروكسيفين (Pyriproxyfen)"
+
+msgid "Stops young stages; acts slowly."
+msgstr "يوقف المراحل الصغيرة؛ مفعوله بطيء."
+
+msgid "Acetamiprid"
+msgstr "أسيتاميبريد (Acetamiprid)"
+
+msgid "Toxic to bees: never during flowering visits."
+msgstr "سام للنحل: لا ترشّ أبدًا أثناء زيارته للأزهار."
+
+msgid "Raised beds and drip irrigation"
+msgstr "أحواض مرتفعة وسقي بالتنقيط"
+
+msgid ""
+"Never let water stand at the stem; remove wilted plants with their soil."
+msgstr ""
+"لا تترك الماء راكدًا عند الساق أبدًا؛ واقلع النباتات الذابلة مع تربتها."
+
+msgid "Fosetyl-aluminium 80% (WG)"
+msgstr "فوزيتيل الألمنيوم (Fosetyl-aluminium) 80% (WG)"
+
+msgid "Systemic, moves down to the roots: foliar spray in spring and autumn."
+msgstr "جهازي، ينزل إلى الجذور: رشّ على الأوراق في الربيع والخريف."
+
+msgid "Metalaxyl-M through the drip line"
+msgstr "ميتالاكسيل-م (Metalaxyl-M) عبر خط التنقيط"
+
+msgid "At planting and once later; max 2 uses a season."
+msgstr "عند الغراسة ثم مرة لاحقًا؛ استعمالان على الأكثر في الموسم."
+
+msgid "Cut early"
+msgstr "احشّ مبكرًا"
+
+msgid "Cutting when larvae damage the tips is the most effective control."
+msgstr "الحشّ عندما تتلف اليرقات الأطراف هو أنجع وسيلة مكافحة."
+
+msgid "Lambda-cyhalothrin"
+msgstr "لامبدا سيهالوثرين (Lambda-cyhalothrin)"
+
+msgid ""
+"Respect the label interval before cutting or grazing; never during flowering"
+" (bees)."
+msgstr ""
+"احترم المدة المذكورة على الملصق قبل الحشّ أو الرعي؛ ولا ترشّ أبدًا أثناء "
+"الإزهار (النحل)."
+
+msgid "Dodder-free seed; cut, cover and burn patches"
+msgstr "بذور خالية من الحامول؛ احشّ البقع المصابة وغطّها واحرقها"
+
+msgid "Act before the dodder flowers and seeds."
+msgstr "تدخّل قبل أن يزهر الحامول ويبذر."
+
+msgid "Fruit-fly traps (food lure or pheromone)"
+msgstr "مصائد ذباب الفاكهة (طُعم غذائي أو فيرومون)"
+
+msgid "Monitoring: 2–4 traps/ha. Mass trapping: about 50 traps/ha"
+msgstr "المراقبة: 2–4 مصائد/هكتار. الصيد المكثّف: حوالي 50 مصيدة/هكتار"
+
+msgid ""
+"Hang on the sunny side at head height before the attack period; treat when "
+"catches rise."
+msgstr ""
+"علّقها في الجهة المشمسة على مستوى الرأس قبل فترة الإصابة؛ وعالج عندما ترتفع "
+"الأعداد."
+
+msgid "Kaolin clay"
+msgstr "طين الكاولين"
+
+msgid "3–5 kg per 100 L of water"
+msgstr "3–5 كغ لكل 100 ل من الماء"
+
+msgid ""
+"The white film repels the insect. Spray before the attack period and again "
+"after heavy rain. Allowed in organic farming."
+msgstr ""
+"الطبقة البيضاء تُبعد الحشرة. رُشّ قبل فترة الإصابة ومرة أخرى بعد المطر "
+"الغزير. مسموح به في الفلاحة البيولوجية."
+
+msgid "Spinosad fruit-fly bait (ready bait, 0.24 g/L)"
+msgstr "طُعم سبينوزاد لذباب الفاكهة (جاهز، 0.24 غ/ل)"
+
+msgid "About 1 L of bait per ha, mixed with 4 L of water"
+msgstr "حوالي 1 ل من الطُّعم للهكتار، ممزوجًا بـ 4 ل من الماء"
+
+msgid ""
+"Spot-spray a few big drops on one side of every tree (or every other tree): "
+"the flies come to eat it. Repeat every 7–10 days while the traps catch "
+"flies."
+msgstr ""
+"رُشّ بضع قطرات كبيرة على جانب كل شجرة (أو شجرة من كل اثنتين): يأتي الذباب "
+"ليأكله. أعد كل 7–10 أيام ما دامت المصائد تصطاد."
+
+msgid "Copper oxychloride 50% (WP)"
+msgstr "أوكسي كلورور النحاس (Copper oxychloride) 50% (WP)"
+
+msgid "300–500 g per 100 L of water"
+msgstr "300–500 غ لكل 100 ل من الماء"
+
+msgid "Allowed in organic farming. Wet the whole canopy."
+msgstr "مسموح به في الفلاحة البيولوجية. بلّل الشجرة كلها."
+
+msgid "Keep the natural parasites (Aphytis)"
+msgstr "حافظ على الطفيليات النافعة (أفيتيس)"
+
+msgid "Avoid broad-spectrum insecticides that kill them."
+msgstr "تجنّب المبيدات الحشرية واسعة الطيف التي تقتلها."
+
+msgid "Paraffinic (summer) oil"
+msgstr "زيت البارافين (الصيفي)"
+
+msgid "1–1.5 L per 100 L of water"
+msgstr "1–1.5 ل لكل 100 ل من الماء"
+
+msgid ""
+"At the crawler stage (late spring); wet the whole tree; not above 32 °C and "
+"not with sulphur."
+msgstr ""
+"في مرحلة اليرقات المتحركة (آخر الربيع)؛ بلّل الشجرة كلها؛ ليس فوق 32 °م ولا "
+"مع الكبريت."
+
+msgid "On crawlers."
+msgstr "على اليرقات المتحركة."
+
+msgid "Keep water off the trunk"
+msgstr "أبعد الماء عن الجذع"
+
+msgid "Drippers 50 cm away from the trunk; good drainage."
+msgstr "المنقّطات على بعد 50 سم من الجذع؛ وتصريف جيد."
+
+msgid "Copper (Bordeaux) paste on the trunk base"
+msgstr "عجينة نحاسية (بوردو) على قاعدة الجذع"
+
+msgid "Scrape the diseased bark first, then paint the wound."
+msgstr "اكشط اللحاء المصاب أولًا، ثم ادهن الجرح."
+
+msgid "Bag the bunches in fine net after fruit set"
+msgstr "غطِّ العراجين بناموسية دقيقة بعد العقد"
+
+msgid "Remove fallen and left-over dates: the moth survives in them."
+msgstr "أزل التمور المتساقطة والمتبقية: الدودة تعيش فيها."
+
+msgid "Report any suspect palm to the CRDA at once"
+msgstr "أبلغ المندوبية الجهوية للتنمية الفلاحية فورًا عن أي نخلة مشتبه بها"
+
+msgid ""
+"Holes with brown ooze, chewed fibres, a crown that leans: quarantine pest."
+msgstr "ثقوب يسيل منها سائل بني، ألياف ممضوغة، وقمة مائلة: آفة حجر صحي."
+
+msgid "Pheromone + food bait traps"
+msgstr "مصائد فيرومون + طُعم غذائي"
+
+msgid "About 1 trap per ha for monitoring"
+msgstr "حوالي مصيدة واحدة في الهكتار للمراقبة"
+
+msgid "light (sandy)"
+msgstr "خفيفة (رملية)"
+
+msgid "medium (loam)"
+msgstr "متوسطة (طميية)"
+
+msgid "heavy (clay)"
+msgstr "ثقيلة (طينية)"
+
+msgid "highly suitable"
+msgstr "ملائم جدًا"
+
+msgid "suitable"
+msgstr "ملائم"
+
+msgid "marginal"
+msgstr "ملائم بشكل محدود"
+
+msgid "not suitable"
+msgstr "غير ملائم"
+
+msgid "Farm water balance (FAO-56) with Open-Meteo weather"
+msgstr "الميزان المائي للضيعة (FAO-56) مع طقس Open-Meteo"
+
+msgid "Open-Meteo forecast at your parcel"
+msgstr "توقعات Open-Meteo في قطعتك"
+
+msgid "Crop calendar and product catalogue of the application"
+msgstr "الرزنامة الزراعية ودليل المنتجات في التطبيق"
+
+msgid "Crop suitability model (climate and soil of your parcel)"
+msgstr "نموذج ملاءمة المحاصيل (مناخ وتربة قطعتك)"
+
+msgid "Your farm log"
+msgstr "سجل ضيعتك"
+
+msgid "When should I water and how much?"
+msgstr "متى أسقي وكم؟"
+
+msgid "What should I do today?"
+msgstr "ماذا أفعل اليوم؟"
+
+msgid "What happens if I skip the watering?"
+msgstr "ماذا يحدث إذا لم أسقِ؟"
+
+msgid "Which fertiliser now, and how much?"
+msgstr "أي سماد الآن، وكم؟"
+
+msgid "Will it rain this week?"
+msgstr "هل ستمطر هذا الأسبوع؟"
+
+msgid "When is the best day to spray?"
+msgstr "ما أفضل يوم للرش؟"
+
+msgid "today"
+msgstr "اليوم"
+
+msgid "tomorrow"
+msgstr "غدًا"
+
+msgid "yesterday"
+msgstr "أمس"
+
+msgid "in {n} days"
+msgstr "بعد {n} أيام"
+
+msgid "{n} days ago"
+msgstr "منذ {n} أيام"
+
+msgid "rain only"
+msgstr "بعلية (مطر فقط)"
+
+msgid "no crop chosen"
+msgstr "لم يُختر محصول"
+
+msgid "unknown texture"
+msgstr "قوام غير معروف"
+
+msgid "measured for your parcel (SoilGrids)"
+msgstr "مقاس لقطعتك (SoilGrids)"
+
+msgid "average of your region"
+msgstr "متوسط منطقتك"
+
+msgid "typical value"
+msgstr "قيمة نموذجية"
+
+msgid "irrigated ({method}, {flow} m³ per hour)"
+msgstr "مسقية ({method}، {flow} م³ في الساعة)"
+
+msgid "irrigated ({method})"
+msgstr "مسقية ({method})"
+
+msgid "{name} ({group})"
+msgstr "{name} ({group})"
+
+msgid "{crop} ({score}/100)"
+msgstr "{crop} ({score}/100)"
+
+msgid "{task} ({when})"
+msgstr "{task} ({when})"
+
+msgid "{month}: no crop"
+msgstr "{month}: لا محصول"
+
+msgid "{month}: {mm} mm"
+msgstr "{month}: {mm} مم"
+
+msgid "for your farm: {qty}"
+msgstr "لضيعتك: {qty}"
+
+msgid ""
+"Tell me what grows on this farm first (edit the farm and choose the crop): "
+"this answer depends on the crop."
+msgstr ""
+"أخبرني أولًا بما يُزرع في هذه الضيعة (عدّل الضيعة واختر المحصول): هذه "
+"الإجابة تعتمد عليه."
+
+msgid "I could not read this information right now. Please try again later."
+msgstr "تعذّرت قراءة هذه المعلومة الآن. حاول مرة أخرى لاحقًا."
+
+msgid ""
+"I answer from your farm's data: when and how much to water, pump time, water"
+" in the soil, what happens if you skip a watering, your to-do list, "
+"fertiliser and products, pests and the best day to spray, the weather and "
+"alerts, growth stage and harvest, what to plant, and your farm log. For your"
+" region I also know the drought outlook, rainfall and temperatures."
+msgstr ""
+"أجيب من بيانات ضيعتك: متى وكم تسقي، مدة تشغيل المضخة، الماء في التربة، ماذا "
+"يحدث إذا تخطيت سقية، مهامك، الأسمدة والمنتجات، الآفات وأفضل يوم للرش، الطقس "
+"والتنبيهات، مرحلة النمو والحصاد، ماذا تزرع، وسجل ضيعتك. وأعرف أيضًا لمنطقتك "
+"توقعات الجفاف والأمطار ودرجات الحرارة."
+
+msgid "Next watering: {when} ({date})."
+msgstr "السقية القادمة: {when} ({date})."
+
+msgid ""
+"Your farm is marked as rain only. If you can irrigate, a supplementary "
+"watering is due {when} ({date})."
+msgstr ""
+"ضيعتك مسجلة كبعلية. إذا كان بإمكانك السقي، فالسقية التكميلية مستحقة {when} "
+"({date})."
+
+msgid ""
+"Give {mm} mm (= {mm} litres per m²), that is {m3} m³ for your {area} ha."
+msgstr "أعطِ {mm} مم (= {mm} لتر لكل م²)، أي {m3} م³ لـ {area} هكتار."
+
+msgid ""
+"Why: the soil holds {pct}% of the water the roots can use, and watering is "
+"due at {thr}%."
+msgstr ""
+"السبب: التربة تحتوي على {pct}% من الماء الذي تستطيع الجذور استعماله، والسقي "
+"مستحق عند {thr}%."
+
+msgid ""
+"No watering is needed in the next 16 days: the water in the soil ({pct}% of "
+"what the roots can use) and the expected rain cover the crop."
+msgstr ""
+"لا حاجة إلى السقي خلال الـ16 يومًا القادمة: الماء في التربة ({pct}% مما "
+"تستطيع الجذور استعماله) والمطر المتوقع يكفيان المحصول."
+
+msgid ""
+"A watering was due on {date} and none is recorded since: if you watered, "
+"record it in the farm log so the plan is right."
+msgstr ""
+"كانت هناك سقية مستحقة يوم {date} ولم تُسجَّل أي سقية منذ ذلك الحين: إذا "
+"سقيت، سجّلها في سجل الضيعة لتكون الخطة صحيحة."
+
+msgid ""
+"It is a large catch-up dose: split it over 2 or 3 days so the soil can "
+"absorb it."
+msgstr "إنها كمية تعويض كبيرة: قسّمها على يومين أو ثلاثة حتى تمتصها التربة."
+
+msgid "No watering is planned in the next 16 days, so no pumping is needed."
+msgstr "لا سقي مبرمج خلال الـ16 يومًا القادمة، فلا حاجة لتشغيل المضخة."
+
+msgid ""
+"I cannot compute the pump time: add your water flow (m³ per hour) in "
+"\"Method & flow\" on the Water tab. The next watering is {mm} mm, that is "
+"{m3} m³ for the farm."
+msgstr ""
+"لا أستطيع حساب مدة تشغيل المضخة: أضف دفق الماء (م³ في الساعة) في «الطريقة "
+"والدفق» في تبويب الماء. السقية القادمة {mm} مم، أي {m3} م³ للضيعة."
+
+msgid ""
+"For the next watering ({mm} mm, {when}) run the pump about {h} h at {flow} "
+"m³ per hour ({m3} m³ in total)."
+msgstr ""
+"للسقية القادمة ({mm} مم، {when}) شغّل المضخة حوالي {h} ساعة بدفق {flow} م³ "
+"في الساعة ({m3} م³ في المجموع)."
+
+msgid ""
+"Water in the soil now: {pct}% of what the roots can use ({used} mm used out "
+"of {taw} mm). Watering is due at {thr}% and the crop starts to suffer below "
+"{stress}%."
+msgstr ""
+"الماء في التربة الآن: {pct}% مما تستطيع الجذور استعماله (استُهلك {used} مم "
+"من {taw} مم). السقي مستحق عند {thr}% ويبدأ المحصول بالمعاناة تحت {stress}%."
+
+msgid "Without watering, the crop would start to suffer {when} ({date})."
+msgstr "بدون سقي، يبدأ المحصول بالمعاناة {when} ({date})."
+
+msgid ""
+"Even without watering, the crop stays comfortable for the next 16 days."
+msgstr "حتى بدون سقي، يبقى المحصول مرتاحًا خلال الـ16 يومًا القادمة."
+
+msgid ""
+"If you follow the plan: {n} waterings, {mm} mm in total, and {s} days of "
+"water stress in the next 16 days."
+msgstr ""
+"إذا اتبعت الخطة: {n} سقيات، {mm} مم في المجموع، و{s} أيام إجهاد مائي خلال "
+"الـ16 يومًا القادمة."
+
+msgid ""
+"If you do not water: the crop suffers from {date}, with {s} days of water "
+"stress, and about {risk}% of the harvest is at risk."
+msgstr ""
+"إذا لم تسقِ: يعاني المحصول ابتداءً من {date}، مع {s} أيام إجهاد مائي، ويصبح "
+"حوالي {risk}% من المحصول في خطر."
+
+msgid ""
+"If you do not water: the crop stays without water stress for the next 16 "
+"days."
+msgstr "إذا لم تسقِ: يبقى المحصول دون إجهاد مائي خلال الـ16 يومًا القادمة."
+
+msgid ""
+"Next 16 days: {n} waterings, {mm} mm in total, that is {m3} m³ for the farm."
+" The crop will use about {etc} mm and useful rain brings {rain} mm."
+msgstr ""
+"الـ16 يومًا القادمة: {n} سقيات، {mm} مم في المجموع، أي {m3} م³ للضيعة. "
+"سيستهلك المحصول حوالي {etc} مم ويجلب المطر المفيد {rain} مم."
+
+msgid ""
+"The monthly outlook needs the climate history of your region, which is not "
+"available for this farm."
+msgstr ""
+"التوقع الشهري يحتاج إلى التاريخ المناخي لمنطقتك، وهو غير متوفر لهذه الضيعة."
+
+msgid "Average watering need in the coming months (average year): {months}."
+msgstr "متوسط الحاجة إلى السقي في الأشهر القادمة (سنة متوسطة): {months}."
+
+msgid "Rest of the season: about {mm} mm, that is {m3} m³ for the farm."
+msgstr "بقية الموسم: حوالي {mm} مم، أي {m3} م³ للضيعة."
+
+msgid "You declared {supply} mm of water: that covers the need."
+msgstr "صرّحت بـ {supply} مم من الماء: هذا يغطي الحاجة."
+
+msgid ""
+"You declared {supply} mm of water: that is less than the need, keep it for "
+"the most sensitive stages (flowering and fruit set)."
+msgstr ""
+"صرّحت بـ {supply} مم من الماء: هذا أقل من الحاجة، احتفظ به للمراحل الأكثر "
+"حساسية (الإزهار وعقد الثمار)."
+
+msgid ""
+"I can only judge past water stress from the waterings you record. Record "
+"them in the farm log and I will tell you."
+msgstr ""
+"لا أستطيع تقدير الإجهاد المائي السابق إلا من السقيات التي تسجّلها. سجّلها في"
+" سجل الضيعة وسأخبرك."
+
+msgid ""
+"Over the last {n} days the crop was short of water on {d} days ({s}% less "
+"water than it needed): about {r}% of the harvest has been lost."
+msgstr ""
+"خلال آخر {n} يومًا عانى المحصول من نقص الماء {d} أيام ({s}% ماء أقل من "
+"حاجته): ضاع حوالي {r}% من المحصول."
+
+msgid "Over the last {n} days the crop had all the water it needed."
+msgstr "خلال آخر {n} يومًا حصل المحصول على كل الماء الذي يحتاجه."
+
+msgid ""
+"The watering plan needs the weather forecast, which is unavailable right "
+"now. Please try again later."
+msgstr ""
+"خطة السقي تحتاج إلى توقعات الطقس، وهي غير متوفرة الآن. حاول مرة أخرى لاحقًا."
+
+msgid ""
+"The crop is not sown yet (sowing planned on {date}): no watering is planned "
+"before that."
+msgstr "لم يُزرع المحصول بعد (الزرع مبرمج يوم {date}): لا سقي مبرمج قبل ذلك."
+
+msgid "The season is over (harvest on {date}): no watering is planned."
+msgstr "انتهى الموسم (الحصاد يوم {date}): لا سقي مبرمج."
+
+msgid "There is no crop in the field right now, so no watering is planned."
+msgstr "لا يوجد محصول في الحقل الآن، فلا سقي مبرمج."
+
+msgid "To do:"
+msgstr "المهام:"
+
+msgid "Questions waiting for your answer (Today tab):"
+msgstr "أسئلة تنتظر إجابتك (تبويب اليوم):"
+
+msgid "There is no fertiliser schedule for this crop in the application."
+msgstr "لا توجد رزنامة تسميد لهذا المحصول في التطبيق."
+
+msgid "No other fertiliser application is planned this season."
+msgstr "لا يوجد تسميد آخر مبرمج هذا الموسم."
+
+msgid ""
+"Next fertiliser: {product}, {when} ({date}), at the \"{stage}\" stage. Dose:"
+" {rate}."
+msgstr ""
+"التسميد القادم: {product}، {when} ({date})، في مرحلة «{stage}». الكمية: "
+"{rate}."
+
+msgid ""
+"The application of {product} planned on {date} is not recorded: if you did "
+"it, add it in the farm log."
+msgstr ""
+"تسميد {product} المبرمج يوم {date} غير مسجّل: إذا قمت به، أضفه إلى سجل "
+"الضيعة."
+
+msgid ""
+"These dates assume sowing on {date}: give your real sowing date (edit the "
+"farm) to make them exact."
+msgstr ""
+"هذه التواريخ تفترض الزرع يوم {date}: أدخل تاريخ زرعك الحقيقي (تعديل الضيعة) "
+"لتصبح دقيقة."
+
+msgid "To watch on your {crop} this month: {names}."
+msgstr "ما يجب مراقبته في {crop} هذا الشهر: {names}."
+
+msgid "The coming weather favours: {names}."
+msgstr "الطقس القادم ملائم لـ: {names}."
+
+msgid ""
+"Ask me about one of them by name to get its symptoms, prevention and "
+"products."
+msgstr "اسألني عن أحدها باسمه لأعطيك أعراضه ووقايته والمنتجات المناسبة."
+
+msgid "No major pest, disease or weed of {crop} is expected this month."
+msgstr "لا يُتوقع أي آفة أو مرض أو أعشاب ضارة مهمة لـ{crop} هذا الشهر."
+
+msgid "{threat} is a problem of {crop}."
+msgstr "{threat} من مشاكل {crop}."
+
+msgid "{threat} — how to recognise it: {text}"
+msgstr "{threat} — كيف تتعرف عليه: {text}"
+
+msgid "Treatment: {text}"
+msgstr "العلاج: {text}"
+
+msgid "Products that help:"
+msgstr "منتجات مفيدة:"
+
+msgid ""
+"Names are active ingredients: buy any registered brand that contains it, and"
+" always follow its label (dose, protective equipment, days before harvest)."
+msgstr ""
+"الأسماء هي مواد فعالة: اشترِ أي علامة مرخّصة تحتويها، واتبع دائمًا ملصقها "
+"(الجرعة، الوقاية، المدة قبل الحصاد)."
+
+msgid "The weather forecast is unavailable right now."
+msgstr "توقعات الطقس غير متوفرة الآن."
+
+msgid ""
+"{label}: {cond}, {tmin} to {tmax} °C, rain {rain} mm ({prob}% chance), wind "
+"{wind} km/h."
+msgstr ""
+"{label}: {cond}، من {tmin} إلى {tmax} °م، مطر {rain} مم (احتمال {prob}%)، "
+"رياح {wind} كم/سا."
+
+msgid "No rain is expected in the next 7 days."
+msgstr "لا يُتوقع مطر خلال الأيام السبعة القادمة."
+
+msgid ""
+"Rain expected in the next 7 days: {mm} mm in total. Next rainy day: {date}, "
+"{day_mm} mm."
+msgstr ""
+"المطر المتوقع خلال الأيام السبعة القادمة: {mm} مم في المجموع. أقرب يوم ممطر:"
+" {date}، {day_mm} مم."
+
+msgid ""
+"Next 7 days: {mm} mm of rain on {n} days, temperatures from {tmin} to {tmax}"
+" °C."
+msgstr ""
+"الأيام السبعة القادمة: {mm} مم مطر على {n} أيام، ودرجات حرارة من {tmin} إلى "
+"{tmax} °م."
+
+msgid ""
+"No frost, heat, heavy-rain or disease alert for your farm in the next 7 "
+"days."
+msgstr ""
+"لا يوجد تنبيه صقيع أو حرارة أو أمطار غزيرة أو مرض لضيعتك خلال الأيام السبعة "
+"القادمة."
+
+msgid "No crop is well suited to plant this month on this farm."
+msgstr "لا يوجد محصول ملائم للزرع هذا الشهر في هذه الضيعة."
+
+msgid "I have no suitability score for this crop here."
+msgstr "ليس لدي تقييم ملاءمة لهذا المحصول هنا."
+
+msgid ""
+"Best crops to plant now on this farm (climate and soil of your parcel): "
+"{items}."
+msgstr "أفضل المحاصيل للزرع الآن في هذه الضيعة (مناخ وتربة قطعتك): {items}."
+
+msgid "{crop} on this farm: {cls} (score {score}/100)."
+msgstr "{crop} في هذه الضيعة: {cls} (التقييم {score}/100)."
+
+msgid "{crop} sown this month: {cls} (score {score}/100)."
+msgstr "{crop} إذا زُرع هذا الشهر: {cls} (التقييم {score}/100)."
+
+msgid ""
+"Its usual sowing time starts in {month}: {cls} (score {score}/100) then."
+msgstr "يبدأ موعد زرعه المعتاد في {month}: {cls} (التقييم {score}/100) حينها."
+
+msgid ""
+"{crop}: sown on {sow}, now at the \"{stage}\" stage. Expected harvest {when}"
+" ({date})."
+msgstr ""
+"{crop}: زُرع يوم {sow}، وهو الآن في مرحلة «{stage}». الحصاد المتوقع {when} "
+"({date})."
+
+msgid ""
+"{crop} is a tree crop: it has no sowing or harvest date to compute here; its"
+" care follows the calendar months (see the Plan tab)."
+msgstr ""
+"{crop} محصول شجري: لا يوجد تاريخ زرع أو حصاد يُحسب هنا؛ العناية به تتبع أشهر"
+" الرزنامة (انظر تبويب الخطة)."
+
+msgid "{crop}: sowing planned {when} ({date})."
+msgstr "{crop}: الزرع مبرمج {when} ({date})."
+
+msgid "{crop}: the season ended; harvest was expected on {date}."
+msgstr "{crop}: انتهى الموسم؛ كان الحصاد متوقعًا يوم {date}."
+
+msgid ""
+"This assumes sowing on {date}: give your real sowing date (edit the farm) to"
+" make it exact."
+msgstr ""
+"هذا يفترض الزرع يوم {date}: أدخل تاريخ زرعك الحقيقي (تعديل الضيعة) ليصبح "
+"دقيقًا."
+
+msgid ""
+"Soil: {texture}; it holds about {awc} mm of water per metre of depth "
+"({source})."
+msgstr ""
+"التربة: {texture}؛ تحتفظ بحوالي {awc} مم من الماء لكل متر من العمق "
+"({source})."
+
+msgid "Your farm \"{name}\": {area} ha, {crop}, {water}."
+msgstr "ضيعتك «{name}»: {area} هكتار، {crop}، {water}."
+
+msgid "Climate data come from the region of {region}."
+msgstr "المعطيات المناخية مأخوذة من منطقة {region}."
+
+msgid ""
+"Your farm log is empty: record your waterings and other work in the farm "
+"log."
+msgstr "سجل ضيعتك فارغ: سجّل سقياتك وأعمالك الأخرى في سجل الضيعة."
+
+msgid "Last entries in your farm log:"
+msgstr "آخر التسجيلات في سجل ضيعتك:"
+
+msgid ""
+"No watering is recorded for this farm yet. Record them in the farm log: the "
+"plan then follows what you really did."
+msgstr ""
+"لم تُسجَّل أي سقية لهذه الضيعة بعد. سجّلها في سجل الضيعة: ستتبع الخطة حينها "
+"ما قمت به فعلًا."
+
+msgid "Your last recorded watering: {date} ({when}), {mm} mm."
+msgstr "آخر سقية مسجّلة: {date} ({when})، {mm} مم."
+
+msgid "Your last recorded watering: {date} ({when})."
+msgstr "آخر سقية مسجّلة: {date} ({when})."
+
+msgid ""
+"{n} waterings recorded in the last 30 days ({mm} mm with a recorded amount)."
+msgstr "{n} سقيات مسجّلة خلال آخر 30 يومًا ({mm} مم للسقيات المسجّلة كميتها)."
+
+msgid ""
+"Watering follows the FAO-56 method: every day the crop uses water (crop "
+"coefficient {kc} × the reference evaporation of the weather), rain refills "
+"the soil, and watering is due when the roots ({root} m deep, {taw} mm of "
+"usable water in your soil) have used {trig} mm."
+msgstr ""
+"يتبع السقي طريقة FAO-56: كل يوم يستهلك المحصول الماء (المعامل المحصولي {kc} "
+"× التبخر المرجعي حسب الطقس)، ويعيد المطر ملء التربة، ويصبح السقي مستحقًا "
+"عندما تستهلك الجذور ({root} م عمقًا، {taw} مم من الماء المتاح في تربتك) "
+"{trig} مم."
+
+msgid ""
+"Your {method} system brings {eff}% of the water to the roots, so the dose "
+"you apply is larger than what the roots receive."
+msgstr ""
+"نظامك ({method}) يوصل {eff}% من الماء إلى الجذور، لذا فالكمية التي تعطيها "
+"أكبر مما تتلقاه الجذور."
+
+msgid ""
+"Data used: Open-Meteo weather at your parcel (last 60 days and 16-day "
+"forecast), FAO-56 crop tables, ISRIC SoilGrids soil, the climate history of "
+"your region, and your own farm log. Fertiliser and product doses are "
+"indicative extension values: the label and your CRDA office have the final "
+"word."
+msgstr ""
+"المعطيات المستعملة: طقس Open-Meteo في قطعتك (آخر 60 يومًا وتوقعات 16 يومًا)،"
+" جداول المحاصيل FAO-56، تربة ISRIC SoilGrids، التاريخ المناخي لمنطقتك، وسجل "
+"ضيعتك. كميات الأسمدة والمنتجات قيم إرشادية: الكلمة الأخيرة للملصق وللمندوبية"
+" الجهوية للتنمية الفلاحية."
+
+msgid ""
+"At {flow} m³ per hour this takes about {days} days of pumping: check the "
+"flow you entered, or water the farm in sectors."
+msgstr ""
+"بدفق {flow} م³ في الساعة يتطلب هذا حوالي {days} أيام من الضخ: تحقّق من الدفق"
+" الذي أدخلته، أو اسقِ الضيعة على أجزاء."
+
+msgid ""
+"Riskiest crops to plant now on this farm (lowest chance of success): "
+"{items}."
+msgstr "أخطر المحاصيل للزرع الآن في هذه الضيعة (أضعف حظوظ النجاح): {items}."
+
+msgid "No connection: try again when you are online."
+msgstr "لا يوجد اتصال: حاول مرة أخرى عند توفر الإنترنت."
+
+msgid "To install on iPhone: tap the Share button, then “Add to Home Screen”."
+msgstr "للتثبيت على آيفون: المس زر المشاركة، ثم «إضافة إلى الشاشة الرئيسية»."
+
+msgid "The app is installed: open it from your home screen."
+msgstr "تم تثبيت التطبيق: افتحه من شاشتك الرئيسية."
+
+msgid "Back online: your data is up to date again."
+msgstr "عاد الاتصال: بياناتك محدّثة من جديد."
+
+msgid "Install the app"
+msgstr "تثبيت التطبيق"
+
+msgid ""
+"You are offline: showing the last saved data. Changes need a connection."
+msgstr "أنت غير متصل: تُعرض آخر البيانات المحفوظة. التعديلات تتطلب اتصالًا."
+
+msgid "You are offline"
+msgstr "أنت غير متصل"
+
+msgid ""
+"Open the app once with a connection: it will then keep your farm’s last data"
+" for the field."
+msgstr ""
+"افتح التطبيق مرة واحدة مع اتصال: سيحتفظ بعدها بآخر بيانات ضيعتك لاستعمالها "
+"في الحقل."
+
+msgid "Try again"
+msgstr "إعادة المحاولة"
+
+msgid "APWRS Farmer"
+msgstr "APWRS الفلاح"
+
+msgid ""
+"When to water, what to plant, pests, weather and an assistant for your farm."
+msgstr "متى تسقي، ماذا تزرع، الآفات، الطقس ومساعد لضيعتك."
+
+msgid "Wrong username or password."
+msgstr "اسم المستخدم أو كلمة المرور غير صحيحة."
+
+msgid "%%s updated successfully!"
+msgstr "تم تحديث %%s بنجاح!"
+
+msgid "%%s deleted successfully!"
+msgstr "تم حذف %%s بنجاح!"
+
+msgid "All %%s deleted successfully!"
+msgstr "تم حذف كل %%s بنجاح!"
+
+msgid ""
+"No current assessment is possible: the newest SPEI-3 reading for this region"
+" is %%(months)s months old (%%(date)s). Re-run the drought-index import "
+"before acting on this result. For reference only, that reading was "
+"%%(level)s (SPEI-3 %%(spei)s)."
+msgstr ""
+"لا يمكن إجراء تقييم حالي: عمر أحدث قراءة SPEI-3 لهذه المنطقة %%(months)s "
+"أشهر (%%(date)s). أعد تشغيل استيراد مؤشر الجفاف قبل الاعتماد على هذه "
+"النتيجة. للعلم فقط، كانت تلك القراءة %%(level)s (SPEI-3 %%(spei)s)."
+
+msgid ""
+"SPEI-3 is %%(spei)s as of %%(date)s: no drought stress indicated. Keep the "
+"current irrigation schedule and monitor weekly."
+msgstr ""
+"قيمة SPEI-3 هي %%(spei)s بتاريخ %%(date)s: لا يوجد إجهاد جفاف. حافظ على جدول"
+" الري الحالي وتابع أسبوعيًا."
+
+msgid ""
+"Near-normal: SPEI-3 is %%(spei)s as of %%(date)s. Keep normal monitoring and"
+" avoid unnecessary irrigation."
+msgstr ""
+"قريب من العادي: قيمة SPEI-3 هي %%(spei)s بتاريخ %%(date)s. حافظ على المتابعة"
+" العادية وتجنّب الري غير الضروري."
+
+msgid ""
+"Moderate drought: SPEI-3 is %%(spei)s as of %%(date)s. Shorten the "
+"irrigation interval slightly and prioritise the most sensitive growth stage."
+msgstr ""
+"جفاف متوسط: قيمة SPEI-3 هي %%(spei)s بتاريخ %%(date)s. قصّر الفاصل بين "
+"الريات قليلًا وأعطِ الأولوية لأكثر مراحل النمو حساسية."
+
+msgid ""
+"Severe drought: SPEI-3 is %%(spei)s as of %%(date)s. Increase irrigation "
+"frequency, concentrate limited water on the most sensitive growth stage, and"
+" postpone any non-essential sowing."
+msgstr ""
+"جفاف شديد: قيمة SPEI-3 هي %%(spei)s بتاريخ %%(date)s. زِد عدد الريات، وركّز "
+"الماء المحدود على أكثر مراحل النمو حساسية، وأجّل كل بذر غير ضروري."
+
+msgid ""
+"Extreme drought: SPEI-3 is %%(spei)s as of %%(date)s. Water availability is "
+"the binding constraint. Prioritise the most sensitive crop areas, and "
+"consider deferring water-demanding crops until conditions improve."
+msgstr ""
+"جفاف قصوى: قيمة SPEI-3 هي %%(spei)s بتاريخ %%(date)s. توفر الماء هو القيد "
+"الحاسم. أعطِ الأولوية لمساحات المحاصيل الأكثر حساسية، وفكّر في تأجيل "
+"المحاصيل المستهلكة للماء حتى تتحسن الظروف."
+
+msgid "SPEI-3 is %%(spei)s (%%(level)s) as of %%(date)s."
+msgstr "قيمة SPEI-3 هي %%(spei)s (%%(level)s) بتاريخ %%(date)s."
+
+msgid ""
+"Ping: __LAT__, __LNG__ | Wind: __WS__ km/h | Temp: __T__°C | Humidity: "
+"__H__%% | Rain: __R__ mm"
+msgstr ""
+"نقطة: __LAT__, __LNG__ | الرياح: __WS__ كم/س | الحرارة: __T__°م | الرطوبة: "
+"__H__%% | المطر: __R__ مم"
+
+msgid ""
+"{n} mm reach the roots; the rest is lost by the method ({e}%% efficient)."
+msgstr "يصل {n} مم إلى الجذور، والباقي تفقده طريقة الري (كفاءة {e}%%)."
+
+msgid "about {p}%% of a well-timed crop"
+msgstr "حوالي {p}%% من محصول مزروع في وقته"
+
+msgid "Ammonium nitrate 33.5%%"
+msgstr "الأمونيتر (نترات الأمونيوم) 33.5%%"
+
+msgid "Triple superphosphate 45%%"
+msgstr "السوبرفوسفات الثلاثي 45%%"
+
+msgid "Potassium sulphate 50%%"
+msgstr "سلفات البوتاسيوم 50%%"
+
+msgid "Potassium sulphate 50%% + manure"
+msgstr "سلفات البوتاسيوم 50%% + سماد عضوي"
+
+msgid "40%% of the N"
+msgstr "40%% من الآزوت"
+
+msgid "35%% of the N + potassium"
+msgstr "35%% من الآزوت + البوتاسيوم"
+
+msgid "25%% of the N"
+msgstr "25%% من الآزوت"
+
+msgid "Urea 46%%"
+msgstr "اليوريا (الأوريا) 46%%"
+
+msgid "Calcium nitrate 15.5%%"
+msgstr "نترات الكالسيوم 15.5%%"
+
+msgid "Tribenuron-methyl 75%% (WG) — broadleaf weeds"
+msgstr ""
+"تريبينورون ميثيل (Tribenuron-methyl) 75%% (WG) — الأعشاب عريضة الأوراق"
+
+msgid "Mancozeb 80%% (WP)"
+msgstr "مانكوزاب (Mancozeb) 80%% (WP)"
+
+msgid "Pirimicarb 50%% (WG)"
+msgstr "بيريميكارب (Pirimicarb) 50%% (WG)"
+
+msgid "Flonicamid 50%% (WG)"
+msgstr "فلونيكاميد (Flonicamid) 50%% (WG)"
+
+msgid "Wettable sulphur 80%%"
+msgstr "الكبريت القابل للبلل 80%%"
+
+msgid "Fosetyl-aluminium 80%% (WG)"
+msgstr "فوزيتيل الألمنيوم (Fosetyl-aluminium) 80%% (WG)"
+
+msgid "Copper oxychloride 50%% (WP)"
+msgstr "أوكسي كلورور النحاس (Copper oxychloride) 50%% (WP)"
+
+msgid ""
+"Why: the soil holds {pct}%% of the water the roots can use, and watering is "
+"due at {thr}%%."
+msgstr ""
+"السبب: التربة تحتوي على {pct}%% من الماء الذي تستطيع الجذور استعماله، والسقي"
+" مستحق عند {thr}%%."
+
+msgid ""
+"No watering is needed in the next 16 days: the water in the soil ({pct}%% of"
+" what the roots can use) and the expected rain cover the crop."
+msgstr ""
+"لا حاجة إلى السقي خلال الـ16 يومًا القادمة: الماء في التربة ({pct}%% مما "
+"تستطيع الجذور استعماله) والمطر المتوقع يكفيان المحصول."
+
+msgid ""
+"Water in the soil now: {pct}%% of what the roots can use ({used} mm used out"
+" of {taw} mm). Watering is due at {thr}%% and the crop starts to suffer "
+"below {stress}%%."
+msgstr ""
+"الماء في التربة الآن: {pct}%% مما تستطيع الجذور استعماله (استُهلك {used} مم "
+"من {taw} مم). السقي مستحق عند {thr}%% ويبدأ المحصول بالمعاناة تحت "
+"{stress}%%."
+
+msgid ""
+"If you do not water: the crop suffers from {date}, with {s} days of water "
+"stress, and about {risk}%% of the harvest is at risk."
+msgstr ""
+"إذا لم تسقِ: يعاني المحصول ابتداءً من {date}، مع {s} أيام إجهاد مائي، ويصبح "
+"حوالي {risk}%% من المحصول في خطر."
+
+msgid ""
+"Over the last {n} days the crop was short of water on {d} days ({s}%% less "
+"water than it needed): about {r}%% of the harvest has been lost."
+msgstr ""
+"خلال آخر {n} يومًا عانى المحصول من نقص الماء {d} أيام ({s}%% ماء أقل من "
+"حاجته): ضاع حوالي {r}%% من المحصول."
+
+msgid ""
+"{label}: {cond}, {tmin} to {tmax} °C, rain {rain} mm ({prob}%% chance), wind"
+" {wind} km/h."
+msgstr ""
+"{label}: {cond}، من {tmin} إلى {tmax} °م، مطر {rain} مم (احتمال {prob}%%)، "
+"رياح {wind} كم/سا."
+
+msgid ""
+"Your {method} system brings {eff}%% of the water to the roots, so the dose "
+"you apply is larger than what the roots receive."
+msgstr ""
+"نظامك ({method}) يوصل {eff}%% من الماء إلى الجذور، لذا فالكمية التي تعطيها "
+"أكبر مما تتلقاه الجذور."

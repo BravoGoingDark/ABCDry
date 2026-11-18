@@ -52,7 +52,7 @@ def _pct(x):
 # ------------------------------------------------------------------ #
 
 def get_assistant_answer(question, region_id=None, crop=None, lang='en',
-                         use_llm=True, history=None, conversation=None):
+                         use_llm=True, history=None, conversation=None, farm=None):
     """Delegate to the grounded assistant brain (facts -> rules -> LLM).
 
     Kept as the public entry point: views, tasks and pre-warming call this.
@@ -60,12 +60,13 @@ def get_assistant_answer(question, region_id=None, crop=None, lang='en',
     deterministic drought/agronomy rules, and lets the local LLM explain them
     in the user's language - validating every number against the facts.
     ``conversation`` carries the crop/region the client already knows about so
-    short follow-ups keep their context.
+    short follow-ups keep their context. ``farm`` (the asking farmer's own
+    parcel) lets farm questions be answered from the farm's data.
     """
     from dashboard.services.assistant_brain import answer_question
     return answer_question(question, region_id=region_id, crop=crop, lang=lang,
                            use_llm=use_llm, history=history,
-                           conversation=conversation)
+                           conversation=conversation, farm=farm)
 
 
 def prewarm_answers():
@@ -74,6 +75,9 @@ def prewarm_answers():
     return _prewarm()
 
 
-def suggestions(lang='en'):
+def suggestions(lang='en', farm=None):
+    if farm is not None:
+        from dashboard.services.farm_qa import suggestions as _farm_suggestions
+        return _farm_suggestions(lang)
     from dashboard.services.assistant_brain import suggestions as _suggestions
     return _suggestions(lang)

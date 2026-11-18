@@ -16,6 +16,7 @@ from types import SimpleNamespace
 
 from django import db
 from django.db import transaction
+from django.utils.translation import gettext as _
 
 from dashboard.models import ClimateMetrics, Region
 from dashboard.prediction_engine.physical_helpers import (
@@ -249,10 +250,10 @@ def suitability_soil(soil):
 def farm_advice(farm, month, today=None):
     """Ranked crop recommendations + plan for the farm's current crop."""
     if farm.region is None:
-        return {'error': 'No region with climate data is available near this farm.'}
+        return {'error': _('No region with climate data is available near this farm.')}
     clim = crop_suitability.region_climatology(farm.region)
     if clim is None:
-        return {'error': f'Not enough climate history for {farm.region.name}.'}
+        return {'error': _('Not enough climate history for {region}.').format(region=farm.region.name)}
 
     soil_raw = farm.soil if farm.soil and not farm.soil.get('unavailable') else None
     if farm.soil is None:
@@ -262,9 +263,10 @@ def farm_advice(farm, month, today=None):
     if soil is None:
         soil = crop_suitability.region_soil(farm.region)
         if soil:
-            pending = ' (the parcel soil is still loading)' if farm.soil is None else ''
-            soil_note = (f'Soil of this parcel is not available{pending}: the average soil of '
-                         f'{farm.region.name} was used instead.')
+            soil_note = (_('Soil of this parcel is not available (it is still loading): the average '
+                           'soil of {region} was used instead.') if farm.soil is None
+                         else _('Soil of this parcel is not available: the average soil of {region} '
+                                'was used instead.')).format(region=farm.region.name)
     scenario, outlook = crop_suitability.drought_scenario(farm.region)
     mode = 'irrigated' if farm.irrigated else 'rainfed'
     water = float(farm.water_supply_mm) if farm.water_supply_mm is not None else None
@@ -275,17 +277,17 @@ def farm_advice(farm, month, today=None):
                             *_region_point(farm.region))
     notes = []
     if distance > FAR_REGION_KM:
-        notes.append(f'Climate is taken from {farm.region.name}, {distance:.0f} km away: '
-                     'treat the water figures as approximate.')
+        notes.append(_('Climate is taken from {region}, {km} km away: treat the water figures as '
+                       'approximate.').format(region=farm.region.name, km=f'{distance:.0f}'))
     if soil_note:
         notes.append(soil_note)
     elif not soil:
-        notes.append('Soil data could not be loaded: pH and texture were not scored.')
+        notes.append(_('Soil data could not be loaded: pH and texture were not scored.'))
     if soil_raw and soil_raw.get('note'):
-        notes.append(soil_raw['note'])
+        notes.append(_(soil_raw['note']))
     if scenario == 'dry':
-        notes.append('The 1-month drought outlook warns of dry conditions: rainfall was '
-                     'set to a dry year (25th percentile).')
+        notes.append(_('The 1-month drought outlook warns of dry conditions: rainfall was set to a '
+                       'dry year (25th percentile).'))
 
     return {
         'month': month,
@@ -323,7 +325,18 @@ def farm_weather(farm, days=16):
     payload = get_region_forecast(point, days=days)
     alerts = crop_management.weather_alerts(payload.get('days') or [], farm.crop or None) \
         if payload and not payload.get('error') else []
-    return {'forecast': payload, 'alerts': alerts}
+    return {'forecast': _translated_forecast(payload), 'alerts': alerts}
+
+
+def _translated_forecast(payload):
+    """Copy of the (cached, shared) forecast with condition labels in the
+    request's language."""
+    if not payload or payload.get('error') or not payload.get('days'):
+        return payload
+    days = [{**d, 'condition': {**d['condition'], 'label': _(d['condition']['label'])}}
+            if isinstance(d.get('condition'), dict) and d['condition'].get('label') else d
+            for d in payload['days']]
+    return {**payload, 'days': days}
 
 
 def serialize_farm(farm):
@@ -338,8 +351,12 @@ def serialize_farm(farm):
         'region_id': farm.region_id,
         'crop': farm.crop or None,
         'crop_name': crop_suitability.CROPS[farm.crop]['names']['en'] if farm.crop in crop_suitability.CROPS else None,
+        'crop_names': crop_suitability.CROPS[farm.crop]['names'] if farm.crop in crop_suitability.CROPS else None,
         'sowing_date': farm.sowing_date.isoformat() if farm.sowing_date else None,
         'irrigated': farm.irrigated,
         'water_supply_mm': float(farm.water_supply_mm) if farm.water_supply_mm is not None else None,
+        'irrigation_method': farm.irrigation_method or None,
+        'irrigation_flow_m3h': float(farm.irrigation_flow_m3h) if farm.irrigation_flow_m3h is not None else None,
+        'last_irrigation_date': farm.last_irrigation_date.isoformat() if farm.last_irrigation_date else None,
         'soil': farm.soil,
     }

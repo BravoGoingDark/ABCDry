@@ -361,6 +361,17 @@ def rank_crops(clim, soil=None, month=None, mode='rainfed', scenario='normal',
         if month and not best['plantable_now']:
             later = sorted(crop['planting_months'], key=lambda m: (m - month) % 12)
             best['next_planting_month'] = later[0]
+            # Out-of-window scenario: what the same model expects if the
+            # farmer sows this month anyway, so the page can compare
+            # "plant now" against "wait for the window" with real numbers.
+            if not crop['perennial']:
+                now = score_crop(key, clim, soil, month, mode, rain_key, water_supply_mm)
+                keep = ('score', 'class', 'limiting_factor', 'factors', 'water_balance')
+                best['if_sown_now'] = {k: now[k] for k in keep}
+                # "Wait" means the next window, which may not be the best month.
+                nxt = best if later[0] == best['sow_month'] else \
+                    score_crop(key, clim, soil, later[0], mode, rain_key, water_supply_mm)
+                best['next_window'] = dict({k: nxt[k] for k in keep}, month=later[0])
         results.append(best)
     results.sort(key=lambda r: (-(r['plantable_now'] or False), -r['score']))
     return results

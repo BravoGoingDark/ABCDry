@@ -44,6 +44,8 @@ tilecache/
 *.pdf
 *.png
 !static/**/*.png
+# the phone app's logo and launcher icons (mobile/build/ stays ignored by mobile/.gitignore)
+!mobile/**/*.png
 
 # Keys & Secrets
 keys/

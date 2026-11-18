@@ -332,32 +332,33 @@ def analysis_export_csv(request):
     pdf.cell(w, 8, '2. Key Drought Drivers', border=0, fill=True)
     pdf.ln(10)
 
+    from ..services.risk_breakdown import signal_rows
+    breakdown = drivers.get('breakdown') if isinstance(drivers, dict) else None
+    rows = signal_rows(breakdown) if breakdown else []
+    pdf.set_font('Helvetica', '', 9)
+    if breakdown and breakdown.get('spi3') is not None:
+        pdf.multi_cell(w, 5, _pdf_str(
+            f"The risk score is set by rainfall only: SPI-3 = {breakdown['spi3']:+.2f} "
+            f"(90-day rain vs the same window in up to 30 earlier years). The other "
+            f"signals are not in the score; they are shown as anomalies to watch."))
+        pdf.ln(2)
     pdf.set_font('Helvetica', 'B', 9)
     pdf.set_fill_color(200, 215, 240)
-    col_w = [w * 0.45, w * 0.25, w * 0.30]
-    headers = ['Driver', 'Contribution (%)', 'Score (0-100)']
-    for i, h in enumerate(headers):
+    col_w = [w * 0.34, w * 0.40, w * 0.26]
+    for i, h in enumerate(['Signal', 'Now vs normal', 'Effect']):
         pdf.cell(col_w[i], 7, h, border=1, fill=True, align='C')
     pdf.ln()
-
-    driver_keys = [
-        ('rainfall_deficit', 'Rainfall Deficit'),
-        ('high_temperature', 'High Temperature'),
-        ('soil_moisture_decline', 'Soil Moisture Decline'),
-        ('vegetation_stress', 'Vegetation Stress'),
-        ('high_evapotranspiration', 'High Evapotranspiration'),
-    ]
-    abs_drivers = drivers.get('absolute', {}) if isinstance(drivers, dict) else {}
     pdf.set_font('Helvetica', '', 9)
-    for i, (key, label) in enumerate(driver_keys):
-        contrib = drivers.get(key, '') if isinstance(drivers, dict) else ''
-        abs_val = abs_drivers.get(key, '') if isinstance(abs_drivers, dict) else ''
+    if not rows:
+        pdf.cell(w, 6, '  No breakdown available for this prediction.', border=1)
+        pdf.ln()
+    for i, (label, now, effect) in enumerate(rows):
         fill = (i % 2 == 0)
         if fill:
             pdf.set_fill_color(245, 248, 252)
-        pdf.cell(col_w[0], 6, f'  {label}', border=1, fill=fill)
-        pdf.cell(col_w[1], 6, _fmt(contrib), border=1, fill=fill, align='C')
-        pdf.cell(col_w[2], 6, _fmt(abs_val), border=1, fill=fill, align='C')
+        pdf.cell(col_w[0], 6, _pdf_str(f'  {label}'), border=1, fill=fill)
+        pdf.cell(col_w[1], 6, _pdf_str(now), border=1, fill=fill, align='C')
+        pdf.cell(col_w[2], 6, _pdf_str(effect), border=1, fill=fill, align='C')
         pdf.ln()
 
     pdf.ln(6)
@@ -449,193 +450,88 @@ def analysis_export_csv(request):
 
 
 def calculations_view(request):
-    """Display calculated metrics, formulas, and custom chart builder."""
+    """Latest value of every metric, relative to its normal / previous reading / last year."""
+    from django.db.models import Count
+    from ..services.relative_metrics import build_sections
+
     rid = request.GET.get('region_id')
-    region = get_object_or_404(Region, pk=rid) if rid else Region.objects.filter(name='Bizerte').first() or Region.objects.first()
-    snap_date = request.GET.get('snap_date')
+    if rid:
+        region = get_object_or_404(Region, pk=rid)
+    else:
+        # default to the region with the most climate records, so the page opens with data
+        busiest = (ClimateMetrics.objects.values('region').annotate(n=Count('id'))
+                   .order_by('-n').first())
+        region = (Region.objects.filter(pk=busiest['region']).first() if busiest else None) \
+            or Region.objects.order_by('name').first()
+    snap_date = request.GET.get('snap_date') or ''
 
-    def _latest_with_date(model_cls, region, snap_date):
-        filters = {'region': region}
-        if snap_date:
-            filters['measurement_date__lte'] = snap_date
-        return model_cls.objects.filter(**filters).order_by('-measurement_date').first()
-
-    latest_soil = _latest_with_date(SoilMetrics, region, snap_date)
-    latest_climate = _latest_with_date(ClimateMetrics, region, snap_date)
-    latest_di = _latest_with_date(DroughtIndices, region, snap_date)
-    latest_rs = _latest_with_date(RemoteSensingMetrics, region, snap_date)
-    latest_hydro = _latest_with_date(HydrologyMetrics, region, snap_date)
-    latest_agri = _latest_with_date(AgriculturalMetrics, region, snap_date)
-
-    def _f(v):
-        if v is None:
-            return '—'
-        if isinstance(v, Decimal):
-            return round(float(v), 2)
-        return v
-
-    mean_temp = None
-    if latest_climate and latest_climate.temperature_max_c is not None and latest_climate.temperature_min_c is not None:
-        try:
-            mean_temp = round((float(latest_climate.temperature_max_c) + float(latest_climate.temperature_min_c)) / 2.0, 2)
-        except Exception:
-            mean_temp = None
-
-    awc = None
-    awc_formula_parts = []
-    if latest_soil:
-        fc = latest_soil.field_capacity_percent
-        wp = latest_soil.wilting_point_percent
-        rz = latest_soil.root_zone_depth_mm
-        if fc is not None and wp is not None and rz:
-            try:
-                fc_f = float(fc)
-                wp_f = float(wp)
-                awc = round(((fc_f - wp_f) / 100.0) * float(rz), 2)
-                awc_formula_parts = [f'FC={fc_f}%', f'WP={wp_f}%', f'RZ={rz}mm', f'({fc_f}-{wp_f})/100×{rz}={awc}mm']
-            except Exception:
-                pass
-
-    soil_water_deficit = None
-    if latest_soil and latest_climate:
-        sm = latest_soil.moisture_content_percent
-        fc_v = latest_soil.field_capacity_percent
-        if sm is not None and fc_v is not None and float(fc_v) > 0:
-            soil_water_deficit = round(max(0, 100 - (float(sm) / float(fc_v) * 100)), 2)
-
-    et_def_calc = None
-    if latest_climate and latest_agri:
-        et0 = latest_climate.evapotranspiration_et0_mmday
-        kc = latest_agri.crop_coefficient_kc
-        if et0 is not None and kc is not None:
-            et_def_calc = f'{_f(et0)} × {_f(kc)} = {round(float(et0)*float(kc), 2)} mm/day'
-
-    calc_sections = [
-        {
-            'category': 'Soil',
-            'items': [
-                {'name': 'Field Capacity (%)',  'formula': 'Saxton & Rawls PTF: 0.28 + 0.57×clay − 0.24×sand', 'value': _f(latest_soil.field_capacity_percent if latest_soil else None)},
-                {'name': 'Wilting Point (%)',   'formula': 'Saxton & Rawls PTF: 0.06 + 0.42×clay − 0.07×sand', 'value': _f(latest_soil.wilting_point_percent if latest_soil else None)},
-                {'name': 'AWC (mm)',             'formula': awc_formula_parts[3] if awc_formula_parts else '(FC − WP)/100 × Root Zone Depth', 'value': _f(awc)},
-                {'name': 'Soil Water Deficit (%)','formula': 'max(0, 100 − (SM/FC × 100))', 'value': _f(soil_water_deficit)},
-                {'name': 'Organic Matter (%)',   'formula': 'Loss on ignition (LOI) method', 'value': _f(latest_soil.organic_matter_percent if latest_soil else None)},
-                {'name': 'Infiltration (mm/hr)', 'formula': 'Double-ring infiltrometer or PTF from texture', 'value': _f(latest_soil.infiltration_rate_mmhr if latest_soil else None)},
-            ]
-        },
-        {
-            'category': 'Climate',
-            'items': [
-                {'name': 'Mean Temp (°C)',       'formula': f'({_f(latest_climate.temperature_max_c if latest_climate else None)} + {_f(latest_climate.temperature_min_c if latest_climate else None)}) ÷ 2', 'value': _f(mean_temp)},
-                {'name': 'ET₀ (mm/day)',          'formula': 'Penman-Monteith FAO-56: (0.408ΔRn + γ·(900/(T+273))·U₂·(es−ea)) / (Δ+γ(1+0.34U₂))', 'value': _f(latest_climate.evapotranspiration_et0_mmday if latest_climate else None)},
-                {'name': 'ETc (mm/day)',          'formula': f'ET₀ × Kc: {et_def_calc or "ET₀ × Kc (FAO-56 lookup)"}', 'value': _f(latest_climate.evapotranspiration_etc_mmday if latest_climate else None)},
-                {'name': 'Rainfall (mm)',         'formula': 'Station / satellite measurement (CHIRPS, gauge)', 'value': _f(latest_climate.rainfall_mm if latest_climate else None)},
-                {'name': 'Humidity (%)',          'formula': 'Station measurement (DHT22 / hygrometer)', 'value': _f(latest_climate.relative_humidity_percent if latest_climate else None)},
-                {'name': 'Wind Speed (m/s)',      'formula': 'Station measurement (anemometer)', 'value': _f(latest_climate.wind_speed_ms if latest_climate else None)},
-            ]
-        },
-        {
-            'category': 'Drought Indices',
-            'items': [
-                {'name': 'SPI (1-month)',         'formula': 'Gamma(α,β) fitted to 30d rainfall → inverse normal CDF', 'value': _f(latest_di.spi_1month if latest_di else None)},
-                {'name': 'SPI (3-month)',         'formula': 'Gamma(α,β) fitted to 90d rainfall → inverse normal CDF', 'value': _f(latest_di.spi_3month if latest_di else None)},
-                {'name': 'SPI (12-month)',        'formula': 'Gamma(α,β) fitted to 365d rainfall → inverse normal CDF', 'value': _f(latest_di.spi_12month if latest_di else None)},
-                {'name': 'SPEI (1-month)',        'formula': 'Water balance (P − ET₀) anomaly ÷ historical σ', 'value': _f(latest_di.spei_1month if latest_di else None)},
-                {'name': 'PDSI',                  'formula': 'Palmer model: soil water balance with climatic coefficient', 'value': _f(latest_di.pdsi_value if latest_di else None)},
-            ]
-        },
-        {
-            'category': 'Remote Sensing',
-            'items': [
-                {'name': 'NDVI',                  'formula': '(NIR − Red) / (NIR + Red)', 'value': _f(latest_rs.ndvi if latest_rs else None)},
-                {'name': 'LST (°C)',              'formula': 'Split-window algorithm from TIR bands', 'value': _f(latest_rs.land_surface_temperature_c if latest_rs else None)},
-                {'name': 'Satellite SM (%)',      'formula': 'SMAP L-band radiometer (0-5 cm depth)', 'value': _f(latest_rs.satellite_soil_moisture_percent if latest_rs else None)},
-                {'name': 'VCI (%)',               'formula': '(NDVI − NDVI_min) / (NDVI_max − NDVI_min) × 100', 'value': _f(latest_rs.vegetation_condition_index if latest_rs else None)},
-            ]
-        },
-        {
-            'category': 'Hydrology',
-            'items': [
-                {'name': 'Precipitation (mm)',    'formula': 'Station / CHIRPS measurement', 'value': _f(latest_hydro.precipitation_mm if latest_hydro else None)},
-                {'name': 'Groundwater Depth (m)', 'formula': 'Well measurement / piezometer', 'value': _f(latest_hydro.groundwater_depth_m if latest_hydro else None)},
-                {'name': 'Runoff (mm)',            'formula': 'SCS-CN: Q = (P−0.2S)²/(P+0.8S) with S=(25400/CN)−254', 'value': _f(latest_hydro.runoff_mm if latest_hydro else None)},
-                {'name': 'River Flow (m³/s)',     'formula': 'Stage-discharge rating curve (Q = a·h^b)', 'value': _f(latest_hydro.river_flow_m3s if latest_hydro else None)},
-                {'name': 'Water Balance (%)',     'formula': '(Supply − Demand) / Demand × 100', 'value': _f(latest_hydro.water_balance_percent if latest_hydro else None)},
-            ]
-        },
-        {
-            'category': 'Agriculture',
-            'items': [
-                {'name': 'Crop Coeff. (Kc)',      'formula': 'FAO-56 growth-stage lookup table', 'value': _f(latest_agri.crop_coefficient_kc if latest_agri else None)},
-                {'name': 'CWR (mm/day)',           'formula': 'ETc = ET₀ × Kc', 'value': _f(latest_agri.crop_water_requirement_mmday if latest_agri else None)},
-                {'name': 'Yield Reduction (0-1)',  'formula': '1 − (actual / potential) yield', 'value': _f(latest_agri.yield_reduction_factor if latest_agri else None)},
-                {'name': 'Irrigation Efficiency (%)','formula': 'Applied water beneficially used ÷ total applied', 'value': _f(latest_agri.irrigation_efficiency_percent if latest_agri else None)},
-            ]
-        },
-    ]
+    sections, missing = build_sections(region, snap_date or None) if region else ([], [])
 
     context = {
-        'regions': Region.objects.all(),
-        'years': ObservationYear.objects.all(),
-        'calc_sections': calc_sections,
-        'metrics_json': json.dumps([{'key': k, 'label': f'{cat} – {lbl}', 'model': m, 'field': f, 'unit': u, 'category': cat} for k, m, f, lbl, u, cat in METRICS_REGISTRY if m is not None]),
+        'regions': Region.objects.order_by('name'),
+        'calc_sections': sections,
+        'missing_metrics': missing,
+        'metrics_json': json.dumps([
+            {'key': k, 'label': lbl, 'unit': u, 'category': str(cat)}
+            for k, m, f, lbl, u, cat in METRICS_REGISTRY if m is not None and f != 'growth_stage'
+        ], ensure_ascii=False, default=str),
         'selected_region': region,
-        'snap_date': snap_date or '',
+        'snap_date': snap_date,
     }
     return render(request, 'dashboard/calculations.html', context)
 
 
 def calculations_chart_api(request):
-    """Return time-series data for a chosen metric + region + date range."""
+    """Time series for one metric, averaged per date; ``mode=relative`` returns
+    departures from each calendar month's normal instead of raw values."""
+    from django.db.models import Avg
+    from ..services.relative_metrics import relative_series
+
     region_id = request.GET.get('region_id')
     metric = request.GET.get('metric')
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
+    relative = request.GET.get('mode') == 'relative'
 
     if not all([region_id, metric]):
         return JsonResponse({'error': 'region_id and metric required'}, status=400)
 
     region = get_object_or_404(Region, pk=region_id)
 
-    reg_entry = None
-    for entry in METRICS_REGISTRY:
-        if entry[0] == metric:
-            reg_entry = entry
-            break
+    reg_entry = next((e for e in METRICS_REGISTRY if e[0] == metric), None)
     if not reg_entry:
         return JsonResponse({'error': f'Unknown metric: {metric}'}, status=400)
 
     _key, model_name, field_name, label, unit, cat = reg_entry
-
     if model_name is None:
         return JsonResponse({'error': 'Derived metrics not available as time-series'}, status=400)
 
-    model_cls = MODEL_MAP[model_name]
+    rows = (MODEL_MAP[model_name].objects
+            .filter(region=region, **{f'{field_name}__isnull': False})
+            .values('measurement_date').annotate(v=Avg(field_name))
+            .order_by('measurement_date'))
+    dates, values = [], []
+    for row in rows:
+        d = row['measurement_date']
+        dates.append(d.date() if hasattr(d, 'date') else d)
+        values.append(float(row['v']))
 
-    filters = {'region': region}
-    if date_from:
-        filters['measurement_date__gte'] = date_from
-    if date_to:
-        filters['measurement_date__lte'] = date_to
+    if relative and values:
+        # normals come from the full record, then the requested range is cut out
+        values, unit = relative_series(dates, values, field_name)
 
-    qs = model_cls.objects.filter(**filters).order_by('measurement_date').values('measurement_date', field_name)
-
-    dates = []
-    values = []
-    for row in qs:
-        v = row[field_name]
-        if v is not None:
-            if isinstance(v, Decimal):
-                v = float(v)
-            dates.append(row['measurement_date'].isoformat() if hasattr(row['measurement_date'], 'isoformat') else str(row['measurement_date']))
-            values.append(v)
+    lo = date.fromisoformat(date_from) if date_from else None
+    hi = date.fromisoformat(date_to) if date_to else None
+    keep = [i for i, d in enumerate(dates) if (not lo or d >= lo) and (not hi or d <= hi)]
 
     return JsonResponse({
         'metric': metric,
-        'label': label,
+        'label': str(label),
         'unit': unit,
-        'category': cat,
-        'dates': dates,
-        'values': values,
+        'category': str(cat),
+        'mode': 'relative' if relative else 'values',
+        'dates': [dates[i].isoformat() for i in keep],
+        'values': [values[i] for i in keep],
     })
 
 
@@ -724,7 +620,9 @@ def drought_prediction_api(request):
     # A saved prediction is reused only on the day it was made; from the next
     # day it is regenerated (a few seconds) so the scores follow new data.
     fresh = (latest_prediction is not None
-             and timezone.localtime(latest_prediction.generated_at).date() >= timezone.localdate())
+             and timezone.localtime(latest_prediction.generated_at).date() >= timezone.localdate()
+             # saved before the risk breakdown existed: regenerate once
+             and isinstance(latest_prediction.drivers, dict) and 'breakdown' in latest_prediction.drivers)
     if latest_prediction and fresh and not refresh:
         sm_today = float(latest_prediction.soil_moisture_today_pct or 0)
         sm_7 = float(latest_prediction.soil_moisture_7day_pct or 0)
@@ -1135,11 +1033,21 @@ def assistant_chat_api(request):
     Returns:   {answer, intent, crop, region, from_cache, facts, sources, understood}
     """
     import json as _json
+    from ..models import Farm
     from ..services.farmer_assistant import get_assistant_answer, suggestions
+
+    def own_farm(farm_id):
+        """The asking user's own farm (never another farmer's)."""
+        if not farm_id or not request.user.is_authenticated:
+            return None
+        try:
+            return Farm.objects.select_related('region').filter(owner=request.user, pk=int(farm_id)).first()
+        except (TypeError, ValueError):
+            return None
 
     if request.method == 'GET':
         lang = request.GET.get('lang', 'en')
-        return JsonResponse({'suggestions': suggestions(lang)})
+        return JsonResponse({'suggestions': suggestions(lang, farm=own_farm(request.GET.get('farm')))})
 
     try:
         payload = _json.loads(request.body or b'{}')
@@ -1153,10 +1061,11 @@ def assistant_chat_api(request):
     crop = payload.get('crop')
     history = payload.get('history') or []
     conversation = payload.get('conversation') or None
+    farm = own_farm(payload.get('farm_id'))
 
     result = get_assistant_answer(question, region_id=region_id, crop=crop,
                                   lang=lang, use_llm=True, history=history,
-                                  conversation=conversation)
+                                  conversation=conversation, farm=farm)
     if not result.get('suggestions'):
-        result['suggestions'] = suggestions(lang)
+        result['suggestions'] = suggestions(lang, farm=farm)
     return JsonResponse(result)

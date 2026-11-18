@@ -843,10 +843,20 @@ msgstr "Cette couche est indisponible pour le moment."
 msgid "Zoom in to see this layer."
 msgstr "Zoomez pour voir cette couche."
 
-msgid "About 10 km resolution, smoothed. Click the map for the value."
+msgid ""
+"ERA5-Land rain, smoothed between its 9 km pixels: no finer rain data exists."
+" Click the map for the value."
 msgstr ""
-"Résolution d’environ 10 km, lissée. Cliquez sur la carte pour lire la "
-"valeur."
+"Pluie ERA5-Land, lissée entre ses pixels de 9 km : il n’existe pas de donnée"
+" de pluie plus fine. Cliquez sur la carte pour lire la valeur."
+
+msgid ""
+"ERA5-Land temperature corrected for terrain height (cooler on hills, warmer "
+"in valleys), about 90 m detail. Click the map for the value."
+msgstr ""
+"Température ERA5-Land corrigée selon l’altitude (plus frais sur les "
+"collines, plus chaud dans les vallées), détail d’environ 90 m. Cliquez sur "
+"la carte pour lire la valeur."
 
 msgid ""
 "Last 3 months of rain compared with the same months in the 30 previous "
@@ -964,3 +974,3391 @@ msgstr "Sévère"
 
 msgid "Extreme"
 msgstr "Extrême"
+
+msgid "What's driving risk?"
+msgstr "Qu’est-ce qui fait le risque ?"
+
+msgid "Method"
+msgstr "Méthode"
+
+msgid "Sets the score"
+msgstr "Fixe le score"
+
+msgid ""
+"Risk comes from SPI-3 alone: 10 when SPI-3 is 0 or above, 40 at −1, 60 at "
+"−1.5, 80 at −2, 100 at −3."
+msgstr ""
+"Le risque vient du seul SPI-3 : 10 quand le SPI-3 est positif ou nul, 40 à "
+"−1, 60 à −1,5, 80 à −2, 100 à −3."
+
+msgid "Other signals to watch (not in the score)"
+msgstr "Autres signaux à surveiller (hors score)"
+
+msgid "wetter / cooler"
+msgstr "plus humide / plus frais"
+
+msgid "normal"
+msgstr "normal"
+
+msgid "drier / hotter"
+msgstr "plus sec / plus chaud"
+
+msgid "Insight"
+msgstr "Analyse"
+
+msgid "Rainfall, last 90 days"
+msgstr "Pluie, 90 derniers jours"
+
+msgid "Rainfall, last 30 days"
+msgstr "Pluie, 30 derniers jours"
+
+msgid "Temperature, last 30 days"
+msgstr "Température, 30 derniers jours"
+
+msgid "Evaporative demand (ET0), 30 days"
+msgstr "Demande évaporative (ET0), 30 jours"
+
+msgid "Soil moisture, 0–28 cm"
+msgstr "Humidité du sol, 0–28 cm"
+
+msgid "of normal"
+msgstr "de la normale"
+
+msgid "vs normal"
+msgstr "par rapport à la normale"
+
+msgid "near normal"
+msgstr "proche de la normale"
+
+msgid "slightly"
+msgstr "légèrement"
+
+msgid "clearly"
+msgstr "nettement"
+
+msgid "strongly"
+msgstr "fortement"
+
+msgid "drier"
+msgstr "plus sec"
+
+msgid "wetter"
+msgstr "plus humide"
+
+msgid "hotter"
+msgstr "plus chaud"
+
+msgid "cooler"
+msgstr "plus frais"
+
+msgid "higher"
+msgstr "plus élevée"
+
+msgid "lower"
+msgstr "plus faible"
+
+msgid "sd"
+msgstr "é.-t."
+
+msgid "Measured up to"
+msgstr "Mesuré jusqu’au"
+
+msgid "Breakdown not available for this prediction."
+msgstr "Détail indisponible pour cette prévision."
+
+msgid "Soil and vegetation need Earth Engine, which is unreachable right now."
+msgstr ""
+"Le sol et la végétation nécessitent Earth Engine, injoignable pour le "
+"moment."
+
+msgid ""
+"Rain over the last 90 days is __PCT__ of normal (SPI-3 __SPI__), so drought "
+"risk is __LEVEL__ (__RISK__/100)."
+msgstr ""
+"La pluie des 90 derniers jours atteint __PCT__ de la normale (SPI-3 __SPI__)"
+" : le risque de sécheresse est __LEVEL__ (__RISK__/100)."
+
+msgid "Watch: __LIST__."
+msgstr "À surveiller : __LIST__."
+
+msgid "No other signal points toward drought."
+msgstr "Aucun autre signal n’indique une sécheresse."
+
+msgid "Filter by farmer name"
+msgstr "Filtrer par nom d’agriculteur"
+
+msgid "Filter"
+msgstr "Filtrer"
+
+msgid "Clear"
+msgstr "Effacer"
+
+msgid "No lands match this farmer name."
+msgstr "Aucune parcelle ne correspond à ce nom d’agriculteur."
+
+msgid "Crop"
+msgstr "Culture"
+
+msgid "All crops"
+msgstr "Toutes les cultures"
+
+msgid "Not planted"
+msgstr "Non semée"
+
+msgid "Rainfed"
+msgstr "Pluviale"
+
+msgid "Order by"
+msgstr "Trier par"
+
+msgid "Largest surface first"
+msgstr "Plus grande surface d’abord"
+
+msgid "Smallest surface first"
+msgstr "Plus petite surface d’abord"
+
+msgid "Farmer total surface"
+msgstr "Surface totale par agriculteur"
+
+msgid "Recently added"
+msgstr "Ajout récent"
+
+msgid "in total"
+msgstr "au total"
+
+msgid "No lands match these filters."
+msgstr "Aucune parcelle ne correspond à ces filtres."
+
+msgid "Cereal"
+msgstr "Céréale"
+
+msgid "Legume"
+msgstr "Légumineuse"
+
+msgid "Vegetable"
+msgstr "Légume"
+
+msgid "Tree crop"
+msgstr "Arboriculture"
+
+msgid "Other"
+msgstr "Autre"
+
+msgid "Drip"
+msgstr "Goutte-à-goutte"
+
+msgid "Sprinkler"
+msgstr "Aspersion"
+
+msgid "Surface / furrow"
+msgstr "Gravitaire / à la raie"
+
+msgid "Water flow for the whole farm (m³/hour)"
+msgstr "Débit d’eau pour toute la parcelle (m³/heure)"
+
+msgid "Optional. Lets us tell you how many hours to run the pump."
+msgstr ""
+"Facultatif. Permet de vous dire combien d’heures faire tourner la pompe."
+
+msgid "Next watering"
+msgstr "Prochain arrosage"
+
+msgid "Tomorrow"
+msgstr "Demain"
+
+msgid "In {n} days"
+msgstr "Dans {n} jours"
+
+msgid "Method & flow"
+msgstr "Méthode et débit"
+
+msgid "Water to apply"
+msgstr "Eau à apporter"
+
+msgid "Per hectare"
+msgstr "Par hectare"
+
+msgid "Whole farm"
+msgstr "Toute la parcelle"
+
+msgid "Pump time"
+msgstr "Durée de pompage"
+
+msgid ""
+"{n} mm reach the roots; the rest is lost by the method ({e}% efficient)."
+msgstr ""
+"{n} mm atteignent les racines ; le reste est perdu par la méthode "
+"(efficience {e} %)."
+
+msgid "Add your water flow in “Method & flow” to get the pump time."
+msgstr ""
+"Indiquez votre débit dans « Méthode et débit » pour connaître la durée de "
+"pompage."
+
+msgid ""
+"No watering needed in the next 16 days: the soil and the expected rain cover"
+" the crop."
+msgstr ""
+"Aucun arrosage nécessaire dans les 16 prochains jours : le sol et la pluie "
+"prévue couvrent la culture."
+
+msgid "Not needed"
+msgstr "Pas nécessaire"
+
+msgid "next 16 days"
+msgstr "16 prochains jours"
+
+msgid "Water early in the morning (less evaporation)"
+msgstr "Arrosez tôt le matin (moins d’évaporation)"
+
+msgid "Windy day: run sprinklers at dawn while the wind is calm"
+msgstr "Journée venteuse : arrosez à l’aube, quand le vent est calme"
+
+msgid "Very hot day: never water at midday"
+msgstr "Journée très chaude : n’arrosez jamais à midi"
+
+msgid "The crop is already short of water: do not delay"
+msgstr "La culture manque déjà d’eau : n’attendez pas"
+
+msgid ""
+"Small dose for surface irrigation: you can wait a day or two and give more "
+"at once"
+msgstr ""
+"Petite dose pour le gravitaire : vous pouvez attendre un ou deux jours et "
+"apporter plus en une fois"
+
+msgid "Water in the soil now"
+msgstr "Eau dans le sol maintenant"
+
+msgid "water here"
+msgstr "arroser ici"
+
+msgid "crop suffers"
+msgstr "la culture souffre"
+
+msgid "of the water the roots can use"
+msgstr "de l’eau utilisable par les racines"
+
+msgid "Soil has enough water"
+msgstr "Le sol a assez d’eau"
+
+msgid "Watering due soon"
+msgstr "Arrosage bientôt"
+
+msgid "Water today"
+msgstr "Arrosez aujourd’hui"
+
+msgid "The crop is short of water"
+msgstr "La culture manque d’eau"
+
+msgid "No crop in the field now"
+msgstr "Aucune culture en place actuellement"
+
+msgid "I watered today"
+msgstr "J’ai arrosé aujourd’hui"
+
+msgid "or I last watered on"
+msgstr "ou mon dernier arrosage date du"
+
+msgid "Watering saved: the plan now starts from it"
+msgstr "Arrosage enregistré : le plan repart de cette date"
+
+msgid "The plan starts from your last watering on"
+msgstr "Le plan part de votre dernier arrosage du"
+
+msgid ""
+"The plan starts from sowing (moist soil at sowing) and assumes you followed "
+"it since. Tell us your last watering for exact dates."
+msgstr ""
+"Le plan part du semis (sol humide au semis) et suppose que vous l’avez suivi"
+" depuis. Indiquez votre dernier arrosage pour des dates exactes."
+
+msgid ""
+"We do not know when you last watered, so we assume you followed this plan. "
+"Tell us your last watering for exact dates."
+msgstr ""
+"Nous ne savons pas quand vous avez arrosé pour la dernière fois : nous "
+"supposons que vous avez suivi ce plan. Indiquez votre dernier arrosage pour "
+"des dates exactes."
+
+msgid ""
+"Your farm is marked “rain only”: the soil is followed with rain alone, and "
+"the waterings shown are what a supplemental irrigation would need."
+msgstr ""
+"Votre parcelle est marquée « pluie seulement » : le sol est suivi avec la "
+"pluie seule, et les arrosages affichés sont ceux d’une irrigation d’appoint."
+
+msgid "Without watering, the crop starts to suffer from"
+msgstr "Sans arrosage, la culture commence à souffrir à partir de"
+
+msgid "Without watering, the crop stays comfortable for the next 16 days."
+msgstr ""
+"Sans arrosage, la culture reste à l’aise pendant les 16 prochains jours."
+
+msgid "Watering plan — next 16 days"
+msgstr "Plan d’arrosage — 16 prochains jours"
+
+msgid "Day by day"
+msgstr "Jour par jour"
+
+msgid "soil water"
+msgstr "eau du sol"
+
+msgid "watering level"
+msgstr "seuil d’arrosage"
+
+msgid "crop use (mm)"
+msgstr "consommation (mm)"
+
+msgid "Rain expected: watering postponed"
+msgstr "Pluie prévue : arrosage reporté"
+
+msgid "Next 16 days"
+msgstr "16 prochains jours"
+
+msgid "Crop water use"
+msgstr "Consommation d’eau de la culture"
+
+msgid "Useful rain"
+msgstr "Pluie utile"
+
+msgid "Coming months (average year)"
+msgstr "Mois à venir (année moyenne)"
+
+msgid "Month"
+msgstr "Mois"
+
+msgid "Waterings"
+msgstr "Arrosages"
+
+msgid "Every"
+msgstr "Tous les"
+
+msgid "Dose (mm)"
+msgstr "Dose (mm)"
+
+msgid "No crop in the field"
+msgstr "Aucune culture en place"
+
+msgid "Rest of the season"
+msgstr "Reste de la saison"
+
+msgid "you declared"
+msgstr "vous avez déclaré"
+
+msgid ""
+"Your declared water is less than the remaining need: keep it for the most "
+"sensitive stages (flowering and fruit set)."
+msgstr ""
+"L’eau déclarée est inférieure au besoin restant : réservez-la aux stades les"
+" plus sensibles (floraison et nouaison)."
+
+msgid "How this is calculated"
+msgstr "Comment c’est calculé"
+
+msgid ""
+"FAO-56 daily soil water balance: crop water use (Kc × reference evaporation)"
+" minus useful rain, from the observed weather of the last 60 days and the "
+"16-day forecast at your parcel."
+msgstr ""
+"Bilan hydrique journalier FAO-56 : consommation de la culture (Kc × "
+"évapotranspiration de référence) moins la pluie utile, à partir de la météo "
+"observée des 60 derniers jours et de la prévision à 16 jours sur votre "
+"parcelle."
+
+msgid "Efficiency (water reaching the roots)"
+msgstr "Efficience (eau qui atteint les racines)"
+
+msgid "Root depth"
+msgstr "Profondeur des racines"
+
+msgid "Water the root zone can hold"
+msgstr "Eau que la zone racinaire peut retenir"
+
+msgid "Easily available water"
+msgstr "Réserve facilement utilisable"
+
+msgid "We water when the crop has used"
+msgstr "On arrose quand la culture a consommé"
+
+msgid "Crop coefficient (Kc)"
+msgstr "Coefficient cultural (Kc)"
+
+msgid "Soil water capacity"
+msgstr "Réserve utile du sol"
+
+msgid "your parcel soil (SoilGrids)"
+msgstr "sol de votre parcelle (SoilGrids)"
+
+msgid "the region soil"
+msgstr "sol de la région"
+
+msgid "typical value for this soil type"
+msgstr "valeur type pour ce type de sol"
+
+msgid ""
+"Choose your irrigation method in “Method & flow” for exact amounts "
+"(sprinkler is assumed)."
+msgstr ""
+"Choisissez votre méthode d’irrigation dans « Méthode et débit » pour des "
+"doses exactes (aspersion supposée)."
+
+msgid "Not sown yet: sowing planned on"
+msgstr "Pas encore semé : semis prévu le"
+
+msgid "The season is over: harvest was expected on"
+msgstr "La saison est terminée : la récolte était prévue le"
+
+msgid "No sowing date given: we assumed"
+msgstr "Pas de date de semis : nous avons supposé le"
+
+msgid "Last two weeks before harvest: stop watering so the crop ripens."
+msgstr ""
+"Deux dernières semaines avant la récolte : arrêtez d’arroser pour que la "
+"culture mûrisse."
+
+msgid "Tell us what is growing on this farm to get a watering plan."
+msgstr ""
+"Indiquez ce qui pousse sur cette parcelle pour obtenir un plan d’arrosage."
+
+msgid ""
+"Weather data is unavailable right now, so the day-by-day plan cannot be "
+"computed. The monthly guide below still applies."
+msgstr ""
+"Les données météo sont indisponibles pour le moment : le plan jour par jour "
+"ne peut pas être calculé. Le guide mensuel ci-dessous reste valable."
+
+msgid "Establishment"
+msgstr "Installation"
+
+msgid "Growing"
+msgstr "Croissance"
+
+msgid "Full canopy (peak need)"
+msgstr "Plein développement (besoin maximal)"
+
+msgid "Maturation"
+msgstr "Maturation"
+
+msgid "Tree / perennial"
+msgstr "Arbre / pérenne"
+
+msgid "About these results"
+msgstr "À propos de ces résultats"
+
+msgid "Best now"
+msgstr "Le mieux maintenant"
+
+msgid "Calendar"
+msgstr "Calendrier"
+
+msgid "Pests"
+msgstr "Ravageurs"
+
+msgid "Now"
+msgstr "Maintenant"
+
+msgid "16 days"
+msgstr "16 jours"
+
+msgid "Months"
+msgstr "Mois"
+
+msgid "Details"
+msgstr "Détails"
+
+msgid "Forecast"
+msgstr "Prévisions"
+
+msgid "Alerts"
+msgstr "Alertes"
+
+msgid "Another day"
+msgstr "Un autre jour"
+
+msgid "When did you last water? It makes the dates exact."
+msgstr ""
+"Quand avez-vous arrosé pour la dernière fois ? Les dates seront exactes."
+
+msgid "Early morning"
+msgstr "Tôt le matin"
+
+msgid "Windy"
+msgstr "Venteux"
+
+msgid "Very hot"
+msgstr "Très chaud"
+
+msgid "Urgent"
+msgstr "Urgent"
+
+msgid "Small dose"
+msgstr "Petite dose"
+
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+msgid "Nothing urgent today"
+msgstr "Rien d’urgent aujourd’hui"
+
+msgid "See all"
+msgstr "Tout voir"
+
+msgid "No alerts this week."
+msgstr "Aucune alerte cette semaine."
+
+msgid "Plant"
+msgstr "Planter"
+
+msgid "Plan"
+msgstr "Plan"
+
+msgid "Map"
+msgstr "Carte"
+
+msgid "Tap any crop to choose it, even outside its season."
+msgstr "Touchez une culture pour la choisir, même hors saison."
+
+msgid "{m} is not the usual sowing time."
+msgstr "{m} n’est pas la période habituelle de semis."
+
+msgid "Usual sowing months"
+msgstr "Mois de semis habituels"
+
+msgid "Here, sowing now scores as well or better in our model."
+msgstr ""
+"Ici, semer maintenant donne un score égal ou meilleur dans notre modèle."
+
+msgid "Sow now"
+msgstr "Semer maintenant"
+
+msgid "Wait for the season"
+msgstr "Attendre la saison"
+
+msgid "in {n} months"
+msgstr "dans {n} mois"
+
+msgid "next month"
+msgstr "le mois prochain"
+
+msgid "Best result"
+msgstr "Meilleur résultat"
+
+msgid "Expected result"
+msgstr "Résultat attendu"
+
+msgid "about {p}% of a well-timed crop"
+msgstr "environ {p} % d’une culture semée à temps"
+
+msgid "Main problem"
+msgstr "Problème principal"
+
+msgid "Irrigation water"
+msgstr "Eau d’irrigation"
+
+msgid "Very likely to fail: we advise against sowing now."
+msgstr "Échec très probable : nous déconseillons de semer maintenant."
+
+msgid "Sow today"
+msgstr "Semer aujourd’hui"
+
+msgid "Plan for {m}"
+msgstr "Prévoir pour {m}"
+
+msgid "Or grow something that fits this month"
+msgstr "Ou cultivez quelque chose d’adapté à ce mois"
+
+msgid ""
+"Trees are best planted in {w}. Planted now, young plants need extra water "
+"and shade to take root."
+msgstr ""
+"Les arbres se plantent de préférence en {w}. Plantés maintenant, les jeunes "
+"plants ont besoin de plus d’eau et d’ombre pour s’enraciner."
+
+msgid ""
+"Scores come from the same climate and soil model as the crop list, for an "
+"average year."
+msgstr ""
+"Les scores viennent du même modèle climat et sol que la liste des cultures, "
+"pour une année moyenne."
+
+msgid "Best month"
+msgstr "Meilleur mois"
+
+msgid "To do"
+msgstr "À faire"
+
+msgid "Nothing to do on this farm today."
+msgstr "Rien à faire sur cette parcelle aujourd’hui."
+
+msgid "Why"
+msgstr "Pourquoi"
+
+msgid "How"
+msgstr "Comment"
+
+msgid "Question"
+msgstr "Question"
+
+msgid "Coming up"
+msgstr "Bientôt"
+
+msgid "{n} days late"
+msgstr "{n} jours de retard"
+
+msgid "Answer so we can update your plan"
+msgstr "Répondez pour que nous mettions votre plan à jour"
+
+msgid "Yes, I watered"
+msgstr "Oui, j’ai arrosé"
+
+msgid "No, not yet"
+msgstr "Non, pas encore"
+
+msgid "Done: {mm} mm given"
+msgstr "Fait : {mm} mm apportés"
+
+msgid "Other amount"
+msgstr "Autre quantité"
+
+msgid "Not today"
+msgstr "Pas aujourd’hui"
+
+msgid "Yes, done"
+msgstr "Oui, c’est fait"
+
+msgid "No"
+msgstr "Non"
+
+msgid "Done"
+msgstr "Fait"
+
+msgid "I checked"
+msgstr "J’ai vérifié"
+
+msgid "Hide"
+msgstr "Masquer"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "When?"
+msgstr "Quand ?"
+
+msgid "Water given (mm = L/m²), empty if you filled the soil"
+msgstr "Eau apportée (mm = L/m²), vide si vous avez rempli le sol"
+
+msgid "Saved: your plan is updated"
+msgstr "Enregistré : votre plan est mis à jour"
+
+msgid "Did you water since {since}?"
+msgstr "Avez-vous arrosé depuis le {since} ?"
+
+msgid "When did you last water this farm?"
+msgstr "Quand avez-vous arrosé cette parcelle pour la dernière fois ?"
+
+msgid "Water {mm} mm ({m3} m³)"
+msgstr "Arroser {mm} mm ({m3} m³)"
+
+msgid "Did you apply {product}?"
+msgstr "Avez-vous apporté {product} ?"
+
+msgid "Apply {product}"
+msgstr "Apporter {product}"
+
+msgid "Check the field for {name}"
+msgstr "Inspectez la parcelle : {name}"
+
+msgid "Have you sown? Tell us the date"
+msgstr "Avez-vous semé ? Indiquez la date"
+
+msgid "Harvest around {date}"
+msgstr "Récolte vers le {date}"
+
+msgid "Have you harvested?"
+msgstr "Avez-vous récolté ?"
+
+msgid ""
+"Watering was due on {due}. We have no watering from you since, so the soil "
+"kept drying: it is at {pct} now (water at {thr})."
+msgstr ""
+"Un arrosage était prévu le {due}. Depuis, vous n’avez signalé aucun "
+"arrosage, donc le sol a continué à sécher : il est à {pct} (arroser à "
+"{thr})."
+
+msgid "If you did not water, the crop has been short of water since {date}."
+msgstr "Si vous n’avez pas arrosé, la culture manque d’eau depuis le {date}."
+
+msgid ""
+"We do not know your waterings, so we assume you followed the plan. Your real"
+" dates make every next date and amount exact."
+msgstr ""
+"Nous ne connaissons pas vos arrosages, donc nous supposons que vous avez "
+"suivi le plan. Vos vraies dates rendent exacts les prochains jours et doses."
+
+msgid ""
+"Water in the soil: {pct} of what the roots can use. It reaches the watering "
+"level ({thr}) on {date}."
+msgstr ""
+"Eau dans le sol : {pct} de ce que les racines peuvent utiliser. Elle atteint"
+" le niveau d’arrosage ({thr}) le {date}."
+
+msgid "Growth stage: {stage}. The crop uses about {mm} mm of water a day."
+msgstr "Stade : {stage}. La culture consomme environ {mm} mm d’eau par jour."
+
+msgid ""
+"Water in the soil: {pct} of what the roots can use, already below the "
+"watering level ({thr})."
+msgstr ""
+"Eau dans le sol : {pct} de ce que les racines peuvent utiliser, déjà sous le"
+" niveau d’arrosage ({thr})."
+
+msgid ""
+"You told us the watering due on {due} was not done: this dose catches up."
+msgstr ""
+"Vous nous avez dit que l’arrosage du {due} n’a pas été fait : cette dose "
+"rattrape le retard."
+
+msgid "Rain is expected on {date}: a watering was moved."
+msgstr "De la pluie est attendue le {date} : un arrosage a été décalé."
+
+msgid ""
+"If you skip the waterings, the crop suffers from {date} ({days} days in the "
+"next 16) and about {risk} of the harvest is at risk."
+msgstr ""
+"Si vous sautez les arrosages, la culture souffre dès le {date} ({days} jours"
+" sur les 16 prochains) et environ {risk} de la récolte est menacée."
+
+msgid "{stage}: the crop takes up this nutrient now."
+msgstr "{stage} : la culture absorbe cet élément maintenant."
+
+msgid "Rainy, mild days are coming: they favour {name}."
+msgstr "Des jours pluvieux et doux arrivent : ils favorisent {name}."
+
+msgid "Warm, humid days are coming: they favour {name}."
+msgstr "Des jours chauds et humides arrivent : ils favorisent {name}."
+
+msgid "Hot, dry days are coming: they favour {name}."
+msgstr "Des jours chauds et secs arrivent : ils favorisent {name}."
+
+msgid "Warm days are coming: they favour {name}."
+msgstr "Des jours chauds arrivent : ils favorisent {name}."
+
+msgid ""
+"We assumed sowing around {date}. Your real date sets the crop stage, the "
+"water need and the fertiliser dates."
+msgstr ""
+"Nous avons supposé un semis vers le {date}. Votre vraie date fixe le stade "
+"de la culture, son besoin en eau et les dates d’engrais."
+
+msgid "The crop is ripening."
+msgstr "La culture arrive à maturité."
+
+msgid ""
+"Harvest was expected on {date}. Once you tell us, the watering reminders "
+"stop."
+msgstr ""
+"La récolte était prévue le {date}. Dès que vous nous le dites, les rappels "
+"d’arrosage s’arrêtent."
+
+msgid "If not, water today: {dose} mm."
+msgstr "Sinon, arrosez aujourd’hui : {dose} mm."
+
+msgid ""
+"{mm} L per m², that is {m3ha} m³ per hectare and {m3} m³ for the whole farm."
+msgstr ""
+"{mm} L par m², soit {m3ha} m³ par hectare et {m3} m³ pour toute la parcelle."
+
+msgid ""
+"Drip: run the lines until the dose is given and check that every dripper "
+"flows."
+msgstr ""
+"Goutte-à-goutte : faites tourner les lignes jusqu’à la dose et vérifiez que "
+"chaque goutteur coule."
+
+msgid ""
+"Sprinkler: water at dawn or in the evening with little wind, and move the "
+"lines so the whole field gets the dose."
+msgstr ""
+"Aspersion : arrosez à l’aube ou le soir avec peu de vent, et déplacez les "
+"rampes pour que tout le champ reçoive la dose."
+
+msgid ""
+"Surface: fill the furrows or basins in one go and stop when the water "
+"reaches the end."
+msgstr ""
+"Gravitaire : remplissez les sillons ou cuvettes en une fois et arrêtez quand"
+" l’eau atteint le bout."
+
+msgid "Run the pump about {h} h."
+msgstr "Faites tourner la pompe environ {h} h."
+
+msgid "Dose: {rate}."
+msgstr "Dose : {rate}."
+
+msgid ""
+"Heavy rain is expected on {date}: apply after it, not before, or the "
+"nitrogen is washed away."
+msgstr ""
+"Forte pluie attendue le {date} : apportez après, pas avant, sinon l’azote "
+"est lessivé."
+
+msgid ""
+"Light rain is expected on {date}: apply just before it so it dissolves into "
+"the soil."
+msgstr ""
+"Pluie légère attendue le {date} : apportez juste avant pour qu’il se "
+"dissolve dans le sol."
+
+msgid "Apply just before the watering of {date} so it reaches the roots."
+msgstr ""
+"Apportez juste avant l’arrosage du {date} pour qu’il atteigne les racines."
+
+msgid ""
+"No rain expected and the farm is not irrigated: nitrogen on dry soil is not "
+"taken up, so wait for rain if you can."
+msgstr ""
+"Pas de pluie prévue et la parcelle n’est pas irriguée : l’azote sur sol sec "
+"n’est pas absorbé, attendez la pluie si possible."
+
+msgid ""
+"If not, it is often still useful within two weeks of this stage: ask your "
+"CRDA office."
+msgstr ""
+"Sinon, c’est souvent encore utile dans les deux semaines suivant ce stade : "
+"demandez à votre CRDA."
+
+msgid "Look for: {text}"
+msgstr "À chercher : {text}"
+
+msgid "Prevention: {text}"
+msgstr "Prévention : {text}"
+
+msgid "If you find it: {text}"
+msgstr "Si vous le trouvez : {text}"
+
+msgid "No more watering: let the crop dry down."
+msgstr "Plus d’arrosage : laissez la culture sécher."
+
+msgid "Pick as the fruits ripen and keep watering lightly between pickings."
+msgstr ""
+"Récoltez au fur et à mesure de la maturité et continuez d’arroser légèrement"
+" entre les cueillettes."
+
+msgid ""
+"Large catch-up dose: split it over 2 or 3 days so the soil can absorb it"
+msgstr ""
+"Grosse dose de rattrapage : répartissez-la sur 2 ou 3 jours pour que le sol "
+"l’absorbe"
+
+msgid "Split it"
+msgstr "À répartir"
+
+msgid "What changes with your choice"
+msgstr "Ce qui change selon votre choix"
+
+msgid "If you follow the plan"
+msgstr "Si vous suivez le plan"
+
+msgid "If you do not water"
+msgstr "Si vous n’arrosez pas"
+
+msgid "days of water stress"
+msgstr "jours de stress hydrique"
+
+msgid "of the harvest at risk"
+msgstr "de la récolte menacée"
+
+msgid "water to give"
+msgstr "eau à apporter"
+
+msgid ""
+"Last {n} days: the crop was short of water {d} days ({s} less water than it "
+"needed), about {r} of the harvest lost."
+msgstr ""
+"{n} derniers jours : la culture a manqué d’eau {d} jours ({s} d’eau en moins"
+" que son besoin), environ {r} de la récolte perdue."
+
+msgid "Last {n} days: thanks to your waterings the crop had enough water."
+msgstr ""
+"{n} derniers jours : grâce à vos arrosages, la culture a eu assez d’eau."
+
+msgid ""
+"You told us you did not water: the plan follows the soil with rain alone "
+"since then."
+msgstr ""
+"Vous nous avez dit ne pas avoir arrosé : le plan suit le sol avec la pluie "
+"seule depuis."
+
+msgid "Log"
+msgstr "Journal"
+
+msgid "Nothing recorded yet. Your answers and waterings appear here."
+msgstr ""
+"Rien d’enregistré pour l’instant. Vos réponses et arrosages apparaissent "
+"ici."
+
+msgid "Undo"
+msgstr "Annuler"
+
+msgid "not done"
+msgstr "non fait"
+
+msgid "Watering"
+msgstr "Arrosage"
+
+msgid "Treatment"
+msgstr "Traitement"
+
+msgid "Field check"
+msgstr "Inspection"
+
+msgid "Harvest"
+msgstr "Récolte"
+
+msgid "For your {area} ha: {kg} kg, that is {bags} bags of {bag} kg."
+msgstr "Pour vos {area} ha : {kg} kg, soit {bags} sacs de {bag} kg."
+
+msgid "Or {name}: {rate} ({kg} kg for the farm)."
+msgstr "Ou {name} : {rate} ({kg} kg pour la parcelle)."
+
+msgid ""
+"Best day to spray this week: {date} (dry, little wind, not hot). Spray early"
+" in the morning or in the evening."
+msgstr ""
+"Meilleur jour pour traiter cette semaine : {date} (sec, peu de vent, pas "
+"trop chaud). Traitez tôt le matin ou le soir."
+
+msgid ""
+"No good spraying day this week (rain, wind or heat): wait before treating."
+msgstr ""
+"Pas de bon jour pour traiter cette semaine (pluie, vent ou chaleur) : "
+"attendez avant de traiter."
+
+msgid "Products that help"
+msgstr "Produits utiles"
+
+msgid "In the field"
+msgstr "Au champ"
+
+msgid "Traps"
+msgstr "Pièges"
+
+msgid "Biological"
+msgstr "Biologique"
+
+msgid "Mineral (organic farming)"
+msgstr "Minéral (agriculture bio)"
+
+msgid "Chemical"
+msgstr "Chimique"
+
+msgid "For your farm"
+msgstr "Pour votre parcelle"
+
+msgid "in {l} L of water"
+msgstr "dans {l} L d’eau"
+
+msgid ""
+"Names are active ingredients: buy any registered brand that contains it. "
+"Always read the label (dose, protective equipment, days before harvest) and "
+"alternate the groups (FRAC, IRAC, HRAC) so pests do not become resistant."
+msgstr ""
+"Les noms sont des matières actives : achetez n’importe quelle marque "
+"homologuée qui la contient. Lisez toujours l’étiquette (dose, équipement de "
+"protection, délai avant récolte) et alternez les groupes (FRAC, IRAC, HRAC) "
+"pour éviter les résistances."
+
+msgid "Contains"
+msgstr "Contient"
+
+msgid "Gives"
+msgstr "Apporte"
+
+msgid "bags of {bag} kg"
+msgstr "sacs de {bag} kg"
+
+msgid "Or"
+msgstr "Ou"
+
+msgid "per week"
+msgstr "par semaine"
+
+msgid "Label dose"
+msgstr "Dose de l’étiquette"
+
+msgid "mm"
+msgstr "mm"
+
+msgid "m³"
+msgstr "m³"
+
+msgid "ha"
+msgstr "ha"
+
+msgid "h"
+msgstr "h"
+
+msgid "kg"
+msgstr "kg"
+
+msgid "m"
+msgstr "m"
+
+msgid "km/h"
+msgstr "km/h"
+
+msgid "mm = L/m²"
+msgstr "mm = L/m²"
+
+msgid "Error"
+msgstr "Erreur"
+
+msgid "AI Agronomist"
+msgstr "Agronome IA"
+
+msgid "Live"
+msgstr "En direct"
+
+msgid "Analysis and diagnosis"
+msgstr "Analyse et diagnostic"
+
+msgid "Send"
+msgstr "Envoyer"
+
+msgid "Farm log"
+msgstr "Journal de la parcelle"
+
+msgid ""
+"Everything you did on this farm. Forgot to record something, or answered by "
+"mistake? Add it or correct it here: the plan is recalculated at once."
+msgstr ""
+"Tout ce que vous avez fait sur cette parcelle. Vous avez oublié de noter "
+"quelque chose ou répondu par erreur ? Ajoutez-le ou corrigez-le ici : le "
+"plan est recalculé tout de suite."
+
+msgid "Add something I forgot"
+msgstr "Ajouter un oubli"
+
+msgid "What did you do?"
+msgstr "Qu’avez-vous fait ?"
+
+msgid "I did it"
+msgstr "Je l’ai fait"
+
+msgid "I did not do it"
+msgstr "Je ne l’ai pas fait"
+
+msgid "Note (optional)"
+msgstr "Note (facultative)"
+
+msgid "Delete this entry? The plan will be recalculated."
+msgstr "Supprimer cette entrée ? Le plan sera recalculé."
+
+msgid "Plan updated: the next watering moves from {a} to {b}."
+msgstr "Plan mis à jour : le prochain arrosage passe du {a} au {b}."
+
+msgid "Plan updated: next watering on {b}."
+msgstr "Plan mis à jour : prochain arrosage le {b}."
+
+msgid "Plan updated: no watering needed in the next 16 days."
+msgstr ""
+"Plan mis à jour : aucun arrosage nécessaire dans les 16 prochains jours."
+
+msgid "Tap a past day to record a watering you forgot."
+msgstr "Touchez un jour passé pour noter un arrosage oublié."
+
+msgid "Could not load. Check your connection."
+msgstr "Chargement impossible. Vérifiez votre connexion."
+
+msgid "Sowing / planting"
+msgstr "Semis / plantation"
+
+msgid "Establishment complete"
+msgstr "Installation terminée"
+
+msgid "Full canopy - peak water need"
+msgstr "Couvert complet - besoin en eau maximal"
+
+msgid "Maturation (reduce irrigation)"
+msgstr "Maturation (réduire l’irrigation)"
+
+msgid "Expected harvest"
+msgstr "Récolte prévue"
+
+msgid "Start watching: {name}"
+msgstr "Commencer la surveillance : {name}"
+
+msgid "{product}: {rate}"
+msgstr "{product} : {rate}"
+
+msgid ""
+"Use only products registered in Tunisia for this crop, at the label dose, "
+"with protective equipment, and respect the pre-harvest interval. Prefer the "
+"prevention and biological options first and confirm with your CRDA extension"
+" office before treating."
+msgstr ""
+"Utilisez uniquement des produits homologués en Tunisie pour cette culture, à"
+" la dose de l’étiquette, avec un équipement de protection, et respectez le "
+"délai avant récolte. Privilégiez d’abord la prévention et les solutions "
+"biologiques et confirmez auprès de votre CRDA avant de traiter."
+
+msgid ""
+"Indicative rates for an average soil. A soil analysis (every 3-4 years) and "
+"your CRDA extension office should set the final dose. Do not apply nitrogen "
+"just before heavy rain (it is washed out) or on dry soil without irrigation "
+"(it is not taken up)."
+msgstr ""
+"Doses indicatives pour un sol moyen. Une analyse de sol (tous les 3-4 ans) "
+"et votre CRDA doivent fixer la dose finale. N’apportez pas d’azote juste "
+"avant une forte pluie (il est lessivé) ni sur sol sec sans irrigation (il "
+"n’est pas absorbé)."
+
+msgid "Frost risk"
+msgstr "Risque de gel"
+
+msgid ""
+"Minimum down to {t} °C on {days}. Protect seedlings and young trees; "
+"irrigate the day before to store heat in the soil."
+msgstr ""
+"Minimum jusqu’à {t} °C le {days}. Protégez les semis et les jeunes arbres ; "
+"irriguez la veille pour stocker la chaleur dans le sol."
+
+msgid "Heat stress"
+msgstr "Stress thermique"
+
+msgid ""
+"Up to {t} °C on {days}. Irrigate early morning or evening; avoid spraying "
+"and fertilising during the heat."
+msgstr ""
+"Jusqu’à {t} °C le {days}. Irriguez tôt le matin ou le soir ; évitez de "
+"traiter et de fertiliser pendant la chaleur."
+
+msgid "Heavy rain"
+msgstr "Forte pluie"
+
+msgid "{days}: 20 mm or more. Postpone nitrogen and spraying; check drainage."
+msgstr ""
+"{days} : 20 mm ou plus. Reportez l’azote et les traitements ; vérifiez le "
+"drainage."
+
+msgid "Spraying windows"
+msgstr "Créneaux de traitement"
+
+msgid ""
+"Good days to spray (little wind, dry, not too hot): {days}. Spray early "
+"morning or evening."
+msgstr ""
+"Bons jours pour traiter (peu de vent, sec, pas trop chaud) : {days}. Traitez"
+" tôt le matin ou le soir."
+
+msgid "No good spraying day this week (rain, wind or heat)."
+msgstr "Pas de bon jour pour traiter cette semaine (pluie, vent ou chaleur)."
+
+msgid "Water balance (7 days)"
+msgstr "Bilan hydrique (7 jours)"
+
+msgid ""
+"Expected rain {rain} mm against about {et0} mm of reference evaporation."
+msgstr ""
+"Pluie attendue {rain} mm pour environ {et0} mm d’évaporation de référence."
+
+msgid "Rain should cover the crop this week."
+msgstr "La pluie devrait couvrir la culture cette semaine."
+
+msgid "Plan irrigation for the difference if the crop is growing."
+msgstr "Prévoyez l’irrigation pour la différence si la culture est en place."
+
+msgid "{name}: favourable weather"
+msgstr "{name} : météo favorable"
+
+msgid "{watch} Prevention: {prevent}"
+msgstr "{watch} Prévention : {prevent}"
+
+msgid "No region with climate data is available near this farm."
+msgstr ""
+"Aucune région avec des données climatiques n’est disponible près de cette "
+"parcelle."
+
+msgid "Not enough climate history for {region}."
+msgstr "Historique climatique insuffisant pour {region}."
+
+msgid ""
+"Soil of this parcel is not available (it is still loading): the average soil"
+" of {region} was used instead."
+msgstr ""
+"Le sol de cette parcelle n’est pas disponible (chargement en cours) : le sol"
+" moyen de {region} a été utilisé."
+
+msgid ""
+"Soil of this parcel is not available: the average soil of {region} was used "
+"instead."
+msgstr ""
+"Le sol de cette parcelle n’est pas disponible : le sol moyen de {region} a "
+"été utilisé."
+
+msgid ""
+"Climate is taken from {region}, {km} km away: treat the water figures as "
+"approximate."
+msgstr ""
+"Le climat provient de {region}, à {km} km : considérez les chiffres d’eau "
+"comme approximatifs."
+
+msgid "Soil data could not be loaded: pH and texture were not scored."
+msgstr ""
+"Les données de sol n’ont pas pu être chargées : pH et texture non évalués."
+
+msgid ""
+"The 1-month drought outlook warns of dry conditions: rainfall was set to a "
+"dry year (25th percentile)."
+msgstr ""
+"La prévision de sécheresse à 1 mois annonce des conditions sèches : la pluie"
+" a été fixée à celle d’une année sèche (25e percentile)."
+
+msgid "Parcel centre not mapped by SoilGrids; nearest data ~2 km away."
+msgstr ""
+"Centre de la parcelle non cartographié par SoilGrids ; données les plus "
+"proches à ~2 km."
+
+msgid "Farmer account required."
+msgstr "Compte agriculteur requis."
+
+msgid "Invalid JSON."
+msgstr "Données invalides."
+
+msgid "Draw the farm boundary on the map first."
+msgstr "Dessinez d’abord les limites de la parcelle sur la carte."
+
+msgid "Farm limit reached (50)."
+msgstr "Nombre maximal de parcelles atteint (50)."
+
+msgid "Farm not found."
+msgstr "Parcelle introuvable."
+
+msgid "Choose a crop."
+msgstr "Choisissez une culture."
+
+msgid "Activity log is full."
+msgstr "Le journal est plein."
+
+msgid "Not found."
+msgstr "Introuvable."
+
+msgid "The farm needs a name."
+msgstr "La parcelle doit avoir un nom."
+
+msgid "Unknown crop."
+msgstr "Culture inconnue."
+
+msgid "Sowing date must be YYYY-MM-DD."
+msgstr "La date de semis doit être au format AAAA-MM-JJ."
+
+msgid "Water supply must be a number (mm)."
+msgstr "L’eau disponible doit être un nombre (mm)."
+
+msgid "Water supply must be between 0 and 5000 mm."
+msgstr "L’eau disponible doit être entre 0 et 5000 mm."
+
+msgid "Unknown irrigation method."
+msgstr "Méthode d’irrigation inconnue."
+
+msgid "Flow rate must be a number (m³/h)."
+msgstr "Le débit doit être un nombre (m³/h)."
+
+msgid "Flow rate must be between 0 and 10 000 m³/h."
+msgstr "Le débit doit être entre 0 et 10 000 m³/h."
+
+msgid "Last irrigation date must be YYYY-MM-DD."
+msgstr "La date du dernier arrosage doit être au format AAAA-MM-JJ."
+
+msgid "Last irrigation date cannot be in the future."
+msgstr "La date du dernier arrosage ne peut pas être dans le futur."
+
+msgid "Unknown activity."
+msgstr "Activité inconnue."
+
+msgid "Status must be done or skipped."
+msgstr "Le statut doit être « fait » ou « non fait »."
+
+msgid "Date must be YYYY-MM-DD."
+msgstr "La date doit être au format AAAA-MM-JJ."
+
+msgid "The date cannot be in the future."
+msgstr "La date ne peut pas être dans le futur."
+
+msgid "The date is more than a year ago."
+msgstr "La date remonte à plus d’un an."
+
+msgid "Amount must be a number (mm)."
+msgstr "La quantité doit être un nombre (mm)."
+
+msgid "Water amount must be between 0 and 500 mm."
+msgstr "La quantité d’eau doit être entre 0 et 500 mm."
+
+msgid "month must be 1-12"
+msgstr "le mois doit être entre 1 et 12"
+
+msgid "sowing_date must be YYYY-MM-DD"
+msgstr "la date de semis doit être au format AAAA-MM-JJ"
+
+msgid "The boundary must be a polygon."
+msgstr "La limite doit être un polygone."
+
+msgid "The polygon has no coordinates."
+msgstr "Le polygone n’a pas de coordonnées."
+
+msgid "Invalid coordinate in the polygon."
+msgstr "Coordonnée invalide dans le polygone."
+
+msgid "Coordinate out of range."
+msgstr "Coordonnée hors limites."
+
+msgid "Draw at least three corners."
+msgstr "Dessinez au moins trois coins."
+
+msgid "The polygon has no area."
+msgstr "Le polygone n’a pas de surface."
+
+msgid "The parcel is too small (under 100 m2)."
+msgstr "La parcelle est trop petite (moins de 100 m²)."
+
+msgid "g"
+msgstr "g"
+
+msgid "L"
+msgstr "L"
+
+msgid "{v} {unit}/ha"
+msgstr "{v} {unit}/ha"
+
+msgid "{v} kg/ha"
+msgstr "{v} kg/ha"
+
+msgid "Clear sky"
+msgstr "Ciel dégagé"
+
+msgid "Mainly clear"
+msgstr "Plutôt dégagé"
+
+msgid "Partly cloudy"
+msgstr "Partiellement nuageux"
+
+msgid "Overcast"
+msgstr "Couvert"
+
+msgid "Fog"
+msgstr "Brouillard"
+
+msgid "Rime fog"
+msgstr "Brouillard givrant"
+
+msgid "Light drizzle"
+msgstr "Bruine légère"
+
+msgid "Drizzle"
+msgstr "Bruine"
+
+msgid "Dense drizzle"
+msgstr "Bruine dense"
+
+msgid "Freezing drizzle"
+msgstr "Bruine verglaçante"
+
+msgid "Light rain"
+msgstr "Pluie faible"
+
+msgid "Freezing rain"
+msgstr "Pluie verglaçante"
+
+msgid "Light snow"
+msgstr "Neige faible"
+
+msgid "Snow"
+msgstr "Neige"
+
+msgid "Heavy snow"
+msgstr "Forte neige"
+
+msgid "Snow grains"
+msgstr "Neige en grains"
+
+msgid "Rain showers"
+msgstr "Averses"
+
+msgid "Violent showers"
+msgstr "Averses violentes"
+
+msgid "Snow showers"
+msgstr "Averses de neige"
+
+msgid "Thunderstorm"
+msgstr "Orage"
+
+msgid "Unknown"
+msgstr "Inconnu"
+
+msgid "K is rarely needed on the clay soils of the north."
+msgstr "Le potassium est rarement nécessaire sur les sols argileux du Nord."
+
+msgid "Sowing (incorporated)"
+msgstr "Semis (enfoui)"
+
+msgid "DAP 18-46-0"
+msgstr "DAP 18-46-0"
+
+msgid "100-150 kg/ha"
+msgstr "100-150 kg/ha"
+
+msgid "Start of tillering"
+msgstr "Début tallage"
+
+msgid "Ammonium nitrate 33.5%"
+msgstr "Ammonitrate 33,5 %"
+
+msgid "Stem elongation"
+msgstr "Montaison"
+
+msgid "100 kg/ha (skip in a very dry year)"
+msgstr "100 kg/ha (à supprimer en année très sèche)"
+
+msgid "Too much nitrogen causes lodging."
+msgstr "Trop d’azote provoque la verse."
+
+msgid "100 kg/ha"
+msgstr "100 kg/ha"
+
+msgid "Tillering"
+msgstr "Tallage"
+
+msgid ""
+"Forage oats: a second N dose after the first cut if grazed or cut twice."
+msgstr ""
+"Avoine fourragère : une deuxième dose d’azote après la première coupe si "
+"elle est pâturée ou fauchée deux fois."
+
+msgid ""
+"A legume: it fixes its own nitrogen. Inoculate seed with Rhizobium if beans "
+"were not grown on the field recently."
+msgstr ""
+"Une légumineuse : elle fixe son propre azote. Inoculez les semences avec du "
+"Rhizobium si la fève n’a pas été cultivée récemment sur la parcelle."
+
+msgid "Triple superphosphate 45%"
+msgstr "Superphosphate triple 45 %"
+
+msgid "100-130 kg/ha"
+msgstr "100-130 kg/ha"
+
+msgid "A legume: no nitrogen top-dressing needed."
+msgstr "Une légumineuse : pas besoin d’azote en couverture."
+
+msgid "90-110 kg/ha"
+msgstr "90-110 kg/ha"
+
+msgid "Well-rotted manure (20 t/ha) before planting improves bulb size."
+msgstr ""
+"Un fumier bien décomposé (20 t/ha) avant plantation améliore la taille des "
+"bulbes."
+
+msgid "Planting"
+msgstr "Plantation"
+
+msgid "NPK 10-20-20 or DAP + potassium sulphate"
+msgstr "NPK 10-20-20 ou DAP + sulfate de potassium"
+
+msgid "300-400 kg/ha"
+msgstr "300-400 kg/ha"
+
+msgid "Leaf growth"
+msgstr "Croissance des feuilles"
+
+msgid "Start of bulbing"
+msgstr "Début de la bulbaison"
+
+msgid "Potassium sulphate 50%"
+msgstr "Sulfate de potassium 50 %"
+
+msgid "100 kg/ha (stop N now)"
+msgstr "100 kg/ha (arrêter l’azote maintenant)"
+
+msgid ""
+"Manure 30 t/ha before planting is recommended. Potassium improves tuber "
+"quality."
+msgstr ""
+"Un fumier de 30 t/ha avant plantation est recommandé. Le potassium améliore "
+"la qualité des tubercules."
+
+msgid "NPK 10-20-20"
+msgstr "NPK 10-20-20"
+
+msgid "500-600 kg/ha"
+msgstr "500-600 kg/ha"
+
+msgid "Earthing up"
+msgstr "Buttage"
+
+msgid "150-200 kg/ha"
+msgstr "150-200 kg/ha"
+
+msgid "Tuber initiation"
+msgstr "Initiation des tubercules"
+
+msgid "150 kg/ha"
+msgstr "150 kg/ha"
+
+msgid ""
+"Best applied by fertigation with drip irrigation, weekly. Manure 30 t/ha "
+"before transplanting."
+msgstr ""
+"Idéalement en fertigation au goutte-à-goutte, chaque semaine. Fumier 30 t/ha"
+" avant repiquage."
+
+msgid "Before transplanting"
+msgstr "Avant repiquage"
+
+msgid "300 kg/ha"
+msgstr "300 kg/ha"
+
+msgid "Flowering start (weekly fertigation)"
+msgstr "Début floraison (fertigation hebdomadaire)"
+
+msgid "Calcium nitrate + potassium nitrate"
+msgstr "Nitrate de calcium + nitrate de potassium"
+
+msgid "10-15 kg/ha per week"
+msgstr "10-15 kg/ha par semaine"
+
+msgid "Fruit enlargement"
+msgstr "Grossissement des fruits"
+
+msgid "Potassium nitrate / sulphate"
+msgstr "Nitrate / sulfate de potassium"
+
+msgid "15-20 kg/ha per week"
+msgstr "15-20 kg/ha par semaine"
+
+msgid "Fertigation with drip is best. Manure 25 t/ha before planting."
+msgstr ""
+"La fertigation au goutte-à-goutte est préférable. Fumier 25 t/ha avant "
+"plantation."
+
+msgid "Flowering (weekly fertigation)"
+msgstr "Floraison (fertigation hebdomadaire)"
+
+msgid "10 kg/ha per week"
+msgstr "10 kg/ha par semaine"
+
+msgid ""
+"A legume: nitrogen only as a small starter at establishment. P and K every "
+"year keep the stand productive."
+msgstr ""
+"Une légumineuse : azote seulement en petite dose de démarrage à "
+"l’installation. P et K chaque année maintiennent la luzernière productive."
+
+msgid "Autumn (each year)"
+msgstr "Automne (chaque année)"
+
+msgid "End of winter (each year)"
+msgstr "Fin d’hiver (chaque année)"
+
+msgid "200 kg/ha"
+msgstr "200 kg/ha"
+
+msgid ""
+"Rainfed groves: about 0.5-1 kg N per tree per year; irrigated groves the "
+"higher values. Manure every 2-3 years."
+msgstr ""
+"Vergers en sec : environ 0,5-1 kg d’azote par arbre et par an ; vergers "
+"irrigués les valeurs hautes. Fumier tous les 2-3 ans."
+
+msgid "End of winter (before bud burst)"
+msgstr "Fin d’hiver (avant le débourrement)"
+
+msgid "1.5-3 kg per tree (half the N)"
+msgstr "1,5-3 kg par arbre (la moitié de l’azote)"
+
+msgid "Before flowering"
+msgstr "Avant floraison"
+
+msgid ""
+"1.5 kg per tree (rest of the N; skip in a dry spring without irrigation)"
+msgstr ""
+"1,5 kg par arbre (reste de l’azote ; à supprimer au printemps sec sans "
+"irrigation)"
+
+msgid "After harvest"
+msgstr "Après récolte"
+
+msgid "Potassium sulphate 50% + manure"
+msgstr "Sulfate de potassium 50 % + fumier"
+
+msgid "1-2 kg per tree + 20-30 kg manure"
+msgstr "1-2 kg par arbre + 20-30 kg de fumier"
+
+msgid ""
+"Split nitrogen over the season; on calcareous soils watch for iron chlorosis"
+" (yellow leaves with green veins)."
+msgstr ""
+"Fractionnez l’azote sur la saison ; sur sol calcaire, surveillez la chlorose"
+" ferrique (feuilles jaunes à nervures vertes)."
+
+msgid "40% of the N"
+msgstr "40 % de l’azote"
+
+msgid "Fruit set"
+msgstr "Nouaison"
+
+msgid "Ammonium nitrate or fertigation"
+msgstr "Ammonitrate ou fertigation"
+
+msgid "35% of the N + potassium"
+msgstr "35 % de l’azote + potassium"
+
+msgid "Fruit growth"
+msgstr "Croissance des fruits"
+
+msgid "Fertigation N + K"
+msgstr "Fertigation N + K"
+
+msgid "25% of the N"
+msgstr "25 % de l’azote"
+
+msgid ""
+"About 1-1.5 kg N per palm per year plus 50 kg manure per palm in winter."
+msgstr ""
+"Environ 1-1,5 kg d’azote par palmier et par an, plus 50 kg de fumier par "
+"palmier en hiver."
+
+msgid "Winter"
+msgstr "Hiver"
+
+msgid "Manure"
+msgstr "Fumier"
+
+msgid "50 kg per palm"
+msgstr "50 kg par palmier"
+
+msgid "Before pollination"
+msgstr "Avant pollinisation"
+
+msgid "1.5-2 kg per palm"
+msgstr "1,5-2 kg par palmier"
+
+msgid "Ammonium nitrate + potassium sulphate"
+msgstr "Ammonitrate + sulfate de potassium"
+
+msgid "1.5 kg + 1 kg per palm"
+msgstr "1,5 kg + 1 kg par palmier"
+
+msgid "Weeds (grasses and broadleaf)"
+msgstr "Mauvaises herbes (graminées et dicotylédones)"
+
+msgid "Weed cover between the 3-leaf stage and tillering."
+msgstr "Couverture des adventices entre le stade 3 feuilles et le tallage."
+
+msgid "Clean seed, rotation with legumes, stale seedbed before sowing."
+msgstr ""
+"Semences propres, rotation avec des légumineuses, faux semis avant le semis."
+
+msgid ""
+"Selective post-emergence herbicide registered for durum wheat, applied at 3 "
+"leaves - full tillering."
+msgstr ""
+"Herbicide sélectif de post-levée homologué pour le blé dur, appliqué de 3 "
+"feuilles à plein tallage."
+
+msgid "Septoria leaf blotch"
+msgstr "Septoriose"
+
+msgid ""
+"Brown blotches with black dots on the lower leaves climbing upward after "
+"rain."
+msgstr ""
+"Taches brunes avec des points noirs sur les feuilles basses, qui montent "
+"après la pluie."
+
+msgid ""
+"Tolerant varieties, rotation, avoid very early sowing and excess nitrogen."
+msgstr ""
+"Variétés tolérantes, rotation, éviter les semis très précoces et l’excès "
+"d’azote."
+
+msgid ""
+"Triazole or strobilurin fungicide when symptoms reach the upper leaves, at "
+"flag-leaf stage."
+msgstr ""
+"Fongicide triazole ou strobilurine quand les symptômes atteignent les "
+"feuilles hautes, au stade dernière feuille."
+
+msgid "Yellow and brown rust"
+msgstr "Rouilles jaune et brune"
+
+msgid "Yellow stripes or orange pustules that rub off on the fingers."
+msgstr ""
+"Stries jaunes ou pustules orange qui laissent une poudre sur les doigts."
+
+msgid "Resistant varieties."
+msgstr "Variétés résistantes."
+
+msgid "Triazole fungicide at the first pustules on the upper leaves."
+msgstr ""
+"Fongicide triazole dès les premières pustules sur les feuilles hautes."
+
+msgid "Net blotch and scald"
+msgstr "Helminthosporiose et rhynchosporiose"
+
+msgid "Net-like brown stripes or pale oval blotches with a dark edge."
+msgstr "Stries brunes en filet ou taches ovales pâles bordées de sombre."
+
+msgid "Rotation, certified seed, bury stubble."
+msgstr "Rotation, semences certifiées, enfouir les chaumes."
+
+msgid "Triazole fungicide if the top two leaves are attacked."
+msgstr "Fongicide triazole si les deux feuilles du haut sont attaquées."
+
+msgid "Weeds"
+msgstr "Mauvaises herbes"
+
+msgid "Weed cover at 3 leaves - tillering."
+msgstr "Couverture des adventices de 3 feuilles au tallage."
+
+msgid "Rotation, clean seed."
+msgstr "Rotation, semences propres."
+
+msgid "Selective herbicide registered for barley."
+msgstr "Herbicide sélectif homologué pour l’orge."
+
+msgid "Crown rust"
+msgstr "Rouille couronnée"
+
+msgid "Orange pustules on the leaves."
+msgstr "Pustules orange sur les feuilles."
+
+msgid "Tolerant varieties; cut forage early if heavily attacked."
+msgstr ""
+"Variétés tolérantes ; faucher tôt le fourrage en cas de forte attaque."
+
+msgid "Rarely economic on forage oats; cut early instead."
+msgstr "Rarement rentable sur avoine fourragère ; faucher tôt plutôt."
+
+msgid "Broomrape (Orobanche)"
+msgstr "Orobanche"
+
+msgid "Pale flowering stems emerging at the foot of the plants."
+msgstr "Tiges fleuries pâles qui sortent au pied des plantes."
+
+msgid ""
+"Long rotation (4+ years), tolerant varieties, slightly later sowing, pull "
+"and burn the stems before they seed."
+msgstr ""
+"Rotation longue (4 ans et plus), variétés tolérantes, semis un peu plus "
+"tardif, arracher et brûler les tiges avant qu’elles grainent."
+
+msgid "No reliable curative option; prevention is essential."
+msgstr "Pas de solution curative fiable ; la prévention est essentielle."
+
+msgid "Chocolate spot (Botrytis)"
+msgstr "Botrytis (taches chocolat)"
+
+msgid "Small red-brown spots on leaves after humid days."
+msgstr "Petites taches brun-rouge sur les feuilles après des jours humides."
+
+msgid "Lower seed density, good drainage."
+msgstr "Densité de semis plus faible, bon drainage."
+
+msgid "Fungicide registered for faba bean at the first spreading spots."
+msgstr ""
+"Fongicide homologué pour la fève dès les premières taches qui s’étendent."
+
+msgid "Black bean aphid"
+msgstr "Puceron noir de la fève"
+
+msgid "Black colonies on the shoot tips."
+msgstr "Colonies noires sur les extrémités des tiges."
+
+msgid "Ladybirds usually control it; pinch infested tips."
+msgstr ""
+"Les coccinelles le contrôlent en général ; pincez les extrémités infestées."
+
+msgid ""
+"Only if colonies cover many plants; never spray during flowering (bees) - "
+"spray in the evening if needed."
+msgstr ""
+"Seulement si les colonies couvrent beaucoup de plantes ; ne jamais traiter "
+"pendant la floraison (abeilles) - traiter le soir si nécessaire."
+
+msgid "Ascochyta blight and rust"
+msgstr "Anthracnose (Ascochyta) et rouille"
+
+msgid "Brown lesions on leaves and pods; rust pustules on stems."
+msgstr ""
+"Lésions brunes sur feuilles et gousses ; pustules de rouille sur les tiges."
+
+msgid "Healthy treated seed, rotation, tolerant varieties."
+msgstr "Semences saines traitées, rotation, variétés tolérantes."
+
+msgid "Registered fungicide at first symptoms in a wet spring."
+msgstr ""
+"Fongicide homologué aux premiers symptômes lors d’un printemps humide."
+
+msgid "Lentil competes poorly in the first 6 weeks."
+msgstr "La lentille est peu compétitive les 6 premières semaines."
+
+msgid "Clean seedbed, row sowing to allow hoeing."
+msgstr "Lit de semence propre, semis en lignes pour permettre le binage."
+
+msgid "Hoeing; herbicide registered for lentil."
+msgstr "Binage ; herbicide homologué pour la lentille."
+
+msgid "Rust"
+msgstr "Rouille"
+
+msgid "Orange pustules on leaves."
+msgstr "Pustules orange sur les feuilles."
+
+msgid "Healthy cloves, avoid dense planting and excess N."
+msgstr "Caïeux sains, éviter la plantation dense et l’excès d’azote."
+
+msgid "Registered fungicide at first pustules."
+msgstr "Fongicide homologué dès les premières pustules."
+
+msgid "Thrips"
+msgstr "Thrips"
+
+msgid "Silvery streaks on the leaves."
+msgstr "Stries argentées sur les feuilles."
+
+msgid "Blue sticky traps, irrigate to avoid stress."
+msgstr "Pièges bleus englués, irriguer pour éviter le stress."
+
+msgid "Registered insecticide only if heavily infested."
+msgstr "Insecticide homologué seulement en cas de forte infestation."
+
+msgid "Late blight (mildiou)"
+msgstr "Mildiou"
+
+msgid "Dark wet patches with white mould under the leaf after humid nights."
+msgstr ""
+"Taches sombres humides avec un feutrage blanc sous la feuille après des "
+"nuits humides."
+
+msgid "Healthy seed, earthing up, destroy volunteer plants and culls."
+msgstr "Plants sains, buttage, détruire les repousses et les déchets de tri."
+
+msgid ""
+"Preventive contact fungicide (e.g. copper or mancozeb-type) before humid "
+"spells; repeat according to the label."
+msgstr ""
+"Fongicide de contact préventif (type cuivre ou mancozèbe) avant les périodes"
+" humides ; renouveler selon l’étiquette."
+
+msgid "Potato tuber moth"
+msgstr "Teigne de la pomme de terre"
+
+msgid "Galleries in leaves and tubers; pheromone trap catches."
+msgstr ""
+"Galeries dans les feuilles et les tubercules ; captures dans les pièges à "
+"phéromone."
+
+msgid ""
+"Good earthing up, irrigate to avoid soil cracks, harvest promptly, never "
+"leave tubers exposed in the field."
+msgstr ""
+"Bon buttage, irriguer pour éviter les fissures du sol, récolter rapidement, "
+"ne jamais laisser les tubercules exposés au champ."
+
+msgid "Bacillus thuringiensis or registered insecticide if catches rise."
+msgstr ""
+"Bacillus thuringiensis ou insecticide homologué si les captures augmentent."
+
+msgid "Tomato leaf miner (Tuta absoluta)"
+msgstr "Mineuse de la tomate (Tuta absoluta)"
+
+msgid "Pheromone traps (weekly counts); mines in leaves and holes in fruit."
+msgstr ""
+"Pièges à phéromone (comptages hebdomadaires) ; mines dans les feuilles et "
+"trous dans les fruits."
+
+msgid ""
+"Insect-proof nets, mass trapping, remove infested leaves and crop residues."
+msgstr ""
+"Filets anti-insectes, piégeage de masse, éliminer les feuilles infestées et "
+"les résidus de culture."
+
+msgid ""
+"Bacillus thuringiensis or spinosad-type products, alternating modes of "
+"action."
+msgstr ""
+"Bacillus thuringiensis ou produits type spinosad, en alternant les modes "
+"d’action."
+
+msgid "Late blight"
+msgstr "Mildiou"
+
+msgid "Brown greasy patches on leaves and fruit after humid nights."
+msgstr ""
+"Taches brunes huileuses sur feuilles et fruits après des nuits humides."
+
+msgid "Drip rather than sprinkler irrigation, airy spacing."
+msgstr "Goutte-à-goutte plutôt qu’aspersion, espacement aéré."
+
+msgid "Preventive copper-type fungicide before humid spells."
+msgstr "Fongicide préventif de type cuivre avant les périodes humides."
+
+msgid "Powdery mildew"
+msgstr "Oïdium"
+
+msgid "Yellow patches on top of leaves with white powder underneath."
+msgstr ""
+"Taches jaunes sur le dessus des feuilles avec une poudre blanche dessous."
+
+msgid "Avoid water stress."
+msgstr "Éviter le stress hydrique."
+
+msgid "Sulphur (not above 30 C) or registered fungicide."
+msgstr "Soufre (pas au-dessus de 30 °C) ou fongicide homologué."
+
+msgid "Whitefly (virus vector)"
+msgstr "Aleurode (vecteur de virus)"
+
+msgid "Yellow sticky traps; small white insects under the leaves."
+msgstr "Pièges jaunes englués ; petits insectes blancs sous les feuilles."
+
+msgid "Nets, virus-tolerant varieties, remove weeds around the field."
+msgstr ""
+"Filets, variétés tolérantes aux virus, désherber autour de la parcelle."
+
+msgid "Registered insecticide only when traps rise sharply."
+msgstr ""
+"Insecticide homologué seulement quand les captures augmentent fortement."
+
+msgid "Aphids"
+msgstr "Pucerons"
+
+msgid "Colonies under young leaves."
+msgstr "Colonies sous les jeunes feuilles."
+
+msgid "Encourage natural enemies; avoid excess nitrogen."
+msgstr "Favoriser les auxiliaires ; éviter l’excès d’azote."
+
+msgid "Insecticidal soap or registered product if colonies spread."
+msgstr "Savon insecticide ou produit homologué si les colonies s’étendent."
+
+msgid "Pale patches on top, white felt under the leaves."
+msgstr "Taches pâles dessus, feutrage blanc sous les feuilles."
+
+msgid "Regular irrigation."
+msgstr "Irrigation régulière."
+
+msgid "Phytophthora root rot"
+msgstr "Pourriture racinaire (Phytophthora)"
+
+msgid "Sudden wilting of plants in wet spots."
+msgstr "Flétrissement brutal des plantes dans les zones humides."
+
+msgid "Raised beds, drip irrigation, never waterlog."
+msgstr "Planches surélevées, goutte-à-goutte, jamais d’engorgement."
+
+msgid "Remove dying plants; rotation away from solanaceous crops."
+msgstr "Arracher les plantes mourantes ; rotation hors solanacées."
+
+msgid "Alfalfa weevil"
+msgstr "Charançon de la luzerne"
+
+msgid "Leaves eaten into lace at the shoot tips in spring."
+msgstr "Feuilles dentelées aux extrémités des tiges au printemps."
+
+msgid "An early first cut usually controls it."
+msgstr "Une première coupe précoce suffit en général."
+
+msgid ""
+"Registered insecticide only if damage is heavy and cutting is not possible."
+msgstr ""
+"Insecticide homologué seulement si les dégâts sont importants et la coupe "
+"impossible."
+
+msgid "Dodder (Cuscuta)"
+msgstr "Cuscute"
+
+msgid "Orange thread-like stems wrapping the plants."
+msgstr "Tiges orange filiformes qui s’enroulent autour des plantes."
+
+msgid "Certified dodder-free seed."
+msgstr "Semences certifiées sans cuscute."
+
+msgid "Cut and burn patches early, before it seeds."
+msgstr "Couper et brûler les foyers tôt, avant la grenaison."
+
+msgid "Olive fruit fly (Bactrocera oleae)"
+msgstr "Mouche de l’olive (Bactrocera oleae)"
+
+msgid "Yellow sticky or McPhail traps from July; stings on the fruit."
+msgstr ""
+"Pièges jaunes englués ou McPhail dès juillet ; piqûres sur les fruits."
+
+msgid "Mass trapping, early harvest, collect fallen fruit."
+msgstr "Piégeage de masse, récolte précoce, ramasser les fruits tombés."
+
+msgid ""
+"Bait (attract-and-kill) sprays on part of the canopy when catches and stings"
+" rise; kaolin clay as a barrier."
+msgstr ""
+"Pulvérisations d’appât (attract-and-kill) sur une partie du feuillage quand "
+"captures et piqûres augmentent ; argile kaolin comme barrière."
+
+msgid "Peacock spot (oeil de paon)"
+msgstr "Œil de paon"
+
+msgid "Dark round spots with a yellow halo on leaves; leaf drop."
+msgstr ""
+"Taches rondes sombres avec un halo jaune sur les feuilles ; chute des "
+"feuilles."
+
+msgid "Pruning to open the canopy."
+msgstr "Taille pour aérer la frondaison."
+
+msgid ""
+"Copper fungicide after harvest and again in late winter before the rains."
+msgstr ""
+"Fongicide cuprique après la récolte et à nouveau en fin d’hiver avant les "
+"pluies."
+
+msgid "Olive moth (Prays oleae)"
+msgstr "Teigne de l’olivier (Prays oleae)"
+
+msgid "Larvae in the flower clusters; pheromone traps."
+msgstr "Larves dans les grappes florales ; pièges à phéromone."
+
+msgid "Natural enemies; traps for monitoring."
+msgstr "Auxiliaires ; pièges de surveillance."
+
+msgid "Bacillus thuringiensis at the start of flowering if traps are high."
+msgstr ""
+"Bacillus thuringiensis en début de floraison si les captures sont élevées."
+
+msgid "Mediterranean fruit fly (Ceratitis)"
+msgstr "Mouche méditerranéenne des fruits (Ceratitis)"
+
+msgid "Traps; stings and soft spots on ripening fruit."
+msgstr "Pièges ; piqûres et zones molles sur les fruits mûrissants."
+
+msgid "Mass trapping, collect and destroy fallen fruit."
+msgstr "Piégeage de masse, ramasser et détruire les fruits tombés."
+
+msgid "Bait sprays on part of the canopy when catches rise."
+msgstr ""
+"Pulvérisations d’appât sur une partie du feuillage quand les captures "
+"augmentent."
+
+msgid "Scale insects"
+msgstr "Cochenilles"
+
+msgid "Scales on twigs and leaves, sooty mould."
+msgstr "Boucliers sur rameaux et feuilles, fumagine."
+
+msgid "Pruning for air flow, protect natural enemies."
+msgstr "Taille pour aérer, protéger les auxiliaires."
+
+msgid "Mineral (summer) oil at crawler stage, not above 32 C."
+msgstr ""
+"Huile minérale (d’été) au stade larves mobiles, pas au-dessus de 32 °C."
+
+msgid "Gummosis (Phytophthora)"
+msgstr "Gommose (Phytophthora)"
+
+msgid "Gum oozing from cracks at the base of the trunk."
+msgstr "Gomme qui suinte des fissures à la base du tronc."
+
+msgid "Keep water away from the trunk, good drainage, tolerant rootstock."
+msgstr "Éloigner l’eau du tronc, bon drainage, porte-greffe tolérant."
+
+msgid "Scrape the lesion and paint with a copper paste."
+msgstr "Gratter la lésion et badigeonner avec une pâte cuprique."
+
+msgid "Date moth (Ectomyelois)"
+msgstr "Pyrale des dattes (Ectomyelois)"
+
+msgid "Larvae in ripening dates."
+msgstr "Larves dans les dattes en maturation."
+
+msgid "Bag the bunches with nets, collect fallen dates, clean stores."
+msgstr ""
+"Ensacher les régimes avec des filets, ramasser les dattes tombées, nettoyer "
+"les entrepôts."
+
+msgid "Bacillus thuringiensis on bunches if needed."
+msgstr "Bacillus thuringiensis sur les régimes si nécessaire."
+
+msgid "Red palm weevil (alert)"
+msgstr "Charançon rouge du palmier (alerte)"
+
+msgid "Holes with brown ooze in the trunk, wilting central leaves."
+msgstr ""
+"Trous avec écoulement brun dans le tronc, flétrissement des palmes "
+"centrales."
+
+msgid "Use certified offshoots only."
+msgstr "Utiliser uniquement des rejets certifiés."
+
+msgid "Report any suspicion to the CRDA immediately (quarantine pest)."
+msgstr ""
+"Signaler immédiatement tout soupçon au CRDA (organisme de quarantaine)."
+
+msgid ""
+"Bury it in the soil at sowing (it does not move down by itself); keep large "
+"doses out of direct contact with the seed."
+msgstr ""
+"Enfouissez-le au semis (il ne descend pas seul dans le sol) ; évitez le "
+"contact direct des fortes doses avec la semence."
+
+msgid ""
+"Spread on moist soil, just before a light rain or a watering; split large "
+"doses."
+msgstr ""
+"Épandre sur sol humide, juste avant une pluie légère ou un arrosage ; "
+"fractionner les fortes doses."
+
+msgid "Urea 46%"
+msgstr "Urée 46 %"
+
+msgid ""
+"Loses nitrogen to the air if left on the surface: water it in or bury it "
+"within 2 days."
+msgstr ""
+"Perd son azote dans l’air s’il reste en surface : arrosez ou enfouissez dans"
+" les 2 jours."
+
+msgid "Bury it before sowing or planting, near the future root zone."
+msgstr ""
+"Enfouissez-le avant le semis ou la plantation, près de la future zone "
+"racinaire."
+
+msgid "Base dressing: spread and work into the soil before planting."
+msgstr "Fumure de fond : épandre et incorporer au sol avant plantation."
+
+msgid ""
+"Better than potassium chloride for vegetables, potato, citrus and olive (no "
+"chloride, adds sulphur)."
+msgstr ""
+"Meilleur que le chlorure de potassium pour les légumes, la pomme de terre, "
+"les agrumes et l’olivier (sans chlore, apporte du soufre)."
+
+msgid "Calcium nitrate 15.5%"
+msgstr "Nitrate de calcium 15,5 %"
+
+msgid ""
+"Soluble: through the drip line. Calcium prevents blossom-end rot. Never mix "
+"with sulphates or phosphates in the same tank."
+msgstr ""
+"Soluble : par le goutte-à-goutte. Le calcium évite la nécrose apicale. Ne "
+"jamais mélanger avec des sulfates ou phosphates dans la même cuve."
+
+msgid "Potassium nitrate 13-0-46"
+msgstr "Nitrate de potassium 13-0-46"
+
+msgid "Soluble: through the drip line during fruit growth."
+msgstr "Soluble : par le goutte-à-goutte pendant la croissance des fruits."
+
+msgid "Well-rotted manure"
+msgstr "Fumier bien décomposé"
+
+msgid ""
+"Only well-composted manure (fresh manure burns roots and spreads weeds); "
+"bury it."
+msgstr ""
+"Uniquement du fumier bien composté (le fumier frais brûle les racines et "
+"propage les mauvaises herbes) ; enfouissez-le."
+
+msgid "Tribenuron-methyl 75% (WG) — broadleaf weeds"
+msgstr "Tribénuron-méthyle 75 % (WG) — dicotylédones"
+
+msgid "15–25 g/ha"
+msgstr "15–25 g/ha"
+
+msgid ""
+"From 3 leaves to the end of tillering, on young growing weeds; no rain for 4"
+" h."
+msgstr ""
+"De 3 feuilles à la fin du tallage, sur jeunes adventices en croissance ; pas"
+" de pluie pendant 4 h."
+
+msgid "2,4-D amine — broadleaf weeds"
+msgstr "2,4-D amine — dicotylédones"
+
+msgid ""
+"End of tillering, before stem elongation. Drift damages vegetables, vines "
+"and trees: never in wind."
+msgstr ""
+"Fin tallage, avant la montaison. La dérive abîme légumes, vignes et arbres :"
+" jamais par vent."
+
+msgid "Clodinafop-propargyl — wild oats, ryegrass, phalaris"
+msgstr "Clodinafop-propargyl — folle avoine, ray-grass, phalaris"
+
+msgid ""
+"Grass weeds at 2 leaves to tillering. Ryegrass resistance is common: rotate "
+"groups."
+msgstr ""
+"Graminées de 2 feuilles au tallage. La résistance du ray-grass est fréquente"
+" : alternez les groupes."
+
+msgid "Mesosulfuron + iodosulfuron — grasses and broadleaf"
+msgstr "Mésosulfuron + iodosulfuron — graminées et dicotylédones"
+
+msgid "Wide spectrum on durum and bread wheat (not barley)."
+msgstr "Large spectre sur blé dur et blé tendre (pas sur orge)."
+
+msgid "Tebuconazole 250 g/L (EW)"
+msgstr "Tébuconazole 250 g/L (EW)"
+
+msgid "1 L/ha (250 g active ingredient/ha)"
+msgstr "1 L/ha (250 g de matière active/ha)"
+
+msgid ""
+"At the first symptoms on the upper leaves. Do not use the same group more "
+"than twice a season."
+msgstr ""
+"Aux premiers symptômes sur les feuilles hautes. Pas plus de deux fois le "
+"même groupe par saison."
+
+msgid "Azoxystrobin 250 g/L (SC)"
+msgstr "Azoxystrobine 250 g/L (SC)"
+
+msgid "0.8–1 L/ha"
+msgstr "0,8–1 L/ha"
+
+msgid ""
+"Preventive (best at flag leaf on cereals). Max 2 sprays of this group per "
+"season; mix or alternate with a triazole (FRAC 3)."
+msgstr ""
+"Préventif (idéal au stade dernière feuille sur céréales). Max 2 traitements "
+"de ce groupe par saison ; mélanger ou alterner avec un triazole (FRAC 3)."
+
+msgid "Propiconazole 250 g/L (EC)"
+msgstr "Propiconazole 250 g/L (EC)"
+
+msgid "0.5 L/ha (125 g active ingredient/ha)"
+msgstr "0,5 L/ha (125 g de matière active/ha)"
+
+msgid ""
+"Same group as tebuconazole: alternate with azoxystrobin, not with "
+"tebuconazole."
+msgstr ""
+"Même groupe que le tébuconazole : alterner avec l’azoxystrobine, pas avec le"
+" tébuconazole."
+
+msgid "Tolerant varieties, later sowing, long rotation"
+msgstr "Variétés tolérantes, semis plus tardif, rotation longue"
+
+msgid ""
+"Broomrape seeds live 10+ years in the soil: no faba bean, lentil or pea on "
+"infested land for several years."
+msgstr ""
+"Les graines d’orobanche vivent plus de 10 ans dans le sol : pas de fève, "
+"lentille ou pois sur une terre infestée pendant plusieurs années."
+
+msgid "Glyphosate at very low dose"
+msgstr "Glyphosate à très faible dose"
+
+msgid ""
+"60–80 g active ingredient/ha, 2–3 sprays 10–15 days apart from the start of "
+"flowering"
+msgstr ""
+"60–80 g de matière active/ha, 2–3 traitements espacés de 10–15 jours dès le "
+"début de la floraison"
+
+msgid ""
+"ONLY on faba bean, only at this very low dose and with your CRDA advice: a "
+"normal dose kills the crop."
+msgstr ""
+"UNIQUEMENT sur fève, seulement à cette très faible dose et avec l’avis de "
+"votre CRDA : une dose normale tue la culture."
+
+msgid "Mancozeb 80% (WP)"
+msgstr "Mancozèbe 80 % (WP)"
+
+msgid "2–2.5 kg/ha"
+msgstr "2–2,5 kg/ha"
+
+msgid ""
+"Contact, preventive: before rain, renew every 7–10 days in wet weather and "
+"after 25–30 mm of rain. Check it is still registered for your crop."
+msgstr ""
+"Contact, préventif : avant la pluie, renouveler tous les 7–10 jours par "
+"temps humide et après 25–30 mm de pluie. Vérifiez qu’il est encore homologué"
+" pour votre culture."
+
+msgid "Tebuconazole"
+msgstr "Tébuconazole"
+
+msgid "From early flowering if wet weather persists."
+msgstr "Dès le début de la floraison si le temps humide persiste."
+
+msgid "Insecticidal (potassium) soap"
+msgstr "Savon insecticide (potassique)"
+
+msgid "1–2 L per 100 L of water"
+msgstr "1–2 L pour 100 L d’eau"
+
+msgid ""
+"Contact only: wet the colonies, under the leaves too. Spares most beneficial"
+" insects."
+msgstr ""
+"Contact seulement : mouiller les colonies, aussi sous les feuilles. Épargne "
+"la plupart des auxiliaires."
+
+msgid "Pirimicarb 50% (WG)"
+msgstr "Pirimicarbe 50 % (WG)"
+
+msgid ""
+"Selective: spares ladybirds, hoverflies and bees. Treat only when colonies "
+"spread."
+msgstr ""
+"Sélectif : épargne coccinelles, syrphes et abeilles. Traiter seulement quand"
+" les colonies s’étendent."
+
+msgid "Flonicamid 50% (WG)"
+msgstr "Flonicamide 50 % (WG)"
+
+msgid "Stops aphid feeding within hours."
+msgstr "Stoppe l’alimentation des pucerons en quelques heures."
+
+msgid "At the first spots; renew after 2 weeks in wet weather."
+msgstr ""
+"Dès les premières taches ; renouveler après 2 semaines par temps humide."
+
+msgid "Pendimethalin — before emergence"
+msgstr "Pendiméthaline — avant la levée"
+
+msgid ""
+"Spray right after sowing on moist, fine soil; lentil competes poorly with "
+"weeds."
+msgstr ""
+"Pulvériser juste après le semis sur sol fin et humide ; la lentille "
+"concurrence mal les adventices."
+
+msgid "At the first orange pustules."
+msgstr "Dès les premières pustules orange."
+
+msgid "Blue sticky traps"
+msgstr "Pièges bleus englués"
+
+msgid "2–4 per ha to watch numbers"
+msgstr "2–4 par ha pour suivre les populations"
+
+msgid "Spinosad"
+msgstr "Spinosad"
+
+msgid ""
+"Natural origin. Spray in the evening (toxic to bees while wet); max 2–3 "
+"sprays a season."
+msgstr ""
+"Origine naturelle. Pulvériser le soir (toxique pour les abeilles tant qu’il "
+"est humide) ; max 2–3 traitements par saison."
+
+msgid "Metalaxyl-M + mancozeb (WG)"
+msgstr "Métalaxyl-M + mancozèbe (WG)"
+
+msgid "2.5 kg/ha"
+msgstr "2,5 kg/ha"
+
+msgid ""
+"Penetrating: when blight starts. Max 2–3 sprays a season (resistance), then "
+"back to a contact fungicide."
+msgstr ""
+"Pénétrant : quand le mildiou démarre. Max 2–3 traitements par saison "
+"(résistance), puis revenir à un fongicide de contact."
+
+msgid "Cymoxanil + mancozeb (WP)"
+msgstr "Cymoxanil + mancozèbe (WP)"
+
+msgid "Stops infections of the last 2–3 days: use right after a wet spell."
+msgstr ""
+"Stoppe les infections des 2–3 derniers jours : à utiliser juste après une "
+"période humide."
+
+msgid "Copper hydroxide"
+msgstr "Hydroxyde de cuivre"
+
+msgid "Allowed in organic farming. Preventive only; washed off by heavy rain."
+msgstr ""
+"Autorisé en agriculture biologique. Préventif seulement ; lessivé par les "
+"fortes pluies."
+
+msgid "Pheromone traps (tuber moth lure)"
+msgstr "Pièges à phéromone (capsule teigne)"
+
+msgid "2–4 traps/ha for monitoring"
+msgstr "2–4 pièges/ha pour la surveillance"
+
+msgid "Earth up well and keep the soil from cracking"
+msgstr "Bien butter et empêcher le sol de se fissurer"
+
+msgid ""
+"Moths lay on exposed tubers: hill up, water to close cracks, harvest "
+"promptly and never leave tubers in the field overnight."
+msgstr ""
+"Les papillons pondent sur les tubercules exposés : butter, arroser pour "
+"refermer les fissures, récolter vite et ne jamais laisser les tubercules au "
+"champ la nuit."
+
+msgid "Bacillus thuringiensis kurstaki (Bt)"
+msgstr "Bacillus thuringiensis kurstaki (Bt)"
+
+msgid "0.5–1 kg/ha"
+msgstr "0,5–1 kg/ha"
+
+msgid ""
+"Kills young caterpillars only, harmless to bees and people; spray in the "
+"evening (sunlight breaks it down) and renew after 7 days."
+msgstr ""
+"Tue seulement les jeunes chenilles, sans danger pour les abeilles et l’homme"
+" ; pulvériser le soir (la lumière le dégrade) et renouveler après 7 jours."
+
+msgid "Deltamethrin"
+msgstr "Deltaméthrine"
+
+msgid "Only when traps catch many moths."
+msgstr "Seulement quand les pièges capturent beaucoup de papillons."
+
+msgid "Pheromone water traps (Tuta lure)"
+msgstr "Pièges à eau à phéromone (capsule Tuta)"
+
+msgid "Monitoring: 2–4 traps/ha. Mass trapping: 20–40 traps/ha"
+msgstr "Surveillance : 2–4 pièges/ha. Piégeage de masse : 20–40 pièges/ha"
+
+msgid ""
+"Start at transplanting; also put insect-proof nets on greenhouse openings."
+msgstr ""
+"Commencer au repiquage ; mettre aussi des filets anti-insectes aux "
+"ouvertures des serres."
+
+msgid "Chlorantraniliprole"
+msgstr "Chlorantraniliprole"
+
+msgid "Alternate groups between sprays."
+msgstr "Alterner les groupes entre les traitements."
+
+msgid "Emamectin benzoate"
+msgstr "Benzoate d’émamectine"
+
+msgid "Wettable sulphur 80%"
+msgstr "Soufre mouillable 80 %"
+
+msgid "200–300 g per 100 L of water"
+msgstr "200–300 g pour 100 L d’eau"
+
+msgid ""
+"Allowed in organic farming. Not above 30 °C (leaf burn) and not within 2 "
+"weeks of an oil spray."
+msgstr ""
+"Autorisé en agriculture biologique. Pas au-dessus de 30 °C (brûlures) ni "
+"dans les 2 semaines d’un traitement à l’huile."
+
+msgid "Penconazole"
+msgstr "Penconazole"
+
+msgid "When sulphur is not enough or too hot to use."
+msgstr ""
+"Quand le soufre ne suffit pas ou qu’il fait trop chaud pour l’utiliser."
+
+msgid "Yellow sticky traps"
+msgstr "Pièges jaunes englués"
+
+msgid "About 1 trap per 20–50 m² in greenhouses"
+msgstr "Environ 1 piège pour 20–50 m² sous serre"
+
+msgid "Beauveria bassiana (fungus)"
+msgstr "Beauveria bassiana (champignon)"
+
+msgid "Needs humid conditions; spray in the evening."
+msgstr "A besoin d’humidité ; pulvériser le soir."
+
+msgid "Pyriproxyfen"
+msgstr "Pyriproxyfène"
+
+msgid "Stops young stages; acts slowly."
+msgstr "Bloque les jeunes stades ; agit lentement."
+
+msgid "Acetamiprid"
+msgstr "Acétamipride"
+
+msgid "Toxic to bees: never during flowering visits."
+msgstr "Toxique pour les abeilles : jamais pendant leur visite des fleurs."
+
+msgid "Raised beds and drip irrigation"
+msgstr "Planches surélevées et goutte-à-goutte"
+
+msgid ""
+"Never let water stand at the stem; remove wilted plants with their soil."
+msgstr ""
+"Ne jamais laisser l’eau stagner au collet ; arracher les plantes flétries "
+"avec leur terre."
+
+msgid "Fosetyl-aluminium 80% (WG)"
+msgstr "Fosétyl-aluminium 80 % (WG)"
+
+msgid "Systemic, moves down to the roots: foliar spray in spring and autumn."
+msgstr ""
+"Systémique, descend jusqu’aux racines : pulvérisation foliaire au printemps "
+"et en automne."
+
+msgid "Metalaxyl-M through the drip line"
+msgstr "Métalaxyl-M par le goutte-à-goutte"
+
+msgid "At planting and once later; max 2 uses a season."
+msgstr ""
+"À la plantation puis une fois plus tard ; max 2 utilisations par saison."
+
+msgid "Cut early"
+msgstr "Faucher tôt"
+
+msgid "Cutting when larvae damage the tips is the most effective control."
+msgstr ""
+"Faucher quand les larves abîment les extrémités est le moyen le plus "
+"efficace."
+
+msgid "Lambda-cyhalothrin"
+msgstr "Lambda-cyhalothrine"
+
+msgid ""
+"Respect the label interval before cutting or grazing; never during flowering"
+" (bees)."
+msgstr ""
+"Respecter le délai de l’étiquette avant fauche ou pâturage ; jamais pendant "
+"la floraison (abeilles)."
+
+msgid "Dodder-free seed; cut, cover and burn patches"
+msgstr "Semences sans cuscute ; couper, couvrir et brûler les foyers"
+
+msgid "Act before the dodder flowers and seeds."
+msgstr "Agir avant la floraison et la grenaison de la cuscute."
+
+msgid "Fruit-fly traps (food lure or pheromone)"
+msgstr "Pièges à mouches des fruits (attractif alimentaire ou phéromone)"
+
+msgid "Monitoring: 2–4 traps/ha. Mass trapping: about 50 traps/ha"
+msgstr ""
+"Surveillance : 2–4 pièges/ha. Piégeage de masse : environ 50 pièges/ha"
+
+msgid ""
+"Hang on the sunny side at head height before the attack period; treat when "
+"catches rise."
+msgstr ""
+"Suspendre côté ensoleillé à hauteur de tête avant la période d’attaque ; "
+"traiter quand les captures augmentent."
+
+msgid "Kaolin clay"
+msgstr "Argile kaolin"
+
+msgid "3–5 kg per 100 L of water"
+msgstr "3–5 kg pour 100 L d’eau"
+
+msgid ""
+"The white film repels the insect. Spray before the attack period and again "
+"after heavy rain. Allowed in organic farming."
+msgstr ""
+"Le film blanc repousse l’insecte. Pulvériser avant la période d’attaque et à"
+" nouveau après une forte pluie. Autorisé en agriculture biologique."
+
+msgid "Spinosad fruit-fly bait (ready bait, 0.24 g/L)"
+msgstr ""
+"Appât spinosad contre les mouches des fruits (prêt à l’emploi, 0,24 g/L)"
+
+msgid "About 1 L of bait per ha, mixed with 4 L of water"
+msgstr "Environ 1 L d’appât par ha, mélangé à 4 L d’eau"
+
+msgid ""
+"Spot-spray a few big drops on one side of every tree (or every other tree): "
+"the flies come to eat it. Repeat every 7–10 days while the traps catch "
+"flies."
+msgstr ""
+"Pulvériser quelques grosses gouttes sur un côté de chaque arbre (ou un arbre"
+" sur deux) : les mouches viennent le manger. Renouveler tous les 7–10 jours "
+"tant que les pièges capturent."
+
+msgid "Copper oxychloride 50% (WP)"
+msgstr "Oxychlorure de cuivre 50 % (WP)"
+
+msgid "300–500 g per 100 L of water"
+msgstr "300–500 g pour 100 L d’eau"
+
+msgid "Allowed in organic farming. Wet the whole canopy."
+msgstr "Autorisé en agriculture biologique. Mouiller toute la frondaison."
+
+msgid "Keep the natural parasites (Aphytis)"
+msgstr "Préserver les parasitoïdes naturels (Aphytis)"
+
+msgid "Avoid broad-spectrum insecticides that kill them."
+msgstr "Éviter les insecticides à large spectre qui les tuent."
+
+msgid "Paraffinic (summer) oil"
+msgstr "Huile paraffinique (d’été)"
+
+msgid "1–1.5 L per 100 L of water"
+msgstr "1–1,5 L pour 100 L d’eau"
+
+msgid ""
+"At the crawler stage (late spring); wet the whole tree; not above 32 °C and "
+"not with sulphur."
+msgstr ""
+"Au stade larves mobiles (fin du printemps) ; mouiller tout l’arbre ; pas au-"
+"dessus de 32 °C ni avec du soufre."
+
+msgid "On crawlers."
+msgstr "Sur les larves mobiles."
+
+msgid "Keep water off the trunk"
+msgstr "Éloigner l’eau du tronc"
+
+msgid "Drippers 50 cm away from the trunk; good drainage."
+msgstr "Goutteurs à 50 cm du tronc ; bon drainage."
+
+msgid "Copper (Bordeaux) paste on the trunk base"
+msgstr "Pâte cuprique (bordelaise) à la base du tronc"
+
+msgid "Scrape the diseased bark first, then paint the wound."
+msgstr "Gratter d’abord l’écorce malade, puis badigeonner la plaie."
+
+msgid "Bag the bunches in fine net after fruit set"
+msgstr "Ensacher les régimes dans un filet fin après la nouaison"
+
+msgid "Remove fallen and left-over dates: the moth survives in them."
+msgstr "Enlever les dattes tombées et restantes : la pyrale y survit."
+
+msgid "Report any suspect palm to the CRDA at once"
+msgstr "Signaler tout palmier suspect au CRDA immédiatement"
+
+msgid ""
+"Holes with brown ooze, chewed fibres, a crown that leans: quarantine pest."
+msgstr ""
+"Trous avec écoulement brun, fibres rongées, couronne qui penche : organisme "
+"de quarantaine."
+
+msgid "Pheromone + food bait traps"
+msgstr "Pièges à phéromone + appât alimentaire"
+
+msgid "About 1 trap per ha for monitoring"
+msgstr "Environ 1 piège par ha pour la surveillance"
+
+msgid "light (sandy)"
+msgstr "léger (sableux)"
+
+msgid "medium (loam)"
+msgstr "moyen (limoneux)"
+
+msgid "heavy (clay)"
+msgstr "lourd (argileux)"
+
+msgid "highly suitable"
+msgstr "très adapté"
+
+msgid "suitable"
+msgstr "adapté"
+
+msgid "marginal"
+msgstr "peu adapté"
+
+msgid "not suitable"
+msgstr "non adapté"
+
+msgid "Farm water balance (FAO-56) with Open-Meteo weather"
+msgstr "Bilan hydrique de la parcelle (FAO-56) avec la météo Open-Meteo"
+
+msgid "Open-Meteo forecast at your parcel"
+msgstr "Prévisions Open-Meteo sur votre parcelle"
+
+msgid "Crop calendar and product catalogue of the application"
+msgstr "Calendrier cultural et catalogue de produits de l’application"
+
+msgid "Crop suitability model (climate and soil of your parcel)"
+msgstr "Modèle d’aptitude des cultures (climat et sol de votre parcelle)"
+
+msgid "Your farm log"
+msgstr "Votre journal de parcelle"
+
+msgid "When should I water and how much?"
+msgstr "Quand dois-je arroser et combien ?"
+
+msgid "What should I do today?"
+msgstr "Que dois-je faire aujourd’hui ?"
+
+msgid "What happens if I skip the watering?"
+msgstr "Que se passe-t-il si je saute l’arrosage ?"
+
+msgid "Which fertiliser now, and how much?"
+msgstr "Quel engrais maintenant, et combien ?"
+
+msgid "Will it rain this week?"
+msgstr "Va-t-il pleuvoir cette semaine ?"
+
+msgid "When is the best day to spray?"
+msgstr "Quel est le meilleur jour pour traiter ?"
+
+msgid "today"
+msgstr "aujourd’hui"
+
+msgid "tomorrow"
+msgstr "demain"
+
+msgid "yesterday"
+msgstr "hier"
+
+msgid "in {n} days"
+msgstr "dans {n} jours"
+
+msgid "{n} days ago"
+msgstr "il y a {n} jours"
+
+msgid "rain only"
+msgstr "pluvial (sans irrigation)"
+
+msgid "no crop chosen"
+msgstr "aucune culture choisie"
+
+msgid "unknown texture"
+msgstr "texture inconnue"
+
+msgid "measured for your parcel (SoilGrids)"
+msgstr "mesuré pour votre parcelle (SoilGrids)"
+
+msgid "average of your region"
+msgstr "moyenne de votre région"
+
+msgid "typical value"
+msgstr "valeur typique"
+
+msgid "irrigated ({method}, {flow} m³ per hour)"
+msgstr "irriguée ({method}, {flow} m³ par heure)"
+
+msgid "irrigated ({method})"
+msgstr "irriguée ({method})"
+
+msgid "{name} ({group})"
+msgstr "{name} ({group})"
+
+msgid "{crop} ({score}/100)"
+msgstr "{crop} ({score}/100)"
+
+msgid "{task} ({when})"
+msgstr "{task} ({when})"
+
+msgid "{month}: no crop"
+msgstr "{month} : pas de culture"
+
+msgid "{month}: {mm} mm"
+msgstr "{month} : {mm} mm"
+
+msgid "for your farm: {qty}"
+msgstr "pour votre parcelle : {qty}"
+
+msgid ""
+"Tell me what grows on this farm first (edit the farm and choose the crop): "
+"this answer depends on the crop."
+msgstr ""
+"Dites-moi d’abord ce qui pousse sur cette parcelle (modifiez la parcelle et "
+"choisissez la culture) : cette réponse en dépend."
+
+msgid "I could not read this information right now. Please try again later."
+msgstr ""
+"Je n’ai pas pu lire cette information pour le moment. Réessayez plus tard."
+
+msgid ""
+"I answer from your farm's data: when and how much to water, pump time, water"
+" in the soil, what happens if you skip a watering, your to-do list, "
+"fertiliser and products, pests and the best day to spray, the weather and "
+"alerts, growth stage and harvest, what to plant, and your farm log. For your"
+" region I also know the drought outlook, rainfall and temperatures."
+msgstr ""
+"Je réponds à partir des données de votre parcelle : quand et combien "
+"arroser, durée de pompage, eau dans le sol, ce qui se passe si vous sautez "
+"un arrosage, vos tâches, engrais et produits, ravageurs et meilleur jour "
+"pour traiter, météo et alertes, stade et récolte, quoi planter, et votre "
+"journal. Pour votre région, je connais aussi la prévision de sécheresse, la "
+"pluie et les températures."
+
+msgid "Next watering: {when} ({date})."
+msgstr "Prochain arrosage : {when} ({date})."
+
+msgid ""
+"Your farm is marked as rain only. If you can irrigate, a supplementary "
+"watering is due {when} ({date})."
+msgstr ""
+"Votre parcelle est déclarée en pluvial. Si vous pouvez irriguer, un arrosage"
+" d’appoint est dû {when} ({date})."
+
+msgid ""
+"Give {mm} mm (= {mm} litres per m²), that is {m3} m³ for your {area} ha."
+msgstr ""
+"Apportez {mm} mm (= {mm} litres par m²), soit {m3} m³ pour vos {area} ha."
+
+msgid ""
+"Why: the soil holds {pct}% of the water the roots can use, and watering is "
+"due at {thr}%."
+msgstr ""
+"Pourquoi : le sol contient {pct} % de l’eau utilisable par les racines, et "
+"l’arrosage est dû à {thr} %."
+
+msgid ""
+"No watering is needed in the next 16 days: the water in the soil ({pct}% of "
+"what the roots can use) and the expected rain cover the crop."
+msgstr ""
+"Aucun arrosage n’est nécessaire dans les 16 prochains jours : l’eau du sol "
+"({pct} % de l’eau utilisable) et la pluie prévue couvrent la culture."
+
+msgid ""
+"A watering was due on {date} and none is recorded since: if you watered, "
+"record it in the farm log so the plan is right."
+msgstr ""
+"Un arrosage était dû le {date} et aucun n’est noté depuis : si vous avez "
+"arrosé, notez-le dans le journal pour que le plan soit juste."
+
+msgid ""
+"It is a large catch-up dose: split it over 2 or 3 days so the soil can "
+"absorb it."
+msgstr ""
+"C’est une grosse dose de rattrapage : répartissez-la sur 2 ou 3 jours pour "
+"que le sol l’absorbe."
+
+msgid "No watering is planned in the next 16 days, so no pumping is needed."
+msgstr ""
+"Aucun arrosage n’est prévu dans les 16 prochains jours : pas de pompage "
+"nécessaire."
+
+msgid ""
+"I cannot compute the pump time: add your water flow (m³ per hour) in "
+"\"Method & flow\" on the Water tab. The next watering is {mm} mm, that is "
+"{m3} m³ for the farm."
+msgstr ""
+"Je ne peux pas calculer la durée de pompage : ajoutez votre débit (m³ par "
+"heure) dans « Méthode et débit » de l’onglet Eau. Le prochain arrosage est "
+"de {mm} mm, soit {m3} m³ pour la parcelle."
+
+msgid ""
+"For the next watering ({mm} mm, {when}) run the pump about {h} h at {flow} "
+"m³ per hour ({m3} m³ in total)."
+msgstr ""
+"Pour le prochain arrosage ({mm} mm, {when}), faites tourner la pompe environ"
+" {h} h à {flow} m³ par heure ({m3} m³ au total)."
+
+msgid ""
+"Water in the soil now: {pct}% of what the roots can use ({used} mm used out "
+"of {taw} mm). Watering is due at {thr}% and the crop starts to suffer below "
+"{stress}%."
+msgstr ""
+"Eau dans le sol maintenant : {pct} % de l’eau utilisable par les racines "
+"({used} mm consommés sur {taw} mm). L’arrosage est dû à {thr} % et la "
+"culture souffre en dessous de {stress} %."
+
+msgid "Without watering, the crop would start to suffer {when} ({date})."
+msgstr "Sans arrosage, la culture commencerait à souffrir {when} ({date})."
+
+msgid ""
+"Even without watering, the crop stays comfortable for the next 16 days."
+msgstr "Même sans arrosage, la culture reste à l’aise les 16 prochains jours."
+
+msgid ""
+"If you follow the plan: {n} waterings, {mm} mm in total, and {s} days of "
+"water stress in the next 16 days."
+msgstr ""
+"Si vous suivez le plan : {n} arrosages, {mm} mm au total, et {s} jours de "
+"stress hydrique dans les 16 prochains jours."
+
+msgid ""
+"If you do not water: the crop suffers from {date}, with {s} days of water "
+"stress, and about {risk}% of the harvest is at risk."
+msgstr ""
+"Si vous n’arrosez pas : la culture souffre dès le {date}, avec {s} jours de "
+"stress hydrique, et environ {risk} % de la récolte est menacée."
+
+msgid ""
+"If you do not water: the crop stays without water stress for the next 16 "
+"days."
+msgstr ""
+"Si vous n’arrosez pas : la culture reste sans stress hydrique les 16 "
+"prochains jours."
+
+msgid ""
+"Next 16 days: {n} waterings, {mm} mm in total, that is {m3} m³ for the farm."
+" The crop will use about {etc} mm and useful rain brings {rain} mm."
+msgstr ""
+"16 prochains jours : {n} arrosages, {mm} mm au total, soit {m3} m³ pour la "
+"parcelle. La culture consommera environ {etc} mm et la pluie utile apporte "
+"{rain} mm."
+
+msgid ""
+"The monthly outlook needs the climate history of your region, which is not "
+"available for this farm."
+msgstr ""
+"La prévision mensuelle a besoin de l’historique climatique de votre région, "
+"qui n’est pas disponible pour cette parcelle."
+
+msgid "Average watering need in the coming months (average year): {months}."
+msgstr ""
+"Besoin moyen d’arrosage dans les prochains mois (année moyenne) : {months}."
+
+msgid "Rest of the season: about {mm} mm, that is {m3} m³ for the farm."
+msgstr "Reste de la saison : environ {mm} mm, soit {m3} m³ pour la parcelle."
+
+msgid "You declared {supply} mm of water: that covers the need."
+msgstr "Vous avez déclaré {supply} mm d’eau : cela couvre le besoin."
+
+msgid ""
+"You declared {supply} mm of water: that is less than the need, keep it for "
+"the most sensitive stages (flowering and fruit set)."
+msgstr ""
+"Vous avez déclaré {supply} mm d’eau : c’est moins que le besoin, gardez-la "
+"pour les stades les plus sensibles (floraison et nouaison)."
+
+msgid ""
+"I can only judge past water stress from the waterings you record. Record "
+"them in the farm log and I will tell you."
+msgstr ""
+"Je ne peux juger le stress passé qu’à partir des arrosages que vous notez. "
+"Notez-les dans le journal et je vous le dirai."
+
+msgid ""
+"Over the last {n} days the crop was short of water on {d} days ({s}% less "
+"water than it needed): about {r}% of the harvest has been lost."
+msgstr ""
+"Sur les {n} derniers jours, la culture a manqué d’eau {d} jours ({s} % d’eau"
+" en moins que son besoin) : environ {r} % de la récolte a été perdue."
+
+msgid "Over the last {n} days the crop had all the water it needed."
+msgstr "Sur les {n} derniers jours, la culture a eu toute l’eau nécessaire."
+
+msgid ""
+"The watering plan needs the weather forecast, which is unavailable right "
+"now. Please try again later."
+msgstr ""
+"Le plan d’arrosage a besoin des prévisions météo, indisponibles pour le "
+"moment. Réessayez plus tard."
+
+msgid ""
+"The crop is not sown yet (sowing planned on {date}): no watering is planned "
+"before that."
+msgstr ""
+"La culture n’est pas encore semée (semis prévu le {date}) : aucun arrosage "
+"n’est prévu avant."
+
+msgid "The season is over (harvest on {date}): no watering is planned."
+msgstr ""
+"La saison est terminée (récolte le {date}) : aucun arrosage n’est prévu."
+
+msgid "There is no crop in the field right now, so no watering is planned."
+msgstr ""
+"Il n’y a pas de culture au champ en ce moment : aucun arrosage n’est prévu."
+
+msgid "To do:"
+msgstr "À faire :"
+
+msgid "Questions waiting for your answer (Today tab):"
+msgstr "Questions en attente de votre réponse (onglet Aujourd’hui) :"
+
+msgid "There is no fertiliser schedule for this crop in the application."
+msgstr ""
+"Il n’y a pas de calendrier d’engrais pour cette culture dans l’application."
+
+msgid "No other fertiliser application is planned this season."
+msgstr "Aucun autre apport d’engrais n’est prévu cette saison."
+
+msgid ""
+"Next fertiliser: {product}, {when} ({date}), at the \"{stage}\" stage. Dose:"
+" {rate}."
+msgstr ""
+"Prochain engrais : {product}, {when} ({date}), au stade « {stage} ». Dose : "
+"{rate}."
+
+msgid ""
+"The application of {product} planned on {date} is not recorded: if you did "
+"it, add it in the farm log."
+msgstr ""
+"L’apport de {product} prévu le {date} n’est pas noté : si vous l’avez fait, "
+"ajoutez-le au journal."
+
+msgid ""
+"These dates assume sowing on {date}: give your real sowing date (edit the "
+"farm) to make them exact."
+msgstr ""
+"Ces dates supposent un semis le {date} : indiquez votre vraie date de semis "
+"(modifier la parcelle) pour les rendre exactes."
+
+msgid "To watch on your {crop} this month: {names}."
+msgstr "À surveiller sur votre {crop} ce mois-ci : {names}."
+
+msgid "The coming weather favours: {names}."
+msgstr "La météo à venir favorise : {names}."
+
+msgid ""
+"Ask me about one of them by name to get its symptoms, prevention and "
+"products."
+msgstr ""
+"Demandez-moi l’un d’eux par son nom pour avoir ses symptômes, la prévention "
+"et les produits."
+
+msgid "No major pest, disease or weed of {crop} is expected this month."
+msgstr ""
+"Aucun ravageur, maladie ou adventice majeur du {crop} n’est attendu ce mois-"
+"ci."
+
+msgid "{threat} is a problem of {crop}."
+msgstr "{threat} est un problème du {crop}."
+
+msgid "{threat} — how to recognise it: {text}"
+msgstr "{threat} — comment le reconnaître : {text}"
+
+msgid "Treatment: {text}"
+msgstr "Traitement : {text}"
+
+msgid "Products that help:"
+msgstr "Produits utiles :"
+
+msgid ""
+"Names are active ingredients: buy any registered brand that contains it, and"
+" always follow its label (dose, protective equipment, days before harvest)."
+msgstr ""
+"Les noms sont des matières actives : achetez n’importe quelle marque "
+"homologuée qui la contient, et suivez toujours son étiquette (dose, "
+"protection, délai avant récolte)."
+
+msgid "The weather forecast is unavailable right now."
+msgstr "Les prévisions météo sont indisponibles pour le moment."
+
+msgid ""
+"{label}: {cond}, {tmin} to {tmax} °C, rain {rain} mm ({prob}% chance), wind "
+"{wind} km/h."
+msgstr ""
+"{label} : {cond}, {tmin} à {tmax} °C, pluie {rain} mm ({prob} % de risque), "
+"vent {wind} km/h."
+
+msgid "No rain is expected in the next 7 days."
+msgstr "Aucune pluie n’est prévue dans les 7 prochains jours."
+
+msgid ""
+"Rain expected in the next 7 days: {mm} mm in total. Next rainy day: {date}, "
+"{day_mm} mm."
+msgstr ""
+"Pluie prévue dans les 7 prochains jours : {mm} mm au total. Prochain jour de"
+" pluie : {date}, {day_mm} mm."
+
+msgid ""
+"Next 7 days: {mm} mm of rain on {n} days, temperatures from {tmin} to {tmax}"
+" °C."
+msgstr ""
+"7 prochains jours : {mm} mm de pluie sur {n} jours, températures de {tmin} à"
+" {tmax} °C."
+
+msgid ""
+"No frost, heat, heavy-rain or disease alert for your farm in the next 7 "
+"days."
+msgstr ""
+"Aucune alerte gel, chaleur, forte pluie ou maladie pour votre parcelle dans "
+"les 7 prochains jours."
+
+msgid "No crop is well suited to plant this month on this farm."
+msgstr ""
+"Aucune culture n’est bien adaptée à un semis ce mois-ci sur cette parcelle."
+
+msgid "I have no suitability score for this crop here."
+msgstr "Je n’ai pas de score d’aptitude pour cette culture ici."
+
+msgid ""
+"Best crops to plant now on this farm (climate and soil of your parcel): "
+"{items}."
+msgstr ""
+"Meilleures cultures à planter maintenant sur cette parcelle (climat et sol "
+"de votre parcelle) : {items}."
+
+msgid "{crop} on this farm: {cls} (score {score}/100)."
+msgstr "{crop} sur cette parcelle : {cls} (score {score}/100)."
+
+msgid "{crop} sown this month: {cls} (score {score}/100)."
+msgstr "{crop} semé ce mois-ci : {cls} (score {score}/100)."
+
+msgid ""
+"Its usual sowing time starts in {month}: {cls} (score {score}/100) then."
+msgstr ""
+"Sa période de semis habituelle commence en {month} : {cls} (score "
+"{score}/100) à ce moment-là."
+
+msgid ""
+"{crop}: sown on {sow}, now at the \"{stage}\" stage. Expected harvest {when}"
+" ({date})."
+msgstr ""
+"{crop} : semé le {sow}, actuellement au stade « {stage} ». Récolte prévue "
+"{when} ({date})."
+
+msgid ""
+"{crop} is a tree crop: it has no sowing or harvest date to compute here; its"
+" care follows the calendar months (see the Plan tab)."
+msgstr ""
+"{crop} est une culture arboricole : pas de date de semis ou de récolte à "
+"calculer ici ; son entretien suit les mois du calendrier (voir l’onglet "
+"Plan)."
+
+msgid "{crop}: sowing planned {when} ({date})."
+msgstr "{crop} : semis prévu {when} ({date})."
+
+msgid "{crop}: the season ended; harvest was expected on {date}."
+msgstr "{crop} : la saison est terminée ; la récolte était prévue le {date}."
+
+msgid ""
+"This assumes sowing on {date}: give your real sowing date (edit the farm) to"
+" make it exact."
+msgstr ""
+"Cela suppose un semis le {date} : indiquez votre vraie date de semis "
+"(modifier la parcelle) pour plus de précision."
+
+msgid ""
+"Soil: {texture}; it holds about {awc} mm of water per metre of depth "
+"({source})."
+msgstr ""
+"Sol : {texture} ; il retient environ {awc} mm d’eau par mètre de profondeur "
+"({source})."
+
+msgid "Your farm \"{name}\": {area} ha, {crop}, {water}."
+msgstr "Votre parcelle « {name} » : {area} ha, {crop}, {water}."
+
+msgid "Climate data come from the region of {region}."
+msgstr "Les données climatiques viennent de la région de {region}."
+
+msgid ""
+"Your farm log is empty: record your waterings and other work in the farm "
+"log."
+msgstr ""
+"Votre journal est vide : notez vos arrosages et autres travaux dans le "
+"journal de la parcelle."
+
+msgid "Last entries in your farm log:"
+msgstr "Dernières entrées de votre journal :"
+
+msgid ""
+"No watering is recorded for this farm yet. Record them in the farm log: the "
+"plan then follows what you really did."
+msgstr ""
+"Aucun arrosage n’est encore noté pour cette parcelle. Notez-les dans le "
+"journal : le plan suivra alors ce que vous avez vraiment fait."
+
+msgid "Your last recorded watering: {date} ({when}), {mm} mm."
+msgstr "Votre dernier arrosage noté : {date} ({when}), {mm} mm."
+
+msgid "Your last recorded watering: {date} ({when})."
+msgstr "Votre dernier arrosage noté : {date} ({when})."
+
+msgid ""
+"{n} waterings recorded in the last 30 days ({mm} mm with a recorded amount)."
+msgstr ""
+"{n} arrosages notés ces 30 derniers jours ({mm} mm pour ceux dont la "
+"quantité est notée)."
+
+msgid ""
+"Watering follows the FAO-56 method: every day the crop uses water (crop "
+"coefficient {kc} × the reference evaporation of the weather), rain refills "
+"the soil, and watering is due when the roots ({root} m deep, {taw} mm of "
+"usable water in your soil) have used {trig} mm."
+msgstr ""
+"L’arrosage suit la méthode FAO-56 : chaque jour la culture consomme de l’eau"
+" (coefficient cultural {kc} × l’évaporation de référence de la météo), la "
+"pluie recharge le sol, et l’arrosage est dû quand les racines ({root} m de "
+"profondeur, {taw} mm d’eau utilisable dans votre sol) ont consommé {trig} "
+"mm."
+
+msgid ""
+"Your {method} system brings {eff}% of the water to the roots, so the dose "
+"you apply is larger than what the roots receive."
+msgstr ""
+"Votre système ({method}) amène {eff} % de l’eau aux racines : la dose "
+"apportée est donc plus grande que ce que reçoivent les racines."
+
+msgid ""
+"Data used: Open-Meteo weather at your parcel (last 60 days and 16-day "
+"forecast), FAO-56 crop tables, ISRIC SoilGrids soil, the climate history of "
+"your region, and your own farm log. Fertiliser and product doses are "
+"indicative extension values: the label and your CRDA office have the final "
+"word."
+msgstr ""
+"Données utilisées : météo Open-Meteo sur votre parcelle (60 derniers jours "
+"et prévision à 16 jours), tables culturales FAO-56, sol ISRIC SoilGrids, "
+"historique climatique de votre région et votre propre journal. Les doses "
+"d’engrais et de produits sont des valeurs indicatives de vulgarisation : "
+"l’étiquette et votre CRDA ont le dernier mot."
+
+msgid ""
+"At {flow} m³ per hour this takes about {days} days of pumping: check the "
+"flow you entered, or water the farm in sectors."
+msgstr ""
+"À {flow} m³ par heure, cela demande environ {days} jours de pompage : "
+"vérifiez le débit saisi, ou arrosez la parcelle par secteurs."
+
+msgid ""
+"Riskiest crops to plant now on this farm (lowest chance of success): "
+"{items}."
+msgstr ""
+"Cultures les plus risquées à planter maintenant sur cette parcelle (plus "
+"faible chance de réussite) : {items}."
+
+msgid "No connection: try again when you are online."
+msgstr "Pas de connexion : réessayez une fois en ligne."
+
+msgid "To install on iPhone: tap the Share button, then “Add to Home Screen”."
+msgstr ""
+"Pour installer sur iPhone : touchez le bouton Partager, puis « Sur l’écran "
+"d’accueil »."
+
+msgid "The app is installed: open it from your home screen."
+msgstr "L’application est installée : ouvrez-la depuis votre écran d’accueil."
+
+msgid "Back online: your data is up to date again."
+msgstr "De retour en ligne : vos données sont de nouveau à jour."
+
+msgid "Install the app"
+msgstr "Installer l’application"
+
+msgid ""
+"You are offline: showing the last saved data. Changes need a connection."
+msgstr ""
+"Vous êtes hors ligne : affichage des dernières données enregistrées. Les "
+"modifications nécessitent une connexion."
+
+msgid "You are offline"
+msgstr "Vous êtes hors ligne"
+
+msgid ""
+"Open the app once with a connection: it will then keep your farm’s last data"
+" for the field."
+msgstr ""
+"Ouvrez l’application une fois avec une connexion : elle gardera ensuite les "
+"dernières données de votre parcelle pour le terrain."
+
+msgid "Try again"
+msgstr "Réessayer"
+
+msgid "APWRS Farmer"
+msgstr "APWRS Agriculteur"
+
+msgid ""
+"When to water, what to plant, pests, weather and an assistant for your farm."
+msgstr ""
+"Quand arroser, quoi planter, ravageurs, météo et un assistant pour votre "
+"parcelle."
+
+msgid "Wrong username or password."
+msgstr "Nom d’utilisateur ou mot de passe incorrect."
+
+msgid ""
+"Ping: __LAT__, __LNG__ | Wind: __WS__ km/h | Temp: __T__°C | Humidity: "
+"__H__%% | Rain: __R__ mm"
+msgstr ""
+"Ping : __LAT__, __LNG__ | Vent : __WS__ km/h | Temp : __T__°C | Humidité : "
+"__H__%% | Pluie : __R__ mm"
+
+msgid "%% vs avg"
+msgstr "%% vs moy."
+
+msgid ""
+"{n} mm reach the roots; the rest is lost by the method ({e}%% efficient)."
+msgstr ""
+"{n} mm atteignent les racines ; le reste est perdu par la méthode "
+"(efficience {e} %%)."
+
+msgid "about {p}%% of a well-timed crop"
+msgstr "environ {p} %% d’une culture semée à temps"
+
+msgid "Ammonium nitrate 33.5%%"
+msgstr "Ammonitrate 33,5 %%"
+
+msgid "Triple superphosphate 45%%"
+msgstr "Superphosphate triple 45 %%"
+
+msgid "Potassium sulphate 50%%"
+msgstr "Sulfate de potassium 50 %%"
+
+msgid "Potassium sulphate 50%% + manure"
+msgstr "Sulfate de potassium 50 %% + fumier"
+
+msgid "40%% of the N"
+msgstr "40 %% de l’azote"
+
+msgid "35%% of the N + potassium"
+msgstr "35 %% de l’azote + potassium"
+
+msgid "25%% of the N"
+msgstr "25 %% de l’azote"
+
+msgid "Urea 46%%"
+msgstr "Urée 46 %%"
+
+msgid "Calcium nitrate 15.5%%"
+msgstr "Nitrate de calcium 15,5 %%"
+
+msgid "Tribenuron-methyl 75%% (WG) — broadleaf weeds"
+msgstr "Tribénuron-méthyle 75 %% (WG) — dicotylédones"
+
+msgid "Mancozeb 80%% (WP)"
+msgstr "Mancozèbe 80 %% (WP)"
+
+msgid "Pirimicarb 50%% (WG)"
+msgstr "Pirimicarbe 50 %% (WG)"
+
+msgid "Flonicamid 50%% (WG)"
+msgstr "Flonicamide 50 %% (WG)"
+
+msgid "Wettable sulphur 80%%"
+msgstr "Soufre mouillable 80 %%"
+
+msgid "Fosetyl-aluminium 80%% (WG)"
+msgstr "Fosétyl-aluminium 80 %% (WG)"
+
+msgid "Copper oxychloride 50%% (WP)"
+msgstr "Oxychlorure de cuivre 50 %% (WP)"
+
+msgid ""
+"Why: the soil holds {pct}%% of the water the roots can use, and watering is "
+"due at {thr}%%."
+msgstr ""
+"Pourquoi : le sol contient {pct} %% de l’eau utilisable par les racines, et "
+"l’arrosage est dû à {thr} %%."
+
+msgid ""
+"No watering is needed in the next 16 days: the water in the soil ({pct}%% of"
+" what the roots can use) and the expected rain cover the crop."
+msgstr ""
+"Aucun arrosage n’est nécessaire dans les 16 prochains jours : l’eau du sol "
+"({pct} %% de l’eau utilisable) et la pluie prévue couvrent la culture."
+
+msgid ""
+"Water in the soil now: {pct}%% of what the roots can use ({used} mm used out"
+" of {taw} mm). Watering is due at {thr}%% and the crop starts to suffer "
+"below {stress}%%."
+msgstr ""
+"Eau dans le sol maintenant : {pct} %% de l’eau utilisable par les racines "
+"({used} mm consommés sur {taw} mm). L’arrosage est dû à {thr} %% et la "
+"culture souffre en dessous de {stress} %%."
+
+msgid ""
+"If you do not water: the crop suffers from {date}, with {s} days of water "
+"stress, and about {risk}%% of the harvest is at risk."
+msgstr ""
+"Si vous n’arrosez pas : la culture souffre dès le {date}, avec {s} jours de "
+"stress hydrique, et environ {risk} %% de la récolte est menacée."
+
+msgid ""
+"Over the last {n} days the crop was short of water on {d} days ({s}%% less "
+"water than it needed): about {r}%% of the harvest has been lost."
+msgstr ""
+"Sur les {n} derniers jours, la culture a manqué d’eau {d} jours ({s} %% "
+"d’eau en moins que son besoin) : environ {r} %% de la récolte a été perdue."
+
+msgid ""
+"{label}: {cond}, {tmin} to {tmax} °C, rain {rain} mm ({prob}%% chance), wind"
+" {wind} km/h."
+msgstr ""
+"{label} : {cond}, {tmin} à {tmax} °C, pluie {rain} mm ({prob} %% de risque),"
+" vent {wind} km/h."
+
+msgid ""
+"Your {method} system brings {eff}%% of the water to the roots, so the dose "
+"you apply is larger than what the roots receive."
+msgstr ""
+"Votre système ({method}) amène {eff} %% de l’eau aux racines : la dose "
+"apportée est donc plus grande que ce que reçoivent les racines."

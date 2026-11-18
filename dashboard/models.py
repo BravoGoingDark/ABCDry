@@ -673,6 +673,11 @@ class Farm(models.Model):
     irrigated = models.BooleanField(default=False)
     water_supply_mm = models.DecimalField(max_digits=7, decimal_places=1, null=True, blank=True,
                                           help_text='Seasonal irrigation water available (mm)')
+    IRRIGATION_METHODS = [('drip', 'Drip'), ('sprinkler', 'Sprinkler'), ('surface', 'Surface / furrow')]
+    irrigation_method = models.CharField(max_length=12, blank=True, default='', choices=IRRIGATION_METHODS)
+    irrigation_flow_m3h = models.DecimalField(max_digits=7, decimal_places=1, null=True, blank=True,
+                                              help_text='Water delivered to the whole farm (m3 per hour)')
+    last_irrigation_date = models.DateField(null=True, blank=True)
     soil = models.JSONField(null=True, blank=True,
                             help_text='0-30 cm soil properties fetched from SoilGrids')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -684,6 +689,40 @@ class Farm(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.owner.username})"
+
+
+class FarmActivity(models.Model):
+    """What the farmer did (or told us he did not do) on a parcel.
+
+    The watering log drives the soil-water balance of services.irrigation_schedule:
+    past days follow the recorded waterings instead of an assumed plan, so a
+    forgotten or skipped watering shows up as a real water deficit. Answers to
+    the reminders of services.farm_tasks are stored here too (task_key), so a
+    question is asked once and the plan changes with the answer.
+    """
+    KINDS = [('irrigation', 'Irrigation'), ('fertilizer', 'Fertilizer'), ('treatment', 'Treatment'),
+             ('scouting', 'Field check'), ('sowing', 'Sowing'), ('harvest', 'Harvest'),
+             ('other', 'Other')]
+    STATUSES = [('done', 'Done'), ('skipped', 'Not done')]
+
+    farm = models.ForeignKey(Farm, on_delete=models.CASCADE, related_name='activities')
+    kind = models.CharField(max_length=12, choices=KINDS)
+    status = models.CharField(max_length=8, choices=STATUSES, default='done')
+    date = models.DateField()
+    amount_mm = models.DecimalField(max_digits=6, decimal_places=1, null=True, blank=True,
+                                    help_text='Irrigation: water applied (gross mm = L/m2)')
+    task_key = models.CharField(max_length=80, blank=True, default='',
+                                help_text='Reminder this answers (services.farm_tasks)')
+    note = models.CharField(max_length=200, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'farm_activities'
+        ordering = ['-date', '-created_at']
+        indexes = [models.Index(fields=['farm', 'kind', 'date'], name='farm_act_farm_kind_date')]
+
+    def __str__(self):
+        return f"{self.farm_id} {self.kind} {self.status} {self.date}"
 
 
 class Sensor(models.Model):

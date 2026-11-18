@@ -181,7 +181,7 @@
                     <span class="w-8 h-px bg-secondary"></span>{% trans "Platform access" %}
                 </p>
                 <h1 class="mt-5 font-headline font-extrabold text-3xl sm:text-[2.25rem] leading-tight text-primary tracking-tight">{% trans "Sign in to APWRS" %}</h1>
-                <p class="mt-3 text-on-surface-variant leading-relaxed">{% trans "Use the account provided by your administrator." %}</p>
+                <p class="mt-3 text-on-surface-variant leading-relaxed">{% trans "Enter your username and password below to sign in." %}</p>
 
                 {% if messages %}
                 <div class="mt-8 space-y-2" role="status">
@@ -223,9 +223,8 @@
                     </button>
                 </form>
 
-                <p class="mt-10 pt-6 border-t border-outline-variant/70 text-xs text-on-surface-variant leading-relaxed">
-                    {% trans "Need an account?" %} <a href="{% url 'dashboard:signup' %}" class="text-primary hover:underline font-medium">{% trans "Sign up as a farmer" %}</a> ·
-                    {% trans "lost your password?" %} {% trans "Contact your platform administrator." %}
+                <p class="mt-10 pt-6 border-t border-outline-variant/70 text-xs text-on-surface-variant leading-relaxed text-center">
+                    {% trans "Forgot your password?" %} {% trans "Contact your platform administrator." %}
                 </p>
             </section>
         </div>

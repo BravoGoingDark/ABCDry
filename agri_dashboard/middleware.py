@@ -52,6 +52,12 @@ class LoginRequiredMiddleware:
         self.exact_exempt.add('/accounts/login/')
         # Django's default post-login redirect target — prevent redirect loops
         self.exact_exempt.add('/accounts/profile/')
+        # Installable farmer app: phones fetch these without the session cookie.
+        # Neither contains user data (app name, icons, caching rules only).
+        self.exact_exempt.add('/farmer/manifest.webmanifest')
+        self.exact_exempt.add('/farmer/sw.js')
+        # Mobile app login (the app then sends its token)
+        self.exact_exempt.add('/farmer/api/auth/login/')
 
     def __call__(self, request):
         path = request.path
@@ -69,6 +75,32 @@ class LoginRequiredMiddleware:
 
         # Otherwise redirect to login page
         return redirect(getattr(settings, 'LOGIN_URL', '/login/'))
+
+
+class ApiTokenMiddleware:
+    """Login for the farmer mobile app: "Authorization: Token <key>".
+
+    Only on the farmer API and the assistant; the web pages keep their session
+    cookie. A token request carries no cookie, so there is no cross-site
+    request to forge and the CSRF check is skipped for it alone. Runs after
+    AuthenticationMiddleware and before LoginRequiredMiddleware.
+    """
+    PREFIXES = ('/farmer/api/', '/assistant/chat/')
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        header = request.META.get('HTTP_AUTHORIZATION', '')
+        if header.startswith('Token ') and request.path.startswith(self.PREFIXES):
+            from django.http import JsonResponse
+            from rest_framework.authtoken.models import Token
+            token = Token.objects.select_related('user').filter(key=header[6:].strip()).first()
+            if token is None or not token.user.is_active:
+                return JsonResponse({'error': 'Invalid or expired login.'}, status=401)
+            request.user = token.user
+            request._dont_enforce_csrf_checks = True
+        return self.get_response(request)
 
 
 class FarmerScopeMiddleware:

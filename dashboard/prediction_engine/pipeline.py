@@ -847,6 +847,21 @@ class DroughtPredictionPipeline:
             result['risk_scores']['today'] = today_block['risk']
             result['today_spi3'] = round(today_block['spi3'], 2)
 
+        # "What's driving risk?": the score above is set by 90-day rain only
+        # (SPI-3), so the breakdown reports that exactly and lists the other
+        # signals (heat, ET0, soil, vegetation) as anomalies to watch. This
+        # replaces the XGBoost global feature importances, which were the same
+        # every day and did not describe the score on the page.
+        try:
+            from ..services import risk_breakdown
+            breakdown = risk_breakdown.build(
+                region, self._latest_observed_day(region),
+                risk_today=result['risk_scores']['today'],
+                spi3=today_block['spi3'] if today_block else None)
+            result['drivers'] = risk_breakdown.legacy_drivers(breakdown)
+        except Exception as exc:
+            logger.warning('Risk breakdown unavailable for %s: %s', region, exc)
+
         if forecast_block:
             if forecast_block.get('day_7'):
                 result['risk_scores']['day_7'] = forecast_block['day_7']['risk']

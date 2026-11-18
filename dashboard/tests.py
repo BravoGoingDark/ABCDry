@@ -1,6 +1,8 @@
 from datetime import date, timedelta
 from datetime import datetime, timezone as dt_timezone
 import json
+import re
+from pathlib import Path
 from unittest import mock
 
 import pandas as pd
@@ -1148,6 +1150,25 @@ class CropSuitabilityTests(SimpleTestCase):
         flags = [r['plantable_now'] for r in ranking]
         self.assertEqual(flags, sorted(flags, reverse=True))
 
+    def test_off_season_crop_gets_sow_now_and_next_window_scenarios(self):
+        from .services.crop_suitability import rank_crops, score_crop
+        clim = self._clim()
+        clim[3]['tmean'] = 2.0  # a frost month makes sowing wheat in March fail
+        ranking = rank_crops(clim, month=3)
+        wheat = next(r for r in ranking if r['crop'] == 'wheat')
+        now, nxt = wheat['if_sown_now'], wheat['next_window']
+        # "Sow now" is the same model run at the off-season month.
+        self.assertEqual(now['score'], score_crop('wheat', clim, sow_month=3)['score'])
+        self.assertEqual(now['class'], 'N')
+        # "Wait" is the next window, scored for that month.
+        self.assertEqual(nxt['month'], wheat['next_planting_month'])
+        self.assertEqual(nxt['score'], score_crop('wheat', clim, sow_month=nxt['month'])['score'])
+        # In-season crops and perennials carry no scenario.
+        pepper = next(r for r in ranking if r['crop'] == 'pepper')
+        olive = next(r for r in ranking if r['crop'] == 'olive')
+        self.assertNotIn('if_sown_now', pepper)
+        self.assertNotIn('if_sown_now', olive)
+
 
 # A ~1 km x 1 km square near Mateur (lon/lat): about 99.5 ha at this latitude
 _SQUARE = {'type': 'Polygon', 'coordinates': [[
@@ -1284,6 +1305,904 @@ class FarmerRoleTests(TestCase):
         advice = self.client.get(f'/farmer/api/farms/{farm_id}/advice/?month=11')
         self.assertEqual(advice.status_code, 404)  # no region with climate history in the test DB
         self.assertIn('error', advice.json())
+
+    def test_irrigation_fields_are_validated(self):
+        self.client.force_login(self.farmer)
+        url = f"/farmer/api/farms/{self._create(self.client).json()['farm']['id']}/"
+        patch = lambda body: self.client.patch(url, json.dumps(body), content_type='application/json')
+        self.assertEqual(patch({'irrigation_method': 'flood'}).status_code, 400)
+        self.assertEqual(patch({'irrigation_flow_m3h': -3}).status_code, 400)
+        future = (date.today() + timedelta(days=2)).isoformat()
+        self.assertEqual(patch({'last_irrigation_date': future}).status_code, 400)
+        ok = patch({'irrigation_method': 'drip', 'irrigation_flow_m3h': 12.5,
+                    'last_irrigation_date': date.today().isoformat()}).json()['farm']
+        self.assertEqual((ok['irrigation_method'], ok['irrigation_flow_m3h']), ('drip', 12.5))
+        self.assertEqual(ok['last_irrigation_date'], date.today().isoformat())
+
+    def test_irrigation_plan_api(self):
+        self.client.force_login(self.farmer)
+        today = date.today()
+        weather = [{'date': today + timedelta(days=k), 'precip': 0, 'et0': 6.0, 'tmax': 30,
+                    'wind': 10, 'precip_prob': 0} for k in range(-60, 16)]
+        farm = self._create(self.client, crop='olive', irrigated=True,
+                            irrigation_method='drip', irrigation_flow_m3h=20).json()['farm']
+        url = f"/farmer/api/farms/{farm['id']}/irrigation/"
+        with mock.patch('dashboard.services.irrigation_schedule.fetch_daily_water', return_value=weather):
+            d = self.client.get(url).json()
+        self.assertTrue(d['available'])
+        self.assertEqual(d['method'], 'drip')
+        self.assertTrue(d['events'])
+        e = d['events'][0]
+        self.assertAlmostEqual(e['gross_mm'], e['net_mm'] / 0.9, delta=0.2)
+        self.assertAlmostEqual(e['hours'], e['m3_farm'] / 20, delta=0.1)
+
+        self.client.force_login(self.other)
+        self.assertEqual(self.client.get(url).status_code, 404)
+
+    def test_irrigation_plan_needs_a_crop(self):
+        self.client.force_login(self.farmer)
+        farm_id = self._create(self.client, crop='').json()['farm']['id']
+        d = self.client.get(f'/farmer/api/farms/{farm_id}/irrigation/').json()
+        self.assertEqual((d['available'], d['reason']), (False, 'no_crop'))
+
+
+class IrrigationScheduleTests(SimpleTestCase):
+    TODAY = date(2026, 7, 10)
+
+    def _weather(self, et0=6.0, rain=None, past=60):
+        rain = rain or {}
+        return [{'date': self.TODAY + timedelta(days=k), 'precip': rain.get(k, 0.0), 'et0': et0,
+                 'tmax': 30, 'wind': 10, 'precip_prob': 90 if k in rain else 0}
+                for k in range(-past, 16)]
+
+    def _plan(self, crop='tomato', **kw):
+        from .services.irrigation_schedule import build_schedule
+        kw.setdefault('sowing_date', date(2026, 4, 20))
+        kw.setdefault('awc_mm_per_m', 140)
+        return build_schedule(crop, kw.pop('weather', None) or self._weather(), self.TODAY, **kw)
+
+    def test_method_sets_dose_frequency_and_losses(self):
+        drip, surface = self._plan(method='drip'), self._plan(method='surface')
+        self.assertGreater(len(drip['events']), len(surface['events']))
+        self.assertLess(drip['events'][0]['net_mm'], surface['events'][-1]['net_mm'])
+        for plan, eff in ((drip, 0.9), (surface, 0.6)):
+            e = plan['events'][-1]
+            self.assertAlmostEqual(e['gross_mm'], e['net_mm'] / eff, delta=0.2)
+            self.assertEqual(e['m3_per_ha'], round(e['gross_mm'] * 10))
+
+    def test_last_watering_resets_the_soil(self):
+        plan = self._plan(last_irrigation=self.TODAY - timedelta(days=1))
+        self.assertEqual(plan['basis'], 'last_irrigation')
+        self.assertLessEqual(plan['now']['depletion_mm'], 8)  # one day of use
+        self.assertEqual(plan['now']['code'], 'ok')
+
+    def test_expected_rain_postpones_a_due_watering(self):
+        # Watered 5 days ago: the sprinkler trigger is reached tomorrow, 30 mm fall the day after.
+        last = self.TODAY - timedelta(days=5)
+        dry = self._plan(last_irrigation=last)
+        wet = self._plan(last_irrigation=last, weather=self._weather(rain={2: 30.0}))
+        first_dry = dry['events'][0]['date']
+        self.assertNotIn(first_dry, [e['date'] for e in wet['events']])
+        self.assertTrue(any(d['postponed'] for d in wet['days']))
+
+    def test_no_watering_in_the_last_weeks_before_harvest(self):
+        # 190-day season: harvest 2026-08-03, so the last forecast days fall in the dry-down.
+        plan = self._plan(crop='wheat', sowing_date=date(2026, 1, 25))
+        for e in plan['events']:
+            self.assertGreater(plan['season']['harvest_date'], e['date'])
+            days_left = (date.fromisoformat(plan['season']['harvest_date']) - date.fromisoformat(e['date'])).days
+            self.assertGreater(days_left, 14)
+
+    def test_rain_only_farm_reports_when_the_crop_starts_to_suffer(self):
+        wet = self._weather(et0=6.0, rain={-1: 60.0})
+        plan = self._plan(crop='olive', irrigated=False, weather=wet, awc_mm_per_m=120)
+        self.assertEqual(plan['basis'], 'rain_only')
+        self.assertIsNotNone(plan['first_stress_date'])
+        self.assertGreater(plan['first_stress_date'], self.TODAY.isoformat())
+
+    def test_logged_amount_counts_not_a_full_refill(self):
+        # Reports since 10 days ago, one watering yesterday: full refill vs 5 mm.
+        day, since = self.TODAY - timedelta(days=1), self.TODAY - timedelta(days=10)
+        full = self._plan(waterings={day: None}, reported_from=since)
+        small = self._plan(waterings={day: 5.0}, reported_from=since)
+        self.assertGreater(small['now']['depletion_mm'], full['now']['depletion_mm'] + 3)
+        self.assertTrue(any(d['logged'] for d in small['days']))
+
+    def test_forgotten_watering_is_asked_and_the_answer_closes_it(self):
+        # Watered 20 days ago, nothing reported since, no rain: the plan was due long ago.
+        last = {self.TODAY - timedelta(days=20): None}
+        plan = self._plan(waterings=last)
+        m = plan['missed']
+        self.assertTrue(m['ask'])
+        self.assertLess(m['due_date'], self.TODAY.isoformat())
+        self.assertGreater(m['days_late'], 0)
+        self.assertIsNotNone(m['stress_since'])
+        self.assertGreater(plan['recent']['stress_days'], 0)
+        self.assertGreater(plan['recent']['yield_risk_pct'], 0)
+        self.assertEqual(plan['next']['date'], self.TODAY.isoformat())  # catch up today
+
+        # "No, not yet" today: no question, but the plan remembers it was skipped.
+        told = self._plan(waterings=last, answered_through=self.TODAY)
+        self.assertFalse(told['missed']['ask'])
+        self.assertTrue(told['missed']['reported_skipped'])
+
+        # "Yes, yesterday": the deficit is gone and so is the question.
+        done = self._plan(waterings={**last, self.TODAY - timedelta(days=1): None},
+                          answered_through=self.TODAY - timedelta(days=1))
+        self.assertIsNone(done['missed'])
+        self.assertEqual(done['now']['code'], 'ok')
+
+    def test_farmer_who_reports_no_watering_is_followed_dry(self):
+        plan = self._plan(answered_through=self.TODAY - timedelta(days=12))
+        self.assertEqual(plan['basis'], 'reported_dry')
+        self.assertIsNotNone(plan['missed'])
+
+    def test_days_before_the_first_report_are_not_counted_as_dry(self):
+        # One watering reported 2 days ago: before it nothing is known, so the
+        # last month must not show up as a drought the farmer caused.
+        plan = self._plan(waterings={self.TODAY - timedelta(days=2): None})
+        self.assertEqual(plan['recent']['stress_days'], 0)
+        self.assertIsNone(plan['missed'])
+
+    def test_big_catch_up_dose_is_split(self):
+        plan = self._plan(method='drip', waterings={self.TODAY - timedelta(days=20): None})
+        self.assertIn('split_dose', plan['next']['tips'])
+
+    def test_skipping_the_plan_costs_more_than_following_it(self):
+        plan = self._plan(waterings={self.TODAY - timedelta(days=2): None})
+        follow, skip = plan['scenarios']['follow'], plan['scenarios']['skip']
+        self.assertGreater(follow['waterings'], 0)
+        self.assertGreater(skip['stress_days'], follow['stress_days'])
+        self.assertGreater(skip['yield_risk_pct'], follow['yield_risk_pct'])
+
+    def test_early_harvest_ends_the_season(self):
+        plan = self._plan(harvested_on=self.TODAY - timedelta(days=1))
+        self.assertEqual(plan['season']['state'], 'harvested')
+        self.assertEqual(plan['events'], [])
+        self.assertEqual(plan['now']['code'], 'no_crop')
+
+
+class ProductCatalogTests(SimpleTestCase):
+    def test_every_threat_and_fertiliser_has_products(self):
+        from .services.crop_management import MANAGEMENT
+        from .services.product_catalog import PROTECTION, PRODUCT_KEYS
+        for crop, m in MANAGEMENT.items():
+            for item in m.get('fertilizer', {}).get('schedule', []):
+                self.assertIn(item['product'], PRODUCT_KEYS, (crop, item['product']))
+            for threat in m.get('protection', []):
+                self.assertTrue(PROTECTION.get(crop, {}).get(threat['name']), (crop, threat['name']))
+
+    def test_fertiliser_quantities_for_the_farm(self):
+        from .services.product_catalog import fertilizer_details
+        d = fertilizer_details('Ammonium nitrate 33.5%', '100-150 kg/ha', area_ha=2)
+        self.assertEqual(d['farm'], {'area_ha': 2, 'kg': '200–300', 'bags': '4–6', 'bag_kg': 50})
+        self.assertEqual(d['supplies']['N'], '34–50 kg/ha')
+        self.assertEqual(d['alternative']['name'], 'Urea 46%')
+        self.assertEqual(d['alternative']['rate'], '73–109 kg/ha')  # same nitrogen
+        mixed = fertilizer_details('Calcium nitrate + potassium nitrate', '10-15 kg/ha per week', 2)
+        self.assertEqual(len(mixed['products']), 2)
+        self.assertTrue(mixed['per_week'])
+        self.assertNotIn('farm', mixed)  # split between two products is not known
+
+    def test_protection_options_ipm_order_and_doses(self):
+        from .services.product_catalog import protection_options
+        opts = protection_options('olive', 'Peacock spot (oeil de paon)', area_ha=3)
+        self.assertEqual(opts[0]['kind'], 'mineral')
+        copper = opts[0]
+        self.assertEqual(copper['per_ha'], '3,000–5,000 g/ha')   # 300-500 g/100 L x 1000 L/ha
+        self.assertEqual(copper['farm_water_l'], 3000)
+        tuta = protection_options('tomato', 'Tomato leaf miner (Tuta absoluta)', area_ha=2)
+        kinds = [o['kind'] for o in tuta]
+        self.assertEqual(kinds, sorted(kinds, key=['cultural', 'trap', 'biological', 'mineral', 'chemical'].index))
+        bt = next(o for o in tuta if o['name'].startswith('Bacillus'))
+        self.assertEqual(bt['farm'], '1–2 kg')
+        mz = next(o for o in protection_options('potato', 'Late blight (mildiou)', area_ha=1.5)
+                  if o['name'].startswith('Mancozeb'))
+        self.assertEqual(mz['farm'], '3–3.8 kg')
+        self.assertTrue(all(o['group'].startswith('IRAC') for o in tuta if o['kind'] == 'chemical'))
+
+    def test_best_spray_day_skips_rain_wind_and_heat(self):
+        from .services.product_catalog import best_spray_day
+        days = [{'date': '2026-05-01', 'precip_prob': 80, 'wind': 5, 'tmax': 20, 'precip': 6},
+                {'date': '2026-05-02', 'precip_prob': 0, 'wind': 30, 'tmax': 20, 'precip': 0},
+                {'date': '2026-05-03', 'precip_prob': 0, 'wind': 5, 'tmax': 34, 'precip': 0},
+                {'date': '2026-05-04', 'precip_prob': 10, 'wind': 8, 'tmax': 24, 'precip': 0}]
+        self.assertEqual(best_spray_day(days), '2026-05-04')
+        self.assertIsNone(best_spray_day(days[:3]))
+
+
+class FarmerTranslationTests(SimpleTestCase):
+    """The farmer page must be entirely in the chosen language."""
+    ARABIC = re.compile(r'[؀-ۿ]')
+
+    @staticmethod
+    def _data_texts():
+        from .services import crop_management as cm, product_catalog as pc, weather_forecast as wf
+        out = set()
+        for m in cm.MANAGEMENT.values():
+            f = m.get('fertilizer') or {}
+            out.add(f.get('note'))
+            for it in f.get('schedule', []):
+                out |= {it['stage'], it['product'], it['rate']}
+            for t in m.get('protection', []):
+                out |= {t['name'], t['watch'], t['prevent'], t['control']}
+        for opts in pc.PROTECTION.values():
+            for lst in opts.values():
+                for o in lst:
+                    out |= {o['name'], o['rate'], o['notes']}
+        for f in pc.FERTILIZERS.values():
+            out |= {f['name'], f['tip']}
+        out |= {v[0] for v in wf._WMO_CONDITIONS.values()}
+        out |= {cm.PROTECTION_NOTICE, cm.FERTILIZER_NOTICE}
+        return {s for s in out if s}
+
+    def test_every_data_text_has_french_and_arabic(self):
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'locale'))
+        from agronomy_pairs import AGRO_PAIRS
+        have = {en for en, fr, ar in AGRO_PAIRS if fr and ar}
+        self.assertEqual(sorted(self._data_texts() - have), [])
+
+    def test_every_template_text_is_translated(self):
+        import polib
+        root = Path(__file__).resolve().parents[1]
+        t = (root / 'Templates' / 'dashboard' / 'farmer_home.html').read_text(encoding='utf-8')
+        ids = set(re.findall(r"\{% trans '([^']*)' %\}", t)) | set(re.findall(r'\{% trans "([^"]*)" %\}', t))
+        for lang in ('fr', 'ar'):
+            po = {e.msgid: e.msgstr for e in polib.pofile(str(root / 'locale' / lang / 'LC_MESSAGES' / 'django.po'))}
+            # {% trans %} looks "%" up doubled
+            missing = sorted(i for i in ids if not po.get(i.replace('%', '%%')))
+            self.assertEqual(missing, [], lang)
+
+    def test_plan_products_and_alerts_come_out_in_arabic(self):
+        from django.utils import translation
+        from .services.crop_management import crop_plan, weather_alerts
+        days = [{'date': f'2026-05-0{k}', 'label': 'x', 'tmin': 1, 'tmax': 36, 'precip': 25, 'precip_prob': 90,
+                 'wind': 5, 'et0': 5, 'tmean': 15, 'humidity': 90} for k in range(1, 8)]
+        with translation.override('ar'):
+            texts = []
+            for crop in ('olive', 'tomato', 'wheat'):
+                p = crop_plan(crop, area_ha=2.0)
+                texts += [p['fertilizer']['note'], p['fertilizer_notice'], p['protection_notice']]
+                for s in p['fertilizer']['schedule']:
+                    texts += [s['stage'], s['product'], s['rate']]
+                    texts += [x['name'] for x in s['details']['products']] + [x['tip'] for x in s['details']['products']]
+                    texts += list(s['details'].get('supplies', {}).values())
+                for t in p['protection']:
+                    texts += [t['name'], t['watch'], t['prevent'], t['control']]
+                    texts += [o['name'] for o in t['products']] + [o['rate'] for o in t['products'] if o['rate']]
+                    texts += [o['notes'] for o in t['products'] if o['notes']]
+                texts += [e['title'] for e in p['calendar']['events']]
+            for a in weather_alerts(days, 'tomato', today=date(2026, 5, 1)):
+                texts += [a['title'], a['text']]
+        english = [s for s in texts if s and not self.ARABIC.search(s)]
+        self.assertEqual(english, [])
+
+    def test_weather_labels_are_translated_without_touching_the_cache(self):
+        from django.utils import translation
+        from .services.farmer_service import _translated_forecast
+        payload = {'days': [{'condition': {'label': 'Light rain', 'icon': 'rainy'}}]}
+        with translation.override('fr'):
+            out = _translated_forecast(payload)
+        self.assertEqual(out['days'][0]['condition']['label'], 'Pluie faible')
+        self.assertEqual(payload['days'][0]['condition']['label'], 'Light rain')
+
+
+class MobileTokenLoginTests(TestCase):
+    """The Flutter app signs in with a token instead of the browser session."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.farmer = User.objects.create_user('mobi', password='pw-12345', first_name='Mona')
+        self.farmer.profile.role = 'farmer'
+        self.farmer.profile.save()
+        self.viewer = User.objects.create_user('just-a-viewer', password='pw-12345')
+        p = mock.patch('dashboard.services.farmer_service.ensure_soil', return_value=None)
+        p.start()
+        self.addCleanup(p.stop)
+        from django.test import Client
+        self.app = Client(enforce_csrf_checks=True)       # a phone: no cookie, no CSRF token
+
+    def login(self, username='mobi', password='pw-12345'):
+        return self.app.post('/farmer/api/auth/login/', json.dumps({'username': username, 'password': password}),
+                             content_type='application/json')
+
+    def test_login_gives_a_token_that_works_on_the_farmer_api(self):
+        r = self.login()
+        self.assertEqual(r.status_code, 200, r.content)
+        token = r.json()['token']
+        self.assertEqual(r.json()['user'], {'username': 'mobi', 'name': 'Mona', 'role': 'farmer'})
+        auth = {'HTTP_AUTHORIZATION': f'Token {token}'}
+        self.assertEqual(self.app.get('/farmer/api/me/', **auth).json()['user']['username'], 'mobi')
+        self.assertIn('wheat', [c['key'] for c in self.app.get('/farmer/api/crops/', **auth).json()['crops']])
+        created = self.app.post('/farmer/api/farms/', json.dumps({'name': 'Phone farm', 'boundary': _SQUARE,
+                                                                   'crop': 'olive'}),
+                                content_type='application/json', **auth)
+        self.assertEqual(created.status_code, 201, created.content)     # POST without CSRF: token request
+        farms = self.app.get('/farmer/api/farms/', **auth).json()['farms']
+        self.assertEqual([f['name'] for f in farms], ['Phone farm'])
+
+    def test_wrong_password_and_non_farmers_are_refused(self):
+        self.assertEqual(self.login(password='nope').status_code, 401)
+        self.assertEqual(self.login(username='just-a-viewer').status_code, 403)
+
+    def test_bad_or_revoked_token_and_other_pages(self):
+        self.assertEqual(self.app.get('/farmer/api/farms/', HTTP_AUTHORIZATION='Token nope').status_code, 401)
+        token = self.login().json()['token']
+        auth = {'HTTP_AUTHORIZATION': f'Token {token}'}
+        # the token opens the farmer API only, never the analyst pages
+        self.assertEqual(self.app.get('/analysis/', **auth).status_code, 302)
+        self.assertEqual(self.app.post('/farmer/api/auth/logout/', **auth).status_code, 200)
+        self.assertEqual(self.app.get('/farmer/api/farms/', **auth).status_code, 401)
+
+    def test_reminder_texts_match_the_web_page(self):
+        from .services.task_text_msgids import TEXTS
+        page = (Path(__file__).resolve().parents[1] / 'Templates' / 'dashboard' / 'farmer_home.html').read_text(encoding='utf-8')
+        found = dict((k, a or b) for k, a, b in re.findall(
+            r"\b((?:tk|tip)_[a-z_]+): \"\{% filter escapejs %\}\{% trans (?:'([^']*)'|\"([^\"]*)\") %\}", page))
+        self.assertEqual(TEXTS, found)   # regenerate task_text_msgids.py when the page texts change
+
+    def test_tasks_arrive_written_in_the_phones_language(self):
+        token = self.login().json()['token']
+        auth = {'HTTP_AUTHORIZATION': f'Token {token}'}
+        today = date.today()
+        weather = [{'date': today + timedelta(days=k), 'precip': 0, 'et0': 6.0, 'tmax': 30, 'wind': 10,
+                    'precip_prob': 0} for k in range(-60, 16)]
+        farm = self.app.post('/farmer/api/farms/', json.dumps({'name': 'F', 'boundary': _SQUARE, 'crop': 'olive',
+                                                                'irrigated': True}),
+                             content_type='application/json', **auth).json()['farm']
+        with mock.patch('dashboard.services.irrigation_schedule.fetch_daily_water', return_value=weather), \
+                mock.patch('dashboard.services.farmer_service.farm_weather', return_value={'forecast': {}}):
+            tasks = self.app.get(f"/farmer/api/farms/{farm['id']}/tasks/", HTTP_ACCEPT_LANGUAGE='ar', **auth).json()['tasks']
+        last = next(t for t in tasks if t['key'] == 'irr-last')
+        self.assertEqual(last['text']['title'], 'متى سقيت هذه الضيعة آخر مرة؟')
+        self.assertTrue(all(re.search(r'[؀-ۿ]', x) for x in last['text']['why']))
+        self.assertIsNone(re.search(r'\{\w+\}', json.dumps([t['text'] for t in tasks], ensure_ascii=False)))
+
+    def test_app_language_comes_from_the_phone(self):
+        token = self.login().json()['token']
+        r = self.app.get('/farmer/api/farms/999/', HTTP_AUTHORIZATION=f'Token {token}', HTTP_ACCEPT_LANGUAGE='fr')
+        self.assertEqual(r.json()['error'], 'Parcelle introuvable.')
+
+
+class FarmerAppInstallTests(TestCase):
+    """The farmer interface installs as a phone app (PWA) and opens offline."""
+
+    def test_manifest_describes_an_installable_app(self):
+        from django.contrib.staticfiles import finders
+        r = self.client.get('/farmer/manifest.webmanifest')
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r['Content-Type'].startswith('application/manifest+json'))
+        m = json.loads(r.content)
+        self.assertEqual((m['display'], m['scope'], m['start_url'][:8]), ('standalone', '/farmer/', '/farmer/'))
+        sizes = {(i['sizes'], i['purpose']) for i in m['icons']}
+        self.assertTrue({('192x192', 'any'), ('512x512', 'any'), ('512x512', 'maskable')} <= sizes)
+        for icon in m['icons']:
+            self.assertIn('/dashboard/pwa/', icon['src'])
+        for name in ('icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'):
+            self.assertTrue(finders.find(f'dashboard/pwa/{name}'), name)
+        self.assertTrue(any('tab=irrigation' in s['url'] for s in m['shortcuts']))
+
+    def test_manifest_speaks_the_users_language(self):
+        self.client.cookies['django_language'] = 'ar'
+        m = json.loads(self.client.get('/farmer/manifest.webmanifest').content)
+        self.assertEqual((m['lang'], m['dir'], m['name']), ('ar', 'rtl', 'APWRS الفلاح'))
+
+    def test_service_worker_controls_only_the_farmer_app(self):
+        r = self.client.get('/farmer/sw.js')
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(r['Content-Type'].startswith('application/javascript'))
+        self.assertEqual(r['Service-Worker-Allowed'], '/farmer/')
+        self.assertEqual(r['Cache-Control'], 'no-cache')
+        body = r.content.decode()
+        self.assertIn('/vendor/leaflet/leaflet', body)        # the map works offline
+        self.assertIn("if (request.method !== 'GET') return;", body)   # changes are never cached or faked
+        self.assertNotIn('{{', body)
+
+    def test_page_links_the_app(self):
+        user = get_user_model().objects.create_user('app-farmer', password='pw-12345')
+        user.profile.role = 'farmer'
+        user.profile.save()
+        self.client.force_login(user)
+        html = self.client.get('/farmer/').content.decode()
+        self.assertIn('rel="manifest" href="/farmer/manifest.webmanifest"', html)
+        self.assertIn("navigator.serviceWorker.register(\"/farmer/sw.js\"", html)
+        self.assertIn('apple-touch-icon', html)
+        self.assertIn('id="offline-bar"', html)
+
+
+class FarmQuestionUnderstandingTests(SimpleTestCase):
+    """Which farm topic a question asks about (three languages, typos)."""
+
+    def test_question_bank(self):
+        from .services.farm_qa import topics
+        bank = {
+            'When should I water and how much?': ['next_watering'],
+            'how long should I run the pump': ['pump_time'],
+            'is my soil dry?': ['soil_water'],
+            "what happens if I don't water this week": ['skip_scenario'],
+            'how much water in the next 16 days': ['water_16d'],
+            'water need for the rest of the season': ['season_water'],
+            'what should I do today?': ['todo'],
+            'which fertilizer now and how much': ['fertilizer'],
+            'when is the best day to spray': ['spray_day'],
+            'will it rain tomorrow?': ['weather'],
+            'any frost alert?': ['alerts'],
+            'what should I plant now': ['what_to_plant'],
+            'when is the harvest': ['crop_status'],
+            'when did I last water': ['last_watering'],
+            'how do you calculate the watering': ['how_calculated'],
+            'Quand dois-je arroser et combien ?': ['next_watering'],
+            'Va-t-il pleuvoir demain ?': ['weather'],
+            'quel engrais maintenant': ['fertilizer'],
+            'متى أسقي وكم؟': ['next_watering'],
+            'ماذا أفعل اليوم؟': ['todo'],
+            'هل ستمطر غدا؟': ['weather'],
+            'ما هو أفضل يوم للرش؟': ['spray_day'],
+            'whn shuld i watr': ['next_watering'],
+            'wether tomorow': ['weather'],
+            'ok and what are the most dangerous one the ones with low success rate': ['what_to_plant'],
+            'which crops should I avoid': ['what_to_plant'],
+            'what are the best and the worst crops': ['what_to_plant'],
+            'quelles cultures éviter': ['what_to_plant'],
+            'ما هي أسوأ محصول للزراعة الآن': ['what_to_plant'],
+            'what is the most dangerous pest': ['pests'],
+        }
+        for question, expected in bank.items():
+            self.assertEqual(topics(question), expected, question)
+
+    def test_regional_and_unrelated_questions_are_not_farm_questions(self):
+        from .services.farm_qa import topics, match_threat
+        for q in ('Is drought expected next month?', 'what is SPEI', 'how much did it rain last month',
+                  'hello', 'who won the football match', 'my leaves are yellow'):
+            self.assertEqual(topics(q), [], q)
+            self.assertIsNone(match_threat(q, 'olive'), q)
+
+    def test_follow_up_keeps_the_previous_topic(self):
+        from .services.farm_qa import topics
+        self.assertEqual(topics('and the pump?', ['next_watering']), ['pump_time'])
+        self.assertEqual(topics('why?', ['soil_water']), ['soil_water'])
+        self.assertEqual(topics('why?'), [])
+
+    def test_best_and_worst_crops_are_never_swapped(self):
+        from types import SimpleNamespace
+        from .services.farm_qa import a_what_to_plant
+        ranking = [
+            {'crop': 'barley', 'score': 100, 'class': 'S1', 'plantable_now': True, 'limiting_factor': None, 'factors': {}},
+            {'crop': 'oats', 'score': 96, 'class': 'S1', 'plantable_now': True, 'limiting_factor': None, 'factors': {}},
+            {'crop': 'tomato', 'score': 35, 'class': 'N', 'plantable_now': False, 'limiting_factor': 'temperature',
+             'factors': {'temperature': 0.4},
+             'if_sown_now': {'score': 12, 'class': 'N', 'limiting_factor': 'temperature', 'factors': {'temperature': 0.2}}},
+            {'crop': 'pepper', 'score': 20, 'class': 'N', 'plantable_now': True, 'limiting_factor': 'ph',
+             'factors': {'ph': 0.5}},
+        ]
+        data = SimpleNamespace(lang='en', advice={'ranking': ranking, 'plant_now': ranking[:2]})
+        worst = ' '.join(a_what_to_plant(data, 'what are the most dangerous ones, with low success rate'))
+        self.assertIn('Riskiest', worst)
+        self.assertIn('Tomato (12/100): climate not ideal', worst)   # if sown now, not in its window
+        self.assertIn('Pepper (20/100): soil pH not ideal', worst)
+        self.assertNotIn('Best', worst)
+        self.assertLess(worst.index('Tomato'), worst.index('Pepper'))   # lowest first
+        best = ' '.join(a_what_to_plant(data, 'what is the best crop to plant now'))
+        self.assertIn('Barley (100/100)', best)
+        self.assertNotIn('Riskiest', best)
+        both = ' '.join(a_what_to_plant(data, 'what are the best and the worst crops'))
+        self.assertIn('Best crops', both)
+        self.assertIn('Riskiest', both)
+
+    def test_what_are_without_a_known_term_is_not_a_definition(self):
+        from .services import assistant_brain as brain
+        empty = ({'documents': [], 'data': [], 'numbers': [], 'signature': '', 'dense': False, 'chunks': 0}, [])
+        with mock.patch.object(brain, '_retrieval', return_value=empty), \
+                mock.patch.object(brain.nlu, 'resolve', return_value={
+                    'crop': None, 'intent': 'knowledge', 'region': None, 'followup': False, 'inherited': {}}), \
+                mock.patch.object(brain.Region.objects, 'all', return_value=[]), \
+                mock.patch.object(brain, 'chat_completion') as chat:
+            d = brain.answer_question('what are the most dangerous ones')
+        chat.assert_not_called()
+        self.assertEqual(d['intent'], 'out_of_scope')
+
+    def test_pest_names_in_three_languages(self):
+        from .services.farm_qa import match_threat
+        cases = [('how do I treat the olive fly', 'olive', 'Olive fruit fly (Bactrocera oleae)'),
+                 ('comment traiter la mouche de l olive', 'olive', 'Olive fruit fly (Bactrocera oleae)'),
+                 ('كيف أعالج ذبابة الزيتون', 'olive', 'Olive fruit fly (Bactrocera oleae)'),
+                 ('what product against tuta', 'tomato', 'Tomato leaf miner (Tuta absoluta)'),
+                 ('my wheat has rust', 'wheat', 'Yellow and brown rust')]
+        for q, crop, name in cases:
+            self.assertEqual(match_threat(q, crop)[1]['name'], name, q)
+        # a crop name alone is not a pest
+        self.assertIsNone(match_threat('when is the olive harvest', 'olive'))
+
+
+class FarmAssistantAnswerTests(TestCase):
+    """Farm answers come from the farm's data, say only what was asked."""
+
+    def setUp(self):
+        User = get_user_model()
+        self.farmer = User.objects.create_user('amel', password='pw-12345')
+        self.farmer.profile.role = 'farmer'
+        self.farmer.profile.save()
+        self.other = User.objects.create_user('hedi', password='pw-12345')
+        self.other.profile.role = 'farmer'
+        self.other.profile.save()
+        today = date.today()
+        self.weather = [{'date': today + timedelta(days=k), 'precip': 12.0 if k == 4 else 0.0, 'et0': 6.0,
+                         'tmax': 34, 'wind': 12, 'precip_prob': 70 if k == 4 else 5} for k in range(-60, 16)]
+        forecast = {'forecast': {'days': [{'date': (today + timedelta(days=k)).isoformat(), 'tmax': 30, 'tmin': 18,
+                                           'tmean': 24, 'precip': 12.0 if k == 4 else 0, 'humidity': 50,
+                                           'precip_prob': 70 if k == 4 else 5, 'wind': 10,
+                                           'condition': {'label': 'Clear sky'}} for k in range(16)]},
+                    'alerts': []}
+        for target, kw in (('dashboard.services.farmer_service.ensure_soil', {'return_value': None}),
+                           ('dashboard.services.farmer_service.farm_weather', {'return_value': forecast}),
+                           ('dashboard.services.irrigation_schedule.fetch_daily_water', {'return_value': self.weather}),
+                           ('dashboard.services.assistant_brain._retrieval',
+                            {'return_value': ({'documents': [], 'data': [], 'numbers': [], 'signature': '',
+                                               'dense': False, 'chunks': 0}, [])}),
+                           ('dashboard.services.assistant_brain.resolve_model', {'return_value': ''})):
+            p = mock.patch(target, **kw)
+            p.start()
+            self.addCleanup(p.stop)
+        self.client.force_login(self.farmer)
+        body = {'name': 'South field', 'boundary': _SQUARE, 'crop': 'tomato', 'irrigated': True,
+                'irrigation_method': 'drip', 'irrigation_flow_m3h': 25,
+                'sowing_date': (today - timedelta(days=80)).isoformat()}
+        self.farm_id = self.client.post('/farmer/api/farms/', json.dumps(body),
+                                        content_type='application/json').json()['farm']['id']
+        self.client.post(f'/farmer/api/farms/{self.farm_id}/activities/', json.dumps(
+            {'kind': 'irrigation', 'date': (today - timedelta(days=3)).isoformat(), 'amount_mm': 20}),
+            content_type='application/json')
+
+    def ask(self, question, lang='en', **extra):
+        r = self.client.post('/assistant/chat/', json.dumps(
+            {'question': question, 'lang': lang, 'farm_id': self.farm_id, **extra}), content_type='application/json')
+        self.assertEqual(r.status_code, 200, r.content)
+        return r.json()
+
+    def test_watering_answer_matches_the_water_tab_exactly(self):
+        page = self.client.get(f'/farmer/api/farms/{self.farm_id}/irrigation/').json()
+        d = self.ask('When should I water and how much?')
+        self.assertEqual(d['engine'], 'farm_data')
+        self.assertIsNone(d['model'])                       # written by code, no model
+        nxt = page['next']
+        from .services.farm_qa import n
+        self.assertIn(f"{n(nxt['gross_mm'])} mm", d['answer'])
+        self.assertIn(f"{n(nxt['m3_farm'], 0)} m³", d['answer'])
+        self.assertIn(f"{n(nxt['hours'])} h", d['answer'])
+        self.assertIn(f"{n(page['now']['available_pct'], 0)}%", d['answer'])
+        # only what was asked: no drought score, no fertiliser, no pests
+        for other in ('drought', 'SPEI', 'fertili', 'score', 'pest'):
+            self.assertNotIn(other, d['answer'])
+
+    def test_each_topic_answers_from_the_data(self):
+        cases = {
+            'how long should I run the pump': 'run the pump about',
+            'is my soil dry?': 'Water in the soil now',
+            "what happens if I don't water": 'If you do not water',
+            'what should I do today?': 'To do:',
+            'what product against tuta': 'Bacillus thuringiensis kurstaki',
+            'will it rain this week?': 'Rain expected in the next 7 days: 12 mm',
+            'when is the harvest': 'Expected harvest',
+            'when did I last water': 'Your last recorded watering',
+            'how do you calculate the watering': 'FAO-56',
+        }
+        for q, expected in cases.items():
+            d = self.ask(q)
+            self.assertEqual(d['engine'], 'farm_data', q)
+            self.assertIn(expected, d['answer'], q)
+
+    def test_impossible_pump_time_is_flagged(self):
+        # 98.7 ha on a 25 m3/h pump: one watering takes days, the farmer must be told
+        d = self.ask('how long should I run the pump')
+        self.assertIn('days of pumping: check the flow you entered', d['answer'])
+
+    def test_products_come_with_doses_for_this_farm(self):
+        area = self.client.get(f'/farmer/api/farms/{self.farm_id}/').json()['farm']['area_ha']
+        d = self.ask('which product against tuta and how much')
+        from .services.product_catalog import _rng
+        self.assertIn(f'0.5–1 kg/ha — for your farm: {_rng(0.5 * area, area, 1 if area < 10 else 0)} kg', d['answer'])
+        self.assertIn('label', d['answer'])
+
+    def test_follow_up_and_two_topics(self):
+        d = self.ask('When should I water?')
+        follow = self.ask('and the pump?', conversation={'farm_topics': d['understood']['farm_topics']})
+        self.assertEqual(follow['understood']['farm_topics'], ['pump_time'])
+        both = self.ask('when should I water and will it rain this week?')
+        self.assertEqual(set(both['understood']['farm_topics']), {'next_watering', 'weather'})
+
+    def test_answers_in_arabic_and_french(self):
+        ar = self.ask('متى أسقي وكم؟', lang='ar')
+        self.assertTrue(re.search(r'[؀-ۿ]', ar['answer']))
+        self.assertNotIn('Next watering', ar['answer'])
+        fr = self.ask('Quand dois-je arroser et combien ?', lang='fr')
+        self.assertIn('Prochain arrosage', fr['answer'])
+
+    def test_another_farmers_farm_is_never_used(self):
+        self.client.force_login(self.other)
+        d = self.ask('When should I water and how much?')
+        self.assertNotEqual(d['engine'], 'farm_data')
+
+    def test_unrelated_question_gets_an_honest_answer(self):
+        d = self.ask('who won the football match yesterday?')
+        self.assertEqual(d['intent'], 'out_of_scope')
+        self.assertIn('no information', d['answer'])
+        sugg = self.client.get(f'/assistant/chat/?lang=en&farm={self.farm_id}').json()['suggestions']
+        self.assertIn('What should I do today?', sugg)
+
+    def test_missing_crop_is_said_not_guessed(self):
+        self.client.patch(f'/farmer/api/farms/{self.farm_id}/', json.dumps({'crop': ''}),
+                          content_type='application/json')
+        d = self.ask('When should I water?')
+        self.assertIn('Tell me what grows on this farm first', d['answer'])
+
+
+class AssistantGroundingTests(SimpleTestCase):
+    """The model only writes documentation answers, and only from the sources."""
+
+    FACTS = {'region': 'Testland', 'climate': {'rain_30d_mm': 12.5, 'rain_month_climatology_mm': 40.0,
+                                                'tmean_30d_c': 18.2, 'tmax_30d_c': 27.0, 'tmin_30d_c': 9.0,
+                                                'water_balance_30d_mm': -60.0, 'et0_30d_mm': 72.5},
+             'drought': {'spei_3month': -1.1}, 'remote_sensing': {'ndvi': 0.41, 'soil_moisture_pct': 22},
+             'summary': {'risk_level': 'moderate', 'risk_score': 55}}
+
+    def test_regional_answers_say_only_the_asked_metric(self):
+        from .services.assistant_brain import fallback_answer
+        rain = fallback_answer(self.FACTS, 'rainfall', {}, 'en')
+        self.assertIn('12.5 mm', rain)
+        for other in ('SPEI', 'NDVI', 'temperature', 'score'):
+            self.assertNotIn(other, rain)
+        temp = fallback_answer(self.FACTS, 'temperature', {}, 'en')
+        self.assertIn('18.2 °C', temp)
+        self.assertNotIn('Rainfall', temp)
+        soil = fallback_answer({**self.FACTS, 'remote_sensing': {}}, 'soil_moisture', {}, 'fr')
+        self.assertIn('Aucune donnée', soil)                    # missing data is said, not guessed
+
+    def test_unknown_question_template_is_out_of_scope(self):
+        from .services.assistant_brain import fallback_answer
+        self.assertIn('no information', fallback_answer(self.FACTS, 'freeform', {}, 'en'))
+
+    def test_data_questions_never_reach_the_model(self):
+        from .services import assistant_brain as brain
+        self.assertNotIn('rainfall', brain.LLM_INTENTS)
+        self.assertNotIn('drought_status', brain.LLM_INTENTS)
+        self.assertNotIn('irrigation', brain.LLM_INTENTS)
+
+    @override_settings(ASSISTANT_LLM_PROVIDER='openai', ASSISTANT_API_URL='https://api.example/v1',
+                       ASSISTANT_API_KEY='k', ASSISTANT_API_MODEL='m', ASSISTANT_LLM_ENABLED=True)
+    def test_hosted_api_first_then_local_model(self):
+        from .services import assistant_brain as brain
+        ok = mock.Mock(status_code=200)
+        ok.json.return_value = {'choices': [{'message': {'content': 'From the API.'}}]}
+        with mock.patch.object(brain.requests, 'post', return_value=ok) as post:
+            self.assertEqual(brain.chat_completion([{'role': 'user', 'content': 'q'}]), ('From the API.', 'api:m'))
+            self.assertIn('/chat/completions', post.call_args[0][0])
+            self.assertEqual(post.call_args[1]['headers']['Authorization'], 'Bearer k')
+            sent = json.dumps(post.call_args[1]['json'])
+        self.assertNotIn('amel', sent)
+        down = mock.Mock(status_code=503, text='busy')
+        local = mock.Mock(status_code=200)
+        local.json.return_value = {'message': {'content': 'From the local model.'}}
+        with mock.patch.object(brain.requests, 'post', side_effect=[down, local]), \
+                mock.patch.object(brain, 'resolve_local_model', return_value='gemma3:4b'):
+            self.assertEqual(brain.chat_completion([{'role': 'user', 'content': 'q'}]),
+                             ('From the local model.', 'gemma3:4b'))
+
+    def test_prompt_forbids_outside_knowledge(self):
+        from .services.assistant_brain import SYSTEM_PROMPT, NO_ANSWER
+        self.assertIn(NO_ANSWER, SYSTEM_PROMPT)
+        self.assertIn('Never use your general knowledge', SYSTEM_PROMPT)
+
+
+class AssistantGroundingFlowTests(TestCase):
+    def setUp(self):
+        from django.core.cache import cache
+        cache.clear()   # answers are cached by question: each test must reach the model
+        self.region, _ = Region.objects.get_or_create(name='Grounding Testland')
+
+    def _docs(self, relevance):
+        return ({'documents': [{'source': 'docs/x.md', 'title': 'X', 'text': 'Some text.', 'relevance': relevance}],
+                 'data': [], 'numbers': [], 'signature': 's', 'dense': False, 'chunks': 1},
+                [{'source': 'docs/x.md', 'title': 'X', 'kind': 'document', 'relevance': relevance}])
+
+    def test_model_saying_no_answer_gives_the_honest_reply(self):
+        from .services import assistant_brain as brain
+        with mock.patch.object(brain, '_retrieval', return_value=self._docs(0.9)), \
+                mock.patch.object(brain, 'resolve_model', return_value='api:m'), \
+                mock.patch.object(brain, 'chat_completion', return_value=('NO_ANSWER', 'api:m')):
+            d = brain.answer_question('Tell me about the zorblax feature', region_id=self.region.id)
+        self.assertIn('no information', d['answer'])
+        self.assertEqual(d['engine'], 'template')
+
+    def test_weakly_related_documents_are_not_sent_to_the_model(self):
+        from .services import assistant_brain as brain
+        with mock.patch.object(brain, '_retrieval', return_value=self._docs(0.05)), \
+                mock.patch.object(brain, 'chat_completion') as chat:
+            d = brain.answer_question('who won the football match', region_id=self.region.id)
+        chat.assert_not_called()
+        self.assertEqual(d['intent'], 'out_of_scope')
+
+    def test_invented_numbers_are_rejected(self):
+        from .services import assistant_brain as brain
+        with mock.patch.object(brain, '_retrieval', return_value=self._docs(0.9)), \
+                mock.patch.object(brain, 'resolve_model', return_value='api:m'), \
+                mock.patch.object(brain, 'chat_completion',
+                                  return_value=('This feature saves exactly 4321 litres every single day.', 'api:m')):
+            d = brain.answer_question('Tell me about the zorblax feature', region_id=self.region.id)
+        self.assertNotIn('4321', d['answer'])
+
+
+class AssistantTranslationTests(SimpleTestCase):
+    def test_every_farm_answer_text_is_translated(self):
+        import ast
+        import polib
+        root = Path(__file__).resolve().parents[1]
+        tree = ast.parse((root / 'dashboard' / 'services' / 'farm_qa.py').read_text(encoding='utf-8'))
+        ids = set()
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and getattr(node.func, 'id', None) == '_' and node.args
+                    and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str)):
+                ids.add(node.args[0].value)
+            if isinstance(node, ast.Assign) and getattr(node.targets[0], 'id', '') in (
+                    'STAGE_MSG', 'METHOD_MSG', 'TEXTURE_MSG', 'CLASS_MSG', 'KIND_MSG', 'TASK_TITLE', 'SOURCES'):
+                ids |= {v.value for v in node.value.values}
+            if isinstance(node, ast.Assign) and getattr(node.targets[0], 'id', '') == 'SUGGESTIONS':
+                ids |= {v.value for v in node.value.elts}
+        for lang in ('fr', 'ar'):
+            po = {e.msgid for e in polib.pofile(str(root / 'locale' / lang / 'LC_MESSAGES' / 'django.po')) if e.msgstr}
+            self.assertEqual(sorted(ids - po), [], lang)
+
+
+class FarmActivityAndTasksTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.farmer = User.objects.create_user('nour', password='pw-12345')
+        self.farmer.profile.role = 'farmer'
+        self.farmer.profile.save()
+        self.other = User.objects.create_user('omar', password='pw-12345')
+        self.other.profile.role = 'farmer'
+        self.other.profile.save()
+        for target, value in (('dashboard.services.farmer_service.ensure_soil', None),
+                              ('dashboard.services.farmer_service.farm_weather', {'forecast': {}})):
+            p = mock.patch(target, return_value=value)
+            p.start()
+            self.addCleanup(p.stop)
+        today = date.today()
+        self.weather = [{'date': today + timedelta(days=k), 'precip': 0, 'et0': 6.0, 'tmax': 30,
+                         'wind': 10, 'precip_prob': 0} for k in range(-60, 16)]
+        p = mock.patch('dashboard.services.irrigation_schedule.fetch_daily_water', return_value=self.weather)
+        p.start()
+        self.addCleanup(p.stop)
+        self.client.force_login(self.farmer)
+
+    def _farm(self, **extra):
+        body = {'name': 'Orchard', 'boundary': _SQUARE, 'crop': 'olive', 'irrigated': True,
+                'irrigation_method': 'drip', **extra}
+        r = self.client.post('/farmer/api/farms/', json.dumps(body), content_type='application/json')
+        return r.json()['farm']['id']
+
+    def _log(self, farm_id, **body):
+        return self.client.post(f'/farmer/api/farms/{farm_id}/activities/', json.dumps(body),
+                                content_type='application/json')
+
+    def _tasks(self, farm_id):
+        return self.client.get(f'/farmer/api/farms/{farm_id}/tasks/').json()['tasks']
+
+    def test_watering_log_updates_the_farm_and_can_be_undone(self):
+        farm_id = self._farm()
+        day = (date.today() - timedelta(days=2)).isoformat()
+        r = self._log(farm_id, kind='irrigation', date=day, amount_mm=12)
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.json()['farm']['last_irrigation_date'], day)
+        ir = self.client.get(f'/farmer/api/farms/{farm_id}/irrigation/').json()
+        self.assertEqual(ir['basis'], 'last_irrigation')
+        self.assertEqual(ir['logged'], [{'date': day, 'gross_mm': 12.0}])
+
+        aid = r.json()['activity']['id']
+        gone = self.client.delete(f'/farmer/api/farms/{farm_id}/activities/{aid}/')
+        self.assertIsNone(gone.json()['farm']['last_irrigation_date'])
+
+    def test_activity_validation_and_isolation(self):
+        farm_id = self._farm()
+        future = (date.today() + timedelta(days=1)).isoformat()
+        self.assertEqual(self._log(farm_id, kind='irrigation', date=future).status_code, 400)
+        self.assertEqual(self._log(farm_id, kind='dance').status_code, 400)
+        self.assertEqual(self._log(farm_id, kind='fertilizer', amount_mm=10).status_code, 400)
+        self.assertEqual(self._log(farm_id, kind='irrigation', status='maybe').status_code, 400)
+        aid = self._log(farm_id, kind='irrigation').json()['activity']['id']
+        self.client.force_login(self.other)
+        self.assertEqual(self._log(farm_id, kind='irrigation').status_code, 404)
+        self.assertEqual(self.client.delete(f'/farmer/api/farms/{farm_id}/activities/{aid}/').status_code, 404)
+        self.assertEqual(self.client.get(f'/farmer/api/farms/{farm_id}/tasks/').status_code, 404)
+
+    def test_forgotten_watering_becomes_a_question_until_answered(self):
+        farm_id = self._farm()
+        self._log(farm_id, kind='irrigation', date=(date.today() - timedelta(days=25)).isoformat())
+        tasks = self._tasks(farm_id)
+        ask = next(t for t in tasks if t['key'].startswith('irr-missed:'))
+        self.assertEqual(ask['state'], 'ask')
+        self.assertEqual(tasks[0], ask)  # questions first
+        self.assertTrue(any(t['key'].startswith('irr:') and t['state'] == 'today' for t in tasks))
+
+        self._log(farm_id, kind='irrigation', status='skipped', task_key=ask['key'])
+        self.assertFalse(any(t['key'].startswith('irr-missed:') for t in self._tasks(farm_id)))
+
+        self._log(farm_id, kind='irrigation', amount_mm=40, task_key='irr:' + date.today().isoformat())
+        ir = self.client.get(f'/farmer/api/farms/{farm_id}/irrigation/').json()
+        self.assertGreater(ir['now']['available_pct'], 50)
+
+    def test_unknown_history_asks_for_the_last_watering(self):
+        farm_id = self._farm()
+        self.assertTrue(any(t['key'] == 'irr-last' for t in self._tasks(farm_id)))
+
+    def test_fertilizer_reminder_then_question(self):
+        sowing = date.today() - timedelta(days=53)  # wheat: tillering N at day 50
+        farm_id = self._farm(crop='wheat', irrigated=False, sowing_date=sowing.isoformat())
+        ask = next(t for t in self._tasks(farm_id) if t['kind'] == 'fertilizer')
+        self.assertEqual(ask['state'], 'ask')
+        self.assertIn('Ammonium nitrate', ask['title']['params']['product'])
+        self.assertIn('farm', ask['fertilizer'])  # quantity for this farm's area
+        self.assertTrue(any(h['code'] == 'how_fert_alt' for h in ask['how']))
+        self._log(farm_id, kind='fertilizer', task_key=ask['key'],
+                  date=(sowing + timedelta(days=50)).isoformat())
+        self.assertFalse(any(t['key'] == ask['key'] for t in self._tasks(farm_id)))
+
+    def _edit(self, farm_id, aid, **body):
+        return self.client.patch(f'/farmer/api/farms/{farm_id}/activities/{aid}/', json.dumps(body),
+                                 content_type='application/json')
+
+    def test_correcting_a_past_answer_changes_the_plan(self):
+        farm_id = self._farm()
+        self._log(farm_id, kind='irrigation', date=(date.today() - timedelta(days=25)).isoformat())
+        ask = next(t for t in self._tasks(farm_id) if t['key'].startswith('irr-missed:'))
+        # The farmer answered "not yet"... but in fact watered 2 days ago.
+        aid = self._log(farm_id, kind='irrigation', status='skipped', task_key=ask['key']).json()['activity']['id']
+        dry = self.client.get(f'/farmer/api/farms/{farm_id}/irrigation/').json()
+        two_days = (date.today() - timedelta(days=2)).isoformat()
+        r = self._edit(farm_id, aid, status='done', date=two_days, amount_mm=30)
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual(r.json()['farm']['last_irrigation_date'], two_days)
+        self.assertEqual(r.json()['activity']['task_key'], ask['key'])  # still answers that question
+        wet = self.client.get(f'/farmer/api/farms/{farm_id}/irrigation/').json()
+        self.assertGreater(wet['now']['available_pct'], dry['now']['available_pct'])
+
+        # A smaller amount than recorded: less water in the soil again.
+        self._edit(farm_id, aid, amount_mm=5)
+        less = self.client.get(f'/farmer/api/farms/{farm_id}/irrigation/').json()
+        self.assertLess(less['now']['available_pct'], wet['now']['available_pct'])
+
+        # Wrong day: moving it back moves the farm's last watering back too.
+        older = (date.today() - timedelta(days=10)).isoformat()
+        r = self._edit(farm_id, aid, date=older)
+        self.assertEqual(r.json()['farm']['last_irrigation_date'], older)
+
+        # Back to "not done": no amount is kept.
+        r = self._edit(farm_id, aid, status='skipped')
+        self.assertIsNone(r.json()['activity']['amount_mm'])
+
+    def test_forgotten_past_activity_and_sowing_correction(self):
+        farm_id = self._farm(crop='wheat', irrigated=False)
+        aid = self._log(farm_id, kind='sowing', date=(date.today() - timedelta(days=30)).isoformat()).json()['activity']['id']
+        fixed = (date.today() - timedelta(days=40)).isoformat()
+        self.assertEqual(self._edit(farm_id, aid, date=fixed).json()['farm']['sowing_date'], fixed)
+        gone = self.client.delete(f'/farmer/api/farms/{farm_id}/activities/{aid}/').json()
+        self.assertIsNone(gone['farm']['sowing_date'])
+
+    def test_activity_edit_validation_and_isolation(self):
+        farm_id = self._farm()
+        aid = self._log(farm_id, kind='irrigation').json()['activity']['id']
+        future = (date.today() + timedelta(days=3)).isoformat()
+        self.assertEqual(self._edit(farm_id, aid, date=future).status_code, 400)
+        self.assertEqual(self._edit(farm_id, aid, amount_mm=900).status_code, 400)
+        self.assertEqual(self._edit(farm_id, aid, status='maybe').status_code, 400)
+        self.client.force_login(self.other)
+        self.assertEqual(self._edit(farm_id, aid, amount_mm=10).status_code, 404)
+
+    def test_sowing_answer_sets_the_sowing_date(self):
+        farm_id = self._farm(crop='wheat', irrigated=False)
+        day = (date.today() - timedelta(days=3)).isoformat()
+        r = self._log(farm_id, kind='sowing', date=day)
+        self.assertEqual(r.json()['farm']['sowing_date'], day)
 
 
 class FarmSoilLookupTests(SimpleTestCase):
@@ -2095,3 +3014,52 @@ class PageConsistencyTests(TestCase):
         self.assertIn('OUTDATED', html)
         self.assertIn('14%', html)
         self.assertNotIn('0.141%', html)
+
+
+class RiskBreakdownTests(TestCase):
+    """'What's driving risk?': the score's own SPI-3 plus anomalies to watch."""
+
+    def setUp(self):
+        import numpy as np
+        import pandas as _pd
+        rng = np.random.default_rng(3)
+        self.region = Region.objects.create(name='Breakdown', latitude=37.0, longitude=9.5)
+        year = ObservationYear.objects.create(label=2024)
+        days = _pd.date_range('1994-01-01', '2024-06-30', freq='D')
+        temp = 18 + 8 * np.sin(2 * np.pi * (days.dayofyear - 110) / 365)
+        rows = []
+        for d, t in zip(days, temp):
+            hot = 3.0 if d >= _pd.Timestamp('2024-06-01') else 0.0      # a heat wave in the last 30 days
+            dry = d >= _pd.Timestamp('2024-04-01')                      # and a dry spring
+            rows.append(ClimateMetrics(region=self.region, year=year, measurement_date=d.date(),
+                                       rainfall_mm=0.0 if dry else float(rng.gamma(0.5, 4)),
+                                       temperature_mean_c=float(t + hot + rng.normal(0, 0.5))))
+        ClimateMetrics.objects.bulk_create(rows, batch_size=2000)
+
+    def test_rain_sets_the_score_and_heat_is_a_signal(self):
+        from .services import risk_breakdown as rb
+        from .services.assistant_brain import _score_from_spei
+        b = rb.build(self.region, '2024-06-30', satellite=False)
+        sig = {s['key']: s for s in b['signals']}
+        self.assertTrue(sig['rain_90']['in_score'])
+        self.assertFalse(any(s['in_score'] for k, s in sig.items() if k != 'rain_90'))
+        self.assertLess(b['spi3'], -1)                               # no rain for 90 days
+        self.assertEqual(b['risk'], _score_from_spei(b['spi3']))     # the score is exactly SPI-3's
+        self.assertEqual(sig['rain_90']['pct_of_normal'], 0)
+        self.assertGreater(sig['temperature']['diff'], 2.0)          # +3 C heat wave
+        self.assertGreater(sig['temperature']['stress'], 1.0)        # hotter = toward drought
+        self.assertGreater(sig['rain_90']['stress'], 1.0)            # no rain = toward drought
+
+    def test_legacy_drivers_report_a_real_deficit(self):
+        from .services import risk_breakdown as rb
+        d = rb.legacy_drivers(rb.build(self.region, '2024-06-30', satellite=False))
+        self.assertEqual(d['rainfall_deficit'], 100)                 # 0 % of normal -> 100 % deficit
+        self.assertIn('breakdown', d)
+        rows = rb.signal_rows(d['breakdown'])
+        self.assertTrue(rows[0][2].startswith('sets the score'))
+
+    def test_strength_words(self):
+        from .services.risk_breakdown import strength
+        self.assertEqual(strength(0.2), 'near normal')
+        self.assertEqual(strength(1.5), 'clearly drier')
+        self.assertEqual(strength(-2.5), 'strongly wetter')

@@ -6,14 +6,27 @@ taken from common extension practice and FAO fertiliser guides; the real
 dose must come from a soil test and the local CRDA / extension office.
 
 Plant protection follows integrated pest management (IPM): monitoring and
-cultural measures first, then product *types* only. No pesticide doses are
-given here on purpose: the farmer must use a product registered in Tunisia
-for that crop and follow its label (dose, protective equipment, pre-harvest
-interval). weather_alerts() links each problem to the 16-day forecast.
+cultural measures first. The precise options (active ingredients, resistance
+groups, standard rates) live in services.product_catalog; the farmer must
+still use a product registered in Tunisia for that crop and follow its label
+(dose, protective equipment, pre-harvest interval). weather_alerts() links
+each problem to the 16-day forecast.
 """
 import datetime as dt
 
+from django.utils.formats import date_format
+from django.utils.translation import gettext as _
+
 from .crop_suitability import CROPS
+
+# The texts below stay English in the data (they are the msgids); they are
+# translated when a response is built, in the language of the request
+# (French and Arabic in locale/agronomy_pairs.py).
+
+
+def tr(text):
+    """Translate one data text (None and '' pass through)."""
+    return _(text) if text else text
 
 PROTECTION_NOTICE = (
     'Use only products registered in Tunisia for this crop, at the label dose, '
@@ -400,11 +413,14 @@ def crop_calendar(crop_key, sowing_date=None, today=None):
     today = today or dt.date.today()
     events = []
 
+    def fert_detail(item):
+        return _('{product}: {rate}').format(product=tr(item['product']), rate=tr(item['rate']))
+
     if crop['perennial']:
         sowing_date = None
         for item in mgmt.get('fertilizer', {}).get('schedule', []):
             events.append({'date': _next_month_date(item['month'], today), 'kind': 'fertilizer',
-                           'title': item['stage'], 'detail': f"{item['product']}: {item['rate']}"})
+                           'title': tr(item['stage']), 'detail': fert_detail(item)})
     else:
         sowing_date = sowing_date or default_sowing_date(crop_key, today)
         l_ini, l_dev, l_mid, l_late = crop['stages']
@@ -414,18 +430,18 @@ def crop_calendar(crop_key, sowing_date=None, today=None):
                  (l_ini + l_dev + l_mid + l_late, 'Expected harvest')]
         for offset, title in marks:
             events.append({'date': sowing_date + dt.timedelta(days=offset), 'kind': 'stage',
-                           'title': title, 'detail': ''})
+                           'title': tr(title), 'detail': ''})
         for item in mgmt.get('fertilizer', {}).get('schedule', []):
             events.append({'date': sowing_date + dt.timedelta(days=item['offset_days']),
-                           'kind': 'fertilizer', 'title': item['stage'],
-                           'detail': f"{item['product']}: {item['rate']}"})
+                           'kind': 'fertilizer', 'title': tr(item['stage']),
+                           'detail': fert_detail(item)})
 
     for threat in mgmt.get('protection', []):
         if len(threat['months']) == 12:
             continue
         events.append({'date': _next_month_date(threat['months'][0], today, day=1),
-                       'kind': 'protection', 'title': f"Start watching: {threat['name']}",
-                       'detail': threat['watch']})
+                       'kind': 'protection', 'title': _('Start watching: {name}').format(name=tr(threat['name'])),
+                       'detail': tr(threat['watch'])})
 
     events.sort(key=lambda e: e['date'])
     return {'sowing_date': sowing_date, 'events': [
@@ -467,40 +483,50 @@ def weather_alerts(days, crop_key=None, today=None):
     alerts = []
     week = days[:7]
 
+    def labels(rows):
+        """Day names in the request's language ('mar. 18', 'الثلاثاء 18')."""
+        out = []
+        for d in rows:
+            try:
+                out.append(date_format(dt.date.fromisoformat(d['date']), 'D j'))
+            except (KeyError, TypeError, ValueError):
+                out.append(d.get('label', ''))
+        return ', '.join(out)
+
     frost = [d for d in week if d.get('tmin') is not None and d['tmin'] <= 2]
     if frost:
-        alerts.append({'level': 'danger', 'icon': 'ac_unit', 'title': 'Frost risk',
-                       'text': f"Minimum down to {min(d['tmin'] for d in frost)} C on "
-                               f"{', '.join(d['label'] for d in frost)}. Protect seedlings and "
-                               'young trees; irrigate the day before to store heat in the soil.'})
+        alerts.append({'level': 'danger', 'icon': 'ac_unit', 'title': _('Frost risk'),
+                       'text': _('Minimum down to {t} °C on {days}. Protect seedlings and young trees; '
+                                 'irrigate the day before to store heat in the soil.').format(
+                           t=min(d['tmin'] for d in frost), days=labels(frost))})
     heat = [d for d in week if d.get('tmax') is not None and d['tmax'] >= 35]
     if heat:
-        alerts.append({'level': 'warning', 'icon': 'device_thermostat', 'title': 'Heat stress',
-                       'text': f"Up to {max(d['tmax'] for d in heat)} C on "
-                               f"{', '.join(d['label'] for d in heat)}. Irrigate early morning or "
-                               'evening; avoid spraying and fertilising during the heat.'})
+        alerts.append({'level': 'warning', 'icon': 'device_thermostat', 'title': _('Heat stress'),
+                       'text': _('Up to {t} °C on {days}. Irrigate early morning or evening; avoid '
+                                 'spraying and fertilising during the heat.').format(
+                           t=max(d['tmax'] for d in heat), days=labels(heat))})
     heavy = [d for d in week if (d.get('precip') or 0) >= 20]
     if heavy:
-        alerts.append({'level': 'warning', 'icon': 'thunderstorm', 'title': 'Heavy rain',
-                       'text': f"{', '.join(d['label'] for d in heavy)}: 20 mm or more. "
-                               'Postpone nitrogen and spraying; check drainage.'})
+        alerts.append({'level': 'warning', 'icon': 'thunderstorm', 'title': _('Heavy rain'),
+                       'text': _('{days}: 20 mm or more. Postpone nitrogen and spraying; check '
+                                 'drainage.').format(days=labels(heavy))})
 
-    spray = [d['label'] for d in week
+    spray = [d for d in week
              if (d.get('precip_prob') or 0) < 30 and (d.get('wind') or 0) < 15
              and (d.get('tmax') or 0) < 30 and (d.get('precip') or 0) < 1]
-    alerts.append({'level': 'info', 'icon': 'sprinkler', 'title': 'Spraying windows',
-                   'text': ('Good days to spray (little wind, dry, not too hot): ' + ', '.join(spray)
-                            + '. Spray early morning or evening.') if spray
-                   else 'No good spraying day this week (rain, wind or heat).'})
+    alerts.append({'level': 'info', 'icon': 'sprinkler', 'title': _('Spraying windows'),
+                   'text': _('Good days to spray (little wind, dry, not too hot): {days}. Spray early '
+                             'morning or evening.').format(days=labels(spray)) if spray
+                   else _('No good spraying day this week (rain, wind or heat).')})
 
     rain_7 = sum(d.get('precip') or 0 for d in week)
     et0_7 = sum(d.get('et0') or 0 for d in week)
     if crop_key in CROPS and et0_7:
-        alerts.append({'level': 'info', 'icon': 'water_drop', 'title': 'Water balance (7 days)',
-                       'text': f'Expected rain {rain_7:.0f} mm against about {et0_7:.0f} mm of '
-                               'reference evaporation. ' + (
-                                   'Rain should cover the crop this week.' if rain_7 >= et0_7
-                                   else 'Plan irrigation for the difference if the crop is growing.')})
+        alerts.append({'level': 'info', 'icon': 'water_drop', 'title': _('Water balance (7 days)'),
+                       'text': _('Expected rain {rain} mm against about {et0} mm of reference '
+                                 'evaporation.').format(rain=f'{rain_7:.0f}', et0=f'{et0_7:.0f}') + ' ' + (
+                                     _('Rain should cover the crop this week.') if rain_7 >= et0_7
+                                     else _('Plan irrigation for the difference if the crop is growing.'))})
 
     if crop_key in MANAGEMENT:
         flags = _weather_flags(days)
@@ -508,22 +534,37 @@ def weather_alerts(days, crop_key=None, today=None):
             trig = threat.get('trigger')
             if trig and flags.get(trig) and today.month in threat['months']:
                 alerts.append({'level': 'warning', 'icon': 'coronavirus',
-                               'title': f"{threat['name']}: favourable weather",
-                               'text': f"{threat['watch']} Prevention: {threat['prevent']}"})
+                               'title': _('{name}: favourable weather').format(name=tr(threat['name'])),
+                               'text': _('{watch} Prevention: {prevent}').format(
+                                   watch=tr(threat['watch']), prevent=tr(threat['prevent']))})
     return alerts
 
 
-def crop_plan(crop_key, sowing_date=None, today=None):
-    """Everything the farmer page shows for one crop."""
+def crop_plan(crop_key, sowing_date=None, today=None, area_ha=None):
+    """Everything the farmer page shows for one crop, with the precise
+    products (services.product_catalog) sized for the farm when area_ha is given."""
+    from .product_catalog import fertilizer_details, protection_options
+
     if crop_key not in CROPS:
         return None
     mgmt = MANAGEMENT.get(crop_key, {})
+    fert = mgmt.get('fertilizer')
+    if fert:
+        # products are looked up with the English text, then everything is translated
+        fert = {**fert, 'note': tr(fert.get('note')), 'schedule': [
+            {**s, 'stage': tr(s['stage']), 'product': tr(s['product']), 'rate': tr(s['rate']),
+             'details': fertilizer_details(s['product'], s['rate'], area_ha)}
+            for s in fert['schedule']]}
     return {
         'crop': crop_key,
         'names': CROPS[crop_key]['names'],
+        'area_ha': area_ha,
         'calendar': crop_calendar(crop_key, sowing_date, today),
-        'fertilizer': mgmt.get('fertilizer'),
-        'fertilizer_notice': FERTILIZER_NOTICE,
-        'protection': mgmt.get('protection', []),
-        'protection_notice': PROTECTION_NOTICE,
+        'fertilizer': fert,
+        'fertilizer_notice': tr(FERTILIZER_NOTICE),
+        'protection': [{**p, 'name': tr(p['name']), 'watch': tr(p['watch']), 'prevent': tr(p['prevent']),
+                        'control': tr(p['control']),
+                        'products': protection_options(crop_key, p['name'], area_ha)}
+                       for p in mgmt.get('protection', [])],
+        'protection_notice': tr(PROTECTION_NOTICE),
     }

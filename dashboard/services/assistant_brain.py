@@ -31,7 +31,7 @@ from dashboard.services.crop_kb import CROP_KB, LOW_WATER_CROPS
 
 logger = logging.getLogger(__name__)
 
-ENGINE_VERSION = 'rag2'         # bump to invalidate every cached answer
+ENGINE_VERSION = 'rag3'         # bump to invalidate every cached answer
 LLM_CACHE_TTL = 60 * 60 * 6     # 6 h  (facts change, so keep it short)
 TPL_CACHE_TTL = 60 * 60 * 24 * 20   # 20 days for deterministic templates
 MODEL_CACHE_KEY = 'assistant:llm_model'
@@ -98,7 +98,81 @@ def llm_config():
         'num_ctx': int(getattr(settings, 'ASSISTANT_LLM_NUM_CTX', 4096)),
         'temperature': float(getattr(settings, 'ASSISTANT_LLM_TEMPERATURE', 0.2)),
         'enabled': bool(getattr(settings, 'ASSISTANT_LLM_ENABLED', True)),
+        # OpenAI-compatible hosted model (first choice when configured)
+        'provider': getattr(settings, 'ASSISTANT_LLM_PROVIDER', 'ollama') or 'ollama',
+        'api_url': (getattr(settings, 'ASSISTANT_API_URL', '') or '').rstrip('/'),
+        'api_key': getattr(settings, 'ASSISTANT_API_KEY', '') or '',
+        'api_model': getattr(settings, 'ASSISTANT_API_MODEL', '') or '',
+        'api_timeout': int(getattr(settings, 'ASSISTANT_API_TIMEOUT', 20)),
     }
+
+
+def api_configured(cfg=None):
+    cfg = cfg or llm_config()
+    return (cfg['provider'] == 'openai' and bool(cfg['api_url'])
+            and bool(cfg['api_key']) and bool(cfg['api_model']))
+
+
+def _chat_api(messages, cfg, max_tokens):
+    """One call to an OpenAI-compatible chat API; text or None."""
+    try:
+        resp = requests.post(
+            f"{cfg['api_url']}/chat/completions",
+            headers={'Authorization': f"Bearer {cfg['api_key']}", 'Content-Type': 'application/json'},
+            json={'model': cfg['api_model'], 'messages': messages,
+                  'temperature': cfg['temperature'], 'max_tokens': max_tokens},
+            timeout=cfg['api_timeout'])
+        if resp.status_code != 200:
+            logger.warning('assistant: API returned HTTP %s (%s)', resp.status_code, resp.text[:200])
+            return None
+        choices = resp.json().get('choices') or []
+        text = ((choices[0].get('message') or {}).get('content') or '').strip() if choices else ''
+        return text or None
+    except Exception as exc:                       # noqa: BLE001
+        logger.warning('assistant: API call failed (%s: %s)', type(exc).__name__, exc)
+        return None
+
+
+def _chat_ollama(messages, cfg, model, max_tokens):
+    """One call to the local Ollama model; text or None."""
+    try:
+        resp = requests.post(
+            f"{cfg['url']}/api/chat",
+            json={'model': model, 'messages': messages, 'stream': False,
+                  'keep_alive': cfg['keep_alive'],
+                  'options': {'temperature': cfg['temperature'],
+                              'num_ctx': cfg['num_ctx'],
+                              'num_predict': max_tokens}},
+            timeout=cfg['timeout'])
+        if resp.status_code != 200:
+            logger.warning('assistant: Ollama returned HTTP %s for model %s', resp.status_code, model)
+            return None
+        return ((resp.json().get('message') or {}).get('content') or '').strip() or None
+    except Exception as exc:                       # noqa: BLE001
+        logger.warning('assistant: LLM call failed with model %s (%s: %s)',
+                       model, type(exc).__name__, exc)
+        return None
+
+
+def chat_completion(messages, max_tokens=220):
+    """Hosted API first (when configured), then the local model.
+
+    Returns (text_or_None, model_label). Every failure falls through, and
+    None lets the caller answer from the deterministic template.
+    """
+    cfg = llm_config()
+    if not cfg['enabled']:
+        return None, ''
+    if api_configured(cfg):
+        text = _chat_api(messages, cfg, max_tokens)
+        if text:
+            return text, 'api:' + cfg['api_model']
+    model = resolve_local_model()
+    if model:
+        text = _chat_ollama(messages, cfg, model, max_tokens)
+        if text:
+            return text, model
+    return None, ''
 
 
 def installed_models(url=None):
@@ -114,6 +188,15 @@ def installed_models(url=None):
 
 
 def resolve_model(force=False):
+    """Label of the model that will answer: the hosted API when configured,
+    else the local one; '' when none (template answers only)."""
+    cfg = llm_config()
+    if cfg['enabled'] and api_configured(cfg):
+        return 'api:' + cfg['api_model']
+    return resolve_local_model(force)
+
+
+def resolve_local_model(force=False):
     """Configured model if installed, else the best installed model.
 
     Returns '' when no model is available (assistant runs template-only).
@@ -919,102 +1002,127 @@ def _headline(facts, lang):
     return f'{text}. Source: {source}.'
 
 
-def _context_lines(facts, lang):
-    """Data-driven context sentences, only for values that exist."""
+def _context_lines(facts, lang, keys=None):
+    """Data-driven context sentences, only for values that exist.
+
+    Each sentence has a key (rain, temp, balance, spei, soil, ndvi,
+    requested); `keys` keeps only the ones a question asked about, in that
+    order, so "how much did it rain?" is answered with rainfall alone.
+    """
     climate = facts.get('climate') or {}
     drought = facts.get('drought') or {}
     rs = facts.get('remote_sensing') or {}
-    lines = []
+    out = {}
+
+    def pick(en, fr, ar):
+        return fr if lang == 'fr' else ar if lang == 'ar' else en
+
     rain30 = climate.get('rain_30d_mm')
     clim = climate.get('rain_month_climatology_mm')
     deficit = climate.get('rain_month_deficit_pct')
     if rain30 is not None:
-        if lang == 'fr':
-            line = f'Pluie des 30 derniers jours : {rain30} mm'
-            if clim is not None:
-                line += f' (moyenne du mois : {clim} mm)'
-            if deficit is not None:
-                line += f', écart {deficit}%'
-        elif lang == 'ar':
-            line = f'أمطار آخر 30 يوماً: {rain30} مم'
-            if clim is not None:
-                line += f' (المعدل الشهري: {clim} مم)'
-            if deficit is not None:
-                line += f'، الفارق {deficit}%'
-        else:
-            line = f'Rainfall over the last 30 days: {rain30} mm'
-            if clim is not None:
-                line += f' (monthly average {clim} mm)'
-            if deficit is not None:
-                line += f', a {deficit}% deviation'
-        lines.append(line + '.')
+        line = pick(f'Rainfall over the last 30 days: {rain30} mm',
+                    f'Pluie des 30 derniers jours : {rain30} mm',
+                    f'أمطار آخر 30 يوماً: {rain30} مم')
+        if clim is not None:
+            line += pick(f' (monthly average {clim} mm)', f' (moyenne du mois : {clim} mm)',
+                         f' (المعدل الشهري: {clim} مم)')
+        if deficit is not None:
+            line += pick(f', a {deficit}% deviation', f', écart {deficit}%', f'، الفارق {deficit}%')
+        out['rain'] = line + '.'
+
+    tmean, tmax, tmin = climate.get('tmean_30d_c'), climate.get('tmax_30d_c'), climate.get('tmin_30d_c')
+    if tmean is not None:
+        line = pick(f'Mean temperature over the last 30 days: {tmean} °C',
+                    f'Température moyenne des 30 derniers jours : {tmean} °C',
+                    f'متوسط الحرارة خلال آخر 30 يوماً: {tmean} °م')
+        if tmax is not None and tmin is not None:
+            line += pick(f' (from {tmin} to {tmax} °C)', f' (de {tmin} à {tmax} °C)',
+                         f' (من {tmin} إلى {tmax} °م)')
+        out['temp'] = line + '.'
 
     balance = climate.get('water_balance_30d_mm')
     et0 = climate.get('et0_30d_mm')
     if balance is not None:
-        if lang == 'fr':
-            lines.append(f'Bilan hydrique sur 30 jours : {balance} mm '
-                         f'(demande évaporative {et0} mm).')
-        elif lang == 'ar':
-            lines.append(f'الرصيد المائي خلال 30 يوماً: {balance} مم '
-                         f'(الطلب التبخري {et0} مم).')
-        else:
-            lines.append(f'30-day water balance: {balance} mm '
-                         f'(atmospheric demand {et0} mm).')
+        out['balance'] = pick(f'30-day water balance: {balance} mm (atmospheric demand {et0} mm).',
+                              f'Bilan hydrique sur 30 jours : {balance} mm (demande évaporative {et0} mm).',
+                              f'الرصيد المائي خلال 30 يوماً: {balance} مم (الطلب التبخري {et0} مم).')
 
     spei3 = drought.get('spei_3month')
     if spei3 is not None:
         change = drought.get('spei_3month_change_3m')
-        if lang == 'fr':
-            line = f'SPEI-3 observé : {spei3}'
-            if change is not None:
-                line += f' (évolution sur 3 mois {change:+})'
-        elif lang == 'ar':
-            line = f'مؤشر SPEI-3 المرصود: {spei3}'
-            if change is not None:
-                line += f' (التغير خلال 3 أشهر {change:+})'
-        else:
-            line = f'Observed SPEI-3: {spei3}'
-            if change is not None:
-                line += f' (change over 3 months {change:+})'
-        lines.append(line + '.')
+        line = pick(f'Observed SPEI-3: {spei3}', f'SPEI-3 observé : {spei3}', f'مؤشر SPEI-3 المرصود: {spei3}')
+        if change is not None:
+            line += pick(f' (change over 3 months {change:+})', f' (évolution sur 3 mois {change:+})',
+                         f' (التغير خلال 3 أشهر {change:+})')
+        out['spei'] = line + '.'
 
     soil = rs.get('soil_moisture_pct')
+    if soil is not None:
+        out['soil'] = pick(f'Satellite soil moisture: {soil}%.', f'Humidité du sol (satellite) : {soil}%.',
+                           f'رطوبة التربة (الأقمار الصناعية): {soil}%.')
     ndvi = rs.get('ndvi')
-    if soil is not None or ndvi is not None:
-        bits = []
-        if soil is not None:
-            bits.append(f'soil moisture {soil}%' if lang == 'en' else
-                        f'humidité du sol {soil}%' if lang == 'fr' else
-                        f'رطوبة التربة {soil}%')
-        if ndvi is not None:
-            bits.append(f'NDVI {ndvi}' if lang == 'en' else
-                        f'NDVI {ndvi}' if lang == 'fr' else
-                        f'NDVI {ndvi}')
+    if ndvi is not None:
         trend = rs.get('ndvi_trend_90d')
+        line = pick(f'Vegetation index NDVI: {ndvi}', f'Indice de végétation NDVI : {ndvi}',
+                    f'مؤشر الغطاء النباتي NDVI: {ndvi}')
         if trend is not None:
-            bits.append(f'90-day NDVI trend {trend:+}' if lang == 'en' else
-                        f'tendance NDVI sur 90 jours {trend:+}' if lang == 'fr' else
-                        f'اتجاه NDVI خلال 90 يوماً {trend:+}')
-        prefix = ('Satellite: ' if lang == 'en' else
-                  'Satellite : ' if lang == 'fr' else 'الأقمار الصناعية: ')
-        lines.append(prefix + ', '.join(bits) + '.')
+            line += pick(f' (90-day trend {trend:+})', f' (tendance sur 90 jours {trend:+})',
+                         f' (الاتجاه خلال 90 يوماً {trend:+})')
+        out['ndvi'] = line + '.'
 
     requested = facts.get('requested_period')
     if requested and requested.get('rain_mm') is not None:
-        if lang == 'fr':
-            lines.append(f"Période demandée {requested.get('month')} "
-                         f"{requested.get('year')} : {requested['rain_mm']} mm de pluie "
-                         f"sur {requested.get('days')} jours.")
-        elif lang == 'ar':
-            lines.append(f"الفترة المطلوبة {requested.get('month')} "
-                         f"{requested.get('year')}: {requested['rain_mm']} مم مطر "
-                         f"خلال {requested.get('days')} يوماً.")
-        else:
-            lines.append(f"Requested period {requested.get('month')} "
-                         f"{requested.get('year')}: {requested['rain_mm']} mm of rain "
-                         f"over {requested.get('days')} days.")
-    return lines
+        month, year, days = requested.get('month'), requested.get('year') or '', requested.get('days')
+        rain = requested['rain_mm']
+        line = pick(f'{month} {year}: {rain} mm of rain over {days} days',
+                    f'{month} {year} : {rain} mm de pluie sur {days} jours',
+                    f'{month} {year}: {rain} مم مطر خلال {days} يوماً')
+        tm = requested.get('tmean_c')
+        if tm is not None:
+            line += pick(f', mean temperature {tm} °C', f', température moyenne {tm} °C', f'، ومتوسط الحرارة {tm} °م')
+        out['requested'] = line + '.'
+
+    order = keys or ('rain', 'balance', 'spei', 'soil', 'ndvi', 'requested')
+    return [out[k] for k in order if k in out]
+
+
+# What each question is about: only these lines are written, nothing else.
+INTENT_LINES = {
+    'rainfall': ('requested', 'rain'),
+    'temperature': ('requested', 'temp'),
+    'soil_moisture': ('soil',),
+    'vegetation_health': ('ndvi',),
+    'historical': ('requested', 'rain', 'temp'),
+    'drought_status': ('spei',),
+    'irrigation': ('rain', 'balance'),
+    'water_reduction': ('balance',),
+    'planting': ('rain', 'spei'),
+    'crop_care': ('balance',),
+}
+# Decision questions start with the region's drought status and end with the action.
+DECISION_INTENTS = ('drought_status', 'irrigation', 'planting', 'water_reduction', 'crop_care')
+
+NOT_STORED = ('No {what} data is stored for {region} yet.',
+              'Aucune donnée de {what} n’est encore enregistrée pour {region}.',
+              'لا توجد بعد معطيات {what} مسجلة لمنطقة {region}.')
+METRIC_NAME = {
+    'rainfall': ('rainfall', 'pluie', 'الأمطار'), 'temperature': ('temperature', 'température', 'الحرارة'),
+    'soil_moisture': ('soil moisture', 'humidité du sol', 'رطوبة التربة'),
+    'vegetation_health': ('vegetation', 'végétation', 'الغطاء النباتي'),
+    'historical': ('history', 'historique', 'التاريخ'),
+}
+OUT_OF_SCOPE = (
+    'I can only answer from the data in this application (your farm, the weather, drought forecasts, climate '
+    'measurements and the platform pages), and I have no information on that. Ask me about watering, '
+    'fertiliser, pests, the weather, rainfall, temperatures or the drought outlook.',
+    'Je ne réponds qu’à partir des données de cette application (votre parcelle, la météo, les prévisions de '
+    'sécheresse, les mesures climatiques et les pages de la plateforme), et je n’ai pas d’information à ce '
+    'sujet. Posez-moi une question sur l’arrosage, les engrais, les ravageurs, la météo, la pluie, les '
+    'températures ou la sécheresse.',
+    'أجيب فقط من بيانات هذا التطبيق (ضيعتك، الطقس، توقعات الجفاف، القياسات المناخية وصفحات المنصة)، وليست '
+    'لدي معلومات عن ذلك. اسألني عن السقي أو الأسمدة أو الآفات أو الطقس أو الأمطار أو درجات الحرارة أو '
+    'توقعات الجفاف.')
 
 
 ORIENTATION = {
@@ -1342,6 +1450,12 @@ def _website_guide_answer(question, lang):
     return _WG['overview'][idx]
 
 
+def _website_guide_specific(question):
+    """Whether a specific guide section (not the overview) matches the question."""
+    q = question.lower() if question else ''
+    return any(any(kw in q for kw in keywords) for _topic, keywords in _WG_RULES)
+
+
 def _website_guide_context():
     """Return a compact, LLM-friendly reference block from the PLATFORM_GUIDE.
 
@@ -1362,24 +1476,33 @@ def _website_guide_context():
 
 
 def fallback_answer(facts, intent, rules, lang='en', question=''):
-    """Deterministic, data-rich answer used whenever the LLM is unusable."""
+    """Deterministic answer, limited to what the question asked about."""
     if intent == 'website_guide':
         return _website_guide_answer(question, lang)
-    parts = [_headline(facts, lang)]
+    if intent == 'freeform':
+        return _loc(OUT_OF_SCOPE, lang)
+    if intent in ('greeting', 'help'):
+        return _loc(ORIENTATION[intent], lang)
     if intent == 'knowledge':
-        parts.append(_knowledge_text(question, facts, lang))
-    elif intent in ('greeting', 'help'):
-        parts.append(_loc(ORIENTATION[intent], lang))
-    else:
-        parts.extend(_context_lines(facts, lang))
-    action = rules.get('action')
-    if action and action != 'inform':
-        parts.append(_loc(ACTIONS.get(action, ACTIONS['inform']), lang))
-    note = rules.get('priority_note')
-    if note:
-        prefix = {'en': 'Technical note: ', 'fr': 'Note technique : ',
-                  'ar': 'ملاحظة فنية: '}.get(lang, 'Technical note: ')
-        parts.append(prefix + note + '.')
+        return _knowledge_text(question, facts, lang)
+    parts = []
+    decision = intent in DECISION_INTENTS
+    if decision:
+        parts.append(_headline(facts, lang))
+    lines = _context_lines(facts, lang, INTENT_LINES.get(intent))
+    if not lines and not decision:
+        what = _loc(METRIC_NAME.get(intent, METRIC_NAME['historical']), lang)
+        lines = [_loc(NOT_STORED, lang).format(what=what, region=facts.get('region') or '—')]
+    parts.extend(lines)
+    if decision:
+        action = rules.get('action')
+        if action and action != 'inform':
+            parts.append(_loc(ACTIONS.get(action, ACTIONS['inform']), lang))
+        note = rules.get('priority_note')
+        if note:
+            prefix = {'en': 'Technical note: ', 'fr': 'Note technique : ',
+                      'ar': 'ملاحظة فنية: '}.get(lang, 'Technical note: ')
+            parts.append(prefix + note + '.')
     warnings = facts.get('data_warnings') or []
     if warnings:
         prefix = {'en': 'Data note: ', 'fr': 'Données : ',
@@ -1416,21 +1539,32 @@ def data_signature(facts):
     ))
 
 
-SYSTEM_PROMPT = """You are AgroAI, the intelligent assistant for the APWRS / ABCDry drought and agricultural platform.
-Your objective is to provide helpful, natural, and conversational explanations based on FACTS and REFERENCE documentation.
+NO_ANSWER = 'NO_ANSWER'
 
-Key Instructions:
-1. Conciseness & Precision:
-   - Provide a clear, natural explanation in 2 to 3 complete sentences. Do not ramble, repeat the question, or recite data tables.
-   - Answer ONLY what the user asked. Do not dump unrequested historical metrics, date ranges, or row counts.
-2. Anti-Leak & Clean Output:
-   - NEVER output internal system labels or prompt tags (such as 'REFERENCE', 'Context', 'FACTS', 'relevance', or 'source:').
-   - NEVER output SQL queries, bash commands, database table names, or internal database row counts.
-3. Grounding:
-   - For regional agronomy, drought assessments, and weather: do not invent numbers. Numerical values must match the provided REGIONAL FACTS. Never contradict the drought level, risk score, or recommended action.
-   - For website, platform, and navigation questions: use the documentation to explain the platform's features, tools, pages, and how-to procedures clearly and step-by-step. Do not mention regional drought status unless asked.
-4. Language:
-   - Write in {language}. Keep the tone professional, friendly, and practical."""
+SYSTEM_PROMPT = """You are AgroAI, the assistant of the APWRS / ABCDry drought and agricultural platform.
+You answer ONLY from the REGIONAL FACTS and the REFERENCE passages given in the message. They are your only source of truth.
+
+Rules:
+1. Answer exactly the question asked, in 1 to 3 short sentences. Do not add other metrics, advice or topics that were not asked.
+2. Use only information that appears in the FACTS or the REFERENCE. Never use your general knowledge, never guess, never estimate.
+3. Every number you write must be copied from the FACTS or the REFERENCE. Never round, convert or invent a number.
+4. If the FACTS and the REFERENCE do not contain the answer, reply with exactly: NO_ANSWER
+5. Never contradict the drought level, the risk score or the recommended action.
+   Never rank, compare or recommend crops unless the FACTS contain that exact ranking.
+6. Never output internal labels ('REFERENCE', 'FACTS', 'source:', 'relevance'), SQL, code, table names or row counts.
+7. Write in {language}, in a friendly, practical tone for a farmer."""
+
+# Facts each intent may talk about: the model only sees what the question needs.
+PROMPT_FACTS = {
+    'rainfall': ('region', 'recent_30d_rain_mm', 'rain_this_month_mm', 'rain_month_average_mm', 'requested_period'),
+    'temperature': ('region', 'recent_30d_mean_temp_c', 'recent_30d_max_temp_c', 'recent_30d_min_temp_c',
+                    'requested_period'),
+    'soil_moisture': ('region', 'soil_moisture_pct'),
+    'vegetation_health': ('region', 'vegetation_ndvi'),
+    'historical': ('region', 'requested_period', 'recent_30d_rain_mm'),
+    'drought_status': ('region', 'risk_score', 'risk_level', 'probability_drought_next_month_pct',
+                       'next_month_verdict', 'spei_3month'),
+}
 
 
 def _facts_for_prompt(facts, intent):
@@ -1446,12 +1580,20 @@ def _facts_for_prompt(facts, intent):
         'probability_drought_next_month_pct': summary.get('probability_drought_next_month_pct'),
         'next_month_verdict': summary.get('next_month_verdict'),
         'recent_30d_rain_mm': climate.get('rain_30d_mm'),
+        'rain_this_month_mm': climate.get('rain_this_month_mm'),
+        'rain_month_average_mm': climate.get('rain_month_climatology_mm'),
         'recent_30d_mean_temp_c': climate.get('tmean_30d_c'),
+        'recent_30d_max_temp_c': climate.get('tmax_30d_c'),
+        'recent_30d_min_temp_c': climate.get('tmin_30d_c'),
         'recent_30d_et0_mm': climate.get('et0_30d_mm'),
         'spei_3month': drought.get('spei_3month'),
         'vegetation_ndvi': remote.get('ndvi'),
         'soil_moisture_pct': remote.get('soil_moisture_pct'),
+        'requested_period': facts.get('requested_period'),
     }
+    keep = PROMPT_FACTS.get(intent)
+    if keep:
+        clean = {k: v for k, v in clean.items() if k in keep}
     return {k: v for k, v in clean.items() if v is not None}
 
 
@@ -1464,10 +1606,8 @@ def llm_answer(question, facts, rules, intent, lang, history=None, repair_bad=No
     numbers from a previous attempt that were not found in the facts.
     ``context`` is the retrieved reference material (see :mod:`retrieval`).
     """
-    model = resolve_model()
-    if not model:
+    if not resolve_model():
         return None, ''
-    cfg = llm_config()
     action = rules.get('action')
     action_sentence = (_loc(ACTIONS.get(action), 'en')
                        if action and action != 'inform' else '')
@@ -1518,25 +1658,7 @@ def llm_answer(question, facts, rules, intent, lang, history=None, repair_bad=No
         user_parts.append(instruction)
     user_parts.append(f'QUESTION: {question}')
     messages.append({'role': 'user', 'content': '\n\n'.join(user_parts)})
-    try:
-        resp = requests.post(
-            f"{cfg['url']}/api/chat",
-            json={'model': model, 'messages': messages, 'stream': False,
-                  'keep_alive': cfg['keep_alive'],
-                  'options': {'temperature': cfg['temperature'],
-                              'num_ctx': cfg['num_ctx'],
-                              'num_predict': 200}},
-            timeout=cfg['timeout'])
-        if resp.status_code != 200:
-            logger.warning('assistant: Ollama returned HTTP %s for model %s',
-                           resp.status_code, model)
-            return None, model
-        text = ((resp.json().get('message') or {}).get('content') or '').strip()
-        return (text or None), model
-    except Exception as exc:                       # noqa: BLE001
-        logger.warning('assistant: LLM call failed with model %s (%s: %s)',
-                       model, type(exc).__name__, exc)
-        return None, model
+    return chat_completion(messages, max_tokens=220)
 
 
 # --------------------------------------------------------------------------- #
@@ -1596,9 +1718,36 @@ def _clarify(kind, lang, regions=None, question='', understood=None):
     }, options
 
 
+# Data questions are always answered by code; a model only writes answers
+# drawn from the documentation (platform guide, definitions, other questions
+# whose retrieved passages are relevant enough).
+LLM_INTENTS = ('website_guide', 'knowledge', 'freeform')
+
+
+def _min_relevance(context):
+    if context.get('dense'):
+        return float(getattr(settings, 'ASSISTANT_MIN_RELEVANCE_DENSE', 0.55))
+    return float(getattr(settings, 'ASSISTANT_MIN_RELEVANCE_LEXICAL', 0.25))
+
+
+def _out_of_scope(lang, region_name=None, reason='no data or documentation covers the question'):
+    return {
+        'answer': _loc(OUT_OF_SCOPE, lang), 'intent': 'out_of_scope', 'crop': None, 'region': region_name,
+        'lang': lang, 'from_cache': False, 'engine': 'template', 'engine_reason': reason, 'model': None,
+        'rag': {'enabled': False, 'dense': False, 'documents': 0, 'data': 0}, 'sources': [],
+        'understood': {'crop': None, 'intent': 'out_of_scope', 'followup': False, 'inherited': {}},
+        'facts': {}, 'details': {},
+    }
+
+
 def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True,
-                    history=None, conversation=None):
-    """Full pipeline: understanding -> facts -> rules -> grounded LLM."""
+                    history=None, conversation=None, farm=None):
+    """Full pipeline: understanding -> facts -> rules -> grounded LLM.
+
+    With `farm` (the asking farmer's own parcel), questions about the farm are
+    answered first, by code, from the farm's data (services.farm_qa); the
+    rest falls back to the farm's region and crop.
+    """
     import hashlib
 
     detected = detect_language(question)
@@ -1606,6 +1755,14 @@ def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True
         lang = detected
     else:
         lang = lang if lang in LANGUAGES else 'en'
+    if farm is not None:
+        from . import farm_qa
+        previous = (conversation or {}).get('farm_topics') or None
+        answered = farm_qa.answer(question, farm, lang, previous_topics=previous)
+        if answered:
+            return answered
+        region_id = region_id or farm.region_id
+        crop = crop or farm.crop or None
     try:
         regions = list(Region.objects.all())
     except Exception:                              # noqa: BLE001
@@ -1614,6 +1771,10 @@ def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True
                              region_id=region_id, crop=crop, regions=regions)
     crop = understood['crop']
     intent = understood['intent']
+    if intent == 'knowledge' and not any(key in (question or '').lower() for key in KNOWLEDGE):
+        # "what are the worst crops?" is not a definition: no glossary term, no definition
+        # answer; it goes through the relevance gate like any other question.
+        intent = 'freeform'
     if understood['region'] is not None:
         region_id = understood['region'].id
     else:
@@ -1622,6 +1783,9 @@ def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True
     context, sources = _retrieval(question, lang, crop, region_id)
     best_relevance = max([hit.get('relevance', 0.0)
                           for hit in context.get('documents') or []] or [0.0])
+    if intent == 'freeform' and best_relevance < _min_relevance(context):
+        # Nothing in the app's data or documentation covers it: say so, never guess.
+        return _out_of_scope(lang, reason=f'best document relevance {best_relevance:.2f} below threshold')
     kind = nlu.needs_clarification(
         intent, region_id=region_id, parsed_region=understood['region'],
         history=history, regions=regions, best_relevance=best_relevance,
@@ -1638,7 +1802,7 @@ def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True
     region_name = facts.get('region')
 
     template = fallback_answer(facts, intent, rules, lang, question)
-    model = resolve_model() if use_llm else ''
+    model = resolve_model() if use_llm and intent in LLM_INTENTS else ''
     engine = 'llm' if model else 'template'
     digest = hashlib.md5(
         f'{intent}|{region_name}|{lang}|{model}|{data_signature(facts)}'
@@ -1650,23 +1814,33 @@ def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True
     from_cache = cached is not None
     answer = cached
     reason = None
+    no_answer = False
     extra = context.get('numbers') or None
 
     if answer is None:
         if engine == 'llm':
             text, _ = llm_answer(question, facts, rules, intent, lang, history,
                                  context=context)
+            no_answer = bool(text and NO_ANSWER in text)
+            if no_answer:
+                reason = 'the model found no answer in the facts and documentation'
+                text = None
+            # Every number must come from the facts or the passages the model
+            # was given (for guide answers, the platform guide too).
+            allowed_extra = list(extra or [])
             if intent == 'website_guide':
-                unverified = []
-            else:
-                unverified = validate_numbers(text, facts, extra=extra) if text else []
-                if text and unverified:
-                    # one repair attempt: tell the model which numbers were invented
-                    text, _ = llm_answer(question, facts, rules, intent, lang, history,
-                                         repair_bad=unverified, context=context)
-                    unverified = validate_numbers(text, facts, extra=extra) if text else []
+                guide = _website_guide_context() + ' ' + _website_guide_answer(question, lang)
+                allowed_extra += [float(t.replace(',', '.')) for t in _NUMBER_RE.findall(guide)]
+            unverified = validate_numbers(text, facts, extra=allowed_extra) if text else []
+            if text and unverified:
+                # one repair attempt: tell the model which numbers were invented
+                text, _ = llm_answer(question, facts, rules, intent, lang, history,
+                                     repair_bad=unverified, context=context)
+                unverified = validate_numbers(text, facts, extra=allowed_extra) if text else []
+            if text and NO_ANSWER in text:
+                reason, text, no_answer = 'the model found no answer in the facts and documentation', None, True
             if not text:
-                reason = 'LLM unavailable or call failed (see server log)'
+                reason = reason or 'LLM unavailable or call failed (see server log)'
             elif unverified:
                 reason = f'LLM numbers not traceable to facts: {unverified[:5]}'
                 logger.warning('assistant: rejected LLM answer - %s', reason)
@@ -1675,6 +1849,11 @@ def answer_question(question, region_id=None, crop=None, lang='en', use_llm=True
                 logger.warning('assistant: rejected LLM answer - %s', reason)
             else:
                 answer = text
+        if answer is None and no_answer and (intent == 'freeform' or (
+                intent == 'website_guide' and not _website_guide_specific(question))):
+            # the documentation does not cover it: say so (no generic overview instead)
+            engine, answer = 'template', _loc(OUT_OF_SCOPE, lang)
+            key = f'{ENGINE_VERSION}:template:{digest}'
         if answer is None:
             engine = 'template'
             key = f'{ENGINE_VERSION}:template:{digest}'

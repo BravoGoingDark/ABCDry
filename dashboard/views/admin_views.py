@@ -197,6 +197,45 @@ def admin_confirm_user(request, user_id):
     return redirect('dashboard:admin_panel')
 
 
+FARM_SORTS = ('area_desc', 'area_asc', 'farmer_area', 'newest')
+
+# Crop families drive the icon and colour of the "Crop Planted" cell.
+_CROP_FAMILY = {
+    'wheat': 'cereal', 'barley': 'cereal', 'oats': 'cereal',
+    'faba_bean': 'legume', 'lentil': 'legume', 'alfalfa': 'legume',
+    'garlic': 'vegetable', 'potato': 'vegetable', 'tomato': 'vegetable', 'pepper': 'vegetable',
+    'olive': 'tree', 'citrus': 'tree', 'date_palm': 'tree',
+}
+_FAMILY_STYLE = {
+    'cereal': {'icon': 'grass', 'label': 'Cereal', 'color': '#b45309', 'tint': 'rgba(245, 158, 11, 0.14)'},
+    'legume': {'icon': 'eco', 'label': 'Legume', 'color': '#15803d', 'tint': 'rgba(34, 197, 94, 0.14)'},
+    'vegetable': {'icon': 'nutrition', 'label': 'Vegetable', 'color': '#be123c', 'tint': 'rgba(244, 63, 94, 0.13)'},
+    'tree': {'icon': 'park', 'label': 'Tree crop', 'color': '#0f766e', 'tint': 'rgba(20, 184, 166, 0.14)'},
+    'other': {'icon': 'sprout', 'label': 'Other', 'color': '#475569', 'tint': 'rgba(100, 116, 139, 0.14)'},
+}
+
+
+def _crop_display(crop_key, lang='en'):
+    """Localised name, family, icon and colours for a farm's crop key."""
+    from ..services.crop_suitability import CROPS
+
+    if not crop_key:
+        return None
+    names = (CROPS.get(crop_key) or {}).get('names') or {}
+    label = names.get(lang) or names.get('en') or crop_key.replace('_', ' ')
+    family = _CROP_FAMILY.get(crop_key, 'other')
+    style = _FAMILY_STYLE[family]
+    return {
+        'key': crop_key,
+        'label': label[:1].upper() + label[1:],
+        'family': family,
+        'family_label': _(style['label']),
+        'icon': style['icon'],
+        'color': style['color'],
+        'tint': style['tint'],
+    }
+
+
 @login_required(login_url='dashboard:login')
 def admin_farms(request):
     """Read-only overview of all farmer lands — who owns what, what is planted, where.
@@ -205,13 +244,72 @@ def admin_farms(request):
     Administration and it has no mutating controls); farmer accounts are kept
     out by FarmerScopeMiddleware.
     """
-    farms = Farm.objects.select_related('owner', 'owner__profile', 'region').order_by('-created_at')
+    all_farms = Farm.objects.select_related('owner', 'owner__profile', 'region').order_by('-created_at')
 
-    # Summary stats
-    total_farms = farms.count()
-    total_area = sum((f.area_ha for f in farms), 0)
-    farmers_count = farms.values('owner').distinct().count()
-    irrigated_count = farms.filter(irrigated=True).count()
+    # ── Filters (all GET params, so a filtered view can be bookmarked) ──
+    farmer_query = (request.GET.get('farmer') or '').strip()
+    crop_filter = (request.GET.get('crop') or '').strip()
+    irrigation_filter = request.GET.get('irrigation') or ''
+    if irrigation_filter not in ('irrigated', 'rainfed'):
+        irrigation_filter = ''
+    sort = request.GET.get('sort') or 'area_desc'
+    if sort not in FARM_SORTS:
+        sort = 'area_desc'
+
+    # Every farm is rendered; the ones outside the filter are only hidden, so
+    # the page's JavaScript can re-filter and re-sort without a reload. The
+    # server applies the URL's filters too, so a bookmarked view opens right.
+    farms = list(all_farms)
+    lang = (getattr(request, 'LANGUAGE_CODE', None) or 'en')[:2]
+    needle = farmer_query.lower()
+    for f in farms:
+        f.crop_info = _crop_display(f.crop, lang)
+        f.farmer_search = ' '.join(
+            filter(None, [f.owner.username, f.owner.first_name, f.owner.last_name])
+        ).lower()
+        f.match = (
+            (not needle or needle in f.farmer_search)
+            and (not crop_filter or (f.crop == '' if crop_filter == 'none' else f.crop == crop_filter))
+            and (not irrigation_filter or f.irrigated == (irrigation_filter == 'irrigated'))
+        )
+
+    # Per-farmer surface among the matching farms.
+    owner_total = {}
+    for f in farms:
+        if f.match:
+            owner_total[f.owner_id] = owner_total.get(f.owner_id, 0) + f.area_ha
+    for f in farms:
+        f.owner_total_ha = owner_total.get(f.owner_id, 0)
+
+    # ── Ordering by surface ──
+    if sort == 'area_desc':
+        farms.sort(key=lambda f: f.area_ha, reverse=True)
+    elif sort == 'area_asc':
+        farms.sort(key=lambda f: f.area_ha)
+    elif sort == 'farmer_area':
+        # Farmers holding the most land first, their own plots largest first.
+        farms.sort(key=lambda f: (-f.owner_total_ha, f.owner.username.lower(), -f.area_ha))
+    # 'newest' keeps the queryset's -created_at order.
+    matching = [f for f in farms if f.match]
+
+    # Choices for the filter bar (from all farms, so options never vanish).
+    farmer_names = sorted(
+        set(all_farms.values_list('owner__username', flat=True)), key=str.lower
+    )
+    crop_keys = set(all_farms.values_list('crop', flat=True))
+    crop_choices = sorted(
+        ({'key': k, 'label': _crop_display(k, lang)['label']} for k in crop_keys if k),
+        key=lambda c: c['label'].lower(),
+    )
+    has_unplanted = '' in crop_keys
+    filters_active = bool(farmer_query or crop_filter or irrigation_filter)
+
+    # Summary stats (reflect the current filter)
+    total_farms = len(matching)
+    total_area = sum((f.area_ha for f in matching), 0)
+    farmers_count = len({f.owner_id for f in matching})
+    irrigated_count = sum(1 for f in matching if f.irrigated)
+    max_area = max((f.area_ha for f in matching), default=0)
 
     # Serialize farms for the map JavaScript
     ichkeul_polys = _load_ichkeul_polys()
@@ -223,11 +321,13 @@ def admin_farms(request):
     for f in farms:
         data = fs.serialize_farm(f)
         data['in_ichkeul'] = f.pk in ichkeul_farm_ids
+        data['match'] = f.match
         farms_payload.append(data)
     farms_json = json.dumps(farms_payload, cls=DjangoJSONEncoder)
 
     context = {
         'farms': farms,
+        'matching_count': len(matching),
         'total_farms': total_farms,
         'total_area': round(total_area, 2),
         'farmers_count': farmers_count,
@@ -240,5 +340,14 @@ def admin_farms(request):
         'farms_json': farms_json,
         'ichkeul_farm_ids': ichkeul_farm_ids,
         'ichkeul_region_name': ichkeul_region_name,
+        'farmer_query': farmer_query,
+        'farmer_names': farmer_names,
+        'crop_filter': crop_filter,
+        'crop_choices': crop_choices,
+        'has_unplanted': has_unplanted,
+        'irrigation_filter': irrigation_filter,
+        'sort': sort,
+        'filters_active': filters_active,
+        'max_area': max_area,
     }
     return render(request, 'dashboard/admin_farms.html', context)

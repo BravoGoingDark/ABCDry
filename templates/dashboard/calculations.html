@@ -3,91 +3,50 @@
 <html lang="{{ LANGUAGE_CODE|default:'en' }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}" class="light"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Calculated Metrics | Ichkeul Intel</title>
+<title>{% trans "Calculated Metrics" %} | Ichkeul Intel</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;700;900&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
     <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
         theme: {
           extend: {
-            "colors": {
-                    "error": "#ba1a1a",
-                    "surface-variant": "#dce2f3",
-                    "surface-dim": "#d3daea",
-                    "secondary-container": "#72ddfd",
-                    "surface-container-lowest": "#ffffff",
-                    "on-primary-fixed": "#002114",
-                    "primary": "#012d1d",
-                    "on-tertiary-fixed-variant": "#554338",
-                    "background": "#f9f9ff",
-                    "inverse-primary": "#a5d0b9",
-                    "on-surface": "#151c27",
-                    "outline": "#717973",
-                    "tertiary": "#322319",
-                    "secondary": "#00677d",
-                    "on-secondary": "#ffffff",
-                    "on-primary-fixed-variant": "#274e3d",
-                    "error-container": "#ffdad6",
-                    "tertiary-fixed": "#f9ddce",
-                    "outline-variant": "#c1c8c2",
-                    "on-primary-container": "#86af99",
-                    "on-error": "#ffffff",
-                    "secondary-fixed": "#b2ebff",
-                    "on-tertiary-fixed": "#27180f",
-                    "inverse-on-surface": "#ebf1ff",
-                    "surface-container-highest": "#dce2f3",
-                    "surface-container-low": "#f0f3ff",
-                    "primary-container": "#1b4332",
-                    "on-background": "#151c27",
-                    "secondary-fixed-dim": "#69d4f4",
-                    "on-error-container": "#93000a",
-                    "on-tertiary": "#ffffff",
-                    "on-surface-variant": "#414844",
-                    "tertiary-fixed-dim": "#dcc1b2",
-                    "on-secondary-container": "#006075",
-                    "tertiary-container": "#4a382d",
-                    "surface-container": "#e7eefe",
-                    "primary-fixed": "#c1ecd4",
-                    "on-primary": "#ffffff",
-                    "surface-container-high": "#e2e8f8",
-                    "surface-tint": "#3f6653",
-                    "primary-fixed-dim": "#a5d0b9",
-                    "surface-bright": "#f9f9ff",
-                    "on-tertiary-container": "#baa193",
-                    "on-secondary-fixed-variant": "#004e5f",
-                    "on-secondary-fixed": "#001f27",
-                    "surface": "#f9f9ff",
-                    "inverse-surface": "#2a313d"
+            colors: {
+              "primary": "#012d1d",
+              "on-primary": "#ffffff",
+              "secondary": "#00677d",
+              "background": "#f9f9ff",
+              "surface": "#f9f9ff",
+              "surface-container-lowest": "#ffffff",
+              "surface-container-low": "#f0f3ff",
+              "surface-container": "#e7eefe",
+              "on-surface": "#151c27",
+              "on-surface-variant": "#414844",
+              "outline-variant": "#c1c8c2"
             },
-            "borderRadius": {
-                    "DEFAULT": "0.125rem",
-                    "lg": "0.25rem",
-                    "xl": "0.5rem",
-                    "full": "0.75rem"
-            },
-            "fontFamily": {
-                    "headline": ["Hanken Grotesk"],
-                    "display": ["Hanken Grotesk"],
-                    "body": ["Inter"],
-                    "label": ["JetBrains Mono"]
+            fontFamily: {
+              headline: ["Hanken Grotesk"],
+              body: ["Inter"],
+              label: ["JetBrains Mono"]
             }
-          },
-        },
+          }
+        }
       }
     </script>
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            display: inline-block;
-            vertical-align: middle;
-        }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Compact formula card value styling */
-        .calc-value{font-family: 'JetBrains Mono', monospace;}
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; display: inline-block; vertical-align: middle; }
+        .num { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; }
+        .seg button { padding: .375rem .75rem; font-size: .75rem; font-weight: 600; color: #414844; border-radius: .375rem; }
+        .seg button.on { background: #fff; color: #012d1d; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+        .badge { display: inline-flex; align-items: center; gap: 2px; padding: 1px 8px; border-radius: 999px; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+        .st-better  { background: #dcfce7; color: #166534; }
+        .st-worse   { background: #ffedd5; color: #9a3412; }
+        .st-normal  { background: #f1f5f9; color: #475569; }
+        .st-neutral { background: #e0f2fe; color: #075985; }
+        .st-none    { background: transparent; color: #94a3b8; }
+        .formula { display: none; }
+        body.show-formulas .formula { display: block; }
     </style>
 {% include "dashboard/_navbar_theme.html" %}
 <link rel="stylesheet" href="{% static 'dashboard/css/rtl.css' %}">
@@ -96,200 +55,280 @@
 
 <div class="flex-1 min-w-0 flex flex-col bg-surface h-screen">
     {% include "dashboard/_header.html" %}
-
-    <!-- APWRS Global Navigation Sidebar -->
     {% include "dashboard/_sidebar.html" with active_page="analyse" %}
 
-    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-6 transition-all duration-300 ease-in-out lg:ml-60">
-        {% include "dashboard/_page_toolbar.html" with page_actions="dashboard/_page_actions_calculations.html" %}
-        <div class="mb-6">
-            <h3 class="font-headline font-black text-lg uppercase tracking-widest">Calculated Metrics</h3>
-            <p class="text-sm text-on-surface-variant mt-1">Formulas and computed values that drive the drought risk assessment. Each value is the latest record for the selected region and date.</p>
+    <main id="main-content" class="flex-1 overflow-y-auto mt-16 p-4 md:p-6 transition-all duration-300 ease-in-out lg:ml-60">
+      <div class="max-w-6xl mx-auto">
 
+        <!-- Header + controls -->
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4 mb-5">
+            <div>
+                <h1 class="font-headline font-black text-2xl text-primary">{% trans "Calculated Metrics" %}</h1>
+                <p class="text-sm text-on-surface-variant mt-1 max-w-xl">
+                    {% trans "Latest value of each metric for" %} <strong>{{ selected_region.name }}</strong>,
+                    {% trans "and how it compares with a reference period." %}
+                </p>
+            </div>
+            <form method="get" class="flex flex-wrap items-end gap-2">
+                <label class="text-xs font-semibold text-on-surface-variant">{% trans "Region" %}
+                    <select name="region_id" onchange="this.form.submit()" class="block mt-1 w-40 py-1.5 text-sm rounded-md border-outline-variant bg-white">
+                        {% for r in regions %}<option value="{{ r.id }}"{% if r.id == selected_region.id %} selected{% endif %}>{{ r.name }}</option>{% endfor %}
+                    </select>
+                </label>
+                <label class="text-xs font-semibold text-on-surface-variant">{% trans "As of" %}
+                    <input type="date" name="snap_date" value="{{ snap_date }}" onchange="this.form.submit()" class="block mt-1 py-1.5 text-sm rounded-md border-outline-variant bg-white">
+                </label>
+            </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {% for section in calc_sections %}
-            <div {% if section.category == 'Soil' %}id="soil"{% elif section.category == 'Climate' %}id="climate"{% elif section.category == 'Drought Indices' %}id="drought"{% elif section.category == 'Remote Sensing' %}id="remote"{% elif section.category == 'Hydrology' %}id="hydro"{% elif section.category == 'Agriculture' %}id="agri"{% endif %} class="bg-surface-container-lowest border border-outline-variant rounded-lg p-4 shadow-sm">
-                <div class="flex items-center justify-between mb-3">
-                    <h4 class="font-headline font-bold text-sm text-primary">{{ section.category }}</h4>
-                    <span class="text-[10px] text-on-surface-variant font-label">Derived</span>
-                </div>
-                <div class="space-y-1.5">
-                    {% for item in section.items %}
-                    <div class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-surface-container transition-colors text-xs">
-                        <div class="min-w-0 flex-1">
-                            <div class="font-medium text-on-surface truncate">{{ item.name }}</div>
-                            <div class="text-[10px] text-on-surface-variant leading-tight truncate">{{ item.formula }}</div>
-                        </div>
-                        <div class="text-right shrink-0 ml-3">
-                            <span class="font-semibold text-on-surface font-label text-sm">{{ item.value }}</span>
-                        </div>
-                    </div>
-                    {% endfor %}
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-on-surface-variant">{% trans "Compare with" %}</span>
+                <div id="ref-toggle" class="seg inline-flex bg-surface-container p-1 rounded-lg">
+                    <button type="button" data-ref="normal" class="on">{% trans "Seasonal normal" %}</button>
+                    <button type="button" data-ref="previous">{% trans "Previous reading" %}</button>
+                    <button type="button" data-ref="last_year">{% trans "Last year" %}</button>
                 </div>
             </div>
+            <label class="inline-flex items-center gap-2 text-xs font-semibold text-on-surface-variant cursor-pointer">
+                <input id="formula-toggle" type="checkbox" class="rounded border-outline-variant text-primary focus:ring-0">
+                {% trans "Show formulas" %}
+            </label>
+        </div>
+
+        {% if calc_sections %}
+        <!-- Summary -->
+        <div id="summary" class="flex flex-wrap items-center gap-x-5 gap-y-2 bg-white border border-outline-variant rounded-xl px-4 py-3 mb-5 text-sm">
+            <span class="text-on-surface-variant" id="summary-lead"></span>
+            <span><span class="badge st-better" id="n-better">0</span> {% trans "better for crops" %}</span>
+            <span><span class="badge st-worse" id="n-worse">0</span> {% trans "worse for crops" %}</span>
+            <span><span class="badge st-normal" id="n-normal">0</span> {% trans "near normal" %}</span>
+        </div>
+
+        <!-- Metric cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {% for section in calc_sections %}
+            <section id="{{ section.id }}" class="bg-white border border-outline-variant rounded-xl overflow-hidden">
+                <h2 class="font-headline font-bold text-sm text-primary px-4 pt-3 pb-2">{{ section.title }}</h2>
+                <ul class="divide-y divide-outline-variant/50">
+                    {% for item in section.items %}
+                    <li class="metric px-4 py-2.5 flex items-start gap-3"
+                        data-unit="{{ item.unit }}"
+                        data-normal-label="{{ item.normal_label }}"
+                        data-prev-date="{{ item.previous_date|date:'j M Y' }}"
+                        {% for ref, r in item.rel.items %}{% if r %} data-{{ ref }}="{{ r.value|stringformat:'s' }}|{{ r.kind }}|{{ r.state }}|{{ r.ref|stringformat:'s' }}"{% endif %}{% endfor %}>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-medium">{{ item.name }}</div>
+                            <div class="text-[11px] text-on-surface-variant">{{ item.date|date:"j M Y" }}</div>
+                            <div class="formula text-[11px] text-secondary num mt-0.5">{{ item.formula }}</div>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="num text-sm font-semibold">{{ item.current }}<span class="text-on-surface-variant font-normal text-xs"> {{ item.unit }}</span></div>
+                            <div class="mt-0.5"><span class="rel badge st-none">—</span></div>
+                            <div class="ref-line text-[11px] text-on-surface-variant mt-0.5"></div>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </section>
             {% endfor %}
         </div>
-
-        <!-- ── Custom Chart Builder ── -->
-        <div class="mt-6 bg-white border border-outline-variant rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <h4 class="font-headline font-bold text-primary">Custom Chart Builder</h4>
-                <span class="text-xs text-on-surface-variant">Pick any metric for X and Y axes</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div>
-                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Region</label>
-                    <select id="chart-region" class="w-full px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary">
-                        {% for r in regions %}
-                        <option value="{{ r.id }}"{% if r.id == selected_region.id %} selected{% endif %}>{{ r.name }}</option>
-                        {% endfor %}
-                    </select>
-                    <p class="text-[10px] text-on-surface-variant mt-0.5">Region filter above also applies</p>
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Metric (over time)</label>
-                    <select id="chart-y" class="w-full px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary"></select>
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Date From</label>
-                    <input type="date" id="chart-from" class="w-full px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary">
-                </div>
-                <div>
-                    <label class="text-xs font-semibold text-on-surface-variant block mb-1">Date To</label>
-                    <div class="flex gap-2">
-                        <input type="date" id="chart-to" class="flex-1 px-3 py-1.5 bg-surface-container-low border border-outline-variant rounded-DEFAULT text-sm focus:outline-none focus:border-secondary">
-                        <button id="chart-go" class="px-4 py-1.5 bg-primary text-on-primary rounded-DEFAULT text-sm font-semibold hover:opacity-90 transition-opacity">Plot</button>
-                    </div>
-                </div>
-            </div>
-            <div class="h-72 md:h-80">
-                <canvas id="customChart"></canvas>
-            </div>
+        {% else %}
+        <div class="bg-white border border-outline-variant rounded-xl p-8 text-center text-sm text-on-surface-variant">
+            {% trans "No measurements stored for this region yet. Pick another region above." %}
         </div>
+        {% endif %}
 
-        <div class="mt-8 text-sm text-on-surface-variant">Note: Calculated values use reference formulas (FAO-56, Saxton &amp; Rawls, SEBAL). Underlying inputs must be present in the metrics tables for the selected region.</div>
+        {% if missing_metrics %}
+        <p class="mt-3 text-xs text-on-surface-variant">
+            <span class="font-semibold">{% trans "No data:" %}</span> {{ missing_metrics|join:", " }}
+        </p>
+        {% endif %}
 
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-        <script>
-        (function(){
-            // ── Populate metric dropdowns ──
-            var METRICS = {{ metrics_json|safe }};
-            var chartY = document.getElementById('chart-y');
-            function populateSelect(sel, selectedKey) {
-                sel.innerHTML = '<option value="">-- Select --</option>';
-                var cats = {};
-                METRICS.forEach(function(m) {
-                    if (!cats[m.category]) cats[m.category] = [];
-                    cats[m.category].push(m);
-                });
-                Object.keys(cats).sort().forEach(function(cat) {
-                    var optgroup = document.createElement('optgroup');
-                    optgroup.label = cat;
-                    cats[cat].forEach(function(m) {
-                        var opt = document.createElement('option');
-                        opt.value = m.key;
-                        opt.textContent = m.label;
-                        if (m.key === selectedKey) opt.selected = true;
-                        optgroup.appendChild(opt);
-                    });
-                    sel.appendChild(optgroup);
-                });
-            }
-            populateSelect(chartY, 'spi1');
+        <!-- Chart -->
+        <section class="mt-6 bg-white border border-outline-variant rounded-xl p-4 md:p-5">
+            <div class="flex flex-wrap items-end gap-3 mb-4">
+                <h2 class="font-headline font-bold text-primary mr-auto">{% trans "History" %}</h2>
+                <label class="text-xs font-semibold text-on-surface-variant">{% trans "Metric" %}
+                    <select id="chart-y" class="block mt-1 w-56 py-1.5 text-sm rounded-md border-outline-variant bg-white"></select>
+                </label>
+                <label class="text-xs font-semibold text-on-surface-variant">{% trans "From" %}
+                    <input type="date" id="chart-from" class="block mt-1 py-1.5 text-sm rounded-md border-outline-variant bg-white">
+                </label>
+                <label class="text-xs font-semibold text-on-surface-variant">{% trans "To" %}
+                    <input type="date" id="chart-to" class="block mt-1 py-1.5 text-sm rounded-md border-outline-variant bg-white">
+                </label>
+                <div id="mode-toggle" class="seg inline-flex bg-surface-container p-1 rounded-lg">
+                    <button type="button" data-mode="values" class="on">{% trans "Values" %}</button>
+                    <button type="button" data-mode="relative">{% trans "Vs. monthly normal" %}</button>
+                </div>
+            </div>
+            <div class="relative h-72 md:h-80">
+                <canvas id="customChart"></canvas>
+                <p id="chart-empty" class="hidden absolute inset-0 flex items-center justify-center text-sm text-on-surface-variant">{% trans "No data for this metric in this region." %}</p>
+            </div>
+            <p class="mt-2 text-[11px] text-on-surface-variant">{% trans "Values on the same date (several stations or crops) are averaged. The monthly normal is the mean of that calendar month over all years." %}</p>
+        </section>
 
-            // ── Line chart: metric over time ──
-            var ctx = document.getElementById('customChart').getContext('2d');
-            var customChart = new Chart(ctx, {
-                type: 'line',
-                data: { datasets: [] },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    plugins: {
-                        legend: { display: true, position: 'top' },
-                        tooltip: {
-                            callbacks: {
-                                title: function(items) {
-                                    var raw = items[0] && items[0].raw;
-                                    return raw && raw.date ? raw.date.split('T')[0] : '';
-                                },
-                                label: function(ctx) {
-                                    var yLbl = METRICS.find(function(m) { return m.key === chartY.value; });
-                                    var unit = yLbl ? yLbl.unit : '';
-                                    return 'Value: ' + ctx.parsed.y.toFixed(2) + (unit ? ' ' + unit : '');
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            type: 'time',
-                            time: { tooltipFormat: 'yyyy-MM-dd', unit: 'month', displayFormats: { month: 'MMM yyyy', day: 'MMM dd' } },
-                            title: { display: true, text: 'Date' }
-                        },
-                        y: {
-                            title: { display: true, text: 'Value' },
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
-
-            function fetchAndPlot() {
-                var rid = document.getElementById('chart-region').value;
-                var yKey = chartY.value;
-                var from = document.getElementById('chart-from').value;
-                var to = document.getElementById('chart-to').value;
-                if (!rid || !yKey) return;
-
-                fetch('/analysis/calculations/chart-data/?region_id=' + rid + '&metric=' + yKey + (from ? '&date_from=' + from : '') + (to ? '&date_to=' + to : '')).then(function(r) {
-                    if (!r.ok) throw new Error('Fetch failed');
-                    return r.json();
-                }).then(function(data) {
-                    var label = data.label + (data.unit ? ' (' + data.unit + ')' : '');
-                    var points = data.dates.map(function(d, i) {
-                        return { date: d.split('T')[0], y: data.values[i] };
-                    });
-                    var color = '#06b6d4';
-                    customChart.data = {
-                        datasets: [{
-                            label: label,
-                            data: points,
-                            borderColor: color,
-                            backgroundColor: 'rgba(6,182,212,0.12)',
-                            fill: true,
-                            tension: 0.2,
-                            pointRadius: 3,
-                            pointHoverRadius: 6,
-                            parsing: { xAxisKey: 'date', yAxisKey: 'y' }
-                        }]
-                    };
-                    customChart.options.scales.y.title.text = label;
-                    customChart.update();
-                }).catch(function(err) {
-                    console.warn('Chart fetch error:', err);
-                });
-            }
-
-            document.getElementById('chart-go').addEventListener('click', fetchAndPlot);
-            document.getElementById('chart-region').addEventListener('change', fetchAndPlot);
-            chartY.addEventListener('change', fetchAndPlot);
-
-            // Auto-plot on load
-            setTimeout(fetchAndPlot, 300);
-        })();
-        </script>
-
-
+        <p class="mt-6 text-xs text-on-surface-variant">
+            {% trans "Percentages compare the latest value with the reference: (value − reference) ÷ reference × 100. Indices centred on zero (SPI, SPEI, PDSI), temperatures and balances are shown as a plain difference. Green and orange show whether the change is good or bad for crops and water supply." %}
+        </p>
 
         {% include 'dashboard/_partners.html' %}
+      </div>
+    </main>
+</div>
+{% include "dashboard/_agroai_chat.html" %}
 
-      </main>
-  </div>
-  {% include "dashboard/_agroai_chat.html" %}
-  </body></html>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script>
+(function () {
+    var REGION_ID = '{{ selected_region.id|default:"" }}';
+    var LABELS = {
+        normal: '{% filter escapejs %}{% trans "Compared with the seasonal normal:" %}{% endfilter %}',
+        previous: '{% filter escapejs %}{% trans "Compared with the previous reading:" %}{% endfilter %}',
+        last_year: '{% filter escapejs %}{% trans "Compared with the same time last year:" %}{% endfilter %}',
+        prev: '{% filter escapejs %}{% trans "previous" %}{% endfilter %}',
+        lastYear: '{% filter escapejs %}{% trans "last year" %}{% endfilter %}',
+        noRef: '{% filter escapejs %}{% trans "no reference" %}{% endfilter %}'
+    };
 
+    // ── Relative comparison ──
+    function fmt(v, kind, unit) {
+        var n = parseFloat(v);
+        var sign = n > 0 ? '+' : (n < 0 ? '−' : '±');
+        var abs = Math.abs(n);
+        if (kind === 'pct') return sign + (abs >= 100 ? abs.toFixed(0) : abs.toFixed(1)) + '%';
+        return sign + abs + (unit ? ' ' + unit : '');
+    }
+    function applyRef(ref) {
+        var counts = { better: 0, worse: 0, normal: 0 };
+        document.querySelectorAll('.metric').forEach(function (li) {
+            var badge = li.querySelector('.rel');
+            var line = li.querySelector('.ref-line');
+            var unit = li.dataset.unit;
+            var raw = li.dataset[ref];
+            if (!raw) {
+                badge.className = 'rel badge st-none';
+                badge.textContent = LABELS.noRef;
+                line.textContent = '';
+                return;
+            }
+            var p = raw.split('|');   // value | kind | state | reference
+            var state = p[2];
+            if (counts[state] !== undefined) counts[state]++;
+            badge.className = 'rel badge st-' + state;
+            badge.textContent = fmt(p[0], p[1], unit);
+            var refName = ref === 'normal' ? li.dataset.normalLabel
+                        : ref === 'previous' ? (li.dataset.prevDate || LABELS.prev)
+                        : LABELS.lastYear;
+            line.textContent = refName + ': ' + p[3] + (unit ? ' ' + unit : '');
+        });
+        var lead = document.getElementById('summary-lead');
+        if (lead) {
+            lead.textContent = LABELS[ref];
+            document.getElementById('n-better').textContent = counts.better;
+            document.getElementById('n-worse').textContent = counts.worse;
+            document.getElementById('n-normal').textContent = counts.normal;
+        }
+    }
+
+    function segment(id, attr, onPick) {
+        var box = document.getElementById(id);
+        box.addEventListener('click', function (e) {
+            var b = e.target.closest('button');
+            if (!b) return;
+            box.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); });
+            onPick(b.dataset[attr]);
+        });
+    }
+    segment('ref-toggle', 'ref', applyRef);
+    applyRef('normal');
+
+    document.getElementById('formula-toggle').addEventListener('change', function (e) {
+        document.body.classList.toggle('show-formulas', e.target.checked);
+    });
+
+    // ── History chart ──
+    var METRICS = {{ metrics_json|safe }};
+    var chartY = document.getElementById('chart-y');
+    var cats = {};
+    METRICS.forEach(function (m) { (cats[m.category] = cats[m.category] || []).push(m); });
+    Object.keys(cats).forEach(function (cat) {
+        var g = document.createElement('optgroup');
+        g.label = cat;
+        cats[cat].forEach(function (m) {
+            var o = document.createElement('option');
+            o.value = m.key;
+            o.textContent = m.label + (m.unit ? ' (' + m.unit + ')' : '');
+            if (m.key === 'drought_spei_3m') o.selected = true;
+            g.appendChild(o);
+        });
+        chartY.appendChild(g);
+    });
+
+    var mode = 'values';
+    var chart = new Chart(document.getElementById('customChart'), {
+        type: 'line',
+        data: { datasets: [] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { intersect: false, mode: 'index' },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: function (c) {
+                    var u = chart.$unit || '';
+                    var v = c.parsed.y;
+                    if (u.charAt(0) === '%') return (v > 0 ? '+' : '') + v.toFixed(1) + ' ' + u;
+                    return v.toFixed(2) + (u ? ' ' + u : '');
+                } } }
+            },
+            scales: {
+                x: { type: 'time', time: { tooltipFormat: 'd MMM yyyy' }, grid: { display: false } },
+                y: { title: { display: true, text: '' }, grid: {
+                    color: function (c) { return (mode === 'relative' && c.tick && c.tick.value === 0) ? '#64748b' : '#e5e7eb'; },
+                    lineWidth: function (c) { return (mode === 'relative' && c.tick && c.tick.value === 0) ? 1.5 : 1; }
+                } }
+            }
+        }
+    });
+
+    function plot() {
+        if (!REGION_ID || !chartY.value) return;
+        var q = new URLSearchParams({ region_id: REGION_ID, metric: chartY.value, mode: mode });
+        var from = document.getElementById('chart-from').value;
+        var to = document.getElementById('chart-to').value;
+        if (from) q.set('date_from', from);
+        if (to) q.set('date_to', to);
+        fetch('{% url "dashboard:calculations_chart_api" %}?' + q).then(function (r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }).then(function (d) {
+            document.getElementById('chart-empty').classList.toggle('hidden', d.values.length > 0);
+            var rel = d.mode === 'relative';
+            var pts = d.dates.map(function (x, i) { return { x: x, y: d.values[i] }; });
+            chart.$unit = d.unit;
+            chart.data.datasets = [{
+                data: pts,
+                borderColor: '#00677d',
+                borderWidth: 1.5,
+                pointRadius: pts.length > 200 ? 0 : 2,
+                tension: 0.2,
+                fill: rel ? { target: { value: 0 }, above: 'rgba(0,103,125,0.16)', below: 'rgba(100,116,139,0.2)' }
+                          : { target: 'origin', above: 'rgba(0,103,125,0.08)' }
+            }];
+            chart.options.scales.y.title.text = d.label + (d.unit ? ' (' + d.unit + ')' : '');
+            chart.update();
+        }).catch(function (e) { console.warn('Chart fetch error:', e); });
+    }
+
+    segment('mode-toggle', 'mode', function (m) { mode = m; plot(); });
+    chartY.addEventListener('change', plot);
+    document.getElementById('chart-from').addEventListener('change', plot);
+    document.getElementById('chart-to').addEventListener('change', plot);
+    plot();
+})();
+</script>
+</body></html>

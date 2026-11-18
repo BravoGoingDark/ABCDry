@@ -40,8 +40,8 @@ Generate a 2-3 sentence explanation for a farmer or park manager based on these 
 - Current drought risk: {risk_today}/100 ({risk_level(risk_today)})
 - Forecast risk in 7 days: {risk_7day}/100 ({risk_level(risk_7day)})
 - Forecast risk in 30 days: {risk_30day}/100 ({risk_level(risk_30day)})
-- Primary driver: {drivers.get('rainfall_deficit', 0)}% rainfall deficit
-- Secondary driver: {drivers.get('high_temperature', 0)}% temperature anomaly
+- Rain over the last 90 days: {drivers.get('rainfall_deficit', 0)}% below normal (0 means at or above normal)
+- Temperature over the last 30 days: {drivers.get('high_temperature', 0)} °C versus normal
 - Current soil moisture: {soil_moisture_pct}% ({soil_pct_of_capacity}% of available capacity)
 
 Write a concise, actionable explanation (2-3 sentences) that explains the current situation, the near-term trend, and one specific action. Do not use markdown, bullet points, or numbered lists."""
@@ -68,7 +68,7 @@ Write a concise, actionable explanation (2-3 sentences) that explains the curren
         rainfall_deficit = drivers.get('rainfall_deficit', 0)
 
         if risk_today <= 20:
-            return f'Conditions are normal with a {rainfall_deficit}% rainfall deficit within seasonal variation. Continue routine monitoring of soil moisture and vegetation health.'
+            return f'Conditions are normal: rain over the last 90 days is {rainfall_deficit}% below normal at most, within seasonal variation. Continue routine monitoring of soil moisture and vegetation health.'
         if risk_today <= 40:
             return f'The current drought risk is moderate (Watch level), driven by a {rainfall_deficit}% rainfall deficit. Prepare irrigation systems for potential use within the next 10-14 days.'
         if risk_today <= 60:
