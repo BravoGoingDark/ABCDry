@@ -1,0 +1,55 @@
+name: apwrs_farmer
+description: "APWRS Farmer: watering, crops, pests, weather and an assistant for your farm."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  cupertino_ui: ^1.1.7
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_map: ^8.3.2
+  flutter_secure_storage: ^11.2.0
+  geolocator: ^14.1.2
+  http: ^1.6.0
+  intl: ^0.20.3
+  latlong2: ^0.10.1
+  material_ui: ^1.11.1
+  shared_preferences: ^2.5.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: any
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/img/apwrs-logo.png
+  # The website's typefaces (Google Fonts, SIL Open Font License):
+  # Hanken Grotesk for titles and numbers, Inter for text.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-400.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-500.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-600.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-700.ttf
+          weight: 700
+    - family: HankenGrotesk
+      fonts:
+        - asset: assets/fonts/HankenGrotesk-500.ttf
+          weight: 500
+        - asset: assets/fonts/HankenGrotesk-600.ttf
+          weight: 600
+        - asset: assets/fonts/HankenGrotesk-700.ttf
+          weight: 700
+        - asset: assets/fonts/HankenGrotesk-800.ttf
+          weight: 800
