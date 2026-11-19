@@ -939,6 +939,55 @@ class WeatherForecastServiceTests(TestCase):
 		):
 			self.assertIsNone(fetch_region_forecast(self.region))
 
+	def test_fetch_falls_back_to_met_norway_when_open_meteo_refuses(self):
+		"""Shared hosting gets 429 from Open-Meteo: MET Norway takes over."""
+		from unittest.mock import Mock, patch
+
+		import requests
+
+		from .services import weather_forecast
+		from .services.weather_forecast import fetch_region_forecast
+
+		def instant(hour, temp, rain, symbol):
+			return {
+				"time": f"2026-11-03T{hour:02d}:00:00Z",
+				"data": {
+					"instant": {"details": {
+						"air_temperature": temp, "relative_humidity": 60.0, "wind_speed": 4.0,
+						"dew_point_temperature": 8.0, "cloud_area_fraction": 20.0,
+					}},
+					"next_1_hours": {"summary": {"symbol_code": symbol},
+									 "details": {"precipitation_amount": rain}},
+				},
+			}
+
+		met = {"properties": {"timeseries": [
+			instant(h, 12.0 + h / 2, 0.5 if h in (8, 10) else 0.0, "lightrain" if h in (8, 10) else "fair_day")
+			for h in range(0, 22, 2)
+		]}}
+
+		def fake_get(url, **kwargs):
+			response = Mock()
+			if "open-meteo" in url:
+				response.raise_for_status.side_effect = requests.HTTPError("429 Client Error: Too Many Requests")
+			else:
+				response.raise_for_status.return_value = None
+				response.json.return_value = met
+			return response
+
+		with patch("requests.get", side_effect=fake_get), patch.object(weather_forecast, "RETRY_DELAY", 0):
+			payload = fetch_region_forecast(self.region, days=2)
+
+		self.assertIsNotNone(payload)
+		self.assertEqual(payload["source"], "met-norway")
+		self.assertIn("MET Norway", payload["attribution"])
+		day = payload["days"][0]
+		self.assertEqual(day["date"], "2026-11-03")
+		self.assertEqual(day["precip"], 1.0)
+		self.assertEqual(day["weather_code"], 61)  # light rain: it rained over 1 mm
+		self.assertGreater(day["et0"], 0)
+		self.assertEqual(day["tmax"], 22.0)
+
 	def test_get_region_forecast_caches_successful_payload(self):
 		from unittest.mock import patch
 

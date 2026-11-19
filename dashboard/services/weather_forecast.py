@@ -238,6 +238,13 @@ def _error_payload(region, point, message):
     }
 
 
+OPEN_METEO_SOURCE = {
+    "source": "open-meteo",
+    "attribution": "Weather data by Open-Meteo.com",
+    "attribution_url": "https://open-meteo.com/",
+}
+
+
 def open_meteo_get(params):
     """Open-Meteo JSON for `params`, trying a second time after a short
     pause when the first call fails (timeout, connection reset, rate limit,
@@ -273,14 +280,21 @@ def fetch_region_forecast(region, days=DEFAULT_FORECAST_DAYS):
         "forecast_days": days,
     }
 
+    source = OPEN_METEO_SOURCE
     try:
         payload = open_meteo_get(params)
-    except Exception as exc:  # network, HTTP, JSON — all fall back to the UI message
+    except Exception as exc:  # network, HTTP, JSON: try the backup source
         logger.warning(
             "Open-Meteo forecast failed for %s (%s, %s): %r",
             region.name, lat, lon, exc,
         )
-        return None
+        from .weather_fallback import MET_SOURCE, met_norway_forecast
+        try:
+            payload = met_norway_forecast(lat, lon, days)
+            source = MET_SOURCE
+        except Exception as exc2:  # both down: the UI says so
+            logger.warning("MET Norway forecast failed for %s: %r", region.name, exc2)
+            return None
 
     daily = payload.get("daily") or {}
     times = daily.get("time") or []
@@ -372,10 +386,8 @@ def fetch_region_forecast(region, days=DEFAULT_FORECAST_DAYS):
             "latitude": round(lat, 4),
             "longitude": round(lon, 4),
         },
-        "source": "open-meteo",
+        **source,
         "model": "best_match",
-        "attribution": "Weather data by Open-Meteo.com",
-        "attribution_url": "https://open-meteo.com/",
         "issued_at": datetime.now(dt_timezone.utc).isoformat(),
         "timezone": payload.get("timezone"),
         "days": rows,
