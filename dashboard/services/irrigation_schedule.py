@@ -89,7 +89,8 @@ REPORTED_BASES = ('last_irrigation', 'reported_dry', 'rain_only')
 
 def fetch_daily_water(lat, lon, past_days=PAST_DAYS, forecast_days=FORECAST_DAYS):
     """Daily rain / ET0 / Tmax / wind / rain probability at a point, past and
-    forecast, from Open-Meteo. Returns a list of dicts or None on failure."""
+    forecast, from Open-Meteo (or the backup sources in weather_fallback when
+    Open-Meteo refuses). Returns a list of dicts or None on failure."""
     from .weather_forecast import open_meteo_get
 
     key = f'irrigation:wx:{lat:.3f}:{lon:.3f}:{past_days}:{forecast_days}'
@@ -106,7 +107,15 @@ def fetch_daily_water(lat, lon, past_days=PAST_DAYS, forecast_days=FORECAST_DAYS
         daily = open_meteo_get(params).get('daily') or {}
     except Exception as exc:  # network, HTTP, JSON (already retried once)
         logger.warning('Open-Meteo irrigation weather failed at (%s, %s): %r', lat, lon, exc)
-        return None
+        # Backup: NASA POWER for the past, MET Norway for the forecast.
+        from .weather_fallback import daily_water
+        try:
+            rows = daily_water(lat, lon, past_days, forecast_days)
+        except Exception as exc2:
+            logger.warning('Backup irrigation weather failed at (%s, %s): %r', lat, lon, exc2)
+            return None
+        cache.set(key, rows, WEATHER_CACHE_TTL)
+        return rows
 
     def col(name, i):
         values = daily.get(name) or []
