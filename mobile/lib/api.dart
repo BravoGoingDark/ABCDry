@@ -18,9 +18,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'i18n.dart';
 
 class ApiException implements Exception {
-  ApiException(this.message, {this.status});
+  ApiException(this.message, {this.status, this.fields = const {}});
   final String message;
   final int? status;
+
+  /// Form errors by field name (sign-up), as the server words them.
+  final Map<String, String> fields;
   @override
   String toString() => message;
 }
@@ -94,16 +97,23 @@ class Api {
     }
     if (r.statusCode >= 400) {
       final msg = data is Map && data['error'] != null ? '${data['error']}' : '${tr(lang, 'error')} ${r.statusCode}';
-      throw ApiException(msg, status: r.statusCode);
+      final fields = data is Map && data['errors'] is Map
+          ? {for (final e in (data['errors'] as Map).entries) '${e.key}': '${e.value}'}
+          : const <String, String>{};
+      throw ApiException(msg, status: r.statusCode, fields: fields);
     }
     return data;
   }
+
+  /// The free server sleeps when unused and takes up to about a minute to
+  /// wake on the first request, so wait long enough for that.
+  static const Duration _slowServerWait = Duration(seconds: 90);
 
   /// GET with the saved copy as fallback when there is no connection.
   Future<dynamic> get(String path) async {
     final key = '$_cachePrefix$lang:$path';
     try {
-      final r = await client.get(_uri(path), headers: _headers).timeout(const Duration(seconds: 30));
+      final r = await client.get(_uri(path), headers: _headers).timeout(_slowServerWait);
       final data = _decode(r);
       await _prefs?.setString(key, utf8.decode(r.bodyBytes));
       offline.value = false;
@@ -122,12 +132,14 @@ class Api {
     final request = http.Request(method, _uri(path))..headers.addAll(_headers);
     if (body != null) request.body = jsonEncode(body);
     try {
-      final streamed = await client.send(request).timeout(const Duration(seconds: 45));
+      final streamed = await client.send(request).timeout(_slowServerWait);
       final r = await http.Response.fromStream(streamed);
       offline.value = false;
       return _decode(r);
     } on ApiException {
       rethrow;
+    } on TimeoutException {
+      throw ApiException(tr(lang, 'serverWaking'));
     } catch (_) {
       offline.value = true;
       throw ApiException(tr(lang, 'noConnection'));
@@ -138,8 +150,31 @@ class Api {
   Future<dynamic> patch(String path, Object body) => send('PATCH', path, body);
   Future<dynamic> delete(String path) => send('DELETE', path);
 
+  /// Create a farmer account (same form and rules as the website's sign-up
+  /// page) and sign in with it straight away.
+  Future<Map<String, dynamic>> signup({
+    required String username,
+    String email = '',
+    required String phone,
+    required String password,
+    required String confirm,
+  }) async {
+    final data = await post('/farmer/api/auth/signup/', {
+      'username': username,
+      'email': email,
+      'phone': phone,
+      'password1': password,
+      'password2': confirm,
+    });
+    return _signedIn(data);
+  }
+
   Future<Map<String, dynamic>> login(String username, String password) async {
     final data = await post('/farmer/api/auth/login/', {'username': username, 'password': password});
+    return _signedIn(data);
+  }
+
+  Future<Map<String, dynamic>> _signedIn(dynamic data) async {
     token = data['token'] as String;
     await _secure.write(key: _tokenKey, value: token);
     final user = Map<String, dynamic>.from(data['user'] as Map);

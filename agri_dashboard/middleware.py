@@ -58,6 +58,8 @@ class LoginRequiredMiddleware:
         self.exact_exempt.add('/farmer/sw.js')
         # Mobile app login (the app then sends its token)
         self.exact_exempt.add('/farmer/api/auth/login/')
+        # Mobile app sign-up (same rules as the public /signup/ page)
+        self.exact_exempt.add('/farmer/api/auth/signup/')
 
     def __call__(self, request):
         path = request.path

@@ -223,6 +223,32 @@ def mobile_login_api(request):
     return JsonResponse({'token': token.key, 'user': _me(user)})
 
 
+@csrf_exempt     # like login: no cookie to forge, and the account is new
+@require_http_methods(['POST'])
+def mobile_signup_api(request):
+    """POST {username, email?, phone, password1, password2} -> 201 {token, user}.
+
+    Same form and rules as the website's sign-up page (a farmer account,
+    active at once); the app is signed in straight away. Refusals come back
+    as 400 {error, errors: {field: message}} in the request's language.
+    """
+    from django.utils.translation import gettext as _
+    from rest_framework.authtoken.models import Token
+    from ..forms import FarmerSignupForm
+    data = _json_body(request)
+    if data is None:
+        return JsonResponse({'error': _('Invalid JSON.')}, status=400)
+    form = FarmerSignupForm({k: data.get(k) or '' for k in ('username', 'email', 'phone', 'password1', 'password2')})
+    if not form.is_valid():
+        errors = {field: [str(m) for m in msgs][0] for field, msgs in form.errors.items()}
+        return JsonResponse({'error': next(iter(errors.values())), 'errors': errors}, status=400)
+    # Reload: the form sets the role on its own copy of the profile, not the
+    # one cached on this user when the account was created.
+    user = type(form.save()).objects.select_related('profile').get(username=form.cleaned_data['username'])
+    token, _created = Token.objects.get_or_create(user=user)
+    return JsonResponse({'token': token.key, 'user': _me(user)}, status=201)
+
+
 @require_http_methods(['POST'])
 def mobile_logout_api(request):
     """Revoke the app's token (every phone signed in with it is logged out)."""
