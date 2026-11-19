@@ -30,6 +30,8 @@ flutter:
   uses-material-design: true
   assets:
     - assets/img/apwrs-logo.png
+    - assets/img/apwrs-logo-hd.png
+    - assets/data/ichkeul_basin.geojson
     - assets/img/app_icon.png
   # The website's typefaces (Google Fonts, SIL Open Font License):
   # Hanken Grotesk for titles and numbers, Inter for text.

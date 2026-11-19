@@ -3,8 +3,9 @@ import 'package:material_ui/material_ui.dart';
 import '../format.dart';
 import '../i18n.dart';
 
-/// Loading screen while the app opens: the brand green of the launch screen,
-/// the app icon, the name, the website's tagline and a quiet progress bar.
+/// Loading screen while the app opens, in the website's light style: its
+/// soft light-blue wash, the logo with its teal ring, the name and tagline,
+/// a thin progress bar and the data sources, easing in.
 class SplashView extends StatefulWidget {
   const SplashView({super.key, this.showText = true});
 
@@ -16,7 +17,7 @@ class SplashView extends StatefulWidget {
 }
 
 class _SplashViewState extends State<SplashView> with SingleTickerProviderStateMixin {
-  late final AnimationController _in = AnimationController(vsync: this, duration: const Duration(milliseconds: 700))
+  late final AnimationController _in = AnimationController(vsync: this, duration: const Duration(milliseconds: 900))
     ..forward();
 
   @override
@@ -27,80 +28,81 @@ class _SplashViewState extends State<SplashView> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    final fade = CurvedAnimation(parent: _in, curve: Curves.easeOut);
+    final logo = CurvedAnimation(parent: _in, curve: const Interval(0, 0.7, curve: Curves.easeOutCubic));
+    final text = CurvedAnimation(parent: _in, curve: const Interval(0.25, 1, curve: Curves.easeOutCubic));
     return Scaffold(
-      backgroundColor: kPrimary,
-      body: Container(
+      body: DecoratedBox(
+        // The website's .hero-bg.
         decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment(0, -0.25),
-            radius: 1.1,
-            colors: [kPrimaryC, kPrimary],
-          ),
+          gradient: LinearGradient(
+              begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.white, kSurfaceLow]),
         ),
-        child: SafeArea(
-          child: Column(children: [
-            const Spacer(flex: 5),
-            ScaleTransition(
-              scale: Tween(begin: 0.9, end: 1.0).animate(fade),
-              child: Container(
-                width: 112,
-                height: 112,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(color: const Color(0x5969D4F4), width: 2),
-                  boxShadow: const [BoxShadow(color: Color(0x66000000), blurRadius: 30, offset: Offset(0, 12))],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(26),
-                  child: Image.asset('assets/img/app_icon.png', fit: BoxFit.cover),
-                ),
-              ),
+        child: DecoratedBox(
+          decoration: const BoxDecoration(
+            gradient: RadialGradient(
+              center: Alignment(1, -1.15),
+              radius: 1.2,
+              colors: [Color(0x2469D4F4), Color(0x0069D4F4)],
             ),
-            const SizedBox(height: 26),
-            FadeTransition(
-              opacity: fade,
+          ),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Column(children: [
-                Text('APWRS', style: hl(34, color: Colors.white)),
-                const SizedBox(height: 6),
-                AnimatedOpacity(
-                  opacity: widget.showText ? 1 : 0,
-                  duration: const Duration(milliseconds: 250),
-                  child: Text(t('farmerSpace').toUpperCase(),
-                      style: const TextStyle(
-                          color: kSecondaryFixed, fontSize: 12, fontWeight: FontWeight.w600, letterSpacing: 2.4)),
+                const Spacer(flex: 5),
+                // Already shown by the phone's launch screen: it only settles in.
+                ScaleTransition(
+                  scale: Tween(begin: 0.96, end: 1.0).animate(logo),
+                  child: const BrandLogo(size: 104),
                 ),
-              ]),
-            ),
-            const Spacer(flex: 4),
-            AnimatedOpacity(
-              opacity: widget.showText ? 1 : 0,
-              duration: const Duration(milliseconds: 250),
-              child: Column(children: [
-                SizedBox(
-                  width: 120,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: const LinearProgressIndicator(
-                      minHeight: 4,
-                      color: kSecondaryFixed,
-                      backgroundColor: Color(0x33FFFFFF),
-                    ),
+                const SizedBox(height: 28),
+                FadeTransition(
+                  opacity: text,
+                  child: SlideTransition(
+                    position: Tween(begin: const Offset(0, 0.25), end: Offset.zero).animate(text),
+                    child: Column(children: [
+                      Text('APWRS', style: hl(34).copyWith(letterSpacing: -0.4)),
+                      const SizedBox(height: 8),
+                      AnimatedOpacity(
+                        opacity: widget.showText ? 1 : 0,
+                        duration: const Duration(milliseconds: 250),
+                        child: Text(t('tagline'),
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: kMuted, fontSize: 13.5, height: 1.4)),
+                      ),
+                    ]),
                   ),
                 ),
-                const SizedBox(height: 14),
-                Text(t('loadingFarm'), style: const TextStyle(color: Color(0xCCFFFFFF), fontSize: 13.5)),
-                const SizedBox(height: 28),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(t('tagline'),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFF86AF99), fontSize: 11.5, height: 1.4)),
+                const Spacer(flex: 4),
+                FadeTransition(
+                  opacity: text,
+                  child: AnimatedOpacity(
+                    opacity: widget.showText ? 1 : 0,
+                    duration: const Duration(milliseconds: 250),
+                    child: Column(children: [
+                      SizedBox(
+                        width: 140,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(2),
+                          child: const LinearProgressIndicator(
+                            minHeight: 3,
+                            color: kSecondary,
+                            backgroundColor: kSurfaceHigh,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(t('loadingFarm'), style: const TextStyle(color: kSubtle, fontSize: 13)),
+                      const SizedBox(height: 28),
+                      Text(t('dataSources'),
+                          textAlign: TextAlign.center, style: const TextStyle(color: kSubtle, fontSize: 11.5)),
+                      const SizedBox(height: 16),
+                    ]),
+                  ),
                 ),
-                const SizedBox(height: 18),
               ]),
             ),
-          ]),
+          ),
         ),
       ),
     );

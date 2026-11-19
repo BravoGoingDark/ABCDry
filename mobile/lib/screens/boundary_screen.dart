@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../api.dart';
+import '../basin.dart';
 import '../format.dart';
 import '../geo.dart';
 import '../i18n.dart';
@@ -53,8 +54,6 @@ class BoundaryScreen extends StatefulWidget {
 }
 
 class _BoundaryScreenState extends State<BoundaryScreen> {
-  static final _morocco = LatLng(31.8, -7.1);
-
   final _map = MapController();
   final _name = TextEditingController();
   late List<LatLng> _corners;
@@ -64,12 +63,20 @@ class _BoundaryScreenState extends State<BoundaryScreen> {
   bool _busy = false;
   String? _error;
 
+  /// The Ichkeul catchment borders, drawn under the farm as on the website.
+  Basin? _basin;
+
   bool get _isNew => widget.farm == null;
 
   @override
   void initState() {
     super.initState();
     _corners = [...fromGeoJson(widget.farm?['boundary'])];
+    if (widget.showTiles) {
+      loadBasin().then((b) {
+        if (mounted) setState(() => _basin = b);
+      });
+    }
     // A new farm: start where the farmer stands, usually on the land itself.
     if (_isNew) WidgetsBinding.instance.addPostFrameCallback((_) => _locate(addCorner: false, quiet: true));
   }
@@ -150,8 +157,8 @@ class _BoundaryScreenState extends State<BoundaryScreen> {
         ? CameraFit.bounds(bounds: LatLngBounds.fromPoints(_corners), padding: const EdgeInsets.all(48), maxZoom: 18)
         : null;
     return MapOptions(
-      initialCenter: _corners.isNotEmpty ? _corners.first : _morocco,
-      initialZoom: _corners.isNotEmpty ? 17 : 5.5,
+      initialCenter: _corners.isNotEmpty ? _corners.first : Basin.centre,
+      initialZoom: _corners.isNotEmpty ? 17 : Basin.zoom,
       initialCameraFit: start,
       maxZoom: 20,
       backgroundColor: const Color(0xFFE8EDE6),
@@ -173,6 +180,7 @@ class _BoundaryScreenState extends State<BoundaryScreen> {
             maxNativeZoom: 19,
             maxZoom: 20,
           ),
+        if (_basin != null) ..._basinLayers(_basin!),
         if (_corners.length >= 3)
           PolygonLayer(polygons: [
             Polygon(
@@ -218,6 +226,26 @@ class _BoundaryScreenState extends State<BoundaryScreen> {
         if (widget.showTiles) const SimpleAttributionWidget(source: Text('Esri, Maxar, Earthstar Geographics')),
       ],
     );
+  }
+
+  /// The website's basin style: thin section lines, and the catchment edge as
+  /// a light line on a dark halo (on the street map, dark lines instead).
+  List<Widget> _basinLayers(Basin b) {
+    final light = _satellite;
+    return [
+      PolylineLayer(polylines: [
+        for (final s in b.sections)
+          Polyline(
+            points: s,
+            strokeWidth: 0.8,
+            color: light ? const Color(0x99FFFFFF) : const Color(0x80414844),
+          ),
+      ]),
+      PolylineLayer(polylines: [
+        Polyline(points: b.outline, strokeWidth: 5, color: light ? const Color(0xBF0B1A22) : const Color(0x40FFFFFF)),
+        Polyline(points: b.outline, strokeWidth: 2, color: light ? Colors.white : kPrimary),
+      ]),
+    ];
   }
 
   Widget _panel() {

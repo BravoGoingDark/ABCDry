@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Launch screen: the brand green with the sprout, like the app's own loading screen. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@color/splash_green" />
+    <item android:drawable="@color/splash_light" />
     <item>
         <bitmap android:gravity="center" android:src="@drawable/splash_icon" />
     </item>

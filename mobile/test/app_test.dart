@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:apwrs_farmer/api.dart';
+import 'package:apwrs_farmer/auth_widgets.dart' show AuthField;
 import 'package:apwrs_farmer/format.dart';
 import 'package:apwrs_farmer/geo.dart';
 import 'package:apwrs_farmer/i18n.dart';
@@ -464,7 +465,7 @@ void main() {
 
   Future<void> fillSignup(WidgetTester tester, {String confirm = 'olive-123'}) async {
     Future<void> type(String label, String text) =>
-        tester.enterText(find.widgetWithText(TextField, label), text);
+        tester.enterText(authField(label), text);
     await type('Username', 'nadia');
     await type('Phone number', '+216 20 000 000');
     await type('Password', 'olive-123');
@@ -551,8 +552,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: LoginScreen(onSignedIn: () => signedIn = true)));
     expect(find.text('Server'), findsNothing);
     expect(find.text('Sign up'), findsOneWidget);
-    await tester.enterText(find.widgetWithText(TextField, 'Username'), 'mona');
-    await tester.enterText(find.widgetWithText(TextField, 'Password'), 'nope');
+    await tester.enterText(authField('Username'), 'mona');
+    await tester.enterText(authField('Password'), 'nope');
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
     expect(find.text('Could not sign in'), findsOneWidget);
@@ -560,3 +561,8 @@ void main() {
     expect(signedIn, isFalse);
   });
 }
+
+/// The text box of the sign-in / sign-up field labelled [label] (the label
+/// sits above the box, as on the website).
+Finder authField(String label) =>
+    find.descendant(of: find.widgetWithText(AuthField, label), matching: find.byType(TextField));

@@ -214,7 +214,9 @@ class BrandLogo extends StatelessWidget {
         child: ClipOval(
           child: Padding(
             padding: EdgeInsets.all(size * 0.06),
-            child: Image.asset('assets/img/apwrs-logo.png', fit: BoxFit.contain, filterQuality: FilterQuality.medium),
+            // The website logo redrawn sharp (scripts/draw_logo.py).
+            child:
+                Image.asset('assets/img/apwrs-logo-hd.png', fit: BoxFit.contain, filterQuality: FilterQuality.medium),
           ),
         ),
       );

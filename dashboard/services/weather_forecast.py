@@ -18,6 +18,7 @@ import calendar
 import logging
 from datetime import date, datetime, timezone as dt_timezone
 from statistics import mean
+import time
 
 import requests
 from django.core.cache import cache
@@ -29,7 +30,11 @@ logger = logging.getLogger(__name__)
 OPEN_METEO_URL = "https://api.open-meteo.com/v1/forecast"
 DEFAULT_FORECAST_DAYS = 16
 MAX_FORECAST_DAYS = 16
-REQUEST_TIMEOUT = 8
+# (connect, read) seconds. Generous: on a free host that has just woken up the
+# first outbound call is often slow, and a short limit turned that into
+# "weather unavailable" on the farmer page and in the app.
+REQUEST_TIMEOUT = (10, 25)
+RETRY_DELAY = 1.0
 CACHE_TTL = 60 * 30          # 30 min: models refresh hourly at best
 ERROR_CACHE_TTL = 60 * 2     # avoid hammering upstream during an outage
 NORMALS_CACHE_TTL = 60 * 60 * 12
@@ -233,6 +238,24 @@ def _error_payload(region, point, message):
     }
 
 
+def open_meteo_get(params):
+    """Open-Meteo JSON for `params`, trying a second time after a short
+    pause when the first call fails (timeout, connection reset, rate limit,
+    server error). Raises the last error if both fail."""
+    last_error = None
+    for attempt in range(2):
+        try:
+            response = requests.get(OPEN_METEO_URL, params=params, timeout=REQUEST_TIMEOUT)
+            response.raise_for_status()
+            return response.json()
+        except Exception as exc:  # network, HTTP, JSON
+            last_error = exc
+            logger.info("Open-Meteo call %d failed: %r", attempt + 1, exc)
+            if attempt == 0:
+                time.sleep(RETRY_DELAY)
+    raise last_error
+
+
 def fetch_region_forecast(region, days=DEFAULT_FORECAST_DAYS):
     """Call Open-Meteo and return the normalised payload, or None on failure."""
     point = region_point(region)
@@ -251,12 +274,10 @@ def fetch_region_forecast(region, days=DEFAULT_FORECAST_DAYS):
     }
 
     try:
-        response = requests.get(OPEN_METEO_URL, params=params, timeout=REQUEST_TIMEOUT)
-        response.raise_for_status()
-        payload = response.json()
+        payload = open_meteo_get(params)
     except Exception as exc:  # network, HTTP, JSON — all fall back to the UI message
         logger.warning(
-            "Open-Meteo forecast failed for %s (%s, %s): %s",
+            "Open-Meteo forecast failed for %s (%s, %s): %r",
             region.name, lat, lon, exc,
         )
         return None

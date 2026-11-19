@@ -10,6 +10,8 @@ const Map<String, Map<String, String>> _s = {
   'en': {
     'tagline': 'Adaptive Planting Window Recommendation System',
     'loadingFarm': 'Getting your farm ready…',
+    'ichkeulBasin': 'Ichkeul basin',
+    'dataSources': 'Data: CHIRPS · ERA5 · MODIS · Sentinel',
     'signUp': 'Sign up',
     'noAccount': 'New to APWRS?',
     'haveAccount': 'Already have an account?',
@@ -231,6 +233,8 @@ const Map<String, Map<String, String>> _s = {
   'fr': {
     'tagline': 'Système de recommandation adaptative des fenêtres de semis',
     'loadingFarm': 'Préparation de votre ferme…',
+    'ichkeulBasin': "Bassin de l'Ichkeul",
+    'dataSources': 'Données : CHIRPS · ERA5 · MODIS · Sentinel',
     'signUp': 'Créer un compte',
     'noAccount': 'Nouveau sur APWRS ?',
     'haveAccount': 'Vous avez déjà un compte ?',
@@ -458,6 +462,8 @@ const Map<String, Map<String, String>> _s = {
   'ar': {
     'tagline': 'نظام التوصية التكيفي بمواعيد الزراعة',
     'loadingFarm': 'جارٍ تجهيز مزرعتك…',
+    'ichkeulBasin': 'حوض إشكل',
+    'dataSources': 'البيانات: CHIRPS · ERA5 · MODIS · Sentinel',
     'signUp': 'إنشاء حساب',
     'noAccount': 'جديد على APWRS؟',
     'haveAccount': 'لديك حساب بالفعل؟',
