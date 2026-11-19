@@ -8,6 +8,8 @@ import 'package:apwrs_farmer/i18n.dart';
 import 'package:apwrs_farmer/screens/boundary_screen.dart';
 import 'package:apwrs_farmer/screens/crop_tab.dart';
 import 'package:apwrs_farmer/screens/farm_settings_screen.dart';
+import 'package:apwrs_farmer/screens/login_screen.dart';
+import 'package:apwrs_farmer/screens/signup_screen.dart';
 import 'package:apwrs_farmer/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:cupertino_ui/cupertino_ui.dart' show GlobalCupertinoLocalizations;
@@ -458,5 +460,103 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('The app is not allowed to use your location: allow it in the phone settings.'), findsOneWidget);
     expect(find.textContaining('0 corners'), findsOneWidget);
+  });
+
+  Future<void> fillSignup(WidgetTester tester, {String confirm = 'olive-123'}) async {
+    Future<void> type(String label, String text) =>
+        tester.enterText(find.widgetWithText(TextField, label), text);
+    await type('Username', 'nadia');
+    await type('Phone number', '+216 20 000 000');
+    await type('Password', 'olive-123');
+    await type('Confirm password', confirm);
+    await tester.ensureVisible(find.text('Create account'));
+    await tester.tap(find.text('Create account'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('sign-up sends the website form, signs in and welcomes the farmer', (tester) async {
+    tallPhone(tester);
+    final sent = <Map<String, dynamic>>[];
+    Api.I.client = MockClient((req) async {
+      sent.add({'path': req.url.path, 'body': jsonDecode(req.body)});
+      return http.Response(
+          jsonEncode({'token': 'new-token', 'user': {'username': 'nadia', 'name': 'nadia', 'role': 'farmer'}}), 201);
+    });
+    bool? created;
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+        builder: (context) => TextButton(
+          onPressed: () async =>
+              created = await Navigator.push<bool>(context, MaterialPageRoute(builder: (_) => const SignupScreen())),
+          child: const Text('open'),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Join APWRS as a farmer'), findsOneWidget);
+
+    await fillSignup(tester);
+    expect(sent.single['path'], '/farmer/api/auth/signup/');
+    expect(sent.single['body'], {
+      'username': 'nadia',
+      'email': '',
+      'phone': '+216 20 000 000',
+      'password1': 'olive-123',
+      'password2': 'olive-123',
+    });
+    expect(Api.I.token, 'new-token');
+    expect(find.text('Welcome, nadia!'), findsOneWidget);
+    await tester.tap(find.text('Start'));
+    await tester.pumpAndSettle();
+    expect(created, isTrue);
+  });
+
+  testWidgets('a refused sign-up shows why, under the field and in a popup', (tester) async {
+    tallPhone(tester);
+    Api.I.client = MockClient((req) async => http.Response.bytes(
+        utf8.encode(jsonEncode({
+          'error': 'This username is already taken.',
+          'errors': {'username': 'This username is already taken.'},
+        })),
+        400));
+    await tester.pumpWidget(const MaterialApp(home: SignupScreen()));
+    await fillSignup(tester);
+    expect(find.text('Could not create the account'), findsOneWidget);
+    expect(find.text('This username is already taken.'), findsNWidgets(2)); // popup + under the field
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+    expect(find.text('This username is already taken.'), findsOneWidget);
+    expect(Api.I.token, isNull);
+  });
+
+  testWidgets('passwords that differ never reach the server', (tester) async {
+    tallPhone(tester);
+    var calls = 0;
+    Api.I.client = MockClient((req) async {
+      calls++;
+      return http.Response('{}', 201);
+    });
+    await tester.pumpWidget(const MaterialApp(home: SignupScreen()));
+    await fillSignup(tester, confirm: 'olive-999');
+    expect(calls, 0);
+    expect(find.text('The two passwords do not match.'), findsNWidgets(2));
+  });
+
+  testWidgets('a refused sign-in is explained in a popup', (tester) async {
+    tallPhone(tester);
+    Api.I.client = MockClient((req) async =>
+        http.Response(jsonEncode({'error': 'Wrong username or password.'}), 401));
+    var signedIn = false;
+    await tester.pumpWidget(MaterialApp(home: LoginScreen(onSignedIn: () => signedIn = true)));
+    expect(find.text('Server'), findsNothing);
+    expect(find.text('Sign up'), findsOneWidget);
+    await tester.enterText(find.widgetWithText(TextField, 'Username'), 'mona');
+    await tester.enterText(find.widgetWithText(TextField, 'Password'), 'nope');
+    await tester.tap(find.text('Sign in'));
+    await tester.pumpAndSettle();
+    expect(find.text('Could not sign in'), findsOneWidget);
+    expect(find.text('Wrong username or password.'), findsOneWidget);
+    expect(signedIn, isFalse);
   });
 }

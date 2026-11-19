@@ -16,8 +16,11 @@ import 'weather_tab.dart';
 /// phone): white header with the logo, language switch and account; the farms
 /// as pills; the farm title; the tabs as a bottom bar; the AI Agronomist button.
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key, required this.onSignedOut});
+  const HomeScreen({super.key, required this.onSignedOut, this.initialFarms});
   final VoidCallback onSignedOut;
+
+  /// The farm list already requested behind the loading screen, if any.
+  final Future<dynamic>? initialFarms;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -35,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _farmId = Api.I.prefs?.getInt('farm');
-    _farms = Api.I.get('/farmer/api/farms/');
+    _farms = widget.initialFarms ?? Api.I.get('/farmer/api/farms/');
   }
 
   Future<void> _pickFarm(int id) async {

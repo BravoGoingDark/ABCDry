@@ -115,6 +115,7 @@ urlpatterns = [
     path("farmer/manifest.webmanifest", farmer_views.farmer_manifest, name="farmer_manifest"),
     path("farmer/sw.js", farmer_views.farmer_service_worker, name="farmer_sw"),
     path("farmer/api/auth/login/", farmer_views.mobile_login_api, name="farmer_mobile_login"),
+    path("farmer/api/auth/signup/", farmer_views.mobile_signup_api, name="farmer_mobile_signup"),
     path("farmer/api/auth/logout/", farmer_views.mobile_logout_api, name="farmer_mobile_logout"),
     path("farmer/api/me/", farmer_views.mobile_me_api, name="farmer_me"),
     path("farmer/api/crops/", farmer_views.crops_api, name="farmer_crops"),

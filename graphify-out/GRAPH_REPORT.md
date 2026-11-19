@@ -1,17 +1,17 @@
-# Graph Report - CURSORAGRI - Copy - Copy  (2026-11-18)
+# Graph Report - CURSORAGRI - Copy - Copy  (2026-11-19)
 
 ## Corpus Check
-- 262 files · ~392,542 words
+- 265 files · ~396,050 words
 - Verdict: corpus is large enough that graph structure adds value.
-- Unclassified: 86 file(s) not represented in the graph (top: .csv 15, .nc 13, .xml 9)
+- Unclassified: 88 file(s) not represented in the graph (top: .csv 15, .nc 13, .xml 11)
 
 ## Summary
-- 4076 nodes · 8401 edges · 242 communities (155 shown, 87 thin omitted)
-- Extraction: 92% EXTRACTED · 8% INFERRED · 0% AMBIGUOUS · INFERRED: 684 edges (avg confidence: 0.9)
+- 4170 nodes · 8500 edges · 252 communities (152 shown, 100 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 636 edges (avg confidence: 0.9)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e76e4fb9`
+- Built from commit: `1f09efc7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -19,9 +19,9 @@
 - turf.min.js
 - water_tab.dart
 - irrigation_schedule.py
-- pandas
+- ajax_upload_file
 - station_climate.py
-- sensor_views.py
+- Region
 - l
 - score_crop
 - temp_views.py
@@ -42,12 +42,12 @@
 - Region
 - jd
 - ============================================================================
-- UserProfile
+- forms.py
 - 2. Platform Navigation and Main Pages
-- make_pwa_icons.py
+- pathlib
 - Implementation Summary - Agricultural Metrics Dashboard
 - require_http_methods
-- drought_grid.py
+- numpy
 - farmer_service.py
 - Command
 - ============================================================================
@@ -63,19 +63,19 @@
 - tasks.py
 - boundary_screen.dart
 - je
-- datetime
+- prediction_views.py
 - Comprehensive Agronomic & Drought Management Field Guide
 - Automated Data Gathering Setup Guide
 - retrieval.py
 - How the Drought Risk Score Works (Simple Terms)
 - llm_answer
 - risk_breakdown.py
-- sentinel_tiles.py
+- day_meta
 - t
-- train_xgboost_quick.py
+- auth_widgets.dart
 - Automated Data Gathering - QUICK START
 - assistant_brain.py
-- datetime
+- physical_helpers.py
 - DocumentIndex
 - oi
 - rag_config
@@ -87,39 +87,40 @@
 - drought_grid_map.js
 - services
 - Jt
-- numpy
+- _f2.py
 - Command
-- AssistantNluTests
+- make_app_icons.py
 - mn
 - ba
 - UserProfile
 - Command
-- scenarios
+- relative_metrics.py
 - FarmerRoleTests
 - PHASE 2: DATABASE CREATION & CONFIGURATION
 - ClimateLayerTests
 - FormulaReport
 - e
 - p
-- smartfarm.py
+- admin_views.py
+- requests
 - TABLE OF CONTENTS
 - 11. APPENDIX: FORMULA REFERENCE
 - 2. METRIC GROUP 1: SOIL METRICS
 - F
 - fallback_answer
 - django_db_models_deletion
-- DroughtGridTests
+- Command
 - FarmActivityAndTasksTests
 - 3. METRIC GROUP 2: CLIMATE METRICS
 - 6. METRIC GROUP 5: REMOTE SENSING METRICS
 - ============================================================================
-- assess_drought_risk
+- PageConsistencyTests
 - retrieval.py
-- _build_features
+- crop_suitability.py
 - 7. METRIC GROUP 6: HYDROLOGY METRICS
 - 8. HOW AI PREDICTS DROUGHT
 - 1.1 Environment Setup
-- tasks.py
+- configured
 - build_assistant_index.py
 - app_test.dart
 - seasonal_validation.py
@@ -144,152 +145,159 @@
 - crop_tab.dart
 - middleware.py
 - g
-- embed_texts
+- signup_screen.dart
 - rt
 - PHASE 7: VERIFICATION & TESTING
 - PHASE 8: CUTOVER & GO-LIVE
 - SmartFarmParsingTests
 - calculations_view
 - bi
-- clarification
-- api_submit_metrics
+- fetch_soilgrids.py
+- Command
 - CLAUDE.md
 - validate_numbers
 - startup_automation.sh
 - analysis_export_csv
-- build_ar_mo.py
+- Farm
 - FarmAssistantAnswerTests
 - format.dart
 - TestCase
-- convert_bzrt1.py
+- sentinel_views.py
 - drought_components
-- SoilProbeReading
+- ._predict_prepared_df
 - widgets.dart
-- UserRoleTests
+- sentinel_tiles.py
 - farmer_assistant.py
 - warm_map_layers.py
 - views/__init__.py
-- StationSpeiTests
+- climate_indices.py
 - fe
 - StationClimateTests
 - farm_settings_screen.dart
-- DroughtGridTests
+- LSTMDroughtForecaster
 - IrrigationScheduleTests
 - fetch_region_forecast
 - gather
 - home_screen.dart
 - dependencies
-- fetch_probe
-- DroughtPredictionPipeline
-- ensure_soil
+- smartfarm.py
+- .predict_for_region
+- simulate_season
 - benchmark_drought_grid.py
-- farm_irrigation
-- credentials
+- FarmData
+- time
 - verify_spei_forecasts.py
-- _Model
+- UserRoleTests
 - Command
-- detect_language
+- mobile_signup_api
 - tests.py
+- RetrievalDataDigestTests
 - AppDelegate
+- HistoricalObservationsApiTests
 - login_screen.dart
 - farmer_sw.js
 - drought_prediction_api
+- FarmActivity
 - i
-- numpy
+- farmer_views.py
 - 0009_seed_region_coordinates.py
 - drought_warning
+- farm_activities_api
 - 0010_region_add_missing_fields.py
 - MobileTokenLoginTests
-- train_spei_models.py
+- pandas
 - analysis_options.yaml
 - 0029_remove_fake_sensors.py
-- sources_for
+- ensure_soil
+- Command
 - FlutterActivity
 - APWRS Farmer (Flutter)
 - LaunchImage.imageset/README.md
-- SmartFarmPasswordLoginTests
+- Command
+- _access_token
 - WeatherForecastApiTests
 - 0003_dataimportlog_error_details.py
-- 0004_alter_agriculturalmetrics_crop_coefficient_kc_and_more.py
+- _risk_from_spi
 - 0007_alter_userprofile_role.py
-- farmer_views.py
+- _can_use_farmer_space
 - 0008_agriculturalmetrics_latitude_and_more.py
 - 0011_merge_20260707_1319.py
 - 0013_climatemetrics_rainfall_source.py
 - 0014_droughtprediction_model_trained_at_and_more.py
-- 0015_droughtprediction_forecast_rain_30d_mm_and_more.py
 - 0016_dataimportlog_data_import_import__f4b759_idx_and_more.py
-- 0017_alter_remotesensingmetrics_satellite_source.py
+- 0004_alter_agriculturalmetrics_crop_coefficient_kc_and_more.py
 - 0018_region_add_sample_points.py
-- 0019_agriculturalmetrics_subregion_and_more.py
+- 0015_droughtprediction_forecast_rain_30d_mm_and_more.py
 - 0020_multi_point_unique_constraints.py
-- 0022_alter_agriculturalmetrics_subregion_and_more.py
+- 0017_alter_remotesensingmetrics_satellite_source.py
 - 0023_speiforecast_prob_drought_t1_and_more.py
 - 0026_speiforecast_unique_constraint.py
 - 0030_userprofile_phone.py
-- 0031_drought_grid.py
+- 0019_agriculturalmetrics_subregion_and_more.py
 - 0032_farm_irrigation_fields.py
+- 0022_alter_agriculturalmetrics_subregion_and_more.py
+- 0031_drought_grid.py
 
 ## God Nodes (most connected - your core abstractions)
-1. `Region` - 132 edges
-2. `ClimateMetrics` - 88 edges
-3. `ObservationYear` - 70 edges
-4. `DroughtPredictionPipeline` - 69 edges
-5. `DroughtIndices` - 59 edges
-6. `RemoteSensingMetrics` - 57 edges
+1. `Region` - 117 edges
+2. `ClimateMetrics` - 82 edges
+3. `DroughtPredictionPipeline` - 65 edges
+4. `ObservationYear` - 62 edges
+5. `DroughtIndices` - 55 edges
+6. `RemoteSensingMetrics` - 55 edges
 7. `SoilMetrics` - 44 edges
 8. `AgriculturalMetrics` - 38 edges
 9. `HydrologyMetrics` - 36 edges
 10. `a()` - 36 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `🛰️ Method 4: Google Earth Engine (Real Satellite Data)` --references--> `DroughtIndices`  [INFERRED]
-  docs/DATAINGEST_GUIDE.md → dashboard/models.py
 - `4. Verification protocol` --references--> `DroughtGridTests`  [INFERRED]
   docs/DROUGHT_GRID_FORECAST.md → dashboard/tests.py
-- `3. Model` --references--> `promote_scenarios()`  [INFERRED]
-  docs/DROUGHT_GRID_FORECAST.md → dashboard/prediction_engine/drought_grid.py
-- `2. Data (per cell, monthly, Jan 1981 → last complete CHIRPS month)` --references--> `fao56_et0()`  [INFERRED]
-  docs/DROUGHT_GRID_FORECAST.md → dashboard/prediction_engine/physical_helpers.py
+- `🛰️ Method 4: Google Earth Engine (Real Satellite Data)` --references--> `DroughtIndices`  [INFERRED]
+  docs/DATAINGEST_GUIDE.md → dashboard/models.py
 - `8. Operations` --references--> `DroughtGridForecast`  [INFERRED]
   docs/DROUGHT_GRID_FORECAST.md → dashboard/models.py
+- `2. Data (per cell, monthly, Jan 1981 → last complete CHIRPS month)` --references--> `fao56_et0()`  [INFERRED]
+  docs/DROUGHT_GRID_FORECAST.md → dashboard/prediction_engine/physical_helpers.py
+- `3. Model` --references--> `promote_scenarios()`  [INFERRED]
+  docs/DROUGHT_GRID_FORECAST.md → dashboard/prediction_engine/drought_grid.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (242 total, 87 thin omitted)
+## Communities (252 total, 100 thin omitted)
 
 ### Community 0 - "turf.min.js"
 Cohesion: 0.03
 Nodes (58): au(), Bg(), bs(), ca(), Ct(), ds(), dt(), du() (+50 more)
 
 ### Community 1 - "water_tab.dart"
-Cohesion: 0.06
-Nodes (32): build, createState, _edit, farmId, initState, _load, _reload, _answer (+24 more)
+Cohesion: 0.04
+Nodes (50): _preview, _account, build, createState, _edit, farmId, initState, _load (+42 more)
 
 ### Community 2 - "irrigation_schedule.py"
-Cohesion: 0.12
-Nodes (15): build_schedule(), crop_state(), cs_awc_taw(), _event(), _interval(), monthly_outlook(), month_need(), _peff_daily() (+7 more)
+Cohesion: 0.09
+Nodes (18): activity_history(), build_schedule(), crop_state(), cs_awc_taw(), _event(), farm_irrigation(), fetch_daily_water(), _interval() (+10 more)
 
-### Community 4 - "pandas"
-Cohesion: 0.04
-Nodes (38): create_reference_data(), DataImporter, DataIngestionError, ExcelImportForm, RiskSimulationForm, Command, ObservationYear, Meta (+30 more)
+### Community 4 - "ajax_upload_file"
+Cohesion: 0.06
+Nodes (23): DataIngestionError, ExcelImportForm, api_submit_metrics(), _batch_calculate_spi(), download_metric_template(), _get_or_create_crop(), _get_or_create_year(), _get_region() (+15 more)
 
 ### Community 5 - "station_climate.py"
-Cohesion: 0.11
-Nodes (18): Command, f(), apply_calibration(), build_days(), calibrate(), _chunks(), _dataset_frame(), _day() (+10 more)
+Cohesion: 0.08
+Nodes (24): Command, f(), apply_calibration(), build_days(), calibrate(), _chunks(), _dataset_frame(), _day() (+16 more)
 
-### Community 6 - "sensor_views.py"
-Cohesion: 0.07
-Nodes (18): _default_region(), navbar(), Sensor, Meta, HistoricalObservationsApiTests, historical_view(), _moisture_level(), _probe_daily() (+10 more)
+### Community 6 - "Region"
+Cohesion: 0.05
+Nodes (26): _default_region(), navbar(), _year_for(), Region, Meta, Sensor, Meta, SoilProbeReading (+18 more)
 
 ### Community 7 - "l"
 Cohesion: 0.08
 Nodes (60): r(), aa(), ay(), be(), bi(), bt(), bu(), c() (+52 more)
 
 ### Community 8 - "score_crop"
-Cohesion: 0.15
-Nodes (8): annual_kc(), effective_rain(), rank_crops(), salinity_factor(), score_crop(), simulate_season(), trapezoid(), CropSuitabilityTests
+Cohesion: 0.31
+Nodes (3): rank_crops(), score_crop(), CropSuitabilityTests
 
 ### Community 9 - "temp_views.py"
 Cohesion: 0.04
@@ -297,11 +305,11 @@ Nodes (24): agricultural_metrics_view(), _build_browser_row(), _build_browser_se
 
 ### Community 10 - "farm_qa.py"
 Cohesion: 0.12
-Nodes (34): normalize_text(), a_crop_status(), a_farm_info(), a_fertilizer(), a_how_calculated(), a_last_watering(), a_next_watering(), a_pests() (+26 more)
+Nodes (33): default_sowing_date(), a_crop_status(), a_farm_info(), a_fertilizer(), a_how_calculated(), a_last_watering(), a_next_watering(), a_pests() (+25 more)
 
 ### Community 11 - "match_threat"
-Cohesion: 0.20
-Nodes (4): _score(), _table(), topics(), FarmQuestionUnderstandingTests
+Cohesion: 0.12
+Nodes (10): _strip_article(), answer(), _crop_tokens(), match_threat(), hits(), _score(), _table(), _threat_aliases() (+2 more)
 
 ### Community 12 - "Agricultural Metrics Dashboard - Quick Start Guide"
 Cohesion: 0.05
@@ -314,10 +322,6 @@ Nodes (10): _build_providers(), _configured_provider(), _disk_path(), _disk_read
 ### Community 15 - "Data Ingestion Implementation Guide"
 Cohesion: 0.05
 Nodes (39): 1. **Soil Metrics**, 2. **Climate Metrics**, 3. **Drought Indices**, 4. **Agricultural Metrics**, 5. **Remote Sensing Metrics**, 6. **Hydrology Metrics**, 📈 Best Practices, "Column not found" (+31 more)
-
-### Community 16 - "XGBoostDroughtRiskPredictor"
-Cohesion: 0.06
-Nodes (4): DroughtLLMExplainer, LSTMDroughtForecaster, XGBoostDroughtRiskPredictor, XGBoostRiskTests
 
 ### Community 17 - "Agricultural Metrics Dashboard - Implementation Guide"
 Cohesion: 0.05
@@ -344,8 +348,8 @@ Cohesion: 0.06
 Nodes (33): ============================================================================, 1.1 Database Health Check, 1.2 Manual Backup, 1.3 Refresh Materialized Views, 1. DAILY OPERATIONS, 2.1 Historical Drought Analysis, 2.2 Water Balance by Region, 2.3 Crop Performance Comparison (+25 more)
 
 ### Community 24 - "Region"
-Cohesion: 0.06
-Nodes (37): Command, Command, _risk_from_spi(), Command, Command, AgriculturalMetrics, Meta, ClimateMetrics (+29 more)
+Cohesion: 0.05
+Nodes (47): create_reference_data(), DataImporter, Command, Command, Command, Command, Command, AgriculturalMetrics (+39 more)
 
 ### Community 25 - "jd"
 Cohesion: 0.09
@@ -355,33 +359,37 @@ Nodes (22): bd(), cd(), dd(), Ed(), s(), fd(), gd(), hd() (+14 more)
 Cohesion: 0.07
 Nodes (29): ============================================================================, 1. Create Django Models, 1. Find Failed Login Attempts (Security), 1. LOGIN_ATTEMPTS (Compliance & Security), 2. Create Custom Authentication Backend, 2. User Activity Timeline, 2. USER_SESSIONS (Session Management), 3. Activity Logging Middleware (+21 more)
 
-### Community 27 - "UserProfile"
-Cohesion: 0.10
-Nodes (6): FarmerSignupForm, UserCreateForm, Meta, UserProfile, Meta, signup_view()
+### Community 27 - "forms.py"
+Cohesion: 0.13
+Nodes (6): FarmerSignupForm, _home_for(), landing_view(), login_view(), logout_view(), signup_view()
 
 ### Community 28 - "2. Platform Navigation and Main Pages"
 Cohesion: 0.07
 Nodes (27): 1. Platform Overview and Mission, 2.10 AgroAI Assistant (`/assistant/` & Floating Widget), 2.11 User Accounts & Admin Panel (`/login/`, `/admin-panel/`), 2.1 Landing Page (`/`), 2.2 Interactive Drought Dashboard (`/dashboard/`), 2.3 Prediction & Climate Forecasting Engine (`/analysis/spei-outlook/`), 2.4 Adaptive Planting Window Calendar (`/calendar/`), 2.5 Calculations & Scientific Formulas (`/analysis/calculations/`) (+19 more)
 
-### Community 29 - "make_pwa_icons.py"
-Cohesion: 0.21
-Nodes (7): android(), ios(), artwork(), bar(), drop(), leaf(), main()
+### Community 29 - "pathlib"
+Cohesion: 0.13
+Nodes (3): main(), main(), main()
 
 ### Community 30 - "Implementation Summary - Agricultural Metrics Dashboard"
 Cohesion: 0.07
 Nodes (26): 1. Database Models (7 new models), 2. Forms (7 comprehensive forms), 3. Views (23 new views), 4. Templates (5 new templates), 5. URL Routing, 6. Navigation & Navbar, 7. Dependencies, 8. Settings Configuration (+18 more)
 
 ### Community 31 - "require_http_methods"
-Cohesion: 0.12
-Nodes (8): _haversine_distance(), resolve_region_api(), sensor_delete_api(), sensor_edit_api(), sensor_history_api(), sensor_ingest_api(), sensor_list_api(), _validate_coordinates_for_region()
+Cohesion: 0.09
+Nodes (13): api_submit_metrics(), delete_all_metrics(), delete_metric_table(), _haversine_distance(), _is_subadmin_user(), _is_viewer_user(), resolve_region_api(), sensor_delete_api() (+5 more)
 
-### Community 32 - "drought_grid.py"
-Cohesion: 0.12
-Nodes (15): add_indices(), _add_months(), basin_geojson_path(), _class(), _driver_group(), forecast(), glo_cdf(), glo_fit() (+7 more)
+### Community 32 - "numpy"
+Cohesion: 0.08
+Nodes (28): add_indices(), _add_months(), basin_geojson_path(), _class(), design(), _driver_group(), _event_scores(), features_for() (+20 more)
 
 ### Community 33 - "farmer_service.py"
 Cohesion: 0.17
 Nodes (8): apply_boundary(), clean_polygon(), FarmGeometryError, haversine_km(), nearest_region(), polygon_area_centroid(), _project(), FarmGeometryTests
+
+### Community 34 - "Command"
+Cohesion: 0.15
+Nodes (3): Command, _month_starts(), calculate_et0()
 
 ### Community 35 - "============================================================================"
 Cohesion: 0.08
@@ -404,16 +412,16 @@ Cohesion: 0.14
 Nodes (15): farm_tasks(), _fertilizer_dates(), _fertilizer_how(), fertilizer_tasks(), _fertilizer_timing(), irrigation_tasks(), _p(), render_text() (+7 more)
 
 ### Community 41 - "assistant_nlu.py"
-Cohesion: 0.12
-Nodes (13): conversation_state(), history_mentions_region(), keyword_score(), _keyword_table(), match_intent(), match_region(), matched_keywords(), _prefix_ok() (+5 more)
+Cohesion: 0.07
+Nodes (22): clarification(), classify_intent(), conversation_state(), history_mentions_region(), is_followup(), keyword_score(), _keyword_table(), match_crop() (+14 more)
 
 ### Community 42 - "ajax_upload_file"
 Cohesion: 0.13
 Nodes (11): ajax_upload_file(), _batch_calculate_spi(), _import_agricultural_metrics(), _import_climate_metrics(), _build_record(), _safe_val(), _import_drought_indices(), import_excel_metrics() (+3 more)
 
 ### Community 43 - "State"
-Cohesion: 0.13
-Nodes (20): FarmerApp, _FarmerAppState, BoundaryScreen, _BoundaryScreenState, CropPreviewScreen, _CropPreviewScreenState, CropTab, _CropTabState (+12 more)
+Cohesion: 0.16
+Nodes (16): _PasswordField, _PasswordFieldState, FarmerApp, _FarmerAppState, BoundaryScreen, _BoundaryScreenState, ChatTab, _ChatTabState (+8 more)
 
 ### Community 44 - "_deny_data_access"
 Cohesion: 0.15
@@ -424,8 +432,8 @@ Cohesion: 0.28
 Nodes (18): buildDailyStrip(), buildPrecipChart(), buildPrecipTable(), buildTempChart(), buildTempHeatmap(), clearWeatherViews(), fmt(), hasValues() (+10 more)
 
 ### Community 46 - "tasks.py"
-Cohesion: 0.11
-Nodes (7): Command, _month_list(), GridCellClimate, Meta, fetch_cell_months(), last_complete_chirps_month(), 2. Data (per cell, monthly, Jan 1981 → last complete CHIRPS month)
+Cohesion: 0.07
+Nodes (18): Command, _month_list(), GridCellClimate, Meta, fetch_cell_months(), last_complete_chirps_month(), monthly_spei_forecast(), 1. Target variable (+10 more)
 
 ### Community 47 - "boundary_screen.dart"
 Cohesion: 0.06
@@ -435,9 +443,9 @@ Nodes (28): ApiException, build, _busy, _corners, createState, dispose, _error, 
 Cohesion: 0.25
 Nodes (17): je(), a(), b(), c(), d(), E(), f(), g() (+9 more)
 
-### Community 49 - "datetime"
+### Community 49 - "prediction_views.py"
 Cohesion: 0.05
-Nodes (21): build_sections(), _compare(), _daily_series(), _mean(), relative_series(), _shift_year(), Spec, _window_sum() (+13 more)
+Nodes (19): DroughtGridForecast, Meta, drought_probability_band(), signal_rows(), _error_payload(), get_region_forecast(), region_point(), regions_with_coordinates() (+11 more)
 
 ### Community 50 - "Comprehensive Agronomic & Drought Management Field Guide"
 Cohesion: 0.12
@@ -448,8 +456,8 @@ Cohesion: 0.08
 Nodes (24): Automated Data Gathering Setup Guide, Automation Timeline (Daily), "broker connection refused", Check Scheduled Tasks, Configuration, Default Broker (In-Memory, Development Only), Disabling Automation, GEE authentication error during satellite pull (+16 more)
 
 ### Community 52 - "retrieval.py"
-Cohesion: 0.29
-Nodes (3): _crop_kb_chunks(), load_corpus(), _markdown_chunks()
+Cohesion: 0.25
+Nodes (4): _crop_kb_chunks(), _docs_dir(), load_corpus(), _markdown_chunks()
 
 ### Community 53 - "How the Drought Risk Score Works (Simple Terms)"
 Cohesion: 0.12
@@ -461,43 +469,39 @@ Nodes (11): api_configured(), _chat_api(), chat_completion(), _chat_ollama(), _f
 
 ### Community 55 - "risk_breakdown.py"
 Cohesion: 0.10
-Nodes (13): fao56_et0(), _score_from_spei(), build(), _daily(), _daily_fao56_et0(), legacy_drivers(), _rain(), _satellite() (+5 more)
+Nodes (12): fao56_et0(), build(), _daily(), _daily_fao56_et0(), legacy_drivers(), _rain(), _satellite(), _signal() (+4 more)
 
-### Community 56 - "sentinel_tiles.py"
-Cohesion: 0.15
-Nodes (19): basin_anomalies(), basin_outline(), _day_dir(), _day_key(), day_meta(), _drop_old_days(), drought_detail(), _drought_detail() (+11 more)
+### Community 56 - "day_meta"
+Cohesion: 0.27
+Nodes (10): basin_anomalies(), basin_outline(), day_meta(), _drought_detail(), _ee(), _latest_day(), SentinelUnavailable, tile_values() (+2 more)
 
 ### Community 57 - "t"
 Cohesion: 0.16
 Nodes (11): t(), ae(), s(), ge(), Re(), a(), i(), s() (+3 more)
 
-### Community 58 - "train_xgboost_quick.py"
-Cohesion: 0.13
-Nodes (9): _month_of_year(), compute_partial_dependence(), main(), generate_sample_drought_data(), main(), main(), load_and_prepare(), main() (+1 more)
+### Community 58 - "auth_widgets.dart"
+Cohesion: 0.04
+Nodes (42): action, AuthButton, AuthField, AuthPage, autofill, build, busy, button (+34 more)
 
 ### Community 59 - "Automated Data Gathering - QUICK START"
 Cohesion: 0.15
 Nodes (12): Automated Data Gathering - QUICK START, 📊 Check Task Execution, Linux/Mac, 📝 Logs, 🔍 Monitor (Optional - Flower Dashboard), 🚀 Production Setup (with Redis), ⚡ Start Automation (Right Now), 🎯 Status (+4 more)
 
 ### Community 60 - "assistant_brain.py"
-Cohesion: 0.14
-Nodes (13): build_facts(), _daily_climate(), _daily_rs(), _extreme(), _f(), _mean(), _requested_period(), _resolve_region() (+5 more)
-
-### Community 61 - "datetime"
 Cohesion: 0.12
-Nodes (10): crop_calendar(), fert_detail(), crop_plan(), default_sowing_date(), _next_month_date(), tr(), weather_alerts(), _weather_flags() (+2 more)
+Nodes (15): build_facts(), _daily_climate(), _daily_rs(), _extreme(), _f(), _mean(), _requested_period(), _resolve_region() (+7 more)
 
-### Community 62 - "DocumentIndex"
-Cohesion: 0.23
-Nodes (3): DocumentIndex, _embed_query(), _rag_chunks()
+### Community 61 - "physical_helpers.py"
+Cohesion: 0.08
+Nodes (13): _calc_prob_zero(), calculate_etc(), calculate_spei(), calculate_spi(), calculate_vci(), _fit_monthly_gamma(), _fit_monthly_loglogistic(), get_crop_coefficient() (+5 more)
 
 ### Community 63 - "oi"
 Cohesion: 0.18
 Nodes (14): S(), hi(), Jo(), jr(), li(), nt(), oi(), B() (+6 more)
 
 ### Community 64 - "rag_config"
-Cohesion: 0.24
-Nodes (7): build_index(), corpus_signature(), _docs_dir(), embedding_model_installed(), get_index(), _index_dir(), rag_config()
+Cohesion: 0.27
+Nodes (6): build_index(), corpus_signature(), embedding_model_installed(), get_index(), _index_dir(), rag_config()
 
 ### Community 65 - "train_lstm_quick.py"
 Cohesion: 0.26
@@ -505,19 +509,19 @@ Nodes (3): DroughtLSTM, build_sequences(), main()
 
 ### Community 66 - "api.dart"
 Cohesion: 0.05
-Nodes (29): Api, base, _cachePrefix, client, _decode, defaultBase, delete, _headers (+21 more)
+Nodes (33): Api, base, _cachePrefix, client, _decode, defaultBase, delete, fields (+25 more)
 
 ### Community 67 - "_is_admin_user"
-Cohesion: 0.25
-Nodes (5): admin_delete_user(), admin_edit_user(), admin_panel(), _deny_admin_access(), _is_admin_user()
+Cohesion: 0.21
+Nodes (6): admin_delete_user(), admin_edit_user(), admin_panel(), _deny_admin_access(), _is_admin_user(), _user_can_access_region()
 
 ### Community 68 - "answer_question"
-Cohesion: 0.12
-Nodes (9): answer_question(), apply_rules(), _clarify(), data_signature(), _json_safe(), _min_relevance(), _tidy(), _website_guide_specific() (+1 more)
+Cohesion: 0.11
+Nodes (10): answer_question(), apply_rules(), _clarify(), data_signature(), detect_language(), _json_safe(), _min_relevance(), _tidy() (+2 more)
 
 ### Community 69 - "RetrievalIndexTests"
-Cohesion: 0.28
-Nodes (3): prompt_block(), _split_long(), RetrievalIndexTests
+Cohesion: 0.18
+Nodes (4): prompt_block(), sources_for(), _split_long(), RetrievalIndexTests
 
 ### Community 70 - "drought_grid_map.js"
 Cohesion: 0.25
@@ -531,13 +535,9 @@ Nodes (11): generateValue, key, value, services, buildCommand, env, envVars, nam
 Cohesion: 0.18
 Nodes (12): Ae(), be(), h(), Ie(), Jt(), ke(), Le(), O() (+4 more)
 
-### Community 73 - "numpy"
-Cohesion: 0.09
-Nodes (23): _aggregate_monthly(), build_spei_dataset(), _compute_et0_from_monthly(), _compute_monthly_spei(), _load_all_points(), _merge_points(), _month_ordinal(), _severity_class() (+15 more)
-
-### Community 75 - "AssistantNluTests"
-Cohesion: 0.18
-Nodes (4): classify_intent(), match_crop(), resolve(), AssistantNluTests
+### Community 75 - "make_app_icons.py"
+Cohesion: 0.17
+Nodes (11): android(), flutter(), ios(), radial(), sprout(), tile(), artwork(), bar() (+3 more)
 
 ### Community 76 - "mn"
 Cohesion: 0.27
@@ -551,9 +551,9 @@ Nodes (11): ba(), da(), ea(), ga(), ia(), ma(), sa(), ta() (+3 more)
 Cohesion: 0.18
 Nodes (4): create_default_superuser(), DashboardConfig, Command, ensure_user_profile()
 
-### Community 80 - "scenarios"
-Cohesion: 0.18
-Nodes (8): _glo_cdf_arr(), _glo_quantile_arr(), _rolling_sum(), scenario_arrays(), scenario_ensemble(), scenarios(), verify_scenarios(), 5b. Scenario outlook (historical-year resampling)
+### Community 80 - "relative_metrics.py"
+Cohesion: 0.15
+Nodes (9): build_sections(), _compare(), _daily_series(), _mean(), relative_series(), _shift_year(), Spec, _window_sum() (+1 more)
 
 ### Community 82 - "PHASE 2: DATABASE CREATION & CONFIGURATION"
 Cohesion: 0.20
@@ -567,9 +567,13 @@ Nodes (10): c(), e(), hi(), m(), q(), Qe(), ve(), xe() (+2 more)
 Cohesion: 0.22
 Nodes (10): De(), ei(), ii(), Je(), ni(), oi(), p(), pe() (+2 more)
 
-### Community 88 - "smartfarm.py"
-Cohesion: 0.18
-Nodes (6): credential_problem(), _json(), _jwt_payload(), _login(), _refresh(), fetch_point()
+### Community 87 - "admin_views.py"
+Cohesion: 0.07
+Nodes (16): UserCreateForm, Meta, UserProfile, Meta, admin_confirm_user(), admin_delete_user(), admin_edit_user(), admin_farms() (+8 more)
+
+### Community 88 - "requests"
+Cohesion: 0.28
+Nodes (4): _json(), _login(), _refresh(), fetch_point()
 
 ### Community 89 - "TABLE OF CONTENTS"
 Cohesion: 0.22
@@ -588,16 +592,16 @@ Cohesion: 0.28
 Nodes (9): F(), G(), j(), k(), me(), Oe(), s(), Se() (+1 more)
 
 ### Community 93 - "fallback_answer"
-Cohesion: 0.12
+Cohesion: 0.15
 Nodes (8): _context_lines(), fallback_answer(), _headline(), _knowledge_text(), _loc(), _out_of_scope(), _website_guide_answer(), AssistantGroundingTests
 
 ### Community 94 - "django_db_models_deletion"
 Cohesion: 0.09
 Nodes (10): Migration, Migration, Migration, Migration, Migration, Migration, Migration, Migration (+2 more)
 
-### Community 95 - "DroughtGridTests"
-Cohesion: 0.19
-Nodes (5): design(), _event_scores(), features_for(), verify(), DroughtGridTests
+### Community 95 - "Command"
+Cohesion: 0.12
+Nodes (3): Command, Command, Command
 
 ### Community 97 - "3. METRIC GROUP 2: CLIMATE METRICS"
 Cohesion: 0.25
@@ -611,17 +615,13 @@ Nodes (8): 6.1 ndvi (Normalized Difference Vegetation Index), 6.2 ndwi (Normaliz
 Cohesion: 0.25
 Nodes (8): ============================================================================, Connection Issues, MAINTENANCE SCHEDULE, Performance Problems, ROLLBACK PROCEDURE, SUPPORT & REFERENCES, TimescaleDB Issues, TROUBLESHOOTING
 
-### Community 100 - "assess_drought_risk"
-Cohesion: 0.15
-Nodes (6): PageConsistencyTests, drought_prediction_api(), assess_drought_risk(), _crop_sensitivity(), _irrigation_buffer(), _prediction_warning_block()
-
 ### Community 101 - "retrieval.py"
-Cohesion: 0.23
-Nodes (5): data_digests(), _describe(), _month_label(), _round(), RetrievalDataDigestTests
+Cohesion: 0.17
+Nodes (8): data_digests(), _describe(), _embed_batch(), _embed_legacy(), _embed_query(), embed_texts(), _month_label(), _round()
 
-### Community 102 - "_build_features"
-Cohesion: 0.18
-Nodes (5): fetch_or_load_nao(), get_climate_data_dir(), merge_nao_features(), _build_features(), _expanding_month_climatology()
+### Community 102 - "crop_suitability.py"
+Cohesion: 0.16
+Nodes (9): drought_scenario(), region_climatology(), region_soil(), salinity_factor(), texture_class(), farm_advice(), _region_point(), suitability_soil() (+1 more)
 
 ### Community 103 - "7. METRIC GROUP 6: HYDROLOGY METRICS"
 Cohesion: 0.29
@@ -635,29 +635,29 @@ Nodes (7): 8.1 The Three-Layer Prediction Architecture, 8.2 XGBoost — The Risk
 Cohesion: 0.29
 Nodes (7): 1.1 Environment Setup, 1.2 Backup Current SQLite Database, 1.3 Install Python Dependencies, Linux (Production - Ubuntu/Debian), macOS (Intel/Apple Silicon), PHASE 1: PRE-MIGRATION PREPARATION, Windows (Development)
 
-### Community 106 - "tasks.py"
-Cohesion: 0.18
-Nodes (5): pull_satellite_and_retrain(), refresh_materialized_views(), sync_smartfarm_probe(), update_station_climate(), validate_spi_forecast()
+### Community 106 - "configured"
+Cohesion: 0.14
+Nodes (7): configured(), missing_settings(), pull_satellite_and_retrain(), refresh_materialized_views(), sync_smartfarm_probe(), update_station_climate(), validate_spi_forecast()
 
 ### Community 108 - "app_test.dart"
-Cohesion: 0.06
-Nodes (12): build, createState, initializeDateFormatting, initState, main, _signedIn, host, main (+4 more)
+Cohesion: 0.05
+Nodes (18): _boot, build, createState, _firstFarms, initState, _loaded, main, maxFarmWait (+10 more)
 
 ### Community 109 - "seasonal_validation.py"
-Cohesion: 0.18
-Nodes (6): _load_daily_data(), download(), extract_region_series(), main(), observed_monthly_mm(), skill_gate()
+Cohesion: 0.09
+Nodes (11): compute_partial_dependence(), main(), generate_sample_drought_data(), main(), download(), extract_region_series(), main(), observed_monthly_mm() (+3 more)
 
 ### Community 110 - "0025_dedupe_speiforecasts.py"
 Cohesion: 0.33
 Nodes (3): dedupe_speiforecasts(), Migration, noop_reverse()
 
 ### Community 111 - "re"
-Cohesion: 0.26
-Nodes (9): load_sheet(), cell_xml(), esc(), load_sheet(), load_ss(), rowxml(), T(), write_xlsx() (+1 more)
+Cohesion: 0.17
+Nodes (15): cell_xml(), esc(), load_sheet(), rowxml(), T(), write_xlsx(), xldate(), cell_xml() (+7 more)
 
 ### Community 112 - "chat_tab.dart"
-Cohesion: 0.06
-Nodes (27): _bubble, build, _busy, _byFarm, _c, ChatTab, _ChatTabState, _Conversation (+19 more)
+Cohesion: 0.07
+Nodes (25): _bubble, build, _busy, _byFarm, _c, _Conversation, createState, didUpdateWidget (+17 more)
 
 ### Community 113 - "5. METRIC GROUP 4: AGRICULTURAL METRICS"
 Cohesion: 0.33
@@ -671,17 +671,13 @@ Nodes (6): =====================================================================
 Cohesion: 0.33
 Nodes (6): 3.1 Install and Configure PgBouncer, 3.2 Configure Django to Use PgBouncer, 3.3 Test PgBouncer Connection, Linux:, macOS:, PHASE 3: CONNECTION POOLING SETUP
 
-### Community 116 - "SentinelTileTests"
-Cohesion: 0.13
-Nodes (8): basin_bounds(), lonlat_to_tile(), tile_in_basin(), value_at(), SentinelTileTests, s2_legend_api(), s2_tile(), s2_value_api()
-
 ### Community 117 - "d"
 Cohesion: 0.33
 Nodes (6): at(), d(), ht(), Li(), v(), W()
 
 ### Community 118 - "sync"
-Cohesion: 0.22
-Nodes (3): sync(), sync_if_stale(), SmartFarmSyncTests
+Cohesion: 0.21
+Nodes (3): SmartFarmError, sync(), SmartFarmSyncTests
 
 ### Community 120 - "4. METRIC GROUP 3: DROUGHT INDICES"
 Cohesion: 0.40
@@ -708,8 +704,8 @@ Cohesion: 0.11
 Nodes (16): a, areaHa, boundaryProblem, earthRadiusM, fromGeoJson, ha, lat0, maxAreaHa (+8 more)
 
 ### Community 128 - "crop_tab.dart"
-Cohesion: 0.05
-Nodes (33): _advice, _application, _bestCrops, build, c, classBadge, colors, createState (+25 more)
+Cohesion: 0.06
+Nodes (30): _advice, _application, _bestCrops, build, c, classBadge, colors, createState (+22 more)
 
 ### Community 129 - "middleware.py"
 Cohesion: 0.11
@@ -719,9 +715,9 @@ Nodes (4): ApiTokenMiddleware, FarmerScopeMiddleware, LoginRequiredMiddleware, N
 Cohesion: 0.26
 Nodes (12): Ad(), a(), b(), i(), o(), s(), u(), w() (+4 more)
 
-### Community 131 - "embed_texts"
-Cohesion: 0.29
-Nodes (3): _embed_batch(), _embed_legacy(), embed_texts()
+### Community 131 - "signup_screen.dart"
+Cohesion: 0.13
+Nodes (14): build, _busy, _confirm, _create, createState, dispose, _email, _errors (+6 more)
 
 ### Community 132 - "rt"
 Cohesion: 0.25
@@ -736,136 +732,132 @@ Cohesion: 0.50
 Nodes (4): 8.1 Pre-Cutover Checklist, 8.2 Cutover Steps, 8.3 Post-Cutover Monitoring, PHASE 8: CUTOVER & GO-LIVE
 
 ### Community 135 - "SmartFarmParsingTests"
-Cohesion: 0.14
-Nodes (10): _moisture(), parse_reading(), _parse_time(), _temperature(), _fake_jwt(), _sf_env(), _sf_row(), SmartFarmParsingTests (+2 more)
+Cohesion: 0.20
+Nodes (6): _fake_jwt(), _sf_env(), _sf_row(), SmartFarmParsingTests, fake_get(), fake_get()
 
 ### Community 138 - "bi"
 Cohesion: 0.50
 Nodes (4): bi(), Pi(), Ti(), u()
 
-### Community 139 - "clarification"
-Cohesion: 0.17
-Nodes (4): clarification(), needs_clarification(), region_option(), _FakeRegion
+### Community 139 - "fetch_soilgrids.py"
+Cohesion: 0.24
+Nodes (3): calculate_available_water_capacity(), calculate_field_capacity(), calculate_wilting_point()
 
-### Community 140 - "api_submit_metrics"
-Cohesion: 0.20
-Nodes (6): api_submit_metrics(), delete_all_metrics(), delete_metric_table(), _is_subadmin_user(), _is_viewer_user(), _user_can_access_region()
+### Community 140 - "Command"
+Cohesion: 0.18
+Nodes (6): Command, _features(), _predict(), _severity_class(), get_recommendations(), spei_to_risk()
 
 ### Community 142 - "validate_numbers"
-Cohesion: 0.15
-Nodes (4): allowed_numbers(), classify_intent(), _collect_numbers(), validate_numbers()
+Cohesion: 0.33
+Nodes (3): allowed_numbers(), _collect_numbers(), validate_numbers()
+
+### Community 153 - "Farm"
+Cohesion: 0.18
+Nodes (9): Farm, Meta, schedule_soil_lookup(), start(), serialize_farm(), _soil_worker(), _apply_fields(), farm_detail_api() (+1 more)
 
 ### Community 155 - "format.dart"
 Cohesion: 0.04
 Nodes (54): appTheme, build, _day, dayDiff, errorView, f, fmtDate, fmtNum (+46 more)
 
 ### Community 156 - "TestCase"
-Cohesion: 0.11
-Nodes (4): AssistantClarificationTests, DashboardChartFallbackTests, FarmerAppInstallTests, NoFakeSensorTests
+Cohesion: 0.12
+Nodes (3): AssistantClarificationTests, FarmerAppInstallTests, NoFakeSensorTests
 
-### Community 160 - "convert_bzrt1.py"
-Cohesion: 0.38
-Nodes (6): cell_xml(), esc(), rowxml(), T(), write_xlsx(), xldate()
+### Community 160 - "sentinel_views.py"
+Cohesion: 0.15
+Nodes (8): drought_detail(), legend(), lonlat_to_tile(), tile_in_basin(), value_at(), s2_legend_api(), s2_tile(), s2_value_api()
 
 ### Community 161 - "drought_components"
 Cohesion: 0.15
 Nodes (9): grid(), _build(), smooth(), _drought_class(), drought_components(), _past(), _rank_p(), _s2() (+1 more)
 
-### Community 162 - "SoilProbeReading"
-Cohesion: 0.22
-Nodes (3): SoilProbeReading, Meta, _probe_rows()
-
 ### Community 163 - "widgets.dart"
 Cohesion: 0.05
 Nodes (32): appLang, keysFor, langNames, _s, supportedLangs, t, text, tr (+24 more)
 
+### Community 164 - "sentinel_tiles.py"
+Cohesion: 0.24
+Nodes (7): _day_dir(), _day_key(), _drop_old_days(), layer_domain(), _lut(), _tile_path(), tile_png()
+
 ### Community 165 - "farmer_assistant.py"
-Cohesion: 0.16
-Nodes (7): prewarm_answers(), suggestions(), suggestions(), get_assistant_answer(), prewarm_answers(), suggestions(), assistant_chat_api()
+Cohesion: 0.11
+Nodes (8): classify_intent(), prewarm_answers(), suggestions(), suggestions(), get_assistant_answer(), prewarm_answers(), suggestions(), assistant_chat_api()
 
 ### Community 167 - "views/__init__.py"
-Cohesion: 0.03
-Nodes (73): AgriculturalMetricsForm, Meta, ClimateMetricsForm, Meta, DroughtIndicesForm, Meta, HydrologyMetricsForm, Meta (+65 more)
+Cohesion: 0.04
+Nodes (62): AgriculturalMetricsForm, Meta, ClimateMetricsForm, Meta, DroughtIndicesForm, Meta, HydrologyMetricsForm, Meta (+54 more)
+
+### Community 168 - "climate_indices.py"
+Cohesion: 0.24
+Nodes (3): fetch_or_load_nao(), get_climate_data_dir(), merge_nao_features()
 
 ### Community 172 - "farm_settings_screen.dart"
 Cohesion: 0.06
 Nodes (30): _area, _body, _borderChanged, _boundary, build, _busy, createState, _crop (+22 more)
 
-### Community 173 - "DroughtGridTests"
-Cohesion: 0.12
-Nodes (13): DroughtGridForecast, Meta, monthly_spei_forecast(), 1. Target variable, 3. Model, 4. Verification protocol, 5. How far ahead — and why it stops there, 6. What drives a forecast (+5 more)
-
 ### Community 175 - "fetch_region_forecast"
-Cohesion: 0.12
-Nodes (11): _climatology(), _condition(), _daily_humidity(), _error_payload(), fetch_region_forecast(), get_region_forecast(), _monthly_normals(), _num() (+3 more)
-
-### Community 176 - "gather"
-Cohesion: 0.22
-Nodes (3): context_numbers(), gather(), reset_index_cache()
+Cohesion: 0.14
+Nodes (8): _climatology(), _condition(), _daily_humidity(), fetch_region_forecast(), _monthly_normals(), _num(), WeatherForecastServiceTests, mean()
 
 ### Community 177 - "home_screen.dart"
-Cohesion: 0.05
-Nodes (35): BrandLogo, LangPill, AiAvatar, AssistantScreen, _BotAvatar, CropPlanView, _AccountButton, _addFarm (+27 more)
+Cohesion: 0.06
+Nodes (25): _addFarm, _bottomBar, build, createState, farm, _farmChanged, _farmId, _farms (+17 more)
 
 ### Community 178 - "dependencies"
 Cohesion: 0.06
 Nodes (32): dependencies, cupertino_ui, flutter, flutter_localizations, flutter_map, flutter_secure_storage, geolocator, http (+24 more)
 
-### Community 179 - "fetch_probe"
-Cohesion: 0.29
-Nodes (4): fetch_probe(), _float_or_none(), _get(), SmartFarmError
+### Community 179 - "smartfarm.py"
+Cohesion: 0.19
+Nodes (9): credentials(), _env(), fetch_probe(), _float_or_none(), _get(), _moisture(), parse_reading(), _parse_time() (+1 more)
 
-### Community 180 - "DroughtPredictionPipeline"
-Cohesion: 0.04
-Nodes (18): Command, Command, Command, Command, calculate_available_water_capacity(), calculate_field_capacity(), calculate_spi(), calculate_vci() (+10 more)
+### Community 181 - "simulate_season"
+Cohesion: 0.22
+Nodes (4): annual_kc(), effective_rain(), simulate_season(), trapezoid()
 
 ### Community 182 - "benchmark_drought_grid.py"
-Cohesion: 0.11
-Nodes (12): _boot_msss_gap(), Command, _fit_lstm(), __init__(), _fit_paper_lstm(), __init__(), _lstm_inputs(), _lstm_predict() (+4 more)
-
-### Community 183 - "farm_irrigation"
-Cohesion: 0.07
-Nodes (14): drought_scenario(), region_climatology(), region_soil(), texture_class(), answer(), FarmData, farm_advice(), _region_point() (+6 more)
-
-### Community 184 - "credentials"
-Cohesion: 0.22
-Nodes (5): Command, configured(), credentials(), _env(), missing_settings()
+Cohesion: 0.08
+Nodes (13): _boot_msss_gap(), Command, _fit_lstm(), __init__(), _fit_paper_lstm(), __init__(), _lstm_inputs(), _lstm_predict() (+5 more)
 
 ### Community 187 - "verify_spei_forecasts.py"
 Cohesion: 0.11
 Nodes (9): Command, _month_end(), _observed_spei(), SpeiForecast, Meta, SpeiVerification, Meta, _level_from_score() (+1 more)
 
-### Community 190 - "detect_language"
-Cohesion: 0.33
-Nodes (3): detect_language(), is_followup(), tokenize()
+### Community 190 - "mobile_signup_api"
+Cohesion: 0.32
+Nodes (5): _json_body(), _me(), mobile_login_api(), mobile_me_api(), mobile_signup_api()
 
 ### Community 191 - "tests.py"
-Cohesion: 0.08
-Nodes (11): _translated_forecast(), _content(), fertilizer_details(), _o(), parse_rate_kg_ha(), protection_options(), _rng(), _t() (+3 more)
+Cohesion: 0.05
+Nodes (21): crop_calendar(), fert_detail(), crop_plan(), _next_month_date(), tr(), weather_alerts(), _weather_flags(), _translated_forecast() (+13 more)
 
 ### Community 193 - "AppDelegate"
 Cohesion: 0.12
 Nodes (6): Flutter, AppDelegate, SceneDelegate, RunnerTests, Testing, UIKit
 
 ### Community 196 - "login_screen.dart"
-Cohesion: 0.17
-Nodes (10): build, _busy, createState, _error, LoginScreen, _LoginScreenState, onSignedIn, _pass (+2 more)
+Cohesion: 0.15
+Nodes (11): build, _busy, createState, dispose, LoginScreen, _LoginScreenState, onSignedIn, _pass (+3 more)
 
 ### Community 200 - "i"
 Cohesion: 0.50
 Nodes (5): i(), Mi(), ne(), e(), zi()
 
-### Community 204 - "numpy"
-Cohesion: 0.13
-Nodes (10): _calc_prob_zero(), calculate_et0(), calculate_etc(), calculate_spei(), _fit_monthly_gamma(), _fit_monthly_loglogistic(), _spei_from_cdf(), spi_at() (+2 more)
+### Community 204 - "farmer_views.py"
+Cohesion: 0.20
+Nodes (3): _app_assets(), farmer_manifest(), farmer_service_worker()
 
 ### Community 207 - "drought_warning"
-Cohesion: 0.24
+Cohesion: 0.21
 Nodes (3): drought_flag_from_probability(), drought_warning(), DroughtWarningRuleTests
 
-### Community 211 - "train_spei_models.py"
-Cohesion: 0.08
-Nodes (11): Command, _features(), _predict(), _severity_class(), _year_for(), Command, drought_probability_band(), get_recommendations() (+3 more)
+### Community 208 - "farm_activities_api"
+Cohesion: 0.22
+Nodes (6): serialize_activity(), farm_activities_api(), farm_activity_detail_api(), _parse_activity(), _sync_farm(), _sync_last_irrigation()
+
+### Community 211 - "pandas"
+Cohesion: 0.07
+Nodes (28): _aggregate_monthly(), _build_features(), build_spei_dataset(), _compute_et0_from_monthly(), _compute_monthly_spei(), _expanding_month_climatology(), _load_all_points(), _load_daily_data() (+20 more)
 
 ### Community 212 - "analysis_options.yaml"
 Cohesion: 0.33
@@ -875,29 +867,33 @@ Nodes (5): analyzer, exclude, include, linter, rules
 Cohesion: 0.50
 Nodes (3): APWRS Farmer (Flutter), Running it, What it does
 
-### Community 232 - "farmer_views.py"
-Cohesion: 0.06
-Nodes (36): Farm, Meta, FarmActivity, Meta, serialize_activity(), schedule_soil_lookup(), start(), serialize_farm() (+28 more)
+### Community 226 - "_access_token"
+Cohesion: 0.23
+Nodes (4): _access_token(), credential_problem(), _jwt_payload(), SmartFarmPasswordLoginTests
+
+### Community 232 - "_can_use_farmer_space"
+Cohesion: 0.19
+Nodes (12): _can_use_farmer_space(), crops_api(), farm_advice_api(), farm_crop_plan_api(), farm_irrigation_api(), farm_tasks_api(), farm_weather_api(), farmer_home() (+4 more)
 
 ## Knowledge Gaps
-- **319 isolated node(s):** `Testing`, `Api`, `message`, `status`, `I` (+314 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1990 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **87 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **375 isolated node(s):** `Api`, `message`, `status`, `fields`, `I` (+370 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2059 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **100 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `SentinelUnavailable` connect `sentinel_tiles.py` to `SentinelTileTests`, `station_climate.py`, `boundary_screen.dart`?**
-  _High betweenness centrality (0.169) - this node is a cross-community bridge._
-- **Are the 80 inferred relationships involving `Region` (e.g. with `navbar()` and `create_reference_data()`) actually correct?**
-  _`Region` has 80 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Testing`, `Api`, `message` to the rest of the system?**
-  _319 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `SentinelUnavailable` connect `day_meta` to `SentinelTileTests`, `sentinel_tiles.py`, `station_climate.py`, `boundary_screen.dart`?**
+  _High betweenness centrality (0.141) - this node is a cross-community bridge._
+- **Are the 65 inferred relationships involving `Region` (e.g. with `navbar()` and `create_reference_data()`) actually correct?**
+  _`Region` has 65 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Api`, `message`, `status` to the rest of the system?**
+  _375 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `turf.min.js` be split into smaller, more focused modules?**
   _Cohesion score 0.027982326951399118 - nodes in this community are weakly interconnected._
 - **Why does `ApiException` connect `boundary_screen.dart` to `api.dart`, `app_test.dart`?**
-  _High betweenness centrality (0.087) - this node is a cross-community bridge._
-- **Are the 41 inferred relationships involving `ClimateMetrics` (e.g. with `DataImporter` and `ClimateMetricsForm`) actually correct?**
-  _`ClimateMetrics` has 41 INFERRED edges - model-reasoned connections that need verification._
+  _High betweenness centrality (0.075) - this node is a cross-community bridge._
+- **Are the 35 inferred relationships involving `ClimateMetrics` (e.g. with `DataImporter` and `ClimateMetricsForm`) actually correct?**
+  _`ClimateMetrics` has 35 INFERRED edges - model-reasoned connections that need verification._
 - **Should `water_tab.dart` be split into smaller, more focused modules?**
-  _Cohesion score 0.058693244739756366 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.04009324009324009 - nodes in this community are weakly interconnected._

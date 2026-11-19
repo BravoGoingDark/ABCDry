@@ -1622,6 +1622,35 @@ class MobileTokenLoginTests(TestCase):
         farms = self.app.get('/farmer/api/farms/', **auth).json()['farms']
         self.assertEqual([f['name'] for f in farms], ['Phone farm'])
 
+    def signup(self, **fields):
+        body = {'username': 'newfarmer', 'email': '', 'phone': '+216 20 000 000',
+                'password1': 'olive-123', 'password2': 'olive-123', **fields}
+        return self.app.post('/farmer/api/auth/signup/', json.dumps(body), content_type='application/json',
+                             HTTP_ACCEPT_LANGUAGE='fr')
+
+    def test_signup_creates_a_farmer_and_signs_the_app_in(self):
+        r = self.signup()
+        self.assertEqual(r.status_code, 201, r.content)
+        self.assertEqual(r.json()['user']['role'], 'farmer')
+        user = get_user_model().objects.get(username='newfarmer')
+        self.assertEqual(user.profile.phone, '+216 20 000 000')
+        auth = {'HTTP_AUTHORIZATION': f"Token {r.json()['token']}"}
+        self.assertEqual(self.app.get('/farmer/api/me/', **auth).json()['user']['username'], 'newfarmer')
+        # the same account then signs in like any other
+        self.assertEqual(self.login('newfarmer', 'olive-123').status_code, 200)
+
+    def test_signup_uses_the_website_rules(self):
+        taken = self.signup(username='MOBI')
+        self.assertEqual(taken.status_code, 400)
+        self.assertIn('username', taken.json()['errors'])
+        self.assertEqual(taken.json()['error'], taken.json()['errors']['username'])
+        mismatch = self.signup(password2='other-123')
+        self.assertEqual(mismatch.status_code, 400)
+        self.assertIn('password2', mismatch.json()['errors'])
+        no_phone = self.signup(phone='')
+        self.assertIn('phone', no_phone.json()['errors'])
+        self.assertFalse(get_user_model().objects.filter(username='newfarmer').exists())
+
     def test_wrong_password_and_non_farmers_are_refused(self):
         self.assertEqual(self.login(password='nope').status_code, 401)
         self.assertEqual(self.login(username='just-a-viewer').status_code, 403)
