@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ]),
               actions: [
-                LangPill(onPick: _setLang),
+                Center(child: SizedBox(height: 40, child: LangPill(onPick: _setLang))),
                 const SizedBox(width: 6),
                 _AccountButton(hasFarm: farm != null, onPick: (v) => _account(v, farm)),
                 const SizedBox(width: 10),

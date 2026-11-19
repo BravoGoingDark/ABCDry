@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import '../api.dart';
 import '../auth_widgets.dart';
 import '../format.dart';
+import '../fx.dart';
 import '../i18n.dart';
 import 'signup_screen.dart';
 
@@ -79,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
           action: TextInputAction.done,
           onSubmitted: (_) => _signIn(),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         AuthButton(label: t('signIn'), busy: _busy, onPressed: _signIn),
         const SizedBox(height: 28),
         // The website's "Need an account? Sign up" link, as a button.
@@ -92,11 +93,20 @@ class _LoginScreenState extends State<LoginScreen> {
           const Expanded(child: Divider()),
         ]),
         const SizedBox(height: 14),
-        OutlinedButton.icon(
-          style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
-          icon: const Icon(Icons.person_add_alt_1_outlined),
-          label: Text(t('signUp')),
-          onPressed: _busy ? null : _signUp,
+        Pressable(
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              minimumSize: const Size.fromHeight(50),
+              backgroundColor: Colors.white,
+              foregroundColor: kPrimary,
+              side: const BorderSide(color: kOutline),
+              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+              textStyle: hl(15, weight: FontWeight.w700),
+            ),
+            icon: const Icon(Icons.person_add_alt_1_outlined, size: 20),
+            label: Text(t('signUp')),
+            onPressed: _busy ? null : _signUp,
+          ),
         ),
       ],
     );

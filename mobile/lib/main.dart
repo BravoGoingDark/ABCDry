@@ -20,7 +20,7 @@ class FarmerApp extends StatefulWidget {
   const FarmerApp({super.key});
 
   /// Shortest time the loading screen stays, so it never just flickers.
-  static const minSplash = Duration(milliseconds: 1300);
+  static const minSplash = Duration(milliseconds: 1800);
 
   /// Longest wait for the farms before showing Home anyway (it keeps loading).
   static const maxFarmWait = Duration(seconds: 8);

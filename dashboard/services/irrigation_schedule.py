@@ -90,8 +90,7 @@ REPORTED_BASES = ('last_irrigation', 'reported_dry', 'rain_only')
 def fetch_daily_water(lat, lon, past_days=PAST_DAYS, forecast_days=FORECAST_DAYS):
     """Daily rain / ET0 / Tmax / wind / rain probability at a point, past and
     forecast, from Open-Meteo. Returns a list of dicts or None on failure."""
-    import requests
-    from .weather_forecast import OPEN_METEO_URL, REQUEST_TIMEOUT
+    from .weather_forecast import open_meteo_get
 
     key = f'irrigation:wx:{lat:.3f}:{lon:.3f}:{past_days}:{forecast_days}'
     hit = cache.get(key)
@@ -104,11 +103,9 @@ def fetch_daily_water(lat, lon, past_days=PAST_DAYS, forecast_days=FORECAST_DAYS
         'timezone': 'auto', 'past_days': past_days, 'forecast_days': forecast_days,
     }
     try:
-        resp = requests.get(OPEN_METEO_URL, params=params, timeout=REQUEST_TIMEOUT)
-        resp.raise_for_status()
-        daily = resp.json().get('daily') or {}
-    except Exception as exc:  # network, HTTP, JSON
-        logger.warning('Open-Meteo irrigation weather failed at (%s, %s): %s', lat, lon, exc)
+        daily = open_meteo_get(params).get('daily') or {}
+    except Exception as exc:  # network, HTTP, JSON (already retried once)
+        logger.warning('Open-Meteo irrigation weather failed at (%s, %s): %r', lat, lon, exc)
         return None
 
     def col(name, i):

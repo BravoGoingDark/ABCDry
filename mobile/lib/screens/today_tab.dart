@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../api.dart';
 import '../format.dart';
+import '../fx.dart';
 import '../i18n.dart';
 import '../widgets.dart';
 import 'log_screen.dart';
@@ -82,10 +83,13 @@ class _TodayTabState extends State<TodayTab> {
                   title: Text(t('nothingToDo')),
                 ),
               ),
-            for (final task in tasks)
-              TaskCard(
-                task: Map<String, dynamic>.from(task),
-                onAction: (act) => _answer(Map<String, dynamic>.from(task), act),
+            for (final (i, task) in tasks.indexed)
+              FadeSlideIn(
+                index: i,
+                child: TaskCard(
+                  task: Map<String, dynamic>.from(task),
+                  onAction: (act) => _answer(Map<String, dynamic>.from(task), act),
+                ),
               ),
             const SizedBox(height: 6),
             OutlinedButton.icon(

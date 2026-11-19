@@ -1,15 +1,18 @@
-// Pieces shared by the sign-in and sign-up screens: the website-style header,
-// a password field with show / hide, and the result popup.
+// Pieces shared by the sign-in and sign-up screens, laid out like the
+// website's sign-in page (templates/dashboard/login.html) on a phone: the
+// logo bar with the language switch, a teal kicker, a big green title,
+// labelled fields, one solid button and the data footer. Also the password
+// field with show / hide, and the result popup.
 import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 
 import 'api.dart';
 import 'format.dart';
+import 'fx.dart';
 import 'i18n.dart';
 
-/// Page frame of the sign-in and sign-up screens, like the website's: logo
-/// and language switch, a small coloured kicker, a big title, a short text.
+/// Page frame of the sign-in and sign-up screens.
 class AuthPage extends StatelessWidget {
   const AuthPage({
     super.key,
@@ -28,54 +31,119 @@ class AuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: AutofillGroup(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                  Row(children: [
-                    if (showBack)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(end: 4),
-                        child: IconButton(
-                          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-                          icon: const BackButtonIcon(),
-                          onPressed: () => Navigator.maybePop(context),
+        child: Column(children: [
+          // Top bar: back, logo and name on the start side, languages on the end.
+          Container(
+            height: 64,
+            padding: EdgeInsetsDirectional.fromSTEB(showBack ? 4 : 20, 0, 16, 0),
+            decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: kOutlineSoft))),
+            child: Row(children: [
+              if (showBack)
+                IconButton(
+                  tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  color: kMuted,
+                  icon: const BackButtonIcon(),
+                  onPressed: () => Navigator.maybePop(context),
+                ),
+              const BrandLogo(size: 32),
+              const SizedBox(width: 10),
+              Text('APWRS', style: hl(17)),
+              const Spacer(),
+              SizedBox(
+                  height: 40,
+                  child: LangPill(onPick: (l) async {
+                    await Api.I.setLang(l);
+                    appLang.value = l;
+                  })),
+            ]),
+          ),
+          // The form, then the footer at the bottom of the screen; on a short
+          // screen (or with the keyboard open) the footer scrolls after the form.
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) => SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: box.maxHeight - 40),
+                  child: IntrinsicHeight(
+                    child: Column(children: [
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 400),
+                          child: FadeSlideIn(
+                            child: AutofillGroup(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                                Kicker(kicker),
+                                const SizedBox(height: 14),
+                                Text(title, style: hl(30).copyWith(letterSpacing: -0.4, height: 1.15)),
+                                const SizedBox(height: 10),
+                                Text(text, style: const TextStyle(color: kMuted, fontSize: 15, height: 1.5)),
+                                const SizedBox(height: 28),
+                                ...children,
+                              ]),
+                            ),
+                          ),
                         ),
                       ),
-                    const BrandLogo(size: 44),
-                    const SizedBox(width: 12),
-                    Text('APWRS', style: hl(20)),
-                    const Spacer(),
-                    LangPill(onPick: (l) async {
-                      await Api.I.setLang(l);
-                      appLang.value = l;
-                    }),
-                  ]),
-                  const SizedBox(height: 32),
-                  Text(kicker.toUpperCase(),
-                      style: const TextStyle(
-                          fontSize: 11.5, fontWeight: FontWeight.w600, letterSpacing: 2.2, color: kSecondary)),
-                  const SizedBox(height: 10),
-                  Text(title, style: hl(30)),
-                  const SizedBox(height: 8),
-                  Text(text, style: const TextStyle(color: kMuted, fontSize: 15, height: 1.45)),
-                  const SizedBox(height: 26),
-                  ...children,
-                ]),
+                      const Spacer(),
+                      const SizedBox(height: 28),
+                      const _Footer(),
+                    ]),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ]),
       ),
     );
   }
 }
 
-/// Text field with a leading icon and an optional error under it.
+/// The website's footer, at the end of the page.
+class _Footer extends StatelessWidget {
+  const _Footer();
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.only(top: 14),
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: kOutlineSoft))),
+        child: Column(children: [
+          Text.rich(
+            TextSpan(children: [
+              TextSpan(text: 'APWRS', style: hl(12, weight: FontWeight.w800)),
+              TextSpan(text: ' · ${t('ichkeulBasin')}'),
+            ]),
+            style: const TextStyle(fontSize: 12, color: kSubtle),
+          ),
+          const SizedBox(height: 2),
+          Text(t('dataSources'), textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, color: kSubtle)),
+        ]),
+      );
+}
+
+/// The website's small label: a short teal line, then teal capitals.
+class Kicker extends StatelessWidget {
+  const Kicker(this.text, {super.key});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Container(width: 28, height: 1.2, color: kSecondary),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(text.toUpperCase(),
+              style:
+                  const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, letterSpacing: 2.2, color: kSecondary)),
+        ),
+      ]);
+}
+
+/// A labelled text field, as on the website: the label above, an icon in the
+/// field, and an optional error under it.
 class AuthField extends StatelessWidget {
   const AuthField({
     super.key,
@@ -99,13 +167,21 @@ class AuthField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final bool password;
 
+  static const _radius = BorderRadius.all(Radius.circular(8));
+
   @override
   Widget build(BuildContext context) {
     final decoration = InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon),
+      prefixIcon: Icon(icon, size: 20),
+      prefixIconColor: WidgetStateColor.resolveWith((s) => s.contains(WidgetState.focused) ? kSecondary : kOutline),
       errorText: error,
       errorMaxLines: 3,
+      isDense: true,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      border: const OutlineInputBorder(borderRadius: _radius, borderSide: BorderSide(color: kOutline)),
+      enabledBorder: const OutlineInputBorder(borderRadius: _radius, borderSide: BorderSide(color: kOutline)),
+      focusedBorder:
+          const OutlineInputBorder(borderRadius: _radius, borderSide: BorderSide(color: kSecondary, width: 1.6)),
     );
     final field = password
         ? _PasswordField(
@@ -122,7 +198,14 @@ class AuthField extends StatelessWidget {
             onSubmitted: onSubmitted,
             decoration: decoration,
           );
-    return Padding(padding: const EdgeInsets.only(bottom: 12), child: field);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: kText)),
+        const SizedBox(height: 7),
+        field,
+      ]),
+    );
   }
 }
 
@@ -159,7 +242,8 @@ class _PasswordFieldState extends State<_PasswordField> {
       );
 }
 
-/// The big dark-green button of the auth screens, with its spinner.
+/// The website's sign-in button: solid dark green, bold, an arrow, a soft
+/// shadow; a spinner while busy.
 class AuthButton extends StatelessWidget {
   const AuthButton({super.key, required this.label, required this.busy, required this.onPressed});
   final String label;
@@ -167,17 +251,28 @@ class AuthButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => FilledButton(
-        onPressed: busy ? null : onPressed,
-        style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(52)),
-        child: busy
-            ? const SizedBox(
-                width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
-                const SizedBox(width: 8),
-                const Icon(Icons.arrow_forward, size: 18),
-              ]),
+  Widget build(BuildContext context) => Pressable(
+        child: FilledButton(
+          onPressed: busy ? null : onPressed,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(52),
+            backgroundColor: kPrimaryC,
+            disabledBackgroundColor: kPrimaryC.withValues(alpha: 0.85),
+            disabledForegroundColor: Colors.white,
+            elevation: 3,
+            shadowColor: const Color(0x66012D1D),
+            shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+            textStyle: hl(15, weight: FontWeight.w700),
+          ),
+          child: busy
+              ? const SizedBox(
+                  width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Flexible(child: Text(label, overflow: TextOverflow.ellipsis)),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.arrow_forward, size: 20),
+                ]),
+        ),
       );
 }
 
