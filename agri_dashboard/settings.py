@@ -308,6 +308,13 @@ LOGGING = {
         },
     },
     'handlers': {
+        # Hosts such as Render only show what the app prints, so warnings and
+        # errors also go to the console (the file stays for local runs).
+        'console': {
+            'level': 'WARNING',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
         'file': {
             'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
@@ -318,7 +325,7 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['file'],
+        'handlers': ['console', 'file'],
         'level': 'INFO',
     },
 }
